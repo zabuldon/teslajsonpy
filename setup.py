@@ -1,16 +1,14 @@
 from setuptools import setup
 setup(
-    name='teslajsonpy',
-    version='0.0.22',
-    packages=['teslajsonpy'],
+    name='teslajsonpy2',
+    version='0.1.23',
+    packages=['teslajsonpy2'],
     include_package_data=True,
     python_requires='>=3',
     license='WTFPL',
     description='A library to work with Tesla API.',
     long_description='A library to work with Tesla car API.',
-    url='https://github.com/zabuldon/teslajsonpy',
-    author='Sergey Isachenko',
-    author_email='sergey.isachenkol@bool.by',
+    url='https://github.com/rudical/teslajsonpy',
     classifiers=[
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',

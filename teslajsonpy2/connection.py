@@ -4,7 +4,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, build_opener
 from urllib.error import HTTPError
 import json
-from teslajsonpy.Exceptions import TeslaException
+from teslajsonpy2.Exceptions import TeslaException
 
 
 class Connection(object):

@@ -1,4 +1,4 @@
-from teslajsonpy.vehicle import VehicleDevice
+from teslajsonpy2.vehicle import VehicleDevice
 
 
 class ParkingSensor(VehicleDevice):
@@ -37,7 +37,7 @@ class ChargerConnectionSensor(VehicleDevice):
         super().__init__(data, controller)
         self.__state = False
 
-        self.type = 'charger sensor.'
+        self.type = 'charger sensor'
         self.hass_type = 'binary_sensor'
         self.name = self._name()
 

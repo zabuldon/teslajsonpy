@@ -1,4 +1,4 @@
-teslajsonpy
+teslajsonpy2
 ===============
 
 Python module for Tesla API
