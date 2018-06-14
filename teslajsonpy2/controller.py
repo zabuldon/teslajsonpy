@@ -1,13 +1,13 @@
 import time
 from multiprocessing import RLock
-from teslajsonpy.connection import Connection
-from teslajsonpy.BatterySensor import Battery, Range
-from teslajsonpy.Lock import Lock
-from teslajsonpy.Climate import Climate, TempSensor
-from teslajsonpy.BinarySensor import ParkingSensor, ChargerConnectionSensor
-from teslajsonpy.Charger import ChargerSwitch, RangeSwitch
-from teslajsonpy.GPS import GPS, Odometer
-from teslajsonpy.Trunk import FrontTrunk, RearTrunk
+from teslajsonpy2.connection import Connection
+from teslajsonpy2.BatterySensor import Battery, Range
+from teslajsonpy2.Lock import Lock
+from teslajsonpy2.Climate import Climate, TempSensor
+from teslajsonpy2.BinarySensor import ParkingSensor, ChargerConnectionSensor
+from teslajsonpy2.Charger import ChargerSwitch, RangeSwitch
+from teslajsonpy2.GPS import GPS, Odometer
+from teslajsonpy2.Trunk import FrontTrunk, RearTrunk
 
 
 class Controller:

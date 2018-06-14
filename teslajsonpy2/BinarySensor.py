@@ -1,4 +1,4 @@
-from teslajsonpy.vehicle import VehicleDevice
+from teslajsonpy2.vehicle import VehicleDevice
 
 
 class ParkingSensor(VehicleDevice):
