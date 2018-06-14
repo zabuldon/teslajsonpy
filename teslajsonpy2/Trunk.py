@@ -7,8 +7,8 @@ class FrontTrunk(VehicleDevice):
         super().__init__(data, controller)
         self.__manual_update_time = 0
         self.__front_trunk_state = False
-        self.type = 'front trunk switch'
-        self.hass_type = 'switch'
+        self.type = 'front trunk lock'
+        self.hass_type = 'lock'
         self.name = self._name()
         self.uniq_name = self._uniq_name()
         self.bin_type = 0xC
@@ -27,8 +27,8 @@ class FrontTrunk(VehicleDevice):
                 self.__front_trunk_state = True
             self.__manual_update_time = time.time()
 
-    def is_open(self):
-        return self.__front_trunk_state
+    def is_locked(self):
+        return not self.__front_trunk_state
 
     @staticmethod
     def has_battery():
@@ -39,8 +39,8 @@ class RearTrunk(VehicleDevice):
         super().__init__(data, controller)
         self.__manual_update_time = 0
         self.__rear_trunk_state = False
-        self.type = 'rear trunk switch'
-        self.hass_type = 'switch'
+        self.type = 'rear trunk lock'
+        self.hass_type = 'lock'
         self.name = self._name()
         self.uniq_name = self._uniq_name()
         self.bin_type = 0xD
@@ -59,8 +59,8 @@ class RearTrunk(VehicleDevice):
                 self.__rear_trunk_state = True
             self.__manual_update_time = time.time()
 
-    def is_open(self):
-        return self.__rear_trunk_state
+    def is_locked(self):
+        return not self.__rear_trunk_state
 
     @staticmethod
     def has_battery():
