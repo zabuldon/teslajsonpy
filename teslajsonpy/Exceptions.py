@@ -19,3 +19,6 @@ class TeslaException(Exception):
             self.message = 'SERVICE_MAINTENANCE'
         elif self.code > 299:
             self.message = "UNKNOWN_ERROR"
+
+class RetryLimitError(TeslaException):
+    pass

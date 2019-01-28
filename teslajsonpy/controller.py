@@ -7,6 +7,8 @@ from teslajsonpy.Climate import Climate, TempSensor
 from teslajsonpy.BinarySensor import ParkingSensor, ChargerConnectionSensor
 from teslajsonpy.Charger import ChargerSwitch, RangeSwitch
 from teslajsonpy.GPS import GPS, Odometer
+from functools import wraps
+from .Exceptions import RetryLimitError
 
 
 class Controller:
@@ -21,11 +23,17 @@ class Controller:
         self.__driving = {}
         self.__gui = {}
         self.__last_update_time = {}
+        self.__last_wake_up_time = {}
         self.__lock = RLock()
+        self.__car_online = {}
+
         cars = self.__connection.get('vehicles')['response']
+
         for car in cars:
             self.__last_update_time[car['id']] = 0
+            self.__last_wake_up_time[car['id']] = 0
             self.__update[car['id']] = True
+            self.__car_online[car['id']] = False
             self.update(car['id'])
             self.__vehicles.append(Climate(car, self))
             self.__vehicles.append(Battery(car, self))
@@ -55,15 +63,37 @@ class Controller:
     def list_vehicles(self):
         return self.__vehicles
 
-    def wake_up(self, vehicle_id):
-        self.post(vehicle_id, 'wake_up')
+    def wake_up(f):
+        @wraps(f)
+        def wrapped(inst, *args, **kwargs):
+            retries = 0
+            sleep_delay = 2
+            while True:
+                result = inst._wake_up(*args)
+                if not result:
+                    if retries < 5:
+                        time.sleep(sleep_delay)
+                        continue
+                    else:
+                        raise RetryLimitError
+                else:
+                    break
+            return f(inst, *args, **kwargs)
+        return wrapped
 
+    def _wake_up(self, vehicle_id):
+        cur_time = int(time.time())
+        if not self.__car_online[vehicle_id] or cur_time - self.__last_wake_up_time[vehicle_id] > 300:
+            self.__car_online[vehicle_id] = self.post(vehicle_id, 'wake_up')['response']['state'] == 'online'
+            self.__last_wake_up_time[vehicle_id] = cur_time
+        return self.__car_online[vehicle_id]
+
+    @wake_up
     def update(self, car_id):
         cur_time = time.time()
         with self.__lock:
             if (self.__update[car_id] and
              (cur_time - self.__last_update_time[car_id] > self.update_interval)):
-                self.wake_up(car_id)
                 data = self.get(car_id, 'data')
                 if data and data['response']:
                     self.__climate[car_id] = data['response']['climate_state']
@@ -79,26 +109,33 @@ class Controller:
                     self.__driving[car_id] = False
                     self.__gui[car_id] = False
 
+    @wake_up
     def get_climate_params(self, car_id):
         return self.__climate[car_id]
 
+    @wake_up
     def get_charging_params(self, car_id):
         return self.__charging[car_id]
 
+    @wake_up
     def get_state_params(self, car_id):
         return self.__state[car_id]
 
+    @wake_up
     def get_drive_params(self, car_id):
         return self.__driving[car_id]
 
+    @wake_up
     def get_gui_params(self, car_id):
         return self.__gui[car_id]
 
+    @wake_up
     def get_updates(self, car_id=None):
         if car_id is not None:
             return self.__update[car_id]
         else:
             return self.__update
 
+    @wake_up
     def set_updates(self, car_id, value):
         self.__update[car_id] = value

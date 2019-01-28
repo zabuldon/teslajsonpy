@@ -9,6 +9,7 @@ from teslajsonpy.Exceptions import TeslaException
 
 class Connection(object):
     """Connection to Tesla Motors API"""
+
     def __init__(self, email, password):
         """Initialize connection object"""
         self.user_agent = 'Model S 2.1.79 (SM-G900V; Android REL 4.4.4; en_US'
