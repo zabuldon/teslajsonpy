@@ -73,6 +73,7 @@ class Controller:
                 if not result:
                     if retries < 5:
                         time.sleep(sleep_delay)
+                        retries += 1
                         continue
                     else:
                         raise RetryLimitError
