@@ -25,18 +25,23 @@ class Controller:
         self.__state = {}
         self.__driving = {}
         self.__gui = {}
-        self.__last_update_time = {}
-        self.__last_wake_up_time = {}
+        self._last_update_time = {}
+        self._last_wake_up_time = {}
         self.__lock = RLock()
-        self.__car_online = {}
+        self._car_online = {}
 
-        cars = self.__connection.get('vehicles')['response']
+        cars = self.get_vehicles()
 
         for car in cars:
-            self.__last_update_time[car['id']] = 0
-            self.__last_wake_up_time[car['id']] = 0
-            self.__update[car['id']] = True
-            self.__car_online[car['id']] = False
+            self._last_update_time[car['id']] = 0
+            self._last_wake_up_time[car['id']] = 0
+            self._car_online[car['id']] = car['state']
+            self.__climate[car['id']] = False
+            self.__charging[car['id']] = False
+            self.__state[car['id']] = False
+            self.__driving[car['id']] = False
+            self.__gui[car['id']] = False
+
             try:
                 self.update(car['id'], wake_if_asleep=False)
             except (TeslaException, RetryLimitError):
@@ -75,8 +80,8 @@ class Controller:
             inst = args[0]
             vehicle_id = args[1]
             result = None
-            if (vehicle_id is not None and vehicle_id in inst.__car_online and
-                    inst.__car_online[vehicle_id]):
+            if (vehicle_id is not None and vehicle_id in inst._car_online and
+                    inst._car_online[vehicle_id]):
                 try:
                     result = f(*args, **kwargs)
                 except (TeslaException):
@@ -85,15 +90,15 @@ class Controller:
                 return result
             else:
                 _LOGGER.debug("Wrapper: f:%s, result:%s, args:%s, kwargs:%s, \
-                               inst:%s, vehicle_id:%s, __cars_online:%s" %
+                               inst:%s, vehicle_id:%s, _car_online:%s" %
                               (f, result, args, kwargs, inst, vehicle_id,
-                               inst.__car_online))
+                               inst._car_online))
                 while ('wake_if_asleep' in kwargs and kwargs['wake_if_asleep']
                         and
                        (vehicle_id is None or
                         (vehicle_id is not None and
-                         vehicle_id in inst.__car_online and
-                         not inst.__car_online[vehicle_id]))):
+                         vehicle_id in inst._car_online and
+                         not inst._car_online[vehicle_id]))):
                     result = inst._wake_up(vehicle_id, *args, **kwargs)
                     _LOGGER.debug("Result(%s): %s" % (retries, result))
                     if not result:
@@ -107,6 +112,9 @@ class Controller:
                         break
                 return f(*args, **kwargs)
         return wrapped
+
+    def get_vehicles(self):
+        return self.__connection.get('vehicles')['response']
 
     def post(self, vehicle_id, command, data={}):
         return self.__connection.post('vehicles/%i/%s' %
@@ -128,38 +136,41 @@ class Controller:
 
     def _wake_up(self, vehicle_id, *args, **kwargs):
         cur_time = int(time.time())
-        if (not self.__car_online[vehicle_id] or
-                (cur_time - self.__last_wake_up_time[vehicle_id] > 300)):
+        if (not self._car_online[vehicle_id] or
+                (cur_time - self._last_wake_up_time[vehicle_id] > 300)):
             result = self.post(vehicle_id, 'wake_up')['response']['state']
             _LOGGER.debug("Wakeup %s: %s" % (vehicle_id, result))
-            self.__car_online[vehicle_id] = result == 'online'
-            self.__last_wake_up_time[vehicle_id] = cur_time
-        return self.__car_online[vehicle_id]
+            self._car_online[vehicle_id] = result == 'online'
+            self._last_wake_up_time[vehicle_id] = cur_time
+        return self._car_online[vehicle_id]
 
     @wake_up
     def update(self, car_id, wake_if_asleep=False):
         cur_time = time.time()
         with self.__lock:
-            if (self.__update[car_id] and
-                    ((cur_time - self.__last_update_time[car_id]) >
+            # Check if any vehicles have been updated recently
+            last_update = max(self._last_update_time.values())
+            if (cur_time - last_update > self.update_interval):
+                cars = self.get_vehicles()
+                for car in cars:
+                    self._car_online[car['id']] = car['state']
+            # Only update online vehicles
+            if (self._car_online[car_id] and
+                    ((cur_time - self._last_update_time[car_id]) >
                         self.update_interval)):
-                data = self.get(car_id, 'data')
+                # Only update cars with update flag on
+                data = (None if (car_id in self.__update and
+                                 not self.__update[car_id]) else
+                        self.get(car_id, 'data'))
                 if data and data['response']:
                     self.__climate[car_id] = data['response']['climate_state']
                     self.__charging[car_id] = data['response']['charge_state']
                     self.__state[car_id] = data['response']['vehicle_state']
                     self.__driving[car_id] = data['response']['drive_state']
                     self.__gui[car_id] = data['response']['gui_settings']
-                    self.__car_online[car_id] = (data['response']['state']
-                                                 == 'online')
-                    self.__last_update_time[car_id] = time.time()
-                else:
-                    self.__climate[car_id] = False
-                    self.__charging[car_id] = False
-                    self.__state[car_id] = False
-                    self.__driving[car_id] = False
-                    self.__gui[car_id] = False
-                    self.__car_online[car_id] = False
+                    self._car_online[car_id] = (data['response']['state']
+                                                == 'online')
+                self._last_update_time[car_id] = time.time()
 
     def get_climate_params(self, car_id):
         return self.__climate[car_id]
