@@ -21,4 +21,5 @@ class TeslaException(Exception):
             self.message = "UNKNOWN_ERROR"
 
 class RetryLimitError(TeslaException):
-    pass
+    def __init__(self, *args, **kwargs):
+        pass
