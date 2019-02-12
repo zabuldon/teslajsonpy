@@ -36,7 +36,7 @@ class Controller:
             self._last_update_time[car['id']] = 0
             self._last_wake_up_time[car['id']] = 0
             self.__update[car['id']] = True
-            self._car_online[car['id']] = car['state']
+            self._car_online[car['id']] = (car['state'] == 'online')
             self.__climate[car['id']] = False
             self.__charging[car['id']] = False
             self.__state[car['id']] = False
@@ -154,7 +154,7 @@ class Controller:
             if (cur_time - last_update > self.update_interval):
                 cars = self.get_vehicles()
                 for car in cars:
-                    self._car_online[car['id']] = car['state']
+                    self._car_online[car['id']] = (car['state'] == 'online')
             # Only update online vehicles
             if (self._car_online[car_id] and
                     ((cur_time - self._last_update_time[car_id]) >
