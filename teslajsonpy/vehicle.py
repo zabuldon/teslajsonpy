@@ -2,18 +2,22 @@ class VehicleDevice:
     def __init__(self, data, controller):
         self._id = data['id']
         self._vehicle_id = data['vehicle_id']
+        self._display_name = data['display_name']
         self._vin = data['vin']
         self._state = data['state']
         self._controller = controller
         self.should_poll = True
 
     def _name(self):
-        return 'Tesla Model {} {}'.format(
-            str(self._vin[3]).upper(), self.type)
+        return ('{} {}'.format(self._display_name, self.type) if
+                self._display_name is not None and
+                self._display_name != self._vin[-6:]
+                else 'Tesla Model {} {}'.format(str(self._vin[3]).upper(),
+                                                self.type))
 
     def _uniq_name(self):
         return 'Tesla Model {} {} {}'.format(
-            str(self._vin[3]).upper(), self._vin, self.type)
+            str(self._vin[3]).upper(), self._vin[-6:], self.type)
 
     def id(self):
         return self._id
