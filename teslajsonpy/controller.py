@@ -35,6 +35,7 @@ class Controller:
         for car in cars:
             self._last_update_time[car['id']] = 0
             self._last_wake_up_time[car['id']] = 0
+            self.__update[car['id']] = True
             self._car_online[car['id']] = car['state']
             self.__climate[car['id']] = False
             self.__charging[car['id']] = False
