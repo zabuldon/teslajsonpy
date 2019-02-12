@@ -89,8 +89,8 @@ class Controller:
             if result is not None:
                 return result
             else:
-                _LOGGER.debug("Wrapper: f:%s, result:%s, args:%s, kwargs:%s, \
-                               inst:%s, vehicle_id:%s, _car_online:%s" %
+                _LOGGER.debug("Wrapper: f:%s, result:%s, args:%s, kwargs:%s, "
+                              "inst:%s, vehicle_id:%s, _car_online:%s" %
                               (f, result, args, kwargs, inst, vehicle_id,
                                inst._car_online))
                 while ('wake_if_asleep' in kwargs and kwargs['wake_if_asleep']
@@ -103,7 +103,7 @@ class Controller:
                     _LOGGER.debug("Result(%s): %s" % (retries, result))
                     if not result:
                         if retries < 5:
-                            time.sleep(sleep_delay)
+                            time.sleep(sleep_delay**(retries+2))
                             retries += 1
                             continue
                         else:
