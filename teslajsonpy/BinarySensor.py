@@ -8,6 +8,7 @@ class ParkingSensor(VehicleDevice):
 
         self.type = 'parking brake sensor'
         self.hass_type = 'binary_sensor'
+        self.sensor_type = 'power'
 
         self.name = self._name()
 
@@ -40,6 +41,7 @@ class ChargerConnectionSensor(VehicleDevice):
         self.type = 'charger sensor'
         self.hass_type = 'binary_sensor'
         self.name = self._name()
+        self.sensor_type = 'power'
 
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x2
