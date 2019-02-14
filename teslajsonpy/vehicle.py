@@ -17,7 +17,7 @@ class VehicleDevice:
 
     def _uniq_name(self):
         return 'Tesla Model {} {} {}'.format(
-            str(self._vin[3]).upper(), self._vin[-6:], self.type)
+            str(self._vin[3]).upper(), self._vin[-3:], self.type)
 
     def id(self):
         return self._id
