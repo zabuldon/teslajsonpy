@@ -41,7 +41,7 @@ class ChargerConnectionSensor(VehicleDevice):
         self.type = 'charger sensor'
         self.hass_type = 'binary_sensor'
         self.name = self._name()
-        self.sensor_type = 'power'
+        self.sensor_type = 'connectivity'
 
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x2
@@ -50,7 +50,7 @@ class ChargerConnectionSensor(VehicleDevice):
         self._controller.update(self._id, wake_if_asleep=False)
         data = self._controller.get_charging_params(self._id)
         if data:
-            if data['charging_state'] in ["Disconnected", "Stopped", "NoPower"]:
+            if data['charging_state'] in ["Disconnected"]:
                 self.__state = False
             else:
                 self.__state = True
