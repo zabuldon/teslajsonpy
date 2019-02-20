@@ -87,7 +87,11 @@ class Controller:
                     result = f(*args, **kwargs)
                 except (TeslaException):
                     pass
-            if result is not None:
+            if (result is not None and
+                (result or
+                 (('result' in result and not result['result']) or
+                  ('reason' in result and result['reason'] !=
+                    'could_not_wake_buses')))):
                 return result
             else:
                 _LOGGER.debug("Wrapper: f:%s, result:%s, args:%s, kwargs:%s, "
@@ -96,10 +100,15 @@ class Controller:
                                inst._car_online))
                 while ('wake_if_asleep' in kwargs and kwargs['wake_if_asleep']
                         and
-                       (vehicle_id is None or
-                        (vehicle_id is not None and
-                         vehicle_id in inst._car_online and
-                         not inst._car_online[vehicle_id]))):
+                        # 'could_not_wake_buses' may occur despite online state
+                        ((result is not None and type(result) == dict and
+                         ('reason' in result and
+                          result['reason'] != 'could_not_wake_buses')) or
+                         # Check online state
+                         (vehicle_id is None or
+                          (vehicle_id is not None and
+                           vehicle_id in inst._car_online and
+                           not inst._car_online[vehicle_id])))):
                     result = inst._wake_up(vehicle_id, *args, **kwargs)
                     _LOGGER.debug("Result(%s): %s" % (retries, result))
                     if not result:
@@ -108,6 +117,7 @@ class Controller:
                             retries += 1
                             continue
                         else:
+                            inst._car_online[vehicle_id] = False
                             raise RetryLimitError
                     else:
                         break
