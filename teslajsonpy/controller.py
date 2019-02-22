@@ -89,8 +89,11 @@ class Controller:
                     result = f(*args, **kwargs)
                 except (TeslaException):
                     pass
+            # Tesla API can return a dict with a bool in 'result', bool, or
+            # None. This clause will check for all conditions and also
+            # the reason isn't a failure to wake_buses.
             if (result is not None and
-                (result or
+                (result is True or
                  (('result' in result and not result['result']) or
                   ('reason' in result and result['reason'] !=
                     'could_not_wake_buses')))):
