@@ -71,6 +71,8 @@ class Controller:
         Args:
         inst (Controller): The instance of a controller
         vehicle_id (string): The vehicle to attempt to wake.
+        TODO: This currently requires a vehicle_id, but update() does not; This
+              should also be updated to allow that case
         wake_if_asleep (bool): Keyword arg to force a vehicle awake. Must be
                                set in the wrapped function f
         Throws:
@@ -99,9 +101,10 @@ class Controller:
                     'could_not_wake_buses')))):
                 return result
             else:
-                _LOGGER.debug("Wrapper: f:%s, result:%s, args:%s, kwargs:%s, "
-                              "inst:%s, vehicle_id:%s, _car_online:%s" %
-                              (f, result, args, kwargs, inst, vehicle_id,
+                _LOGGER.debug("f:%s reports result:%s requiring wake up"
+                              " Additional info: args:%s, kwargs:%s, "
+                              "vehicle_id:%s, _car_online:%s" %
+                              (f, result, args, kwargs, vehicle_id,
                                inst._car_online))
                 while ('wake_if_asleep' in kwargs and kwargs['wake_if_asleep']
                         and
@@ -115,7 +118,7 @@ class Controller:
                            vehicle_id in inst._car_online and
                            not inst._car_online[vehicle_id])))):
                     result = inst._wake_up(vehicle_id, *args, **kwargs)
-                    _LOGGER.debug("Result(%s): %s" % (retries, result))
+                    _LOGGER.debug("Wake Attempt(%s): %s" % (retries, result))
                     if not result:
                         if retries < 5:
                             time.sleep(sleep_delay**(retries+2))
@@ -177,6 +180,8 @@ class Controller:
         force (bool): Keyword arg to force a vehicle update regardless of the
                       update_interval
 
+        Returns:
+        True if any update succeeded for any vehicle else false
         Throws:
         RetryLimitError
         """
@@ -193,6 +198,7 @@ class Controller:
             # The throttling is per car's last succesful update
             # Note: This separate check is because there may be individual cars
             # to update.
+            update_succeeded = False
             for id, v in self._car_online.items():
                 # If specific car_id provided, only update match
                 if (car_id is not None and car_id != id):
@@ -213,7 +219,9 @@ class Controller:
                         self.__gui[car_id] = response['gui_settings']
                         self._car_online[car_id] = (response['state']
                                                     == 'online')
-                    self._last_update_time[car_id] = time.time()
+                        self._last_update_time[car_id] = time.time()
+                        update_succeeded = True
+            return update_succeeded
 
     def get_climate_params(self, car_id):
         return self.__climate[car_id]
