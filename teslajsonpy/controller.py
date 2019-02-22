@@ -96,13 +96,14 @@ class Controller:
             # the reason isn't a failure to wake_buses.
             if (result is not None and
                 (result is True or
-                 (('result' in result and not result['result']) or
-                  ('reason' in result and result['reason'] !=
-                    'could_not_wake_buses')))):
+                 ((type(result) == dict and
+                  ('result' in result and not result['result'] or
+                  'reason' in result and result['reason'] !=
+                    'could_not_wake_buses'))))):
                 return result
             else:
-                _LOGGER.debug("f:%s reports result:%s requiring wake up"
-                              " Additional info: args:%s, kwargs:%s, "
+                _LOGGER.debug("Wrapped %s fails with %s \n"
+                              "Additional info: args:%s, kwargs:%s, "
                               "vehicle_id:%s, _car_online:%s" %
                               (f, result, args, kwargs, vehicle_id,
                                inst._car_online))
