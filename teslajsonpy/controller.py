@@ -25,12 +25,14 @@ class Controller:
         self.__state = {}
         self.__driving = {}
         self.__gui = {}
-        self._last_update_time = {}
-        self._last_wake_up_time = {}
+        self._last_update_time = {}  # succesful attempts by car
+        self._last_wake_up_time = {}  # succesful wake_ups by car
+        self._last_attempted_update_time = 0  # all attempts by controller
         self.__lock = RLock()
         self._car_online = {}
 
         cars = self.get_vehicles()
+        self._last_attempted_update_time = time.time()
 
         for car in cars:
             self._last_update_time[car['id']] = 0
@@ -69,6 +71,8 @@ class Controller:
         Args:
         inst (Controller): The instance of a controller
         vehicle_id (string): The vehicle to attempt to wake.
+        TODO: This currently requires a vehicle_id, but update() does not; This
+              should also be updated to allow that case
         wake_if_asleep (bool): Keyword arg to force a vehicle awake. Must be
                                set in the wrapped function f
         Throws:
@@ -87,16 +91,21 @@ class Controller:
                     result = f(*args, **kwargs)
                 except (TeslaException):
                     pass
+            # Tesla API can return a dict with a bool in 'result', bool, or
+            # None. This clause will check for all conditions and also
+            # the reason isn't a failure to wake_buses.
             if (result is not None and
-                (result or
-                 (('result' in result and not result['result']) or
-                  ('reason' in result and result['reason'] !=
-                    'could_not_wake_buses')))):
+                (result is True or
+                 ((type(result) == dict and
+                  ('result' in result and not result['result'] or
+                  'reason' in result and result['reason'] !=
+                    'could_not_wake_buses'))))):
                 return result
             else:
-                _LOGGER.debug("Wrapper: f:%s, result:%s, args:%s, kwargs:%s, "
-                              "inst:%s, vehicle_id:%s, _car_online:%s" %
-                              (f, result, args, kwargs, inst, vehicle_id,
+                _LOGGER.debug("Wrapped %s fails with %s \n"
+                              "Additional info: args:%s, kwargs:%s, "
+                              "vehicle_id:%s, _car_online:%s" %
+                              (f, result, args, kwargs, vehicle_id,
                                inst._car_online))
                 while ('wake_if_asleep' in kwargs and kwargs['wake_if_asleep']
                         and
@@ -110,7 +119,7 @@ class Controller:
                            vehicle_id in inst._car_online and
                            not inst._car_online[vehicle_id])))):
                     result = inst._wake_up(vehicle_id, *args, **kwargs)
-                    _LOGGER.debug("Result(%s): %s" % (retries, result))
+                    _LOGGER.debug("Wake Attempt(%s): %s" % (retries, result))
                     if not result:
                         if retries < 5:
                             time.sleep(sleep_delay**(retries+2))
@@ -156,32 +165,64 @@ class Controller:
         return self._car_online[vehicle_id]
 
     @wake_up
-    def update(self, car_id, wake_if_asleep=False):
+    def update(self, car_id=None, wake_if_asleep=False, force=False):
+        """Updates all vehicle attributes in the cache.
+
+        This command will connect to the Tesla API and first update the list of
+        online vehicles assuming no attempt for at least the [update_interval].
+        It will then update all the cached values for cars that are awake
+        assuming no update has occurred for at least the [update_interval].
+
+        Args:
+        inst (Controller): The instance of a controller
+        car_id (string): The vehicle to update. If None, all cars are updated.
+        wake_if_asleep (bool): Keyword arg to force a vehicle awake. This is
+                               processed by the wake_up decorator.
+        force (bool): Keyword arg to force a vehicle update regardless of the
+                      update_interval
+
+        Returns:
+        True if any update succeeded for any vehicle else false
+        Throws:
+        RetryLimitError
+        """
         cur_time = time.time()
         with self.__lock:
-            # Check if any vehicles have been updated recently
-            last_update = max(self._last_update_time.values())
-            if (cur_time - last_update > self.update_interval):
+            #  Update the online cars using get_vehicles()
+            last_update = self._last_attempted_update_time
+            if (force or cur_time - last_update > self.update_interval):
                 cars = self.get_vehicles()
                 for car in cars:
                     self._car_online[car['id']] = (car['state'] == 'online')
-            # Only update online vehicles
-            if (self._car_online[car_id] and
-                    ((cur_time - self._last_update_time[car_id]) >
-                        self.update_interval)):
-                # Only update cars with update flag on
-                data = (None if (car_id in self.__update and
-                                 not self.__update[car_id]) else
-                        self.get(car_id, 'data'))
-                if data and data['response']:
-                    self.__climate[car_id] = data['response']['climate_state']
-                    self.__charging[car_id] = data['response']['charge_state']
-                    self.__state[car_id] = data['response']['vehicle_state']
-                    self.__driving[car_id] = data['response']['drive_state']
-                    self.__gui[car_id] = data['response']['gui_settings']
-                    self._car_online[car_id] = (data['response']['state']
-                                                == 'online')
-                self._last_update_time[car_id] = time.time()
+            self._last_attempted_update_time = cur_time
+            # Only update online vehicles that haven't been updated recently
+            # The throttling is per car's last succesful update
+            # Note: This separate check is because there may be individual cars
+            # to update.
+            update_succeeded = False
+            for id, v in self._car_online.items():
+                # If specific car_id provided, only update match
+                if (car_id is not None and car_id != id):
+                    continue
+                if (v and
+                    (id in self.__update and self.__update[id]) and
+                    (force or id not in self._last_update_time or
+                        ((cur_time - self._last_update_time[id]) >
+                            self.update_interval))):
+                    # Only update cars with update flag on
+                    data = self.get(id, 'data')
+                    if data and data['response']:
+                        response = data['response']
+                        self.__climate[car_id] = response['climate_state']
+                        self.__charging[car_id] = response['charge_state']
+                        self.__state[car_id] = response['vehicle_state']
+                        self.__driving[car_id] = response['drive_state']
+                        self.__gui[car_id] = response['gui_settings']
+                        self._car_online[car_id] = (response['state']
+                                                    == 'online')
+                        self._last_update_time[car_id] = time.time()
+                        update_succeeded = True
+            return update_succeeded
 
     def get_climate_params(self, car_id):
         return self.__climate[car_id]
