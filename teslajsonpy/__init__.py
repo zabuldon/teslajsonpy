@@ -6,4 +6,11 @@ from teslajsonpy.controller import Controller
 from teslajsonpy.Exceptions import TeslaException
 from teslajsonpy.GPS import GPS, Odometer
 from teslajsonpy.Lock import Lock
-
+__all__ = ['Battery', 'Range',
+           'ChargerConnectionSensor', 'ParkingSensor',
+           'ChargerSwitch', 'RangeSwitch',
+           'Climate', 'TempSensor',
+           'Controller',
+           'TeslaException',
+           'GPS', 'Odometer',
+           'Lock']

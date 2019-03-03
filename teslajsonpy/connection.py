@@ -15,8 +15,10 @@ class Connection(object):
     def __init__(self, email, password):
         """Initialize connection object"""
         self.user_agent = 'Model S 2.1.79 (SM-G900V; Android REL 4.4.4; en_US'
-        self.client_id = "81527cff06843c8634fdc09e8ac0abefb46ac849f38fe1e431c2ef2106796384"
-        self.client_secret = "c7257eb71a564034f9419ee651c7d0e5f7aa6bfbd18bafb5c5c033b093bb2fa3"
+        self.client_id = ("81527cff06843c8634fdc09e8ac0"
+                          "abefb46ac849f38fe1e431c2ef2106796384")
+        self.client_secret = ("c7257eb71a564034f9419ee651c7d0e5"
+                              "f7aa6bfbd18bafb5c5c033b093bb2fa3")
         self.baseurl = 'https://owner-api.teslamotors.com'
         self.api = '/api/1/'
         self.oauth = {
@@ -37,7 +39,8 @@ class Connection(object):
         if now > self.expiration:
             auth = self.__open("/oauth/token", data=self.oauth)
             self.__sethead(auth['access_token'])
-        return self.__open("%s%s" % (self.api, command), headers=self.head, data=data)
+        return self.__open("%s%s" % (self.api, command),
+                           headers=self.head, data=data)
 
     def __sethead(self, access_token):
         """Set HTTP header"""

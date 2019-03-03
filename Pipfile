@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+
+[dev-packages]
+"flake8" = "*"
+aresponses = "*"
+detox = "*"
+mypy = "*"
+pydocstyle = "*"
+pylint = "*"
+pytest-aiohttp = "*"
+pytest-cov = "*"
+tox = "*"
+twine = "*"
+
+[packages]
+requests = "*"

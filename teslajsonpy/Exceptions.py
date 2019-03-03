@@ -20,6 +20,7 @@ class TeslaException(Exception):
         elif self.code > 299:
             self.message = "UNKNOWN_ERROR"
 
+
 class RetryLimitError(TeslaException):
     def __init__(self, *args, **kwargs):
         pass

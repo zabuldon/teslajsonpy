@@ -1,0 +1,11 @@
+[MESSAGES CONTROL]
+# Reasons disabled:
+# unnecessary-pass - This can hurt readability
+disable=
+  unnecessary-pass
+
+[REPORTS]
+reports=no
+
+[FORMAT]
+expected-line-ending-format=LF
