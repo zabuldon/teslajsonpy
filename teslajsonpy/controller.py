@@ -80,6 +80,33 @@ class Controller:
         """
         @wraps(f)
         def wrapped(*args, **kwargs):
+            def valid_result(result):
+                """Is TeslaAPI result succesful.
+
+                Parameters
+                ----------
+                result : tesla API result
+                    This is the result of a Tesla Rest API call.
+
+                Returns
+                -------
+                bool
+                  Tesla API failure can be checked in a dict with a bool in
+                  ['response']['result'], a bool, or None or
+                  ['response']['reason'] == 'could_not_wake_buses'
+                  Returns true when a failure state not detected.
+                """
+                return (result is not None and
+                        (result is True or
+                         (isinstance(result, dict) and
+                          isinstance(result['response'], dict) and
+                          ('result' in result['response'] and
+                           result['response']['result'] is True) or
+                          ('reason' in result['response'] and
+                           result['response']['reason'] !=
+                           'could_not_wake_buses') or
+                          ('result' not in result['response']))))
+
             retries = 0
             sleep_delay = 2
             inst = args[0]
@@ -89,67 +116,57 @@ class Controller:
                     inst._car_online[vehicle_id]):
                 try:
                     result = f(*args, **kwargs)
-                except (TeslaException):
+                except TeslaException:
                     pass
-            # Tesla API can return a dict with a bool in 'result', bool, or
-            # None. This clause will check for all conditions and also
-            # the reason isn't a failure to wake_buses.
-            if (result is not None and
-                (result is True or
-                 ((type(result) == dict and
-                  ('result' in result and not result['result'] or
-                  'reason' in result and result['reason'] !=
-                    'could_not_wake_buses'))))):
+            if valid_result(result):
                 return result
-            else:
-                _LOGGER.debug("Wrapped %s fails with %s \n"
-                              "Additional info: args:%s, kwargs:%s, "
-                              "vehicle_id:%s, _car_online:%s" %
-                              (f, result, args, kwargs, vehicle_id,
-                               inst._car_online))
-                while ('wake_if_asleep' in kwargs and kwargs['wake_if_asleep']
-                        and
-                        # 'could_not_wake_buses' may occur despite online state
-                        ((result is not None and type(result) == dict and
-                         ('reason' in result and
-                          result['reason'] != 'could_not_wake_buses')) or
-                         # Check online state
-                         (vehicle_id is None or
-                          (vehicle_id is not None and
-                           vehicle_id in inst._car_online and
-                           not inst._car_online[vehicle_id])))):
-                    result = inst._wake_up(vehicle_id, *args, **kwargs)
-                    _LOGGER.debug("Wake Attempt(%s): %s" % (retries, result))
-                    if not result:
-                        if retries < 5:
-                            time.sleep(sleep_delay**(retries+2))
-                            retries += 1
-                            continue
-                        else:
-                            inst._car_online[vehicle_id] = False
-                            raise RetryLimitError
+            _LOGGER.debug("Wrapped %s -> %s \n"
+                          "Additional info: args:%s, kwargs:%s, "
+                          "vehicle_id:%s, _car_online:%s",
+                          f.__name__, result, args, kwargs, vehicle_id,
+                          inst._car_online)
+            inst._car_online[vehicle_id] = False
+            while ('wake_if_asleep' in kwargs and kwargs['wake_if_asleep']
+                    and not valid_result(result) and
+                    # Check online state
+                    (vehicle_id is None or
+                     (vehicle_id is not None and
+                      vehicle_id in inst._car_online and
+                      not inst._car_online[vehicle_id]))):
+                result = inst._wake_up(vehicle_id, *args, **kwargs)
+                _LOGGER.debug("Wake Attempt(%s): %s" % (retries, result))
+                if not valid_result(result):
+                    if retries < 5:
+                        time.sleep(sleep_delay**(retries+2))
+                        retries += 1
+                        continue
                     else:
-                        break
-                return f(*args, **kwargs)
+                        inst._car_online[vehicle_id] = False
+                        raise RetryLimitError
+                else:
+                    break
+            return f(*args, **kwargs)
         return wrapped
 
     def get_vehicles(self):
         return self.__connection.get('vehicles')['response']
 
-    def post(self, vehicle_id, command, data={}):
+    @wake_up
+    def post(self, vehicle_id, command, data={}, wake_if_asleep=True):
         return self.__connection.post('vehicles/%i/%s' %
                                       (vehicle_id, command), data)
 
-    def get(self, vehicle_id, command):
+    @wake_up
+    def get(self, vehicle_id, command, wake_if_asleep=False):
         return self.__connection.get('vehicles/%i/%s' % (vehicle_id, command))
 
-    @wake_up
     def data_request(self, vehicle_id, name, wake_if_asleep=False):
-        return self.get(vehicle_id, 'data_request/%s' % name)['response']
+        return self.get(vehicle_id, 'data_request/%s' % name,
+                        wake_if_asleep=False)['response']
 
-    @wake_up
     def command(self, vehicle_id, name, data={}, wake_if_asleep=True):
-        return self.post(vehicle_id, 'command/%s' % name, data)
+        return self.post(vehicle_id, 'command/%s' % name, data,
+                         wake_if_asleep=True)
 
     def list_vehicles(self):
         return self.__vehicles
@@ -164,7 +181,6 @@ class Controller:
             self._last_wake_up_time[vehicle_id] = cur_time
         return self._car_online[vehicle_id]
 
-    @wake_up
     def update(self, car_id=None, wake_if_asleep=False, force=False):
         """Updates all vehicle attributes in the cache.
 
@@ -210,7 +226,7 @@ class Controller:
                         ((cur_time - self._last_update_time[id]) >
                             self.update_interval))):
                     # Only update cars with update flag on
-                    data = self.get(id, 'data')
+                    data = self.get(id, 'data', wake_if_asleep)
                     if data and data['response']:
                         response = data['response']
                         self.__climate[car_id] = response['climate_state']
