@@ -9,8 +9,8 @@ from teslajsonpy.Charger import ChargerSwitch, RangeSwitch
 from teslajsonpy.GPS import GPS, Odometer
 from teslajsonpy.Exceptions import TeslaException
 from functools import wraps
-from .Exceptions import RetryLimitError
 import logging
+from .Exceptions import RetryLimitError
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -127,7 +127,7 @@ class Controller:
                           inst._car_online)
             inst._car_online[vehicle_id] = False
             while ('wake_if_asleep' in kwargs and kwargs['wake_if_asleep']
-                    and not valid_result(result) and
+                    and
                     # Check online state
                     (vehicle_id is None or
                      (vehicle_id is not None and
@@ -135,7 +135,7 @@ class Controller:
                       not inst._car_online[vehicle_id]))):
                 result = inst._wake_up(vehicle_id, *args, **kwargs)
                 _LOGGER.debug("Wake Attempt(%s): %s" % (retries, result))
-                if not valid_result(result):
+                if not result:
                     if retries < 5:
                         time.sleep(sleep_delay**(retries+2))
                         retries += 1
@@ -175,10 +175,14 @@ class Controller:
         cur_time = int(time.time())
         if (not self._car_online[vehicle_id] or
                 (cur_time - self._last_wake_up_time[vehicle_id] > 300)):
-            result = self.post(vehicle_id, 'wake_up')['response']['state']
-            _LOGGER.debug("Wakeup %s: %s" % (vehicle_id, result))
-            self._car_online[vehicle_id] = result == 'online'
+            result = self.post(vehicle_id,
+                               'wake_up',
+                               wake_if_asleep=False)  # avoid wrapper loop
+            self._car_online[vehicle_id] = (result['response']['state'] ==
+                                            'online')
             self._last_wake_up_time[vehicle_id] = cur_time
+            _LOGGER.debug("Wakeup %s: %s", vehicle_id,
+                          result['response']['state'])
         return self._car_online[vehicle_id]
 
     def update(self, car_id=None, wake_if_asleep=False, force=False):
