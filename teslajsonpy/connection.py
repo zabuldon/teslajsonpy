@@ -4,7 +4,9 @@ from urllib.parse import urlencode
 from urllib.request import Request, build_opener
 from urllib.error import HTTPError
 import json
+import logging
 from teslajsonpy.Exceptions import TeslaException
+_LOGGER = logging.getLogger(__name__)
 
 
 class Connection(object):
@@ -51,6 +53,8 @@ class Connection(object):
         if not baseurl:
             baseurl = self.baseurl
         req = Request("%s%s" % (baseurl, url), headers=headers)
+        _LOGGER.debug(url)
+
         try:
             req.data = urlencode(data).encode('utf-8')
         except TypeError:
@@ -62,6 +66,7 @@ class Connection(object):
             charset = resp.info().get('charset', 'utf-8')
             data = json.loads(resp.read().decode(charset))
             opener.close()
+            _LOGGER.debug(json.dumps(data))
             return data
         except HTTPError as e:
             if e.code == 408:
