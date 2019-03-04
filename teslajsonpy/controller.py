@@ -67,7 +67,8 @@ class Controller:
 
         The command f is run once if the vehicle_id was last reported
         online. Assuming f returns None and wake_if_asleep is True, 5 attempts
-        will be made to wake the vehicle to reissue the command.
+        will be made to wake the vehicle to reissue the command. In addition,
+        if there is a `could_not_wake_buses` error, it will retry the command
         Args:
         inst (Controller): The instance of a controller
         vehicle_id (string): The vehicle to attempt to wake.
@@ -96,17 +97,19 @@ class Controller:
                   ['response']['reason'] == 'could_not_wake_buses'
                   Returns true when a failure state not detected.
                 """
-                return (result is not None and
-                        (result is True or
-                         (isinstance(result, dict) and
-                          isinstance(result['response'], dict) and
-                          ('result' in result['response'] and
-                           result['response']['result'] is True) or
-                          ('reason' in result['response'] and
-                           result['response']['reason'] !=
-                           'could_not_wake_buses') or
-                          ('result' not in result['response']))))
-
+                try:
+                    return (result is not None and result is not False and
+                            (result is True or
+                             (isinstance(result, dict) and
+                              isinstance(result['response'], dict) and
+                              ('result' in result['response'] and
+                               result['response']['result'] is True) or
+                              ('reason' in result['response'] and
+                               result['response']['reason'] !=
+                               'could_not_wake_buses') or
+                              ('result' not in result['response']))))
+                except TypeError as exception:
+                    _LOGGER.error("Result: %s, %s", result, exception)
             retries = 0
             sleep_delay = 2
             inst = args[0]
@@ -127,14 +130,14 @@ class Controller:
                           inst._car_online)
             inst._car_online[vehicle_id] = False
             while ('wake_if_asleep' in kwargs and kwargs['wake_if_asleep']
-                    and
-                    # Check online state
-                    (vehicle_id is None or
-                     (vehicle_id is not None and
-                      vehicle_id in inst._car_online and
-                      not inst._car_online[vehicle_id]))):
+                   and
+                   # Check online state
+                   (vehicle_id is None or
+                    (vehicle_id is not None and
+                     vehicle_id in inst._car_online and
+                     not inst._car_online[vehicle_id]))):
                 result = inst._wake_up(vehicle_id, *args, **kwargs)
-                _LOGGER.debug("Wake Attempt(%s): %s" % (retries, result))
+                _LOGGER.debug("Wake Attempt(%s): %s", retries, result)
                 if not result:
                     if retries < 5:
                         time.sleep(sleep_delay**(retries+2))
@@ -145,7 +148,21 @@ class Controller:
                         raise RetryLimitError
                 else:
                     break
-            return f(*args, **kwargs)
+            # try function five more times
+            retries = 0
+            while True:
+                try:
+                    result = f(*args, **kwargs)
+                    _LOGGER.debug("Retry Attempt(%s): %s", retries, result)
+                except TeslaException:
+                    pass
+                finally:
+                    retries += 1
+                time.sleep(sleep_delay**(retries+1))
+                if valid_result(result):
+                    return result
+                elif retries >= 5:
+                    raise RetryLimitError
         return wrapped
 
     def get_vehicles(self):
