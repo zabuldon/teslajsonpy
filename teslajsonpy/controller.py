@@ -130,12 +130,12 @@ class Controller:
                           inst._car_online)
             inst._car_online[vehicle_id] = False
             while ('wake_if_asleep' in kwargs and kwargs['wake_if_asleep']
-                    and
-                    # Check online state
-                    (vehicle_id is None or
-                     (vehicle_id is not None and
-                      vehicle_id in inst._car_online and
-                      not inst._car_online[vehicle_id]))):
+                   and
+                   # Check online state
+                   (vehicle_id is None or
+                    (vehicle_id is not None and
+                     vehicle_id in inst._car_online and
+                     not inst._car_online[vehicle_id]))):
                 result = inst._wake_up(vehicle_id, *args, **kwargs)
                 _LOGGER.debug("Wake Attempt(%s): %s", retries, result)
                 if not result:
