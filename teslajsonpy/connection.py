@@ -70,7 +70,7 @@ class Connection(object):
             return data
         except HTTPError as e:
             if e.code == 408:
-                _LOGGER.debug("Request timedout: %s", e)
+                _LOGGER.debug("%s", e)
                 return False
             else:
                 raise TeslaException(e.code)
