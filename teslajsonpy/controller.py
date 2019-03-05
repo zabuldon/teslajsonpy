@@ -249,8 +249,8 @@ class Controller:
                     # Only update cars with update flag on
                     try:
                         data = self.get(id, 'data', wake_if_asleep)
-                    except RetryLimitError:
-                        pass
+                    except TeslaException:
+                        data = None
                     if data and data['response']:
                         response = data['response']
                         self.__climate[car_id] = response['climate_state']
