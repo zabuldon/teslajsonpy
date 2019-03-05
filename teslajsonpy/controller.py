@@ -175,7 +175,10 @@ class Controller:
                      vehicle_id in inst.car_online and
                      not inst.car_online[vehicle_id]))):
                 result = inst._wake_up(vehicle_id)
-                _LOGGER.debug("Wake Attempt(%s): %s", retries, result)
+                _LOGGER.debug("%s(%s): Wake Attempt(%s): %s",
+                              func.__name__,  # pylint: disable=no-member,
+                              vehicle_id,
+                              retries, result)
                 if not result:
                     if retries < 5:
                         time.sleep(sleep_delay**(retries+2))
@@ -191,7 +194,10 @@ class Controller:
             while True:
                 try:
                     result = func(*args, **kwargs)
-                    _LOGGER.debug("Retry Attempt(%s): %s", retries, result)
+                    _LOGGER.debug("%s(%s): Retry Attempt(%s): %s",
+                                  func.__name__,  # pylint: disable=no-member,
+                                  vehicle_id,
+                                  retries, result)
                 except TeslaException:
                     pass
                 finally:
