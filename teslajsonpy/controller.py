@@ -391,7 +391,7 @@ class Controller:
                           self.update_interval))):
                     # Only update cars with update flag on
                     try:
-                        data = self.get(id, 'data', wake_if_asleep)
+                        data = self.get(id_, 'data', wake_if_asleep)
                     except TeslaException:
                         data = None
                     if data and data['response']:
