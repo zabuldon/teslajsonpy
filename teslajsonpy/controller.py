@@ -21,7 +21,7 @@ from teslajsonpy.exceptions import TeslaException
 from teslajsonpy.gps import GPS, Odometer
 from teslajsonpy.lock import ChargerLock, Lock
 
-from .Exceptions import RetryLimitError
+from .exceptions import RetryLimitError
 
 _LOGGER = logging.getLogger(__name__)
 

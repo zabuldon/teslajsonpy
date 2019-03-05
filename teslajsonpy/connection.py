@@ -15,7 +15,7 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 from urllib.request import Request, build_opener
 
-from teslajsonpy.Exceptions import TeslaException
+from teslajsonpy.exceptions import TeslaException
 
 _LOGGER = logging.getLogger(__name__)
 
