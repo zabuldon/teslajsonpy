@@ -17,11 +17,10 @@ from teslajsonpy.binary_sensor import ChargerConnectionSensor, ParkingSensor
 from teslajsonpy.charger import ChargerSwitch, RangeSwitch
 from teslajsonpy.climate import Climate, TempSensor
 from teslajsonpy.connection import Connection
-from teslajsonpy.exceptions import TeslaException
+from teslajsonpy.exceptions import TeslaException, RetryLimitError
 from teslajsonpy.gps import GPS, Odometer
 from teslajsonpy.lock import ChargerLock, Lock
 
-from .exceptions import RetryLimitError
 
 _LOGGER = logging.getLogger(__name__)
 
