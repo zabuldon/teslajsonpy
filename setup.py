@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#  SPDX-License-Identifier: WTFPL
+#  SPDX-License-Identifier: Apache-2.0
 
 # Note: To use the "upload" functionality of this file, you must:
 #   $ pip install twine
@@ -25,7 +25,7 @@ URL = "https://github.com/zabuldon/teslajsonpy"
 EMAIL = "sergey.isachenkol@bool.by"
 AUTHOR = "Sergey Isachenko"
 REQUIRES_PYTHON = ">=3.0"
-LICENSE = "WTFPL"
+LICENSE = "Apache-2.0"
 VERSION = None
 
 # What packages are required for this module to be executed?
