@@ -64,6 +64,7 @@ class Controller:
         self._last_wake_up_time = {}  # succesful wake_ups by car
         self._last_attempted_update_time = 0  # all attempts by controller
         self.__lock = {}
+        self.__controller_lock = None
         self.__wakeup_conds = {}
         self.car_online = {}
 
@@ -73,6 +74,7 @@ class Controller:
         if test_login:
             return (self.__connection.refresh_token, self.__connection.access_token)
         self._last_attempted_update_time = time.time()
+        self.__controller_lock = asyncio.Lock()
 
         for car in cars:
             self.__lock[car["id"]] = asyncio.Lock()
@@ -457,14 +459,14 @@ class Controller:
 
         """
         cur_time = time.time()
-        # async with self.__lock:
-        #  Update the online cars using get_vehicles()
-        last_update = self._last_attempted_update_time
-        if force or cur_time - last_update > self.update_interval:
-            cars = await self.get_vehicles()
-            for car in cars:
-                self.car_online[car["id"]] = car["state"] == "online"
-            self._last_attempted_update_time = cur_time
+        async with self.__controller_lock:
+            #  Update the online cars using get_vehicles()
+            last_update = self._last_attempted_update_time
+            if force or cur_time - last_update > self.update_interval:
+                cars = await self.get_vehicles()
+                for car in cars:
+                    self.car_online[car["id"]] = car["state"] == "online"
+                self._last_attempted_update_time = cur_time
         # Only update online vehicles that haven't been updated recently
         # The throttling is per car's last succesful update
         # Note: This separate check is because there may be individual cars
