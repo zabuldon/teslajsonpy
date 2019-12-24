@@ -39,7 +39,7 @@ class Controller:
         """Initialize controller.
 
         Args:
-            websession (aiohttp.ClientSession):
+            websession (aiohttp.ClientSession): Websession for aiohttp.
             email (Text, optional): Email account. Defaults to None.
             password (Text, optional): Password. Defaults to None.
             access_token (Text, optional): Access token. Defaults to None.
