@@ -315,6 +315,7 @@ class Controller:
             Tesla json object.
 
         """
+        car_id = self._update_id(car_id)
         data = data or {}
         return await self.__connection.post(f"vehicles/{car_id}/{command}", data=data)
 
@@ -343,6 +344,7 @@ class Controller:
             Tesla json object.
 
         """
+        car_id = self._update_id(car_id)
         return await self.__connection.get(f"vehicles/{car_id}/{command}")
 
     async def data_request(self, car_id, name, wake_if_asleep=False):
@@ -368,6 +370,7 @@ class Controller:
             Tesla json object.
 
         """
+        car_id = self._update_id(car_id)
         return (
             await self.get(
                 car_id, f"vehicle_data/{name}", wake_if_asleep=wake_if_asleep
@@ -397,6 +400,7 @@ class Controller:
             Tesla json object.
 
         """
+        car_id = self._update_id(car_id)
         data = data or {}
         return await self.post(
             car_id, f"command/{name}", data=data, wake_if_asleep=wake_if_asleep
@@ -411,6 +415,7 @@ class Controller:
 
     async def _wake_up(self, car_id):
         car_vin = self._id_to_vin(car_id)
+        car_id = self._update_id(car_id)
         async with self.__wakeup_conds[car_vin]:
             cur_time = int(time.time())
             if not self.car_online[car_vin] or (
@@ -466,6 +471,7 @@ class Controller:
         # to update.
         update_succeeded = False
         car_vin = self._id_to_vin(car_id)
+        car_id = self._update_id(car_id)
         for vin, online in self.car_online.items():
             # If specific car_id provided, only update match
             if car_vin and car_vin != vin:
@@ -486,9 +492,7 @@ class Controller:
                     )
                 ):  # Only update cars with update flag on
                     try:
-                        data = await self.get(
-                            self.__vin_id_map[vin], "data", wake_if_asleep
-                        )
+                        data = await self.get(car_id, "data", wake_if_asleep)
                     except TeslaException:
                         data = None
                     if data and data["response"]:
@@ -629,8 +633,10 @@ class Controller:
             self._update_interval = int(value)
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
-        if car_id:
-            result = self.__id_vin_map.get(car_id)
-            if result:
-                return result
-        return None
+        return self.__id_vin_map.get(car_id)
+
+    def _update_id(self, car_id: Text) -> Optional[Text]:
+        new_car_id = self.__vin_id_map.get(self._id_to_vin(car_id))
+        if new_car_id:
+            car_id = new_car_id
+        return car_id
