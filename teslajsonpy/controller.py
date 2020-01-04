@@ -138,15 +138,15 @@ class Controller:
         #  https://hynek.me/articles/decorators/
         """Wrap a API func so it will attempt to wake the vehicle if asleep.
 
-        The command func is run once if the vehicle_id was last reported
+        The command func is run once if the car_id was last reported
         online. Assuming func returns None and wake_if_asleep is True, 5 attempts
         will be made to wake the vehicle to reissue the command. In addition,
         if there is a `could_not_wake_buses` error, it will retry the command
 
         Args:
         inst (Controller): The instance of a controller
-        vehicle_id (string): The vehicle to attempt to wake.
-        TODO: This currently requires a vehicle_id, but update() does not; This
+        car_id (string): The vehicle to attempt to wake.
+        TODO: This currently requires a car_id, but update() does not; This
               should also be updated to allow that case
         wake_if_asleep (bool): Keyword arg to force a vehicle awake. Must be
                                set in the wrapped function func
@@ -204,12 +204,12 @@ class Controller:
             retries = 0
             sleep_delay = 2
             inst = args[0]
-            vehicle_id = args[1]
+            car_id = args[1]
             result = None
             if (
-                vehicle_id is not None
-                and vehicle_id in inst.car_online
-                and inst.car_online[vehicle_id]
+                car_id is not None
+                and car_id in inst.car_online
+                and inst.car_online[car_id]
             ):
                 try:
                     result = await func(*args, **kwargs)
@@ -220,35 +220,35 @@ class Controller:
             _LOGGER.debug(
                 "wake_up needed for %s -> %s \n"
                 "Info: args:%s, kwargs:%s, "
-                "vehicle_id:%s, car_online:%s",
+                "car_id:%s, car_online:%s",
                 func.__name__,  # pylint: disable=no-member
                 result,
                 args,
                 kwargs,
-                vehicle_id,
+                car_id,
                 inst.car_online,
             )
-            inst.car_online[vehicle_id] = False
+            inst.car_online[car_id] = False
             while (
                 "wake_if_asleep" in kwargs
                 and kwargs["wake_if_asleep"]
                 and
                 # Check online state
                 (
-                    vehicle_id is None
+                    car_id is None
                     or (
-                        vehicle_id is not None
-                        and vehicle_id in inst.car_online
-                        and not inst.car_online[vehicle_id]
+                        car_id is not None
+                        and car_id in inst.car_online
+                        and not inst.car_online[car_id]
                     )
                 )
             ):
                 _LOGGER.debug("Attempting to wake up")
-                result = await inst._wake_up(vehicle_id)
+                result = await inst._wake_up(car_id)
                 _LOGGER.debug(
                     "%s(%s): Wake Attempt(%s): %s",
                     func.__name__,  # pylint: disable=no-member,
-                    vehicle_id,
+                    car_id,
                     retries,
                     result,
                 )
@@ -257,7 +257,7 @@ class Controller:
                         await asyncio.sleep(sleep_delay ** (retries + 2))
                         retries += 1
                         continue
-                    inst.car_online[vehicle_id] = False
+                    inst.car_online[car_id] = False
                     raise RetryLimitError
                 break
             # try function five more times
@@ -272,7 +272,7 @@ class Controller:
                     _LOGGER.debug(
                         "%s(%s): Retry Attempt(%s): %s",
                         func.__name__,  # pylint: disable=no-member,
-                        vehicle_id,
+                        car_id,
                         retries,
                         result,
                     )
@@ -293,18 +293,17 @@ class Controller:
         return (await self.__connection.get("vehicles"))["response"]
 
     @wake_up
-    async def post(self, vehicle_id, command, data=None, wake_if_asleep=True):
+    async def post(self, car_id, command, data=None, wake_if_asleep=True):
         #  pylint: disable=unused-argument
-        """Send post command to the vehicle_id.
+        """Send post command to the car_id.
 
         This is a wrapped function by wake_up.
 
         Parameters
         ----------
-        vehicle_id : string
-            Identifier for the car on the owner-api endpoint. Confusingly it
-            is not the vehicle_id field for identifying the car across
-            different endpoints.
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
         command : string
             Tesla API command. https://tesla-api.timdorr.com/vehicle/commands
@@ -321,23 +320,20 @@ class Controller:
 
         """
         data = data or {}
-        return await self.__connection.post(
-            f"vehicles/{vehicle_id}/{command}", data=data
-        )
+        return await self.__connection.post(f"vehicles/{car_id}/{command}", data=data)
 
     @wake_up
-    async def get(self, vehicle_id, command, wake_if_asleep=False):
+    async def get(self, car_id, command, wake_if_asleep=False):
         #  pylint: disable=unused-argument
-        """Send get command to the vehicle_id.
+        """Send get command to the car_id.
 
         This is a wrapped function by wake_up.
 
         Parameters
         ----------
-        vehicle_id : string
-            Identifier for the car on the owner-api endpoint. Confusingly it
-            is not the vehicle_id field for identifying the car across
-            different endpoints.
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
         command : string
             Tesla API command. https://tesla-api.timdorr.com/vehicle/commands
@@ -351,17 +347,16 @@ class Controller:
             Tesla json object.
 
         """
-        return await self.__connection.get(f"vehicles/{vehicle_id}/{command}")
+        return await self.__connection.get(f"vehicles/{car_id}/{command}")
 
-    async def data_request(self, vehicle_id, name, wake_if_asleep=False):
-        """Get requested data from vehicle_id.
+    async def data_request(self, car_id, name, wake_if_asleep=False):
+        """Get requested data from car_id.
 
         Parameters
         ----------
-        vehicle_id : string
-            Identifier for the car on the owner-api endpoint. Confusingly it
-            is not the vehicle_id field for identifying the car across
-            different endpoints.
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
         name: string
             Name of data to be requested from the data_request endpoint which
@@ -379,19 +374,18 @@ class Controller:
         """
         return (
             await self.get(
-                vehicle_id, f"vehicle_data/{name}", wake_if_asleep=wake_if_asleep
+                car_id, f"vehicle_data/{name}", wake_if_asleep=wake_if_asleep
             )
         )["response"]
 
-    async def command(self, vehicle_id, name, data=None, wake_if_asleep=True):
-        """Post name command to the vehicle_id.
+    async def command(self, car_id, name, data=None, wake_if_asleep=True):
+        """Post name command to the car_id.
 
         Parameters
         ----------
-        vehicle_id : string
-            Identifier for the car on the owner-api endpoint. Confusingly it
-            is not the vehicle_id field for identifying the car across
-            different endpoints.
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
         name : string
             Tesla API command. https://tesla-api.timdorr.com/vehicle/commands
@@ -409,7 +403,7 @@ class Controller:
         """
         data = data or {}
         return await self.post(
-            vehicle_id, f"command/{name}", data=data, wake_if_asleep=wake_if_asleep
+            car_id, f"command/{name}", data=data, wake_if_asleep=wake_if_asleep
         )
 
     def get_homeassistant_components(self):
@@ -419,21 +413,21 @@ class Controller:
         """
         return self.__components
 
-    async def _wake_up(self, vehicle_id):
-        async with self.__wakeup_conds[vehicle_id]:
-            # await self.__wakeup_conds[vehicle_id]
+    async def _wake_up(self, car_id):
+        async with self.__wakeup_conds[car_id]:
+            # await self.__wakeup_conds[car_id]
             cur_time = int(time.time())
-            if not self.car_online[vehicle_id] or (
-                cur_time - self._last_wake_up_time[vehicle_id] > self.update_interval
+            if not self.car_online[car_id] or (
+                cur_time - self._last_wake_up_time[car_id] > self.update_interval
             ):
                 result = await self.post(
-                    vehicle_id, "wake_up", wake_if_asleep=False
+                    car_id, "wake_up", wake_if_asleep=False
                 )  # avoid wrapper loop
-                self.car_online[vehicle_id] = result["response"]["state"] == "online"
-                self._last_wake_up_time[vehicle_id] = cur_time
-                _LOGGER.debug("Wakeup %s: %s", vehicle_id, result["response"]["state"])
-            # self.__wakeup_conds[vehicle_id].notify_all()
-            return self.car_online[vehicle_id]
+                self.car_online[car_id] = result["response"]["state"] == "online"
+                self._last_wake_up_time[car_id] = cur_time
+                _LOGGER.debug("Wakeup %s: %s", car_id, result["response"]["state"])
+            # self.__wakeup_conds[car_id].notify_all()
+            return self.car_online[car_id]
 
     async def update(self, car_id=None, wake_if_asleep=False, force=False):
         """Update all vehicle attributes in the cache.
@@ -538,9 +532,8 @@ class Controller:
         Parameters
         ----------
         car_id : string
-            Identifier for the car on the owner-api endpoint. Confusingly it
-            is not the vehicle_id field for identifying the car across
-            different endpoints.
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
             If no car_id, returns the complete dictionary.
 
@@ -581,9 +574,8 @@ class Controller:
         Parameters
         ----------
         car_id : string
-            Identifier for the car on the owner-api endpoint. Confusingly it
-            is not the vehicle_id field for identifying the car across
-            different endpoints.
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
             If no car_id, returns the complete dictionary.
 
