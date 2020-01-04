@@ -9,7 +9,7 @@ import asyncio
 from functools import wraps
 import logging
 import time
-from typing import Text, Tuple
+from typing import Optional, Text, Tuple
 
 from teslajsonpy.battery_sensor import Battery, Range
 from teslajsonpy.binary_sensor import ChargerConnectionSensor, ParkingSensor
@@ -67,6 +67,8 @@ class Controller:
         self.__controller_lock = None
         self.__wakeup_conds = {}
         self.car_online = {}
+        self.__id_vin_map = {}
+        self.__vin_id_map = {}
 
     async def connect(self, test_login=False) -> Tuple[Text, Text]:
         """Connect controller to Tesla."""
@@ -77,18 +79,21 @@ class Controller:
         self.__controller_lock = asyncio.Lock()
 
         for car in cars:
-            self.__lock[car["id"]] = asyncio.Lock()
-            self.__wakeup_conds[car["id"]] = asyncio.Lock()
-            self._last_update_time[car["id"]] = 0
-            self._last_wake_up_time[car["id"]] = 0
-            self.__update[car["id"]] = True
-            self.car_online[car["id"]] = car["state"] == "online"
-            self.__climate[car["id"]] = {}
-            self.__charging[car["id"]] = {}
-            self.__state[car["id"]] = {}
-            self.__config[car["id"]] = {}
-            self.__driving[car["id"]] = {}
-            self.__gui[car["id"]] = {}
+            vin = car["vin"]
+            self.__id_vin_map[car["id"]] = vin
+            self.__vin_id_map[vin] = car["id"]
+            self.__lock[vin] = asyncio.Lock()
+            self.__wakeup_conds[vin] = asyncio.Lock()
+            self._last_update_time[vin] = 0
+            self._last_wake_up_time[vin] = 0
+            self.__update[vin] = True
+            self.car_online[vin] = car["state"] == "online"
+            self.__climate[vin] = {}
+            self.__charging[vin] = {}
+            self.__state[vin] = {}
+            self.__config[vin] = {}
+            self.__driving[vin] = {}
+            self.__gui[vin] = {}
 
             self.__components.append(Climate(car, self))
             self.__components.append(Battery(car, self))
@@ -186,15 +191,10 @@ class Controller:
                                 isinstance(result, dict)
                                 and isinstance(result["response"], dict)
                                 and (
-                                    "result" in result["response"]
-                                    and result["response"]["result"]
-                                )
-                                or (
-                                    "reason" in result["response"]
-                                    and result["response"]["reason"]
+                                    result["response"].get("result") is not False
+                                    or result["response"].get("result")
                                     != "could_not_wake_buses"
                                 )
-                                or ("result" not in result["response"])
                             )
                         )
                     )
@@ -206,11 +206,7 @@ class Controller:
             inst = args[0]
             car_id = args[1]
             result = None
-            if (
-                car_id is not None
-                and car_id in inst.car_online
-                and inst.car_online[car_id]
-            ):
+            if inst.car_online.get(inst._id_to_vin(car_id)):
                 try:
                     result = await func(*args, **kwargs)
                 except TeslaException:
@@ -228,7 +224,7 @@ class Controller:
                 car_id,
                 inst.car_online,
             )
-            inst.car_online[car_id] = False
+            inst.car_online[inst._id_to_vin(car_id)] = False
             while (
                 "wake_if_asleep" in kwargs
                 and kwargs["wake_if_asleep"]
@@ -237,9 +233,8 @@ class Controller:
                 (
                     car_id is None
                     or (
-                        car_id is not None
-                        and car_id in inst.car_online
-                        and not inst.car_online[car_id]
+                        not inst._id_to_vin(car_id)
+                        or not inst.car_online.get(inst._id_to_vin(car_id))
                     )
                 )
             ):
@@ -257,7 +252,7 @@ class Controller:
                         await asyncio.sleep(sleep_delay ** (retries + 2))
                         retries += 1
                         continue
-                    inst.car_online[car_id] = False
+                    inst.car_online[inst._id_to_vin(car_id)] = False
                     raise RetryLimitError
                 break
             # try function five more times
@@ -274,13 +269,14 @@ class Controller:
                         func.__name__,  # pylint: disable=no-member,
                         car_id,
                         retries,
-                        result,
+                        "Success" if valid_result(result) else result,
                     )
                 except TeslaException:
                     pass
                 finally:
                     retries += 1
                 if valid_result(result):
+                    inst.car_online[inst._id_to_vin(car_id)] = True
                     return result
                 if retries >= 5:
                     raise RetryLimitError
@@ -414,20 +410,20 @@ class Controller:
         return self.__components
 
     async def _wake_up(self, car_id):
-        async with self.__wakeup_conds[car_id]:
-            # await self.__wakeup_conds[car_id]
+        car_vin = self._id_to_vin(car_id)
+        async with self.__wakeup_conds[car_vin]:
             cur_time = int(time.time())
-            if not self.car_online[car_id] or (
-                cur_time - self._last_wake_up_time[car_id] > self.update_interval
+            if not self.car_online[car_vin] or (
+                cur_time - self._last_wake_up_time[car_vin] > self.update_interval
             ):
                 result = await self.post(
                     car_id, "wake_up", wake_if_asleep=False
                 )  # avoid wrapper loop
-                self.car_online[car_id] = result["response"]["state"] == "online"
-                self._last_wake_up_time[car_id] = cur_time
+                self.car_online[car_vin] = result["response"]["state"] == "online"
+                self._last_wake_up_time[car_vin] = cur_time
                 _LOGGER.debug("Wakeup %s: %s", car_id, result["response"]["state"])
             # self.__wakeup_conds[car_id].notify_all()
-            return self.car_online[car_id]
+            return self.car_online[car_vin]
 
     async def update(self, car_id=None, wake_if_asleep=False, force=False):
         """Update all vehicle attributes in the cache.
@@ -458,75 +454,98 @@ class Controller:
             last_update = self._last_attempted_update_time
             if force or cur_time - last_update > self.update_interval:
                 cars = await self.get_vehicles()
+                self.car_online = {}
                 for car in cars:
-                    self.car_online[car["id"]] = car["state"] == "online"
+                    self.__id_vin_map[car["id"]] = car["vin"]
+                    self.__vin_id_map[car["vin"]] = car["id"]
+                    self.car_online[car["vin"]] = car["state"] == "online"
                 self._last_attempted_update_time = cur_time
         # Only update online vehicles that haven't been updated recently
         # The throttling is per car's last succesful update
         # Note: This separate check is because there may be individual cars
         # to update.
         update_succeeded = False
-        for id_, online in self.car_online.items():
+        car_vin = self._id_to_vin(car_id)
+        for vin, online in self.car_online.items():
             # If specific car_id provided, only update match
-            if car_id is not None and car_id != id_:
+            if car_vin and car_vin != vin:
                 continue
-            async with self.__lock[id_]:
+            async with self.__lock[vin]:
                 if (
                     online
                     and (  # pylint: disable=too-many-boolean-expressions
-                        id_ in self.__update and self.__update[id_]
+                        self.__update.get(vin)
                     )
                     and (
                         force
-                        or id_ not in self._last_update_time
+                        or vin not in self._last_update_time
                         or (
-                            (cur_time - self._last_update_time[id_])
+                            (cur_time - self._last_update_time[vin])
                             > self.update_interval
                         )
                     )
                 ):  # Only update cars with update flag on
                     try:
-                        data = await self.get(id_, "data", wake_if_asleep)
+                        data = await self.get(
+                            self.__vin_id_map[vin], "data", wake_if_asleep
+                        )
                     except TeslaException:
                         data = None
                     if data and data["response"]:
                         response = data["response"]
-                        self.__climate[car_id] = response["climate_state"]
-                        self.__charging[car_id] = response["charge_state"]
-                        self.__state[car_id] = response["vehicle_state"]
-                        self.__config[car_id] = response["vehicle_config"]
-                        self.__driving[car_id] = response["drive_state"]
-                        self.__gui[car_id] = response["gui_settings"]
-                        self.car_online[car_id] = response["state"] == "online"
-                        self._last_update_time[car_id] = time.time()
+                        self.__climate[vin] = response["climate_state"]
+                        self.__charging[vin] = response["charge_state"]
+                        self.__state[vin] = response["vehicle_state"]
+                        self.__config[vin] = response["vehicle_config"]
+                        self.__driving[vin] = response["drive_state"]
+                        self.__gui[vin] = response["gui_settings"]
+                        self._last_update_time[vin] = time.time()
                         update_succeeded = True
             return update_succeeded
 
     def get_climate_params(self, car_id):
         """Return cached copy of climate_params for car_id."""
-        return self.__climate[car_id]
+        vin = self._id_to_vin(car_id)
+        if vin:
+            return self.__climate[vin]
+        return {}
 
     def get_charging_params(self, car_id):
         """Return cached copy of charging_params for car_id."""
-        return self.__charging[car_id]
+        vin = self._id_to_vin(car_id)
+        if vin:
+            return self.__charging[vin]
+        return {}
 
     def get_state_params(self, car_id):
         """Return cached copy of state_params for car_id."""
-        return self.__state[car_id]
+        vin = self._id_to_vin(car_id)
+        if vin:
+            return self.__state[vin]
+        return {}
 
     def get_config_params(self, car_id):
         """Return cached copy of state_params for car_id."""
-        return self.__config[car_id]
+        vin = self._id_to_vin(car_id)
+        if vin:
+            return self.__config[vin]
+        return {}
 
     def get_drive_params(self, car_id):
         """Return cached copy of drive_params for car_id."""
-        return self.__driving[car_id]
+        vin = self._id_to_vin(car_id)
+        if vin:
+            return self.__driving[vin]
+        return {}
 
     def get_gui_params(self, car_id):
         """Return cached copy of gui_params for car_id."""
-        return self.__gui[car_id]
+        vin = self._id_to_vin(car_id)
+        if vin:
+            return self.__gui[vin]
+        return {}
 
-    def get_updates(self, car_id=None):
+    def get_updates(self, car_id: Text = None):
         """Get updates dictionary.
 
         Parameters
@@ -544,11 +563,12 @@ class Controller:
             processed. Othewise, the entire updates dictionary.
 
         """
-        if car_id is not None:
-            return self.__update[car_id]
+        vin = self._id_to_vin(car_id)
+        if vin:
+            return self.__update[vin]
         return self.__update
 
-    def set_updates(self, car_id, value):
+    def set_updates(self, car_id: Text, value: bool) -> None:
         """Set updates dictionary.
 
         Parameters
@@ -566,9 +586,11 @@ class Controller:
         None
 
         """
-        self.__update[car_id] = value
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self.__update[vin] = value
 
-    def get_last_update_time(self, car_id=None):
+    def get_last_update_time(self, car_id: Text = None):
         """Get last_update time dictionary.
 
         Parameters
@@ -586,8 +608,9 @@ class Controller:
             processed. Othewise, the entire updates dictionary.
 
         """
-        if car_id is not None:
-            return self._last_update_time[car_id]
+        vin = self._id_to_vin(car_id)
+        if vin:
+            return self._last_update_time[vin]
         return self._last_update_time
 
     @property
@@ -604,3 +627,10 @@ class Controller:
     def update_interval(self, value: int) -> None:
         if value:
             self._update_interval = int(value)
+
+    def _id_to_vin(self, car_id: Text) -> Optional[Text]:
+        if car_id:
+            result = self.__id_vin_map.get(car_id)
+            if result:
+                return result
+        return None
