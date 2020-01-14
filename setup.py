@@ -29,10 +29,7 @@ LICENSE = "Apache-2.0"
 VERSION = None
 
 # What packages are required for this module to be executed?
-REQUIRED = [
-    'teslajsonpy',
-    'requests'
-]
+REQUIRED = ["aiohttp"]
 
 # What packages are optional?
 EXTRAS = {
@@ -90,8 +87,7 @@ class UploadCommand(Command):
             pass
 
         self.status("Building Source and Wheel (universal) distribution…")
-        os.system("{0} setup.py sdist bdist_wheel --universal".
-                  format(sys.executable))
+        os.system("{0} setup.py sdist bdist_wheel --universal".format(sys.executable))
 
         self.status("Uploading the package to PyPI via Twine…")
         os.system("twine upload dist/*")
@@ -117,7 +113,6 @@ setup(
     packages=find_packages(exclude=("tests",)),
     # If your package is a single module, use this instead of "packages":
     # py_modules=["mypackage"],
-
     # entry_points={
     #     "console_scripts": ["mycli=mymodule:cli"],
     # },
@@ -129,15 +124,13 @@ setup(
         # Trove classifiers
         # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
         "Development Status :: 3 - Alpha",
-        'Intended Audience :: Developers',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Topic :: Internet',
+        "Intended Audience :: Developers",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Topic :: Internet",
     ],
     # $ setup.py publish support.
-    cmdclass={
-        "upload": UploadCommand,
-    },
+    cmdclass={"upload": UploadCommand},
 )
