@@ -12,7 +12,7 @@ import time
 from typing import Optional, Text, Tuple
 
 from teslajsonpy.battery_sensor import Battery, Range
-from teslajsonpy.binary_sensor import ChargerConnectionSensor, ParkingSensor
+from teslajsonpy.binary_sensor import ChargerConnectionSensor, Online, ParkingSensor
 from teslajsonpy.charger import ChargerSwitch, ChargingSensor, RangeSwitch
 from teslajsonpy.climate import Climate, TempSensor
 from teslajsonpy.connection import Connection
@@ -108,6 +108,7 @@ class Controller:
             self.__components.append(ParkingSensor(car, self))
             self.__components.append(GPS(car, self))
             self.__components.append(Odometer(car, self))
+            self.__components.append(Online(car, self))
 
         tasks = [self.update(car["id"], wake_if_asleep=True) for car in cars]
         try:

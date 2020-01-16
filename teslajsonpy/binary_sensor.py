@@ -5,6 +5,8 @@ Python Package for controlling Tesla API.
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
+from typing import Dict, Text
+
 from teslajsonpy.vehicle import VehicleDevice
 
 
@@ -113,3 +115,37 @@ class ChargerConnectionSensor(VehicleDevice):
     def has_battery():
         """Return whether the device has a battery."""
         return False
+
+
+class Online(VehicleDevice):
+    """Home-Assistant Online class for a Tesla VehicleDevice."""
+
+    def __init__(self, data: Dict, controller) -> None:
+        """Initialize the Online sensor.
+
+        Args:
+            data (Dict): The base state for a Tesla vehicle.
+                https://tesla-api.timdorr.com/vehicle/state/data
+            controller (Controller): The controller that controls updates to the Tesla API.
+
+        """
+        super().__init__(data, controller)
+        self.__online_state: bool = None
+        self.type: Text = "online sensor"
+        self.hass_type = "binary_sensor"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
+
+    async def async_update(self) -> None:
+        """Update the battery state."""
+        await super().async_update()
+        self.__online_state = self._controller.car_online[self._vin]
+
+    @staticmethod
+    def has_battery() -> bool:
+        """Return whether the device has a battery."""
+        return False
+
+    def get_value(self) -> bool:
+        """Return the battery level."""
+        return self.__online_state
