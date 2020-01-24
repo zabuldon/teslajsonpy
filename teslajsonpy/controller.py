@@ -206,6 +206,7 @@ class Controller:
             sleep_delay = 2
             inst = args[0]
             car_id = args[1]
+            is_wake_command = len(args) >= 3 and args[2] == "wake_up"
             result = None
             if inst.car_online.get(inst._id_to_vin(car_id)):
                 try:
@@ -214,61 +215,67 @@ class Controller:
                     pass
             if valid_result(result):
                 return result
-            _LOGGER.debug(
-                "wake_up needed for %s -> %s \n"
-                "Info: args:%s, kwargs:%s, "
-                "car_id:%s, car_online:%s",
-                func.__name__,  # pylint: disable=no-member
-                result,
-                args,
-                kwargs,
-                car_id,
-                inst.car_online,
-            )
-            inst.car_online[inst._id_to_vin(car_id)] = False
-            while (
-                "wake_if_asleep" in kwargs
-                and kwargs["wake_if_asleep"]
-                and
-                # Check online state
-                (
-                    car_id is None
-                    or (
-                        not inst._id_to_vin(car_id)
-                        or not inst.car_online.get(inst._id_to_vin(car_id))
-                    )
-                )
-            ):
-                _LOGGER.debug("Attempting to wake up")
-                result = await inst._wake_up(car_id)
+            if not is_wake_command:
                 _LOGGER.debug(
-                    "%s(%s): Wake Attempt(%s): %s",
-                    func.__name__,  # pylint: disable=no-member,
-                    car_id,
-                    retries,
+                    "wake_up needed for %s -> %s \n"
+                    "Info: args:%s, kwargs:%s, "
+                    "VIN:%s, car_online:%s",
+                    func.__name__,  # pylint: disable=no-member
                     result,
+                    args,
+                    kwargs,
+                    inst._id_to_vin(car_id)[-5:],
+                    inst.car_online,
                 )
-                if not result:
-                    if retries < 5:
-                        await asyncio.sleep(sleep_delay ** (retries + 2))
-                        retries += 1
-                        continue
-                    inst.car_online[inst._id_to_vin(car_id)] = False
-                    raise RetryLimitError
-                break
+                inst.car_online[inst._id_to_vin(car_id)] = False
+                while (
+                    "wake_if_asleep" in kwargs
+                    and kwargs["wake_if_asleep"]
+                    and
+                    # Check online state
+                    (
+                        car_id is None
+                        or (
+                            not inst._id_to_vin(car_id)
+                            or not inst.car_online.get(inst._id_to_vin(car_id))
+                        )
+                    )
+                ):
+                    _LOGGER.debug("Attempting to wake up")
+                    result = await inst._wake_up(car_id)
+                    _LOGGER.debug(
+                        "%s(%s): Wake Attempt(%s): %s",
+                        func.__name__,  # pylint: disable=no-member,
+                        inst._id_to_vin(car_id)[-5:],
+                        retries,
+                        result,
+                    )
+                    if not result:
+                        if retries < 5:
+                            await asyncio.sleep(sleep_delay ** (retries + 2))
+                            retries += 1
+                            continue
+                        inst.car_online[inst._id_to_vin(car_id)] = False
+                        raise RetryLimitError
+                    break
             # try function five more times
             retries = 0
+            result = None
             _LOGGER.debug(
-                "Vehicle is awake, trying function %s",
+                "Retrying %s(%s %s)",
                 func.__name__,  # pylint: disable=no-member,
+                args,
+                kwargs,
             )
-            while True and func.__name__ != "wake_up":  # pylint: disable=no-member,
+            while not valid_result(result):
+                await asyncio.sleep(sleep_delay ** (retries + 1))
                 try:
                     result = await func(*args, **kwargs)
                     _LOGGER.debug(
-                        "%s(%s): Retry Attempt(%s): %s",
+                        "%s(%s %s):\n Retry Attempt(%s): %s",
                         func.__name__,  # pylint: disable=no-member,
-                        car_id,
+                        args,
+                        kwargs,
                         retries,
                         "Success" if valid_result(result) else result,
                     )
@@ -276,12 +283,10 @@ class Controller:
                     pass
                 finally:
                     retries += 1
-                if valid_result(result):
-                    inst.car_online[inst._id_to_vin(car_id)] = True
-                    return result
                 if retries >= 5:
                     raise RetryLimitError
-                await asyncio.sleep(sleep_delay ** (retries + 1))
+            inst.car_online[inst._id_to_vin(car_id)] = True
+            return result
 
         return wrapped
 
