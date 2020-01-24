@@ -117,8 +117,8 @@ class ChargerConnectionSensor(VehicleDevice):
         return False
 
 
-class Online(VehicleDevice):
-    """Home-Assistant Online class for a Tesla VehicleDevice."""
+class OnlineSensor(VehicleDevice):
+    """Home-Assistant Online sensor class for a Tesla VehicleDevice."""
 
     def __init__(self, data: Dict, controller) -> None:
         """Initialize the Online sensor.
