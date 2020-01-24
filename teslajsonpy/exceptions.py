@@ -5,6 +5,9 @@ Python Package for controlling Tesla API.
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class TeslaException(Exception):
@@ -39,16 +42,10 @@ class TeslaException(Exception):
 class RetryLimitError(TeslaException):
     """Class of exceptions for hitting retry limits."""
 
-    def __init__(self, *args, **kwargs):
-        # pylint: disable=super-init-not-called
-        """Initialize exceptions for the Tesla retry limit API."""
-        pass
+    pass
 
 
 class IncompleteCredentials(TeslaException):
-    """Class of exceptions for hitting retry limits."""
+    """Class of exceptions for incomplete credentials."""
 
-    def __init__(self, *args, **kwargs):
-        # pylint: disable=super-init-not-called
-        """Initialize exceptions for the Tesla retry limit API."""
-        pass
+    pass
