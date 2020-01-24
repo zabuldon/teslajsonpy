@@ -479,7 +479,7 @@ class Controller:
                 continue
             async with self.__lock[vin]:
                 if (
-                    online
+                    (online or wake_if_asleep)
                     and (  # pylint: disable=too-many-boolean-expressions
                         self.__update.get(vin)
                     )
@@ -493,7 +493,9 @@ class Controller:
                     )
                 ):  # Only update cars with update flag on
                     try:
-                        data = await self.get(car_id, "data", wake_if_asleep)
+                        data = await self.get(
+                            car_id, "data", wake_if_asleep=wake_if_asleep
+                        )
                     except TeslaException:
                         data = None
                     if data and data["response"]:
