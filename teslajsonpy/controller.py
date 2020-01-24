@@ -71,6 +71,7 @@ class Controller:
         self.__controller_lock = None
         self.__wakeup_conds = {}
         self.car_online = {}
+        self.raw_online_state = {}
         self.__id_vin_map = {}
         self.__vin_id_map = {}
 
@@ -91,6 +92,7 @@ class Controller:
             self._last_update_time[vin] = 0
             self._last_wake_up_time[vin] = 0
             self.__update[vin] = True
+            self.raw_online_state[vin] = car["state"]
             self.car_online[vin] = car["state"] == "online"
             self.__climate[vin] = {}
             self.__charging[vin] = {}

@@ -16,7 +16,7 @@ class ParkingSensor(VehicleDevice):
     This is intended to be partially inherited by a Home-Assitant entity.
     """
 
-    def __init__(self, data, controller):
+    def __init__(self, data: Dict, controller):
         """Initialize the parking brake sensor.
 
         Parameters
@@ -135,11 +135,13 @@ class OnlineSensor(VehicleDevice):
         self.hass_type = "binary_sensor"
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
+        self.attrs: Dict[Text, Text] = {}
 
     async def async_update(self) -> None:
         """Update the battery state."""
         await super().async_update()
         self.__online_state = self._controller.car_online[self._vin]
+        self.attrs["state"] = self._controller.raw_online_state[self._vin]
 
     @staticmethod
     def has_battery() -> bool:
