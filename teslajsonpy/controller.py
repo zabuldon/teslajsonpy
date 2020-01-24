@@ -432,8 +432,9 @@ class Controller:
                 )  # avoid wrapper loop
                 self.car_online[car_vin] = result["response"]["state"] == "online"
                 self._last_wake_up_time[car_vin] = cur_time
-                _LOGGER.debug("Wakeup %s: %s", car_id, result["response"]["state"])
-            # self.__wakeup_conds[car_id].notify_all()
+                _LOGGER.debug(
+                    "Wakeup %s: %s", car_vin[-5:], result["response"]["state"]
+                )
             return self.car_online[car_vin]
 
     async def update(self, car_id=None, wake_if_asleep=False, force=False):
