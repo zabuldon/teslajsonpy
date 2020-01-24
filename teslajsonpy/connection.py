@@ -50,6 +50,7 @@ class Connection:
         self.generate_oauth(email, password, refresh_token)
         if access_token:
             self.__sethead(access_token)
+            _LOGGER.debug("Connecting with existing access token")
 
     def generate_oauth(
         self, email: Text = None, password: Text = None, refresh_token: Text = None
@@ -79,7 +80,7 @@ class Connection:
             self.oauth["refresh_token"] = refresh_token
         else:
             raise IncompleteCredentials(
-                "Connection requires email and password or access and refresh token."
+                "Connection requires email and password or refresh token to authenticate."
             )
 
     async def get(self, command):
@@ -90,6 +91,9 @@ class Connection:
         """Post data to API."""
         now = calendar.timegm(datetime.datetime.now().timetuple())
         if now > self.expiration:
+            _LOGGER.debug(
+                "Requesting new oauth token using %s", self.oauth["grant_type"]
+            )
             auth = await self.__open("/oauth/token", "post", data=self.oauth)
             self.__sethead(auth["access_token"], auth["expires_in"])
             self.refresh_token = auth["refresh_token"]
