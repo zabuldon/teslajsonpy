@@ -6,6 +6,7 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import time
+from typing import Text
 
 from teslajsonpy.vehicle import VehicleDevice
 
@@ -166,6 +167,7 @@ class TempSensor(VehicleDevice):
         self.type = "temperature sensor"
         self.measurement = "C"
         self.hass_type = "sensor"
+        self._device_class: Text = "temperature"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x4
@@ -194,3 +196,8 @@ class TempSensor(VehicleDevice):
     def has_battery():
         """Return whether the device has a battery."""
         return False
+
+    @property
+    def device_class(self) -> Text:
+        """Return the HA device class."""
+        return self._device_class

@@ -6,7 +6,7 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import time
-from typing import Dict, Text
+from typing import Dict, Optional, Text
 
 from teslajsonpy.vehicle import VehicleDevice
 
@@ -150,6 +150,7 @@ class ChargingSensor(VehicleDevice):
         self.__rated: bool = True
         self.measurement: Text = "mi/hr"
         self.hass_type: Text = "sensor"
+        self._device_class: Optional[Text] = None
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
         self.bin_type: hex = 0xC
@@ -217,3 +218,8 @@ class ChargingSensor(VehicleDevice):
     def charger_voltage(self) -> float:
         """Return the charging rate."""
         return self.__charger_voltage
+
+    @property
+    def device_class(self) -> Text:
+        """Return the HA device class."""
+        return self._device_class

@@ -5,7 +5,7 @@ Python Package for controlling Tesla API.
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
-from typing import Dict, Text
+from typing import Dict, Optional, Text
 
 from teslajsonpy.vehicle import VehicleDevice
 
@@ -29,6 +29,7 @@ class Battery(VehicleDevice):
         self.type: Text = "battery sensor"
         self.measurement: Text = "%"
         self.hass_type: Text = "sensor"
+        self._device_class: Text = "battery"
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
         self.bin_type: hex = 0x5
@@ -49,6 +50,11 @@ class Battery(VehicleDevice):
     def get_value(self) -> int:
         """Return the battery level."""
         return self.__battery_level
+
+    @property
+    def device_class(self) -> Text:
+        """Return the HA device class."""
+        return self._device_class
 
 
 class Range(VehicleDevice):
@@ -78,6 +84,7 @@ class Range(VehicleDevice):
         self.__rated = True
         self.measurement = "LENGTH_MILES"
         self.hass_type = "sensor"
+        self._device_class: Optional[Text] = None
         self.name = self._name()
         self.uniq_name = self._uniq_name()
         self.bin_type = 0xA
@@ -112,3 +119,8 @@ class Range(VehicleDevice):
         if self.__rated:
             return self.__battery_range
         return self.__ideal_battery_range
+
+    @property
+    def device_class(self) -> Text:
+        """Return the HA device class."""
+        return self._device_class
