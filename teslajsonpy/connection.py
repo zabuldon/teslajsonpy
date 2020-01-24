@@ -78,9 +78,13 @@ class Connection:
         elif refresh_token:
             self.oauth["grant_type"] = "refresh_token"
             self.oauth["refresh_token"] = refresh_token
+        elif not refresh_token:
+            raise IncompleteCredentials(
+                "Missing oauth authentication details: refresh token."
+            )
         else:
             raise IncompleteCredentials(
-                "Connection requires email and password or refresh token to authenticate."
+                "Missing oauth authentication details: email and password."
             )
 
     async def get(self, command):

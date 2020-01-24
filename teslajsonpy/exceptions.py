@@ -15,6 +15,9 @@ class TeslaException(Exception):
         self.message = ""
         super().__init__(*args, **kwargs)
         self.code = code
+        if isinstance(code, str):
+            self.message = self.code
+            return
         if self.code == 401:
             self.message = "UNAUTHORIZED"
         elif self.code == 404:
