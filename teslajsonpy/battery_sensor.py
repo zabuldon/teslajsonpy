@@ -40,16 +40,24 @@ class Battery(VehicleDevice):
         data = self._controller.get_charging_params(self._id)
         if data:
             self.__battery_level = data["battery_level"]
-            self.__charging_state = data["charging_state"]
+            self.__charging_state = data["charging_state"] == "Charging"
 
     @staticmethod
     def has_battery() -> bool:
         """Return whether the device has a battery."""
-        return False
+        return True
 
     def get_value(self) -> int:
         """Return the battery level."""
         return self.__battery_level
+
+    def battery_level(self) -> int:
+        """Return the battery level."""
+        return self.get_value()
+
+    def battery_charging(self) -> bool:
+        """Return the battery level."""
+        return self.__charging_state
 
     @property
     def device_class(self) -> Text:
