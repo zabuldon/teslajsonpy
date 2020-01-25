@@ -44,7 +44,7 @@ class Connection:
         self.expiration: int = 0
         self.access_token = None
         self.head = None
-        self.refresh_token = None
+        self.refresh_token = refresh_token
         self.websession = websession
         self.token_refreshed = False
         self.generate_oauth(email, password, refresh_token)
