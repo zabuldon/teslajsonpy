@@ -43,12 +43,16 @@ class ParkingSensor(VehicleDevice):
 
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x1
+        self.attrs: Dict[Text, Text] = {}
 
     async def async_update(self):
         """Update the parking brake sensor."""
         await super().async_update()
         data = self._controller.get_drive_params(self._id)
         if data:
+            self.attrs["shift_state"] = (
+                data["shift_state"] if data["shift_state"] else "P"
+            )
             if not data["shift_state"] or data["shift_state"] == "P":
                 self.__state = True
             else:
@@ -96,12 +100,14 @@ class ChargerConnectionSensor(VehicleDevice):
 
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x2
+        self.attrs: Dict[Text, Text] = {}
 
     async def async_update(self):
         """Update the charger connection sensor."""
         await super().async_update()
         data = self._controller.get_charging_params(self._id)
         if data:
+            self.attrs["charging_state"] = data["charging_state"]
             if data["charging_state"] in ["Disconnected"]:
                 self.__state = False
             else:
