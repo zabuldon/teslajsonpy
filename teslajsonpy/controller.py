@@ -214,56 +214,55 @@ class Controller:
             car_id = args[1]
             is_wake_command = len(args) >= 3 and args[2] == "wake_up"
             result = None
-            if inst.car_online.get(inst._id_to_vin(car_id)):
+            if inst.car_online.get(inst._id_to_vin(car_id)) or is_wake_command:
                 try:
                     result = await func(*args, **kwargs)
                 except TeslaException:
                     pass
-            if valid_result(result):
+            if valid_result(result) or is_wake_command:
                 return result
-            if not is_wake_command:
-                _LOGGER.debug(
-                    "wake_up needed for %s -> %s \n"
-                    "Info: args:%s, kwargs:%s, "
-                    "VIN:%s, car_online:%s",
-                    func.__name__,  # pylint: disable=no-member
-                    result,
-                    args,
-                    kwargs,
-                    inst._id_to_vin(car_id)[-5:],
-                    inst.car_online,
+            _LOGGER.debug(
+                "wake_up needed for %s -> %s \n"
+                "Info: args:%s, kwargs:%s, "
+                "VIN:%s, car_online:%s",
+                func.__name__,  # pylint: disable=no-member
+                result,
+                args,
+                kwargs,
+                inst._id_to_vin(car_id)[-5:],
+                inst.car_online,
+            )
+            inst.car_online[inst._id_to_vin(car_id)] = False
+            while (
+                "wake_if_asleep" in kwargs
+                and kwargs["wake_if_asleep"]
+                and
+                # Check online state
+                (
+                    car_id is None
+                    or (
+                        not inst._id_to_vin(car_id)
+                        or not inst.car_online.get(inst._id_to_vin(car_id))
+                    )
                 )
-                inst.car_online[inst._id_to_vin(car_id)] = False
-                while (
-                    "wake_if_asleep" in kwargs
-                    and kwargs["wake_if_asleep"]
-                    and
-                    # Check online state
-                    (
-                        car_id is None
-                        or (
-                            not inst._id_to_vin(car_id)
-                            or not inst.car_online.get(inst._id_to_vin(car_id))
-                        )
-                    )
-                ):
-                    _LOGGER.debug("Attempting to wake up")
-                    result = await inst._wake_up(car_id)
-                    _LOGGER.debug(
-                        "%s(%s): Wake Attempt(%s): %s",
-                        func.__name__,  # pylint: disable=no-member,
-                        inst._id_to_vin(car_id)[-5:],
-                        retries,
-                        result,
-                    )
-                    if not result:
-                        if retries < 5:
-                            await asyncio.sleep(sleep_delay ** (retries + 2))
-                            retries += 1
-                            continue
-                        inst.car_online[inst._id_to_vin(car_id)] = False
-                        raise RetryLimitError
-                    break
+            ):
+                _LOGGER.debug("Attempting to wake up")
+                result = await inst._wake_up(car_id)
+                _LOGGER.debug(
+                    "%s(%s): Wake Attempt(%s): %s",
+                    func.__name__,  # pylint: disable=no-member,
+                    inst._id_to_vin(car_id)[-5:],
+                    retries,
+                    result,
+                )
+                if not result:
+                    if retries < 5:
+                        await asyncio.sleep(sleep_delay ** (retries + 2))
+                        retries += 1
+                        continue
+                    inst.car_online[inst._id_to_vin(car_id)] = False
+                    raise RetryLimitError("Reached retry limit; aborting")
+                break
             # try function five more times
             retries = 0
             result = None
@@ -290,7 +289,7 @@ class Controller:
                 finally:
                     retries += 1
                 if retries >= 5:
-                    raise RetryLimitError
+                    raise RetryLimitError("Reached retry limit; aborting")
             inst.car_online[inst._id_to_vin(car_id)] = True
             return result
 
