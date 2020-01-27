@@ -256,7 +256,7 @@ class Controller:
                 )
                 if not result:
                     if retries < 5:
-                        await asyncio.sleep(sleep_delay ** (retries + 2))
+                        await asyncio.sleep(15 + sleep_delay ** (retries + 2))
                         retries += 1
                         continue
                     inst.car_online[inst._id_to_vin(car_id)] = False
@@ -272,7 +272,7 @@ class Controller:
                 kwargs,
             )
             while not valid_result(result):
-                await asyncio.sleep(sleep_delay ** (retries + 1))
+                await asyncio.sleep(15 + sleep_delay ** (retries + 1))
                 try:
                     result = await func(*args, **kwargs)
                     _LOGGER.debug(
