@@ -475,6 +475,7 @@ class Controller:
                     self.__id_vin_map[car["id"]] = car["vin"]
                     self.__vin_id_map[car["vin"]] = car["id"]
                     self.car_online[car["vin"]] = car["state"] == "online"
+                    self.raw_online_state[car["vin"]] = car["state"]
                 self._last_attempted_update_time = cur_time
         # Only update online vehicles that haven't been updated recently
         # The throttling is per car's last succesful update
