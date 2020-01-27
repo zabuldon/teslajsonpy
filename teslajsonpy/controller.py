@@ -489,8 +489,9 @@ class Controller:
             if car_vin and car_vin != vin:
                 continue
             async with self.__lock[vin]:
+                car_state = self.raw_online_state[vin]
                 if (
-                    (online or wake_if_asleep)
+                    (online or (wake_if_asleep and car_state == "asleep"))
                     and (  # pylint: disable=too-many-boolean-expressions
                         self.__update.get(vin)
                     )
