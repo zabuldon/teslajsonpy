@@ -234,8 +234,7 @@ class Controller:
             )
             inst.car_online[inst._id_to_vin(car_id)] = False
             while (
-                "wake_if_asleep" in kwargs
-                and kwargs["wake_if_asleep"]
+                kwargs.get("wake_if_asleep")
                 and
                 # Check online state
                 (
