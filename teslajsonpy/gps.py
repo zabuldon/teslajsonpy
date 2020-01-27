@@ -5,6 +5,8 @@ Python Package for controlling Tesla API.
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
+from typing import Optional, Text
+
 from teslajsonpy.vehicle import VehicleDevice
 
 
@@ -95,6 +97,7 @@ class Odometer(VehicleDevice):
         self.type = "mileage sensor"
         self.measurement = "LENGTH_MILES"
         self.hass_type = "sensor"
+        self._device_class: Optional[Text] = None
         self.name = self._name()
         self.uniq_name = self._uniq_name()
         self.bin_type = 0xB
@@ -122,3 +125,8 @@ class Odometer(VehicleDevice):
     def get_value(self):
         """Return the odometer reading."""
         return round(self.__odometer, 1)
+
+    @property
+    def device_class(self) -> Text:
+        """Return the HA device class."""
+        return self._device_class

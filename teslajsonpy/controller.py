@@ -12,7 +12,11 @@ import time
 from typing import Optional, Text, Tuple
 
 from teslajsonpy.battery_sensor import Battery, Range
-from teslajsonpy.binary_sensor import ChargerConnectionSensor, ParkingSensor
+from teslajsonpy.binary_sensor import (
+    ChargerConnectionSensor,
+    OnlineSensor,
+    ParkingSensor,
+)
 from teslajsonpy.charger import ChargerSwitch, ChargingSensor, RangeSwitch
 from teslajsonpy.climate import Climate, TempSensor
 from teslajsonpy.connection import Connection
@@ -67,6 +71,7 @@ class Controller:
         self.__controller_lock = None
         self.__wakeup_conds = {}
         self.car_online = {}
+        self.raw_online_state = {}
         self.__id_vin_map = {}
         self.__vin_id_map = {}
 
@@ -87,6 +92,7 @@ class Controller:
             self._last_update_time[vin] = 0
             self._last_wake_up_time[vin] = 0
             self.__update[vin] = True
+            self.raw_online_state[vin] = car["state"]
             self.car_online[vin] = car["state"] == "online"
             self.__climate[vin] = {}
             self.__charging[vin] = {}
@@ -108,6 +114,7 @@ class Controller:
             self.__components.append(ParkingSensor(car, self))
             self.__components.append(GPS(car, self))
             self.__components.append(Odometer(car, self))
+            self.__components.append(OnlineSensor(car, self))
 
         tasks = [self.update(car["id"], wake_if_asleep=True) for car in cars]
         try:
@@ -205,23 +212,24 @@ class Controller:
             sleep_delay = 2
             inst = args[0]
             car_id = args[1]
+            is_wake_command = len(args) >= 3 and args[2] == "wake_up"
             result = None
-            if inst.car_online.get(inst._id_to_vin(car_id)):
+            if inst.car_online.get(inst._id_to_vin(car_id)) or is_wake_command:
                 try:
                     result = await func(*args, **kwargs)
                 except TeslaException:
                     pass
-            if valid_result(result):
+            if valid_result(result) or is_wake_command:
                 return result
             _LOGGER.debug(
                 "wake_up needed for %s -> %s \n"
                 "Info: args:%s, kwargs:%s, "
-                "car_id:%s, car_online:%s",
+                "VIN:%s, car_online:%s",
                 func.__name__,  # pylint: disable=no-member
                 result,
                 args,
                 kwargs,
-                car_id,
+                inst._id_to_vin(car_id)[-5:],
                 inst.car_online,
             )
             inst.car_online[inst._id_to_vin(car_id)] = False
@@ -243,7 +251,7 @@ class Controller:
                 _LOGGER.debug(
                     "%s(%s): Wake Attempt(%s): %s",
                     func.__name__,  # pylint: disable=no-member,
-                    car_id,
+                    inst._id_to_vin(car_id)[-5:],
                     retries,
                     result,
                 )
@@ -253,21 +261,26 @@ class Controller:
                         retries += 1
                         continue
                     inst.car_online[inst._id_to_vin(car_id)] = False
-                    raise RetryLimitError
+                    raise RetryLimitError("Reached retry limit; aborting")
                 break
             # try function five more times
             retries = 0
+            result = None
             _LOGGER.debug(
-                "Vehicle is awake, trying function %s",
+                "Retrying %s(%s %s)",
                 func.__name__,  # pylint: disable=no-member,
+                args,
+                kwargs,
             )
-            while True and func.__name__ != "wake_up":  # pylint: disable=no-member,
+            while not valid_result(result):
+                await asyncio.sleep(sleep_delay ** (retries + 1))
                 try:
                     result = await func(*args, **kwargs)
                     _LOGGER.debug(
-                        "%s(%s): Retry Attempt(%s): %s",
+                        "%s(%s %s):\n Retry Attempt(%s): %s",
                         func.__name__,  # pylint: disable=no-member,
-                        car_id,
+                        args,
+                        kwargs,
                         retries,
                         "Success" if valid_result(result) else result,
                     )
@@ -275,12 +288,10 @@ class Controller:
                     pass
                 finally:
                     retries += 1
-                if valid_result(result):
-                    inst.car_online[inst._id_to_vin(car_id)] = True
-                    return result
                 if retries >= 5:
-                    raise RetryLimitError
-                await asyncio.sleep(sleep_delay ** (retries + 1))
+                    raise RetryLimitError("Reached retry limit; aborting")
+            inst.car_online[inst._id_to_vin(car_id)] = True
+            return result
 
         return wrapped
 
@@ -426,8 +437,9 @@ class Controller:
                 )  # avoid wrapper loop
                 self.car_online[car_vin] = result["response"]["state"] == "online"
                 self._last_wake_up_time[car_vin] = cur_time
-                _LOGGER.debug("Wakeup %s: %s", car_id, result["response"]["state"])
-            # self.__wakeup_conds[car_id].notify_all()
+                _LOGGER.debug(
+                    "Wakeup %s: %s", car_vin[-5:], result["response"]["state"]
+                )
             return self.car_online[car_vin]
 
     async def update(self, car_id=None, wake_if_asleep=False, force=False):
@@ -478,7 +490,7 @@ class Controller:
                 continue
             async with self.__lock[vin]:
                 if (
-                    online
+                    (online or wake_if_asleep)
                     and (  # pylint: disable=too-many-boolean-expressions
                         self.__update.get(vin)
                     )
@@ -492,7 +504,9 @@ class Controller:
                     )
                 ):  # Only update cars with update flag on
                     try:
-                        data = await self.get(car_id, "data", wake_if_asleep)
+                        data = await self.get(
+                            car_id, "data", wake_if_asleep=wake_if_asleep
+                        )
                     except TeslaException:
                         data = None
                     if data and data["response"]:
