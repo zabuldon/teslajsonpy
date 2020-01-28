@@ -74,6 +74,8 @@ class Controller:
         self.raw_online_state = {}
         self.__id_vin_map = {}
         self.__vin_id_map = {}
+        self.__vin_vehicle_id_map = {}
+        self.__vehicle_id_vin_map = {}
 
     async def connect(self, test_login=False) -> Tuple[Text, Text]:
         """Connect controller to Tesla."""
@@ -87,6 +89,8 @@ class Controller:
             vin = car["vin"]
             self.__id_vin_map[car["id"]] = vin
             self.__vin_id_map[vin] = car["id"]
+            self.__vin_vehicle_id_map[vin] = car["vehicle_id"]
+            self.__vehicle_id_vin_map[car["vehicle_id"]] = vin
             self.__lock[vin] = asyncio.Lock()
             self.__wakeup_conds[vin] = asyncio.Lock()
             self._last_update_time[vin] = 0
@@ -474,6 +478,8 @@ class Controller:
                 for car in cars:
                     self.__id_vin_map[car["id"]] = car["vin"]
                     self.__vin_id_map[car["vin"]] = car["id"]
+                    self.__vin_vehicle_id_map[car["vin"]] = car["vehicle_id"]
+                    self.__vehicle_id_vin_map[car["vehicle_id"]] = car["vin"]
                     self.car_online[car["vin"]] = car["state"] == "online"
                     self.raw_online_state[car["vin"]] = car["state"]
                 self._last_attempted_update_time = cur_time
@@ -520,6 +526,15 @@ class Controller:
                         self.__gui[vin] = response["gui_settings"]
                         self._last_update_time[vin] = time.time()
                         update_succeeded = True
+                        if (
+                            self.get_drive_params(car_id).get("shift_state")
+                            and self.get_drive_params(car_id).get("shift_state") != "P"
+                        ):
+                            await self.__connection.websocket_connect(
+                                vin[-5:],
+                                self.__vin_vehicle_id_map[vin],
+                                on_message=self._process_websocket_message,
+                            )
             return update_succeeded
 
     def get_climate_params(self, car_id):
@@ -655,3 +670,46 @@ class Controller:
         if new_car_id:
             car_id = new_car_id
         return car_id
+
+    def _process_websocket_message(self, data):
+        if data["msg_type"] == "data:update":
+            update_json = {}
+            vehicle_id = int(data["tag"])
+            vin = self.__vehicle_id_vin_map[vehicle_id]
+            _LOGGER.debug("Updating %s with websocket", vin[-5:])
+            keys = [
+                ("timestamp", int),
+                ("speed", int),
+                ("odometer", float),
+                ("soc", int),
+                ("elevation", int),
+                ("est_heading", int),
+                ("est_lat", float),
+                ("est_lng", float),
+                ("power", int),
+                ("shift_state", str),
+                ("range", int),
+                ("est_range", int),
+                ("heading", int),
+            ]
+            values = data["value"].split(",")
+            for num, value in enumerate(values):
+                update_json[keys[num][0]] = keys[num][1](value) if value else None
+            _LOGGER.debug("Update_json %s", update_json)
+            self.__driving[vin]["timestamp"] = update_json["timestamp"]
+            self.__charging[vin]["timestamp"] = update_json["timestamp"]
+            self.__state[vin]["timestamp"] = update_json["timestamp"]
+            self.__driving[vin]["speed"] = update_json["speed"]
+            self.__state[vin]["odometer"] = update_json["odometer"]
+            self.__charging[vin]["odometer"] = update_json["soc"]
+            # self.__state[vin]["odometer"] = update_json["elevation"]
+            # no current elevation stored
+            self.__driving[vin]["heading"] = update_json["est_heading"]
+            self.__driving[vin]["latitude"] = update_json["est_lat"]
+            self.__driving[vin]["longitude"] = update_json["est_lng"]
+            self.__driving[vin]["power"] = update_json["power"]
+            self.__driving[vin]["shift_state"] = update_json["shift_state"]
+            self.__charging[vin]["battery_range"] = update_json["range"]
+            self.__charging[vin]["est_battery_range"] = update_json["est_range"]
+            # self.__driving[vin]["heading"] = update_json["heading"]
+            # est_heading appears more accurate

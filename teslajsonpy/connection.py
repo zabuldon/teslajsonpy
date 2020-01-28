@@ -5,6 +5,7 @@ Python Package for controlling Tesla API.
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
+import asyncio
 import calendar
 import datetime
 import json
@@ -39,6 +40,7 @@ class Connection:
             "c7257eb71a564034f9419ee651c7d0e5f7" "aa6bfbd18bafb5c5c033b093bb2fa3"
         )
         self.baseurl: Text = "https://owner-api.teslamotors.com"
+        self.websocket_url: Text = "wss://streaming.vn.teslamotors.com/streaming"
         self.api: Text = "/api/1/"
         self.oauth: Dict[Text, Text] = {}
         self.expiration: int = 0
@@ -51,6 +53,7 @@ class Connection:
         if access_token:
             self.__sethead(access_token)
             _LOGGER.debug("Connecting with existing access token")
+        self.websocket = None
 
     def generate_oauth(
         self, email: Text = None, password: Text = None, refresh_token: Text = None
@@ -149,3 +152,51 @@ class Connection:
         except aiohttp.ClientResponseError as exception_:
             raise TeslaException(exception_.status)
         return data
+
+    async def websocket_connect(self, vin: int, vehicle_id: int, **kwargs):
+        """Connect to Tesla streaming websocket.
+
+        Args:
+            vin (int): vin of vehicle
+            vehicle_id (int): vehicle_id from Tesla api
+
+        """
+
+        async def _process_messages() -> None:
+            """Start Async WebSocket Listener."""
+            async for msg in self.websocket:
+                _LOGGER.debug("msg: %s", msg)
+                if msg.type == aiohttp.WSMsgType.BINARY:
+                    msg_json = json.loads(msg.data)
+                    if msg_json["msg_type"] == "control:hello":
+                        _LOGGER.debug(
+                            "Succesfully connected to websocket %s for %s",
+                            self.websocket_url,
+                            vin[-5:],
+                        )
+                    if (
+                        msg_json["msg_type"] == "data:error"
+                        and msg_json["value"] == "Can't validate token. "
+                    ):
+                        raise TeslaException(
+                            "Can't validate token for websocket connection."
+                        )
+                    if kwargs.get("on_message"):
+                        kwargs.get("on_message")(msg_json)
+                elif msg.type == aiohttp.WSMsgType.ERROR:
+                    _LOGGER.debug("WSMsgType error")
+                    break
+
+        if not self.websocket or self.websocket.closed:
+            _LOGGER.debug("Connecting to websocket %s", self.websocket_url)
+            self.websocket = await self.websession.ws_connect(self.websocket_url)
+            loop = asyncio.get_event_loop()
+            loop.create_task(_process_messages())
+        await self.websocket.send_json(
+            data={
+                "msg_type": "data:subscribe_oauth",
+                "token": self.access_token,
+                "value": "speed,odometer,soc,elevation,est_heading,est_lat,est_lng,power,shift_state,range,est_range,heading",
+                "tag": f"{vehicle_id}",
+            }
+        )
