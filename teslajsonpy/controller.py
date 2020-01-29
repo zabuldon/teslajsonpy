@@ -76,6 +76,7 @@ class Controller:
         self.__vin_id_map = {}
         self.__vin_vehicle_id_map = {}
         self.__vehicle_id_vin_map = {}
+        self.__websocket_listeners = []
 
     async def connect(self, test_login=False) -> Tuple[Text, Text]:
         """Connect controller to Tesla."""
@@ -147,6 +148,19 @@ class Controller:
         """
         self.__connection.token_refreshed = False
         return (self.__connection.refresh_token, self.__connection.access_token)
+
+    def register_websocket_callback(self, callback) -> int:
+        """Register callback for websocket messages.
+
+        Args
+            callback (function): function to call with json data
+
+        Returns
+            int: Return index of entry
+
+        """
+        self.__websocket_listeners.append(callback)
+        return len(self.__websocket_listeners) - 1
 
     def wake_up(func):
         #  pylint: disable=no-self-argument
@@ -676,7 +690,6 @@ class Controller:
             update_json = {}
             vehicle_id = int(data["tag"])
             vin = self.__vehicle_id_vin_map[vehicle_id]
-            _LOGGER.debug("Updating %s with websocket", vin[-5:])
             keys = [
                 ("timestamp", int),
                 ("speed", int),
@@ -695,7 +708,7 @@ class Controller:
             values = data["value"].split(",")
             for num, value in enumerate(values):
                 update_json[keys[num][0]] = keys[num][1](value) if value else None
-            _LOGGER.debug("Update_json %s", update_json)
+            _LOGGER.debug("Updating %s with websocket: %s", vin[-5:], update_json)
             self.__driving[vin]["timestamp"] = update_json["timestamp"]
             self.__charging[vin]["timestamp"] = update_json["timestamp"]
             self.__state[vin]["timestamp"] = update_json["timestamp"]
@@ -713,3 +726,5 @@ class Controller:
             self.__charging[vin]["est_battery_range"] = update_json["est_range"]
             # self.__driving[vin]["heading"] = update_json["heading"]
             # est_heading appears more accurate
+        for func in self.__websocket_listeners:
+            func(data)
