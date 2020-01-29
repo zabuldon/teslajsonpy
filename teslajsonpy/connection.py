@@ -159,6 +159,8 @@ class Connection:
         Args:
             vin (int): vin of vehicle
             vehicle_id (int): vehicle_id from Tesla api
+            on_message (function): function to call on a valid message. It must
+                                   process a json delivered in data
 
         """
 
