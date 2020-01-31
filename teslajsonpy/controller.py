@@ -745,7 +745,7 @@ class Controller:
             self.__state[vin]["timestamp"] = update_json["timestamp"]
             self.__driving[vin]["speed"] = update_json["speed"]
             self.__state[vin]["odometer"] = update_json["odometer"]
-            self.__charging[vin]["odometer"] = update_json["soc"]
+            self.__charging[vin]["battery_level"] = update_json["soc"]
             # self.__state[vin]["odometer"] = update_json["elevation"]
             # no current elevation stored
             self.__driving[vin]["heading"] = update_json["est_heading"]
