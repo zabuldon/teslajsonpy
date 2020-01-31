@@ -20,6 +20,7 @@ from teslajsonpy.binary_sensor import (
 from teslajsonpy.charger import ChargerSwitch, ChargingSensor, RangeSwitch
 from teslajsonpy.climate import Climate, TempSensor
 from teslajsonpy.connection import Connection
+from teslajsonpy.const import IDLE_INTERVAL, ONLINE_INTERVAL, SLEEP_INTERVAL
 from teslajsonpy.exceptions import RetryLimitError, TeslaException
 from teslajsonpy.gps import GPS, Odometer
 from teslajsonpy.lock import ChargerLock, Lock
@@ -77,6 +78,7 @@ class Controller:
         self.__vin_vehicle_id_map = {}
         self.__vehicle_id_vin_map = {}
         self.__websocket_listeners = []
+        self.__last_parked_timestamp = {}
 
     async def connect(self, test_login=False) -> Tuple[Text, Text]:
         """Connect controller to Tesla."""
@@ -99,6 +101,7 @@ class Controller:
             self.__update[vin] = True
             self.raw_online_state[vin] = car["state"]
             self.car_online[vin] = car["state"] == "online"
+            self.__last_parked_timestamp[vin] = self._last_attempted_update_time
             self.__climate[vin] = {}
             self.__charging[vin] = {}
             self.__state[vin] = {}
@@ -460,6 +463,7 @@ class Controller:
             return self.car_online[car_vin]
 
     async def update(self, car_id=None, wake_if_asleep=False, force=False):
+        #  pylint: disable=too-many-locals
         """Update all vehicle attributes in the cache.
 
         This command will connect to the Tesla API and first update the list of
@@ -482,11 +486,26 @@ class Controller:
         RetryLimitError
 
         """
+
+        def _calculate_next_interval(vin: int) -> int:
+            if self.raw_online_state[vin] == "asleep" or self.__driving[vin].get(
+                "shift_state"
+            ):
+                self.__last_parked_timestamp[vin] = cur_time
+            elif (cur_time - (self.__last_parked_timestamp[vin])) > IDLE_INTERVAL:
+                _LOGGER.debug(
+                    "%s trying to sleep; will ignore updates for %s seconds",
+                    vin[-5:],
+                    round(SLEEP_INTERVAL + self._last_update_time[vin] - time.time(), 2),
+                )
+                return SLEEP_INTERVAL
+            return self.update_interval
+
         cur_time = time.time()
         async with self.__controller_lock:
             #  Update the online cars using get_vehicles()
             last_update = self._last_attempted_update_time
-            if force or cur_time - last_update > self.update_interval:
+            if force or cur_time - last_update > ONLINE_INTERVAL:
                 cars = await self.get_vehicles()
                 self.car_online = {}
                 for car in cars:
@@ -520,7 +539,7 @@ class Controller:
                         or vin not in self._last_update_time
                         or (
                             (cur_time - self._last_update_time[vin])
-                            > self.update_interval
+                            > _calculate_next_interval(vin)
                         )
                     )
                 ):  # Only update cars with update flag on
@@ -536,6 +555,18 @@ class Controller:
                         self.__charging[vin] = response["charge_state"]
                         self.__state[vin] = response["vehicle_state"]
                         self.__config[vin] = response["vehicle_config"]
+                        if (
+                            self.__driving[vin].get("shift_state")
+                            and self.__driving[vin].get("shift_state")
+                            != response["drive_state"]["shift_state"]
+                            and (
+                                response["drive_state"]["shift_state"] is None
+                                or response["drive_state"]["shift_state"] == "P"
+                            )
+                        ):
+                            self.__last_parked_timestamp[vin] = (
+                                response["drive_state"]["timestamp"] / 1000
+                            )
                         self.__driving[vin] = response["drive_state"]
                         self.__gui[vin] = response["gui_settings"]
                         self._last_update_time[vin] = time.time()
@@ -721,6 +752,15 @@ class Controller:
             self.__driving[vin]["latitude"] = update_json["est_lat"]
             self.__driving[vin]["longitude"] = update_json["est_lng"]
             self.__driving[vin]["power"] = update_json["power"]
+            if (
+                self.__driving[vin].get("shift_state")
+                and self.__driving[vin].get("shift_state") != update_json["shift_state"]
+                and (
+                    update_json["shift_state"] is None
+                    or update_json["shift_state"] == "P"
+                )
+            ):
+                self.__last_parked_timestamp[vin] = update_json["timestamp"] / 1000
             self.__driving[vin]["shift_state"] = update_json["shift_state"]
             self.__charging[vin]["battery_range"] = update_json["range"]
             self.__charging[vin]["est_battery_range"] = update_json["est_range"]

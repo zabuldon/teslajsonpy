@@ -60,6 +60,10 @@ class VehicleDevice:
         """Return the id of this Vehicle."""
         return self._id
 
+    def vehicle_id(self):
+        """Return the vehicle_id of this Vehicle."""
+        return self._vehicle_id
+
     def car_name(self):
         """Return the car name of this Vehicle."""
         return (
