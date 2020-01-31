@@ -526,7 +526,7 @@ class Controller:
                 ):  # Only update cars with update flag on
                     try:
                         data = await self.get(
-                            car_id, "data", wake_if_asleep=wake_if_asleep
+                            car_id, "vehicle_data", wake_if_asleep=wake_if_asleep
                         )
                     except TeslaException:
                         data = None
