@@ -6,6 +6,7 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import logging
+from typing import Dict, Text
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,6 +43,7 @@ class VehicleDevice:
         self._controller = controller
         self.should_poll = True
         self.type = "device"
+        self.attrs: Dict[Text, Text] = {}
 
     def _name(self):
         return (

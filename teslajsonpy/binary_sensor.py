@@ -43,7 +43,6 @@ class ParkingSensor(VehicleDevice):
 
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x1
-        self.attrs: Dict[Text, Text] = {}
 
     async def async_update(self):
         """Update the parking brake sensor."""
@@ -100,7 +99,6 @@ class ChargerConnectionSensor(VehicleDevice):
 
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x2
-        self.attrs: Dict[Text, Text] = {}
 
     async def async_update(self):
         """Update the charger connection sensor."""
@@ -141,7 +139,6 @@ class OnlineSensor(VehicleDevice):
         self.hass_type = "binary_sensor"
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
-        self.attrs: Dict[Text, Text] = {}
 
     async def async_update(self) -> None:
         """Update the battery state."""
