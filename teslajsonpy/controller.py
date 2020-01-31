@@ -492,11 +492,15 @@ class Controller:
                 "shift_state"
             ):
                 self.__last_parked_timestamp[vin] = cur_time
-            elif (cur_time - (self.__last_parked_timestamp[vin])) > IDLE_INTERVAL:
+            elif (
+                cur_time - (self.__last_parked_timestamp[vin])
+            ) > IDLE_INTERVAL and not self.__state[vin].get("sentry_mode"):
                 _LOGGER.debug(
                     "%s trying to sleep; will ignore updates for %s seconds",
                     vin[-5:],
-                    round(SLEEP_INTERVAL + self._last_update_time[vin] - time.time(), 2),
+                    round(
+                        SLEEP_INTERVAL + self._last_update_time[vin] - time.time(), 2
+                    ),
                 )
                 return SLEEP_INTERVAL
             return self.update_interval
