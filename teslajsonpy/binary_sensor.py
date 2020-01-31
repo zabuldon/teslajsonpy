@@ -106,6 +106,10 @@ class ChargerConnectionSensor(VehicleDevice):
         data = self._controller.get_charging_params(self._id)
         if data:
             self.attrs["charging_state"] = data["charging_state"]
+            self.attrs["conn_charge_cable"] = data["conn_charge_cable"]
+            self.attrs["fast_charger_present"] = data["fast_charger_present"]
+            self.attrs["fast_charger_brand"] = data["fast_charger_brand"]
+            self.attrs["fast_charger_type"] = data["fast_charger_type"]
             if data["charging_state"] in ["Disconnected"]:
                 self.__state = False
             else:
