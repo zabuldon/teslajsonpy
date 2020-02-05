@@ -170,6 +170,7 @@ class ChargingSensor(VehicleDevice):
             self.__rated = data["gui_range_display"] == "Rated"
         data = self._controller.get_charging_params(self._id)
         if data:
+            self.attrs["charger_phases"] = data["charger_phases"]
             self.__added_range = (
                 data["charge_miles_added_rated"]
                 if self.__rated
