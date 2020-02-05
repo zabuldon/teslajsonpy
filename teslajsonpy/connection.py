@@ -161,6 +161,8 @@ class Connection:
             vehicle_id (int): vehicle_id from Tesla api
             on_message (function): function to call on a valid message. It must
                                    process a json delivered in data
+            on_disconnect (function): function to call on a disconnect message. It must
+                                   process a json delivered in data
 
         """
 
@@ -183,6 +185,12 @@ class Connection:
                         raise TeslaException(
                             "Can't validate token for websocket connection."
                         )
+                    if (
+                        msg_json["msg_type"] == "data:error"
+                        and msg_json["value"] == "disconnected"
+                    ):
+                        if kwargs.get("on_disconnect"):
+                            kwargs.get("on_disconnect")()
                     if kwargs.get("on_message"):
                         kwargs.get("on_message")(msg_json)
                 elif msg.type == aiohttp.WSMsgType.ERROR:

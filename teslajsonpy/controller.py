@@ -20,7 +20,12 @@ from teslajsonpy.binary_sensor import (
 from teslajsonpy.charger import ChargerSwitch, ChargingSensor, RangeSwitch
 from teslajsonpy.climate import Climate, TempSensor
 from teslajsonpy.connection import Connection
-from teslajsonpy.const import IDLE_INTERVAL, ONLINE_INTERVAL, SLEEP_INTERVAL
+from teslajsonpy.const import (
+    DRIVING_INTERVAL,
+    IDLE_INTERVAL,
+    ONLINE_INTERVAL,
+    SLEEP_INTERVAL,
+)
 from teslajsonpy.exceptions import RetryLimitError, TeslaException
 from teslajsonpy.gps import GPS, Odometer
 from teslajsonpy.lock import ChargerLock, Lock
@@ -79,6 +84,7 @@ class Controller:
         self.__vehicle_id_vin_map = {}
         self.__websocket_listeners = []
         self.__last_parked_timestamp = {}
+        self.__update_state = {}
 
     async def connect(self, test_login=False) -> Tuple[Text, Text]:
         """Connect controller to Tesla."""
@@ -99,6 +105,7 @@ class Controller:
             self._last_update_time[vin] = 0
             self._last_wake_up_time[vin] = 0
             self.__update[vin] = True
+            self.__update_state[vin] = "normal"
             self.raw_online_state[vin] = car["state"]
             self.car_online[vin] = car["state"] == "online"
             self.__last_parked_timestamp[vin] = self._last_attempted_update_time
@@ -463,7 +470,7 @@ class Controller:
             return self.car_online[car_vin]
 
     async def update(self, car_id=None, wake_if_asleep=False, force=False):
-        #  pylint: disable=too-many-locals
+        #  pylint: disable=too-many-locals,too-many-statements
         """Update all vehicle attributes in the cache.
 
         This command will connect to the Tesla API and first update the list of
@@ -488,21 +495,58 @@ class Controller:
         """
 
         def _calculate_next_interval(vin: int) -> int:
+            cur_time = time.time()
+            # _LOGGER.debug(
+            #     "%s: %s > %s; shift_state: %s sentry: %s climate: %s, charging: %s ",
+            #     vin[-5:],
+            #     cur_time - self.__last_parked_timestamp[vin],
+            #     IDLE_INTERVAL,
+            #     self.__driving[vin].get("shift_state"),
+            #     self.__state[vin].get("sentry_mode"),
+            #     self.__climate[vin].get("is_climate_on"),
+            #     self.__charging[vin].get("charging_state") == "Charging",
+            # )
             if self.raw_online_state[vin] == "asleep" or self.__driving[vin].get(
                 "shift_state"
             ):
-                self.__last_parked_timestamp[vin] = cur_time
-            elif (
-                cur_time - (self.__last_parked_timestamp[vin])
-            ) > IDLE_INTERVAL and not self.__state[vin].get("sentry_mode"):
                 _LOGGER.debug(
-                    "%s trying to sleep; will ignore updates for %s seconds",
+                    "%s resetting last_parked_timestamp: shift_state %s",
                     vin[-5:],
-                    round(
-                        SLEEP_INTERVAL + self._last_update_time[vin] - time.time(), 2
-                    ),
+                    self.__driving[vin].get("shift_state"),
                 )
+                self.__last_parked_timestamp[vin] = cur_time
+            if self.__driving[vin].get("shift_state") in ["D", "R"]:
+                if self.__update_state[vin] != "driving":
+                    self.__update_state[vin] = "driving"
+                    _LOGGER.debug(
+                        "%s driving; increasing scan rate to every %s seconds",
+                        vin[-5:],
+                        DRIVING_INTERVAL,
+                    )
+                return DRIVING_INTERVAL
+            if (
+                cur_time - self.__last_parked_timestamp[vin] > IDLE_INTERVAL
+            ) and not (
+                self.__state[vin].get("sentry_mode")
+                or self.__climate[vin].get("is_climate_on")
+                or self.__charging[vin].get("charging_state") == "Charging"
+            ):
+                if self.__update_state[vin] != "trying_to_sleep":
+                    self.__update_state[vin] = "trying_to_sleep"
+                    _LOGGER.debug(
+                        "%s trying to sleep; scan throttled to %s seconds and will ignore updates for %s seconds",
+                        vin[-5:],
+                        SLEEP_INTERVAL,
+                        round(SLEEP_INTERVAL + self._last_update_time[vin] - cur_time, 2),
+                    )
                 return SLEEP_INTERVAL
+            if self.__update_state[vin] != "normal":
+                self.__update_state[vin] = "normal"
+                _LOGGER.debug(
+                    "%s scanning every %s seconds",
+                    vin[-5:],
+                    self.update_interval,
+                )
             return self.update_interval
 
         cur_time = time.time()
