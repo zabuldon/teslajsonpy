@@ -47,6 +47,7 @@ class Controller:
         access_token: Text = None,
         refresh_token: Text = None,
         update_interval: int = 300,
+        enable_websocket: bool = False,
     ) -> None:
         """Initialize controller.
 
@@ -58,6 +59,7 @@ class Controller:
             refresh_token (Text, optional): Refresh token. Defaults to None.
             update_interval (int, optional): Seconds between allowed updates to the API.  This is to prevent
             being blocked by Tesla. Defaults to 300.
+            enable_websocket (bool, optional): Whether to connect with websockets. Defaults to False.
 
         """
         self.__connection = Connection(
@@ -87,6 +89,7 @@ class Controller:
         self.__websocket_listeners = []
         self.__last_parked_timestamp = {}
         self.__update_state = {}
+        self.enable_websocket = enable_websocket
 
     async def connect(self, test_login=False) -> Tuple[Text, Text]:
         """Connect controller to Tesla."""
@@ -627,7 +630,8 @@ class Controller:
                         self._last_update_time[vin] = time.time()
                         update_succeeded = True
                         if (
-                            self.get_drive_params(car_id).get("shift_state")
+                            self.enable_websocket
+                            and self.get_drive_params(car_id).get("shift_state")
                             and self.get_drive_params(car_id).get("shift_state") != "P"
                         ):
                             await self.__connection.websocket_connect(
