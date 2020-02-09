@@ -141,14 +141,25 @@ class Connection:
                 url, headers=headers, data=data
             )
             data = await resp.json()
-            _LOGGER.debug(json.dumps(data))
+            _LOGGER.debug("%s: %s", resp.status, json.dumps(data))
             if resp.status > 299:
                 if resp.status == 401:
-                    if "error" in data and data["error"] == "invalid_token":
+                    if data.get("error") == "invalid_token":
                         raise TeslaException(resp.status, "invalid_token")
                 elif resp.status == 408:
-                    return False
+                    raise TeslaException(resp.status, "vehicle_unavailable")
                 raise TeslaException(resp.status)
+            if data.get("error"):
+                # known errors:
+                #     'vehicle unavailable: {:error=>"vehicle unavailable:"}',
+                #     "upstream_timeout", "vehicle is curently in service"
+                _LOGGER.debug(
+                    "Raising exception for : %s",
+                    f'{data.get("error")}:{data.get("error_description")}',
+                )
+                raise TeslaException(
+                    f'{data.get("error")}:{data.get("error_description")}'
+                )
         except aiohttp.ClientResponseError as exception_:
             raise TeslaException(exception_.status)
         return data

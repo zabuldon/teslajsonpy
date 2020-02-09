@@ -16,6 +16,7 @@ black = "*"
 
 [packages]
 aiohttp = "*"
+backoff = "*"
 
 [pipenv]
 allow_prereleases = true

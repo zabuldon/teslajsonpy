@@ -11,6 +11,8 @@ import logging
 import time
 from typing import Optional, Text, Tuple
 
+import backoff
+
 from teslajsonpy.battery_sensor import Battery, Range
 from teslajsonpy.binary_sensor import (
     ChargerConnectionSensor,
@@ -245,8 +247,15 @@ class Controller:
             if inst.car_online.get(inst._id_to_vin(car_id)) or is_wake_command:
                 try:
                     result = await func(*args, **kwargs)
-                except TeslaException:
-                    pass
+                except TeslaException as ex:
+                    _LOGGER.debug(
+                        "Exception: %s\n%s(%s %s)",
+                        ex.message,
+                        func.__name__,  # pylint: disable=no-member,
+                        args,
+                        kwargs,
+                    )
+                    raise
             if valid_result(result) or is_wake_command:
                 return result
             _LOGGER.debug(
@@ -288,37 +297,34 @@ class Controller:
                         retries += 1
                         continue
                     inst.car_online[inst._id_to_vin(car_id)] = False
-                    raise RetryLimitError("Reached retry limit; aborting")
+                    raise RetryLimitError("Reached retry limit; aborting wake up")
                 break
-            # try function five more times
-            retries = 0
-            result = None
+            inst.car_online[inst._id_to_vin(car_id)] = True
+            # retry function
             _LOGGER.debug(
                 "Retrying %s(%s %s)",
                 func.__name__,  # pylint: disable=no-member,
                 args,
                 kwargs,
             )
-            while not valid_result(result):
-                await asyncio.sleep(15 + sleep_delay ** (retries + 1))
-                try:
-                    result = await func(*args, **kwargs)
-                    _LOGGER.debug(
-                        "%s(%s %s):\n Retry Attempt(%s): %s",
-                        func.__name__,  # pylint: disable=no-member,
-                        args,
-                        kwargs,
-                        retries,
-                        "Success" if valid_result(result) else result,
-                    )
-                except TeslaException:
-                    pass
-                finally:
-                    retries += 1
-                if retries >= 5:
-                    raise RetryLimitError("Reached retry limit; aborting")
-            inst.car_online[inst._id_to_vin(car_id)] = True
-            return result
+            try:
+                result = await func(*args, **kwargs)
+                _LOGGER.debug(
+                    "Retry after wake up succeeded: %s",
+                    "True" if valid_result(result) else result,
+                )
+            except TeslaException as ex:
+                _LOGGER.debug(
+                    "Exception: %s\n%s(%s %s)",
+                    ex.message,
+                    func.__name__,  # pylint: disable=no-member,
+                    args,
+                    kwargs,
+                )
+                raise
+            if valid_result(result):
+                return result
+            raise TeslaException("could_not_wake_buses")
 
         return wrapped
 
@@ -326,6 +332,7 @@ class Controller:
         """Get vehicles json from TeslaAPI."""
         return (await self.__connection.get("vehicles"))["response"]
 
+    @backoff.on_exception(backoff.expo, TeslaException, max_time=120, logger=__name__)
     @wake_up
     async def post(self, car_id, command, data=None, wake_if_asleep=True):
         #  pylint: disable=unused-argument
@@ -357,6 +364,7 @@ class Controller:
         data = data or {}
         return await self.__connection.post(f"vehicles/{car_id}/{command}", data=data)
 
+    @backoff.on_exception(backoff.expo, TeslaException, max_time=60, logger=__name__)
     @wake_up
     async def get(self, car_id, command, wake_if_asleep=False):
         #  pylint: disable=unused-argument
