@@ -77,7 +77,7 @@ class Controller:
         self.__controller_lock = None
         self.__wakeup_conds = {}
         self.car_online = {}
-        self.raw_online_state = {}
+        self.car_state = {}
         self.__id_vin_map = {}
         self.__vin_id_map = {}
         self.__vin_vehicle_id_map = {}
@@ -106,7 +106,7 @@ class Controller:
             self._last_wake_up_time[vin] = 0
             self.__update[vin] = True
             self.__update_state[vin] = "normal"
-            self.raw_online_state[vin] = car["state"]
+            self.car_state[vin] = car
             self.car_online[vin] = car["state"] == "online"
             self.__last_parked_timestamp[vin] = self._last_attempted_update_time
             self.__climate[vin] = {}
@@ -463,9 +463,10 @@ class Controller:
                     car_id, "wake_up", wake_if_asleep=False
                 )  # avoid wrapper loop
                 self.car_online[car_vin] = result["response"]["state"] == "online"
+                self.car_state[car_vin] = result["response"]
                 self._last_wake_up_time[car_vin] = cur_time
                 _LOGGER.debug(
-                    "Wakeup %s: %s", car_vin[-5:], result["response"]["state"]
+                    "Wakeup %s: %s", car_vin[-5:], self.car_state[car_vin]["state"]
                 )
             return self.car_online[car_vin]
 
@@ -506,7 +507,7 @@ class Controller:
             #     self.__climate[vin].get("is_climate_on"),
             #     self.__charging[vin].get("charging_state") == "Charging",
             # )
-            if self.raw_online_state[vin] == "asleep" or self.__driving[vin].get(
+            if self.car_state[vin].get("state") == "asleep" or self.__driving[vin].get(
                 "shift_state"
             ):
                 _LOGGER.debug(
@@ -562,7 +563,7 @@ class Controller:
                     self.__vin_vehicle_id_map[car["vin"]] = car["vehicle_id"]
                     self.__vehicle_id_vin_map[car["vehicle_id"]] = car["vin"]
                     self.car_online[car["vin"]] = car["state"] == "online"
-                    self.raw_online_state[car["vin"]] = car["state"]
+                    self.car_state[car["vin"]] = car
                 self._last_attempted_update_time = cur_time
         # Only update online vehicles that haven't been updated recently
         # The throttling is per car's last succesful update
@@ -576,7 +577,7 @@ class Controller:
             if car_vin and car_vin != vin:
                 continue
             async with self.__lock[vin]:
-                car_state = self.raw_online_state[vin]
+                car_state = self.car_state[vin].get("state")
                 if (
                     (online or (wake_if_asleep and car_state == "asleep"))
                     and (  # pylint: disable=too-many-boolean-expressions

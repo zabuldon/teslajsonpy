@@ -148,7 +148,7 @@ class OnlineSensor(VehicleDevice):
         """Update the battery state."""
         await super().async_update()
         self.__online_state = self._controller.car_online[self._vin]
-        self.attrs["state"] = self._controller.raw_online_state[self._vin]
+        self.attrs["state"] = self._controller.car_state[self._vin].get("state")
 
     @staticmethod
     def has_battery() -> bool:
