@@ -37,8 +37,10 @@ class TeslaException(Exception):
             self.message = "SERVER_ERROR"
         elif self.code == 503:
             self.message = "SERVICE_MAINTENANCE"
+        elif self.code == 504:
+            self.message = "UPSTREAM_TIMEOUT"
         elif self.code > 299:
-            self.message = f"UNKNOWN_ERROR:{self.code}"
+            self.message = f"UNKNOWN_ERROR_{self.code}"
 
 
 class RetryLimitError(TeslaException):
