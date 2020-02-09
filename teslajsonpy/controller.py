@@ -580,7 +580,7 @@ class Controller:
         car_id = self._update_id(car_id)
         for vin, online in self.car_online.items():
             # If specific car_id provided, only update match
-            if car_vin and car_vin != vin:
+            if (car_vin and car_vin != vin) or self.car_state[vin].get("in_service"):
                 continue
             async with self.__lock[vin]:
                 car_state = self.car_state[vin].get("state")
