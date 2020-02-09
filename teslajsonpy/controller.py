@@ -533,9 +533,7 @@ class Controller:
                         DRIVING_INTERVAL,
                     )
                 return DRIVING_INTERVAL
-            if (
-                cur_time - self.__last_parked_timestamp[vin] > IDLE_INTERVAL
-            ) and not (
+            if (cur_time - self.__last_parked_timestamp[vin] > IDLE_INTERVAL) and not (
                 self.__state[vin].get("sentry_mode")
                 or self.__climate[vin].get("is_climate_on")
                 or self.__charging[vin].get("charging_state") == "Charging"
@@ -546,15 +544,15 @@ class Controller:
                         "%s trying to sleep; scan throttled to %s seconds and will ignore updates for %s seconds",
                         vin[-5:],
                         SLEEP_INTERVAL,
-                        round(SLEEP_INTERVAL + self._last_update_time[vin] - cur_time, 2),
+                        round(
+                            SLEEP_INTERVAL + self._last_update_time[vin] - cur_time, 2
+                        ),
                     )
                 return SLEEP_INTERVAL
             if self.__update_state[vin] != "normal":
                 self.__update_state[vin] = "normal"
                 _LOGGER.debug(
-                    "%s scanning every %s seconds",
-                    vin[-5:],
-                    self.update_interval,
+                    "%s scanning every %s seconds", vin[-5:], self.update_interval,
                 )
             return self.update_interval
 
