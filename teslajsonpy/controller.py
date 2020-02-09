@@ -796,34 +796,37 @@ class Controller:
                 ("heading", int),
             ]
             values = data["value"].split(",")
-            for num, value in enumerate(values):
-                update_json[keys[num][0]] = keys[num][1](value) if value else None
-            _LOGGER.debug("Updating %s with websocket: %s", vin[-5:], update_json)
-            self.__driving[vin]["timestamp"] = update_json["timestamp"]
-            self.__charging[vin]["timestamp"] = update_json["timestamp"]
-            self.__state[vin]["timestamp"] = update_json["timestamp"]
-            self.__driving[vin]["speed"] = update_json["speed"]
-            self.__state[vin]["odometer"] = update_json["odometer"]
-            self.__charging[vin]["battery_level"] = update_json["soc"]
-            # self.__state[vin]["odometer"] = update_json["elevation"]
-            # no current elevation stored
-            self.__driving[vin]["heading"] = update_json["est_heading"]
-            self.__driving[vin]["latitude"] = update_json["est_lat"]
-            self.__driving[vin]["longitude"] = update_json["est_lng"]
-            self.__driving[vin]["power"] = update_json["power"]
-            if (
-                self.__driving[vin].get("shift_state")
-                and self.__driving[vin].get("shift_state") != update_json["shift_state"]
-                and (
-                    update_json["shift_state"] is None
-                    or update_json["shift_state"] == "P"
-                )
-            ):
-                self.__last_parked_timestamp[vin] = update_json["timestamp"] / 1000
-            self.__driving[vin]["shift_state"] = update_json["shift_state"]
-            self.__charging[vin]["battery_range"] = update_json["range"]
-            self.__charging[vin]["est_battery_range"] = update_json["est_range"]
-            # self.__driving[vin]["heading"] = update_json["heading"]
-            # est_heading appears more accurate
+            try:
+                for num, value in enumerate(values):
+                    update_json[keys[num][0]] = keys[num][1](value) if value else None
+                _LOGGER.debug("Updating %s with websocket: %s", vin[-5:], update_json)
+                self.__driving[vin]["timestamp"] = update_json["timestamp"]
+                self.__charging[vin]["timestamp"] = update_json["timestamp"]
+                self.__state[vin]["timestamp"] = update_json["timestamp"]
+                self.__driving[vin]["speed"] = update_json["speed"]
+                self.__state[vin]["odometer"] = update_json["odometer"]
+                self.__charging[vin]["battery_level"] = update_json["soc"]
+                # self.__state[vin]["odometer"] = update_json["elevation"]
+                # no current elevation stored
+                self.__driving[vin]["heading"] = update_json["est_heading"]
+                self.__driving[vin]["latitude"] = update_json["est_lat"]
+                self.__driving[vin]["longitude"] = update_json["est_lng"]
+                self.__driving[vin]["power"] = update_json["power"]
+                if (
+                    self.__driving[vin].get("shift_state")
+                    and self.__driving[vin].get("shift_state") != update_json["shift_state"]
+                    and (
+                        update_json["shift_state"] is None
+                        or update_json["shift_state"] == "P"
+                    )
+                ):
+                    self.__last_parked_timestamp[vin] = update_json["timestamp"] / 1000
+                self.__driving[vin]["shift_state"] = update_json["shift_state"]
+                self.__charging[vin]["battery_range"] = update_json["range"]
+                self.__charging[vin]["est_battery_range"] = update_json["est_range"]
+                # self.__driving[vin]["heading"] = update_json["heading"]
+                # est_heading appears more accurate
+            except ValueError:
+                _LOGGER.debug("Websocket for %s malformed: %s", vin[-5:], values)
         for func in self.__websocket_listeners:
             func(data)
