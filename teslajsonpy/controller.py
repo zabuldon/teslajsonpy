@@ -226,8 +226,8 @@ class Controller:
                                 isinstance(result, dict)
                                 and isinstance(result["response"], dict)
                                 and (
-                                    result["response"].get("result") is not False
-                                    or result["response"].get("result")
+                                    result["response"].get("result") is True
+                                    or result["response"].get("reason")
                                     != "could_not_wake_buses"
                                 )
                             )
