@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "81182701cadd01dcf3eb5056bd5b37a42cdc2cfa46f7489e8df4d3650edca98c"
+            "sha256": "56fd0cfd6dd3899803ad48904a136010a6bdde1495c8b2cbee1e70f4d8ac06bc"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -40,6 +40,13 @@
                 "sha256:f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"
             ],
             "version": "==19.3.0"
+        },
+        "backoff": {
+            "hashes": [
+                "sha256:5e73e2cbe780e1915a204799dba0a01896f45f4385e636bcca7a0614d879d0cd",
+                "sha256:b8fba021fac74055ac05eb7c7bfce4723aedde6cd0a504e5326bcb0bdd6d19a4"
+            ],
+            "version": "==1.10.0"
         },
         "chardet": {
             "hashes": [
@@ -85,6 +92,12 @@
             ],
             "version": "==3.7.4.1"
         },
+        "wrapt": {
+            "hashes": [
+                "sha256:565a021fd19419476b9362b05eeaa094178de64f8361e44468f9e9d7843901e1"
+            ],
+            "version": "==1.11.2"
+        },
         "yarl": {
             "hashes": [
                 "sha256:0c2ab325d33f1b824734b3ef51d4d54a54e0e7a23d13b86974507602334c2cce",
@@ -129,13 +142,6 @@
                 "sha256:f7b7ce16570fe9965acd6d30101a28f62fb4a7f9e926b3bbc9b61f8b04247e72"
             ],
             "version": "==19.3.0"
-        },
-        "backoff": {
-            "hashes": [
-                "sha256:5e73e2cbe780e1915a204799dba0a01896f45f4385e636bcca7a0614d879d0cd",
-                "sha256:b8fba021fac74055ac05eb7c7bfce4723aedde6cd0a504e5326bcb0bdd6d19a4"
-            ],
-            "version": "==1.10.0"
         },
         "black": {
             "hashes": [
@@ -514,10 +520,10 @@
         },
         "python-semantic-release": {
             "hashes": [
-                "sha256:038f8961b617906db72634ef0746515b5de17e09cd3a69a6b0a1c020e6b5edb3",
-                "sha256:e00fae90765a380c2d619fdf0ad9c940a4b8b769bec964845c03edb9ca73af7f"
+                "sha256:71a0dfb59ab159f5a356cf06719be75c4457816ea2d090c9b3ffb2ce15f30618",
+                "sha256:98f8a4b21831c0aeae4331a4805b9c33d4945c6f2842bffac93b25972e40c303"
             ],
-            "version": "==4.4.0"
+            "version": "==4.5.0"
         },
         "readme-renderer": {
             "hashes": [

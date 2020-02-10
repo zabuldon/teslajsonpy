@@ -6,12 +6,12 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import asyncio
-from functools import wraps
 import logging
 import time
-from typing import Optional, Text, Tuple
+from typing import Callable, Optional, Text, Tuple
 
 import backoff
+import wrapt
 
 from teslajsonpy.battery_sensor import Battery, Range
 from teslajsonpy.binary_sensor import (
@@ -56,6 +56,150 @@ def min_expo(base=2, factor=1, max_value=None, min_value=0):
             n += 1
         else:
             yield max_value
+
+
+@wrapt.decorator
+async def wake_up(wrapped, instance, args, kwargs) -> Callable:
+    # pylint: disable=protected-access
+    """Wrap a API func so it will attempt to wake the vehicle if asleep.
+
+    The command wrapped is run once if the car_id was last reported
+    online. If wrapped detects the car_id is offline, five attempts
+    will be made to wake the vehicle to reissue the command.
+
+    Raises
+        RetryLimitError: The wake_up has exceeded the 5 attempts.
+        TeslaException: Tesla connection errors
+
+    Returns
+        Callable: Wrapped function that will wake_up
+
+    """
+
+    def valid_result(result):
+        """Check if TeslaAPI result succesful.
+
+        Parameters
+        ----------
+        result : tesla API result
+            This is the result of a Tesla Rest API call.
+
+        Returns
+        -------
+        bool
+            Tesla API failure can be checked in a dict with a bool in
+            ['response']['result'], a bool, or None or
+            ['response']['reason'] == 'could_not_wake_buses'
+            Returns true when a failure state not detected.
+
+        """
+        try:
+            return (
+                result is not None
+                and result is not False
+                and (
+                    result is True
+                    or (
+                        isinstance(result, dict)
+                        and isinstance(result["response"], dict)
+                        and (
+                            result["response"].get("result") is True
+                            or result["response"].get("reason")
+                            != "could_not_wake_buses"
+                        )
+                    )
+                )
+            )
+        except TypeError as exception:
+            _LOGGER.error("Result: %s, %s", result, exception)
+
+    retries = 0
+    sleep_delay = 2
+    instance = args[0]
+    car_id = args[1]
+    is_wake_command = len(args) >= 3 and args[2] == "wake_up"
+    result = None
+    if instance.car_online.get(instance._id_to_vin(car_id)) or is_wake_command:
+        try:
+            result = await wrapped(*args, **kwargs)
+        except TeslaException as ex:
+            _LOGGER.debug(
+                "Exception: %s\n%s(%s %s)",
+                ex.message,
+                wrapped.__name__,
+                args,
+                kwargs,
+            )
+            raise
+    if valid_result(result) or is_wake_command:
+        return result
+    _LOGGER.debug(
+        "wake_up needed for %s -> %s \n"
+        "Info: args:%s, kwargs:%s, "
+        "VIN:%s, car_online:%s",
+        wrapped.__name__,
+        result,
+        args,
+        kwargs,
+        instance._id_to_vin(car_id)[-5:],
+        instance.car_online,
+    )
+    instance.car_online[instance._id_to_vin(car_id)] = False
+    while (
+        kwargs.get("wake_if_asleep")
+        and
+        # Check online state
+        (
+            car_id is None
+            or (
+                not instance._id_to_vin(car_id)
+                or not instance.car_online.get(instance._id_to_vin(car_id))
+            )
+        )
+    ):
+        _LOGGER.debug("Attempting to wake up")
+        result = await instance._wake_up(car_id)
+        _LOGGER.debug(
+            "%s(%s): Wake Attempt(%s): %s",
+            wrapped.__name__,
+            instance._id_to_vin(car_id)[-5:],
+            retries,
+            result,
+        )
+        if not result:
+            if retries < 5:
+                await asyncio.sleep(15 + sleep_delay ** (retries + 2))
+                retries += 1
+                continue
+            instance.car_online[instance._id_to_vin(car_id)] = False
+            raise RetryLimitError("Reached retry limit; aborting wake up")
+        break
+    instance.car_online[instance._id_to_vin(car_id)] = True
+    # retry function
+    _LOGGER.debug(
+        "Retrying %s(%s %s)",
+        wrapped.__name__,
+        args,
+        kwargs,
+    )
+    try:
+        result = await wrapped(*args, **kwargs)
+        _LOGGER.debug(
+            "Retry after wake up succeeded: %s",
+            "True" if valid_result(result) else result,
+        )
+    except TeslaException as ex:
+        _LOGGER.debug(
+            "Exception: %s\n%s(%s %s)",
+            ex.message,
+            wrapped.__name__,
+            args,
+            kwargs,
+        )
+        raise
+    if valid_result(result):
+        return result
+    raise TeslaException("could_not_wake_buses")
 
 
 class Controller:
@@ -199,160 +343,6 @@ class Controller:
         """
         self.__websocket_listeners.append(callback)
         return len(self.__websocket_listeners) - 1
-
-    def wake_up(func):
-        #  pylint: disable=no-self-argument
-        #  issue is use of wraps on classmethods which should be replaced:
-        #  https://hynek.me/articles/decorators/
-        """Wrap a API func so it will attempt to wake the vehicle if asleep.
-
-        The command func is run once if the car_id was last reported
-        online. Assuming func returns None and wake_if_asleep is True, 5 attempts
-        will be made to wake the vehicle to reissue the command. In addition,
-        if there is a `could_not_wake_buses` error, it will retry the command
-
-        Args:
-        inst (Controller): The instance of a controller
-        car_id (string): The vehicle to attempt to wake.
-        TODO: This currently requires a car_id, but update() does not; This
-              should also be updated to allow that case
-        wake_if_asleep (bool): Keyword arg to force a vehicle awake. Must be
-                               set in the wrapped function func
-
-        Throws:
-        RetryLimitError
-
-        """
-
-        @wraps(func)
-        async def wrapped(*args, **kwargs):
-            # pylint: disable=too-many-branches,protected-access, not-callable
-            def valid_result(result):
-                """Check if TeslaAPI result succesful.
-
-                Parameters
-                ----------
-                result : tesla API result
-                    This is the result of a Tesla Rest API call.
-
-                Returns
-                -------
-                bool
-                  Tesla API failure can be checked in a dict with a bool in
-                  ['response']['result'], a bool, or None or
-                  ['response']['reason'] == 'could_not_wake_buses'
-                  Returns true when a failure state not detected.
-
-                """
-                try:
-                    return (
-                        result is not None
-                        and result is not False
-                        and (
-                            result is True
-                            or (
-                                isinstance(result, dict)
-                                and isinstance(result["response"], dict)
-                                and (
-                                    result["response"].get("result") is True
-                                    or result["response"].get("reason")
-                                    != "could_not_wake_buses"
-                                )
-                            )
-                        )
-                    )
-                except TypeError as exception:
-                    _LOGGER.error("Result: %s, %s", result, exception)
-
-            retries = 0
-            sleep_delay = 2
-            inst = args[0]
-            car_id = args[1]
-            is_wake_command = len(args) >= 3 and args[2] == "wake_up"
-            result = None
-            if inst.car_online.get(inst._id_to_vin(car_id)) or is_wake_command:
-                try:
-                    result = await func(*args, **kwargs)
-                except TeslaException as ex:
-                    _LOGGER.debug(
-                        "Exception: %s\n%s(%s %s)",
-                        ex.message,
-                        func.__name__,  # pylint: disable=no-member,
-                        args,
-                        kwargs,
-                    )
-                    raise
-            if valid_result(result) or is_wake_command:
-                return result
-            _LOGGER.debug(
-                "wake_up needed for %s -> %s \n"
-                "Info: args:%s, kwargs:%s, "
-                "VIN:%s, car_online:%s",
-                func.__name__,  # pylint: disable=no-member
-                result,
-                args,
-                kwargs,
-                inst._id_to_vin(car_id)[-5:],
-                inst.car_online,
-            )
-            inst.car_online[inst._id_to_vin(car_id)] = False
-            while (
-                kwargs.get("wake_if_asleep")
-                and
-                # Check online state
-                (
-                    car_id is None
-                    or (
-                        not inst._id_to_vin(car_id)
-                        or not inst.car_online.get(inst._id_to_vin(car_id))
-                    )
-                )
-            ):
-                _LOGGER.debug("Attempting to wake up")
-                result = await inst._wake_up(car_id)
-                _LOGGER.debug(
-                    "%s(%s): Wake Attempt(%s): %s",
-                    func.__name__,  # pylint: disable=no-member,
-                    inst._id_to_vin(car_id)[-5:],
-                    retries,
-                    result,
-                )
-                if not result:
-                    if retries < 5:
-                        await asyncio.sleep(15 + sleep_delay ** (retries + 2))
-                        retries += 1
-                        continue
-                    inst.car_online[inst._id_to_vin(car_id)] = False
-                    raise RetryLimitError("Reached retry limit; aborting wake up")
-                break
-            inst.car_online[inst._id_to_vin(car_id)] = True
-            # retry function
-            _LOGGER.debug(
-                "Retrying %s(%s %s)",
-                func.__name__,  # pylint: disable=no-member,
-                args,
-                kwargs,
-            )
-            try:
-                result = await func(*args, **kwargs)
-                _LOGGER.debug(
-                    "Retry after wake up succeeded: %s",
-                    "True" if valid_result(result) else result,
-                )
-            except TeslaException as ex:
-                _LOGGER.debug(
-                    "Exception: %s\n%s(%s %s)",
-                    ex.message,
-                    func.__name__,  # pylint: disable=no-member,
-                    args,
-                    kwargs,
-                )
-                raise
-            if valid_result(result):
-                return result
-            raise TeslaException("could_not_wake_buses")
-
-        return wrapped
 
     async def get_vehicles(self):
         """Get vehicles json from TeslaAPI."""
