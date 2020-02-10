@@ -35,6 +35,29 @@ from teslajsonpy.lock import ChargerLock, Lock
 _LOGGER = logging.getLogger(__name__)
 
 
+def min_expo(base=2, factor=1, max_value=None, min_value=0):
+    # pylint: disable=invalid-name
+    """Generate value for exponential decay.
+
+    Args:
+        base: The mathematical base of the exponentiation operation
+        factor: Factor to multiply the exponentation by.
+        max_value: The maximum value to yield. Once the value in the
+             true exponential sequence exceeds this, the value
+             of max_value will forever after be yielded.
+        min_value: The minimum value to yield. This is a constant minimum.
+
+    """
+    n = 0
+    while True:
+        a = min_value + factor * base ** n
+        if max_value is None or a < max_value:
+            yield a
+            n += 1
+        else:
+            yield max_value
+
+
 class Controller:
     #  pylint: disable=too-many-public-methods
     """Controller for connections to Tesla Motors API."""
@@ -335,7 +358,7 @@ class Controller:
         """Get vehicles json from TeslaAPI."""
         return (await self.__connection.get("vehicles"))["response"]
 
-    @backoff.on_exception(backoff.expo, TeslaException, max_time=120, logger=__name__)
+    @backoff.on_exception(min_expo, TeslaException, max_time=120, logger=__name__, min_value=15)
     @wake_up
     async def post(self, car_id, command, data=None, wake_if_asleep=True):
         #  pylint: disable=unused-argument
@@ -367,7 +390,7 @@ class Controller:
         data = data or {}
         return await self.__connection.post(f"vehicles/{car_id}/{command}", data=data)
 
-    @backoff.on_exception(backoff.expo, TeslaException, max_time=60, logger=__name__)
+    @backoff.on_exception(min_expo, TeslaException, max_time=120, logger=__name__, min_value=15)
     @wake_up
     async def get(self, car_id, command, wake_if_asleep=False):
         #  pylint: disable=unused-argument
