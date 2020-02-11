@@ -156,5 +156,5 @@ class OnlineSensor(VehicleDevice):
         return False
 
     def get_value(self) -> bool:
-        """Return the battery level."""
+        """Return the car is online."""
         return self.__online_state

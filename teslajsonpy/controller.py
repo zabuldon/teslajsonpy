@@ -65,7 +65,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
 
     The command wrapped is run once if the car_id was last reported
     online. If wrapped detects the car_id is offline, five attempts
-    will be made to wake the vehicle to reissue the command.
+    will be made to wake the vehicle to retry the command.
 
     Raises
         RetryLimitError: The wake_up has exceeded the 5 attempts.
