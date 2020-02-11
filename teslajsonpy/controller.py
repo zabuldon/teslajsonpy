@@ -257,8 +257,18 @@ class Controller:
         self.__update_state = {}
         self.enable_websocket = enable_websocket
 
-    async def connect(self, test_login=False) -> Tuple[Text, Text]:
-        """Connect controller to Tesla."""
+    async def connect(self, test_login=False, wake_if_asleep=False) -> Tuple[Text, Text]:
+        """Connect controller to Tesla.
+
+        Args
+            test_login (bool, optional): Whether to test credentials only. Defaults to False.
+            wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update state. Defaults to False.
+
+        Returns
+            Tuple[Text, Text]: Returns the refresh_token and access_token
+
+        """
+
         cars = await self.get_vehicles()
         if test_login:
             return (self.__connection.refresh_token, self.__connection.access_token)
@@ -302,7 +312,7 @@ class Controller:
             self.__components.append(Odometer(car, self))
             self.__components.append(OnlineSensor(car, self))
 
-        tasks = [self.update(car["id"], wake_if_asleep=True) for car in cars]
+        tasks = [self.update(car["id"], wake_if_asleep=wake_if_asleep) for car in cars]
         try:
             await asyncio.gather(*tasks)
         except (TeslaException, RetryLimitError):
