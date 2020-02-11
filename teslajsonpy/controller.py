@@ -115,9 +115,8 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
 
     retries = 0
     sleep_delay = 2
-    instance = args[0]
-    car_id = args[1]
-    is_wake_command = len(args) >= 3 and args[2] == "wake_up"
+    car_id = args[0]
+    is_wake_command = len(args) >= 2 and args[1] == "wake_up"
     result = None
     if instance.car_online.get(instance._id_to_vin(car_id)) or is_wake_command:
         try:
@@ -348,7 +347,6 @@ class Controller:
         """Get vehicles json from TeslaAPI."""
         return (await self.__connection.get("vehicles"))["response"]
 
-    @backoff.on_exception(min_expo, TeslaException, max_time=120, logger=__name__, min_value=15)
     @wake_up
     async def post(self, car_id, command, data=None, wake_if_asleep=True):
         #  pylint: disable=unused-argument
@@ -380,7 +378,6 @@ class Controller:
         data = data or {}
         return await self.__connection.post(f"vehicles/{car_id}/{command}", data=data)
 
-    @backoff.on_exception(min_expo, TeslaException, max_time=120, logger=__name__, min_value=15)
     @wake_up
     async def get(self, car_id, command, wake_if_asleep=False):
         #  pylint: disable=unused-argument
@@ -439,6 +436,7 @@ class Controller:
             )
         )["response"]
 
+    @backoff.on_exception(min_expo, TeslaException, max_time=60, logger=__name__, min_value=15)
     async def command(self, car_id, name, data=None, wake_if_asleep=True):
         """Post name command to the car_id.
 
