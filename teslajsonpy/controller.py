@@ -659,6 +659,7 @@ class Controller:
                                 vin[-5:],
                                 self.__vin_vehicle_id_map[vin],
                                 on_message=self._process_websocket_message,
+                                on_disconnect=self._process_websocket_disconnect,
                             )
             return update_succeeded
 
@@ -851,3 +852,8 @@ class Controller:
                 _LOGGER.debug("Websocket for %s malformed: %s", vin[-5:], values)
         for func in self.__websocket_listeners:
             func(data)
+
+    def _process_websocket_disconnect(self, data):
+        vehicle_id = int(data["tag"])
+        vin = self.__vehicle_id_vin_map[vehicle_id]
+        _LOGGER.debug("Disconnected %s from websocket", vin[-5:])

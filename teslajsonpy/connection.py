@@ -201,7 +201,7 @@ class Connection:
                         and msg_json["value"] == "disconnected"
                     ):
                         if kwargs.get("on_disconnect"):
-                            kwargs.get("on_disconnect")()
+                            kwargs.get("on_disconnect")(msg_json)
                     if kwargs.get("on_message"):
                         kwargs.get("on_message")(msg_json)
                 elif msg.type == aiohttp.WSMsgType.ERROR:
@@ -213,6 +213,7 @@ class Connection:
             self.websocket = await self.websession.ws_connect(self.websocket_url)
             loop = asyncio.get_event_loop()
             loop.create_task(_process_messages())
+        _LOGGER.debug("%s:Trying to subscribe to websocket", vin[-5:])
         await self.websocket.send_json(
             data={
                 "msg_type": "data:subscribe_oauth",
