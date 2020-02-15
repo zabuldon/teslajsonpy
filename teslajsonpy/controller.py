@@ -802,20 +802,28 @@ class Controller:
             update_json = {}
             vehicle_id = int(data["tag"])
             vin = self.__vehicle_id_vin_map[vehicle_id]
+            # shift_state,speed,power,est_lat,est_lng,est_heading,est_corrected_lat,est_corrected_lng,
+            # native_latitude,native_longitude,native_heading,native_type,native_location_supported
             keys = [
                 ("timestamp", int),
+                ("shift_state", str),
                 ("speed", int),
-                ("odometer", float),
-                ("soc", int),
-                ("elevation", int),
-                ("est_heading", int),
+                ("power", int),
                 ("est_lat", float),
                 ("est_lng", float),
-                ("power", int),
-                ("shift_state", str),
-                ("range", int),
-                ("est_range", int),
-                ("heading", int),
+                ("est_heading", int),
+                ("est_corrected_lat", float),
+                ("est_corrected_lng", float),
+                ("native_latitude", float),
+                ("native_longitude", float),
+                ("native_heading", float),
+                ("native_type", str),
+                ("native_location_supported", int),
+                # ("soc", int),
+                # ("elevation", int),
+                # ("range", int),
+                # ("est_range", int),
+                # ("heading", int),
             ]
             values = data["value"].split(",")
             try:
@@ -823,20 +831,10 @@ class Controller:
                     update_json[keys[num][0]] = keys[num][1](value) if value else None
                 _LOGGER.debug("Updating %s with websocket: %s", vin[-5:], update_json)
                 self.__driving[vin]["timestamp"] = update_json["timestamp"]
-                self.__charging[vin]["timestamp"] = update_json["timestamp"]
-                self.__state[vin]["timestamp"] = update_json["timestamp"]
-                self.__driving[vin]["speed"] = update_json["speed"]
-                self.__state[vin]["odometer"] = update_json["odometer"]
-                self.__charging[vin]["battery_level"] = update_json["soc"]
-                # self.__state[vin]["odometer"] = update_json["elevation"]
-                # no current elevation stored
-                self.__driving[vin]["heading"] = update_json["est_heading"]
-                self.__driving[vin]["latitude"] = update_json["est_lat"]
-                self.__driving[vin]["longitude"] = update_json["est_lng"]
-                self.__driving[vin]["power"] = update_json["power"]
                 if (
                     self.__driving[vin].get("shift_state")
-                    and self.__driving[vin].get("shift_state") != update_json["shift_state"]
+                    and self.__driving[vin].get("shift_state")
+                    != update_json["shift_state"]
                     and (
                         update_json["shift_state"] is None
                         or update_json["shift_state"] == "P"
@@ -844,12 +842,34 @@ class Controller:
                 ):
                     self.__last_parked_timestamp[vin] = update_json["timestamp"] / 1000
                 self.__driving[vin]["shift_state"] = update_json["shift_state"]
-                self.__charging[vin]["battery_range"] = update_json["range"]
-                self.__charging[vin]["est_battery_range"] = update_json["est_range"]
+                self.__driving[vin]["speed"] = update_json["speed"]
+                self.__driving[vin]["power"] = update_json["power"]
+                self.__driving[vin]["latitude"] = update_json["est_corrected_lat"]
+                self.__driving[vin]["longitude"] = update_json["est_corrected_lng"]
+                self.__driving[vin]["heading"] = update_json["est_heading"]
+                self.__driving[vin]["native_latitude"] = update_json["native_latitude"]
+                self.__driving[vin]["native_longitude"] = update_json[
+                    "native_longitude"
+                ]
+                self.__driving[vin]["native_type"] = update_json["native_type"]
+                self.__driving[vin]["native_location_supported"] = update_json[
+                    "native_location_supported"
+                ]
+                # old values
+                # self.__charging[vin]["timestamp"] = update_json["timestamp"]
+                # self.__state[vin]["timestamp"] = update_json["timestamp"]
+                # self.__state[vin]["odometer"] = update_json["odometer"]
+                # self.__charging[vin]["battery_level"] = update_json["soc"]
+                # self.__state[vin]["odometer"] = update_json["elevation"]
+                # no current elevation stored
+                # self.__charging[vin]["battery_range"] = update_json["range"]
+                # self.__charging[vin]["est_battery_range"] = update_json["est_range"]
                 # self.__driving[vin]["heading"] = update_json["heading"]
                 # est_heading appears more accurate
-            except ValueError:
-                _LOGGER.debug("Websocket for %s malformed: %s", vin[-5:], values)
+            except ValueError as ex:
+                _LOGGER.debug(
+                    "Websocket for %s malformed: %s\n%s", vin[-5:], values, ex
+                )
         for func in self.__websocket_listeners:
             func(data)
 

@@ -10,12 +10,14 @@ import calendar
 import datetime
 import json
 import logging
+import time
 from typing import Dict, Text
 
 import aiohttp
 from yarl import URL
 
 from teslajsonpy.exceptions import IncompleteCredentials, TeslaException
+from teslajsonpy.const import DRIVING_INTERVAL, WEBSOCKET_TIMEOUT
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -179,6 +181,8 @@ class Connection:
 
         async def _process_messages() -> None:
             """Start Async WebSocket Listener."""
+            nonlocal last_message_time
+            nonlocal disconnected
             async for msg in self.websocket:
                 _LOGGER.debug("msg: %s", msg)
                 if msg.type == aiohttp.WSMsgType.BINARY:
@@ -189,6 +193,8 @@ class Connection:
                             self.websocket_url,
                             vin[-5:],
                         )
+                    if msg_json["msg_type"] == "data:update":
+                        last_message_time = time.time()
                     if (
                         msg_json["msg_type"] == "data:error"
                         and msg_json["value"] == "Can't validate token. "
@@ -202,23 +208,111 @@ class Connection:
                     ):
                         if kwargs.get("on_disconnect"):
                             kwargs.get("on_disconnect")(msg_json)
+                        disconnected = True
                     if kwargs.get("on_message"):
                         kwargs.get("on_message")(msg_json)
                 elif msg.type == aiohttp.WSMsgType.ERROR:
                     _LOGGER.debug("WSMsgType error")
                     break
 
+        disconnected = False
+        last_message_time = time.time()
+        timeout = last_message_time + DRIVING_INTERVAL
         if not self.websocket or self.websocket.closed:
             _LOGGER.debug("Connecting to websocket %s", self.websocket_url)
             self.websocket = await self.websession.ws_connect(self.websocket_url)
             loop = asyncio.get_event_loop()
             loop.create_task(_process_messages())
-        _LOGGER.debug("%s:Trying to subscribe to websocket", vin[-5:])
-        await self.websocket.send_json(
-            data={
-                "msg_type": "data:subscribe_oauth",
-                "token": self.access_token,
-                "value": "speed,odometer,soc,elevation,est_heading,est_lat,est_lng,power,shift_state,range,est_range,heading",
-                "tag": f"{vehicle_id}",
-            }
-        )
+        while not (
+            disconnected
+            or time.time() - last_message_time > WEBSOCKET_TIMEOUT
+            or time.time() > timeout
+        ):
+            _LOGGER.debug("%s:Trying to subscribe to websocket", vin[-5:])
+            await self.websocket.send_json(
+                data={
+                    "msg_type": "data:subscribe_oauth",
+                    "token": self.access_token,
+                    "value": "shift_state,speed,power,est_lat,est_lng,est_heading,est_corrected_lat,est_corrected_lng,native_latitude,native_longitude,native_heading,native_type,native_location_supported",
+                    # "value": "speed,odometer,soc,elevation,est_heading,est_lat,est_lng,power,shift_state,range,est_range,heading",
+                    # old values
+                    "tag": f"{vehicle_id}",
+                    "created:timestamp": round(time.time() * 1000),
+                }
+            )
+            await asyncio.sleep(WEBSOCKET_TIMEOUT - 1)
+
+    # async def websocket_connect2(self, vin: int, vehicle_id: int, **kwargs):
+    #     """Connect to Tesla streaming websocket.
+
+    #     Args:
+    #         vin (int): vin of vehicle
+    #         vehicle_id (int): vehicle_id from Tesla api
+    #         on_message (function): function to call on a valid message. It must
+    #                                process a json delivered in data
+    #         on_disconnect (function): function to call on a disconnect message. It must
+    #                                process a json delivered in data
+
+    #     """
+
+    #     async def _process_messages() -> None:
+    #         """Start Async WebSocket Listener."""
+    #         async for msg in self.websocket[vin]["websocket"]:
+    #             _LOGGER.debug("%s:msg: %s", vin[-5:], msg)
+    #             if msg.type == aiohttp.WSMsgType.BINARY:
+    #                 msg_json = json.loads(msg.data)
+    #                 if msg_json["msg_type"] == "control:hello":
+    #                     _LOGGER.debug(
+    #                         "%s:Succesfully connected to websocket %s on %s",
+    #                         vin[-5:],
+    #                         self.websocket_url,
+    #                         task,
+    #                     )
+    #                 if (
+    #                     msg_json["msg_type"] == "data:error"
+    #                     and msg_json["value"] == "Can't validate token. "
+    #                 ):
+    #                     raise TeslaException(
+    #                         "Can't validate token for websocket connection."
+    #                     )
+    #                 if (
+    #                     msg_json["msg_type"] == "data:error"
+    #                     and msg_json["value"] == "disconnected"
+    #                 ):
+    #                     if self.websocket[vin].kwargs.get("on_disconnect"):
+    #                         self.websocket[vin].kwargs.get("on_disconnect")()
+    #                     self.websocket[vin].pop(None)
+    #                     _LOGGER.debug(
+    #                         "%s:Disconnecting from websocket on %s", vin[-5:], task
+    #                     )
+    #                 await self.websocket[vin]["websocket"].close()
+    #                 if kwargs.get("on_message"):
+    #                     kwargs.get("on_message")(msg_json)
+    #             elif msg.type == aiohttp.WSMsgType.ERROR:
+    #                 _LOGGER.debug("WSMsgType error")
+    #                 break
+
+    #     self.websocket.setdefault(vin, {"websocket": None, "kwargs": kwargs})
+    #     if (
+    #         not self.websocket[vin]["websocket"]
+    #         or self.websocket[vin]["websocket"].closed
+    #     ):
+    #         _LOGGER.debug("%s:Connecting to websocket %s", vin[-5:], self.websocket_url)
+    #         self.websocket[vin]["websocket"] = await self.websession.ws_connect(
+    #             self.websocket_url
+    #         )
+    #         loop = asyncio.get_event_loop()
+    #         task = loop.create_task(_process_messages())
+    #     _LOGGER.debug(
+    #         "%s:Trying to subscribe to websocket: %s", vin[-5:], self.access_token
+    #     )
+
+    #     await self.websocket[vin]["websocket"].send_json(
+    #         data={
+    #             "msg_type": "data:subscribe_oauth",
+    #             # "token": "self.access_token",
+    #             "token": self.access_token,
+    #             "value": "speed,odometer,soc,elevation,est_heading,est_lat,est_lng,power,shift_state,range,est_range,heading",
+    #             "tag": f"{vehicle_id}",
+    #         }
+    #     )

@@ -9,3 +9,4 @@ IDLE_INTERVAL = 600  # interval after parking to check at regular update_interva
 ONLINE_INTERVAL = 60  # interval for checking online state; does not hit individual cars
 SLEEP_INTERVAL = 660  # interval required to let vehicle sleep; based on testing
 DRIVING_INTERVAL = 60  # interval when driving detected
+WEBSOCKET_TIMEOUT = 11  # time for websocket to timeout
