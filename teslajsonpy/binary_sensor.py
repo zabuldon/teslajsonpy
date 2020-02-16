@@ -44,9 +44,9 @@ class ParkingSensor(VehicleDevice):
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x1
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the parking brake sensor."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_drive_params(self._id)
         if data:
             self.attrs["shift_state"] = (
@@ -100,9 +100,9 @@ class ChargerConnectionSensor(VehicleDevice):
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x2
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the charger connection sensor."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_charging_params(self._id)
         if data:
             self.attrs["charging_state"] = data["charging_state"]
@@ -144,9 +144,9 @@ class OnlineSensor(VehicleDevice):
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
 
-    async def async_update(self) -> None:
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the battery state."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         self.__online_state = self._controller.car_online[self._vin]
         self.attrs["state"] = self._controller.car_state[self._vin].get("state")
 

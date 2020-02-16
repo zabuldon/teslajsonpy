@@ -70,9 +70,9 @@ class Climate(VehicleDevice):
         """Return fan status."""
         return self.__fan_status
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the HVAC state."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_climate_params(self._id)
         if data:
             last_update = self._controller.get_last_update_time(self._id)
@@ -180,9 +180,9 @@ class TempSensor(VehicleDevice):
         """Get outside temperature."""
         return self.__outside_temp
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the temperature."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_climate_params(self._id)
         if data:
             self.__inside_temp = (

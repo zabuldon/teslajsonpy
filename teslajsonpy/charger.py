@@ -39,9 +39,9 @@ class ChargerSwitch(VehicleDevice):
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x8
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the charging state of the Tesla Vehicle."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_charging_params(self._id)
@@ -94,9 +94,9 @@ class RangeSwitch(VehicleDevice):
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x9
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the status of the range setting."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_charging_params(self._id)
@@ -161,9 +161,9 @@ class ChargingSensor(VehicleDevice):
         self.__charger_actual_current = None
         self.__charger_voltage = None
 
-    async def async_update(self) -> None:
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the battery state."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_gui_params(self._id)
         if data:
             self.measurement = data["gui_distance_units"]
