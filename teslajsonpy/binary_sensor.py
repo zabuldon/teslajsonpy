@@ -33,7 +33,7 @@ class ParkingSensor(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__state = False
+        self.__state = None
 
         self.type = "parking brake sensor"
         self.hass_type = "binary_sensor"
@@ -90,7 +90,7 @@ class ChargerConnectionSensor(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__state = False
+        self.__state = None
 
         self.type = "charger sensor"
         self.hass_type = "binary_sensor"

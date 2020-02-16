@@ -30,10 +30,10 @@ class GPS(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__longitude = 0
-        self.__latitude = 0
-        self.__heading = 0
-        self.__speed = 0
+        self.__longitude = None
+        self.__latitude = None
+        self.__heading = None
+        self.__speed = None
         self.__location = {}
 
         self.last_seen = 0
@@ -48,6 +48,13 @@ class GPS(VehicleDevice):
 
     def get_location(self):
         """Return the current location."""
+        if self.__longitude and self.__latitude and self.__heading:
+            self.__location = {
+                "longitude": self.__longitude,
+                "latitude": self.__latitude,
+                "heading": self.__heading,
+                "speed": self.__speed,
+            }
         return self.__location
 
     async def async_update(self):
@@ -59,13 +66,6 @@ class GPS(VehicleDevice):
             self.__latitude = data["latitude"]
             self.__heading = data["heading"]
             self.__speed = data["speed"] if data["speed"] else 0
-        if self.__longitude and self.__latitude and self.__heading:
-            self.__location = {
-                "longitude": self.__longitude,
-                "latitude": self.__latitude,
-                "heading": self.__heading,
-                "speed": self.__speed,
-            }
 
     @staticmethod
     def has_battery():
@@ -93,7 +93,7 @@ class Odometer(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__odometer = 0
+        self.__odometer = None
         self.type = "mileage sensor"
         self.measurement = "LENGTH_MILES"
         self.hass_type = "sensor"
@@ -124,7 +124,7 @@ class Odometer(VehicleDevice):
 
     def get_value(self):
         """Return the odometer reading."""
-        return round(self.__odometer, 1)
+        return round(self.__odometer, 1) if self.__odometer else None
 
     @property
     def device_class(self) -> Text:

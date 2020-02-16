@@ -32,7 +32,7 @@ class ChargerSwitch(VehicleDevice):
         """
         super().__init__(data, controller)
         self.__manual_update_time = 0
-        self.__charger_state = False
+        self.__charger_state = None
         self.type = "charger switch"
         self.hass_type = "switch"
         self.name = self._name()
@@ -87,7 +87,7 @@ class RangeSwitch(VehicleDevice):
         """Initialize the charger range switch."""
         super().__init__(data, controller)
         self.__manual_update_time = 0
-        self.__maxrange_state = False
+        self.__maxrange_state = None
         self.type = "maxrange switch"
         self.hass_type = "switch"
         self.name = self._name()
@@ -154,12 +154,12 @@ class ChargingSensor(VehicleDevice):
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
         self.bin_type: hex = 0xC
-        self.__added_range = 0
-        self.__charging_rate = 0
-        self.__time_to_full = 0
-        self.__charge_current_request = 0
-        self.__charger_actual_current = 0
-        self.__charger_voltage = 0
+        self.__added_range = None
+        self.__charging_rate = None
+        self.__time_to_full = None
+        self.__charge_current_request = None
+        self.__charger_actual_current = None
+        self.__charger_voltage = None
 
     async def async_update(self) -> None:
         """Update the battery state."""

@@ -23,7 +23,7 @@ class Battery(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__battery_level: int = 0
+        self.__battery_level: int = None
         self.__charging_state: bool = None
         self.__charge_port_door_open: bool = None
         self.type: Text = "battery sensor"
@@ -85,9 +85,9 @@ class Range(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__battery_range = 0
-        self.__est_battery_range = 0
-        self.__ideal_battery_range = 0
+        self.__battery_range = None
+        self.__est_battery_range = None
+        self.__ideal_battery_range = None
         self.type = "range sensor"
         self.__rated = True
         self.measurement = "LENGTH_MILES"
