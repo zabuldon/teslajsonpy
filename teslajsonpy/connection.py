@@ -189,9 +189,9 @@ class Connection:
                     msg_json = json.loads(msg.data)
                     if msg_json["msg_type"] == "control:hello":
                         _LOGGER.debug(
-                            "Succesfully connected to websocket %s for %s",
-                            self.websocket_url,
+                            "%s:Succesfully connected to websocket %s",
                             vin[-5:],
+                            self.websocket_url,
                         )
                     if msg_json["msg_type"] == "data:update":
                         last_message_time = time.time()
@@ -219,7 +219,7 @@ class Connection:
         last_message_time = time.time()
         timeout = last_message_time + DRIVING_INTERVAL
         if not self.websocket or self.websocket.closed:
-            _LOGGER.debug("Connecting to websocket %s", self.websocket_url)
+            _LOGGER.debug("%s:Connecting to websocket %s", vin[-5:], self.websocket_url)
             self.websocket = await self.websession.ws_connect(self.websocket_url)
             loop = asyncio.get_event_loop()
             loop.create_task(_process_messages())
@@ -241,6 +241,9 @@ class Connection:
                 }
             )
             await asyncio.sleep(WEBSOCKET_TIMEOUT - 1)
+        _LOGGER.debug(
+            "%s:Exiting websocket_connect", vin[-5:],
+        )
 
     # async def websocket_connect2(self, vin: int, vehicle_id: int, **kwargs):
     #     """Connect to Tesla streaming websocket.
