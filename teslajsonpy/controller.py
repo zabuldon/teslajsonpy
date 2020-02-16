@@ -123,11 +123,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
             result = await wrapped(*args, **kwargs)
         except TeslaException as ex:
             _LOGGER.debug(
-                "Exception: %s\n%s(%s %s)",
-                ex.message,
-                wrapped.__name__,
-                args,
-                kwargs,
+                "Exception: %s\n%s(%s %s)", ex.message, wrapped.__name__, args, kwargs
             )
             raise
     if valid_result(result) or is_wake_command:
@@ -175,12 +171,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         break
     instance.car_online[instance._id_to_vin(car_id)] = True
     # retry function
-    _LOGGER.debug(
-        "Retrying %s(%s %s)",
-        wrapped.__name__,
-        args,
-        kwargs,
-    )
+    _LOGGER.debug("Retrying %s(%s %s)", wrapped.__name__, args, kwargs)
     try:
         result = await wrapped(*args, **kwargs)
         _LOGGER.debug(
@@ -189,11 +180,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         )
     except TeslaException as ex:
         _LOGGER.debug(
-            "Exception: %s\n%s(%s %s)",
-            ex.message,
-            wrapped.__name__,
-            args,
-            kwargs,
+            "Exception: %s\n%s(%s %s)", ex.message, wrapped.__name__, args, kwargs
         )
         raise
     if valid_result(result):
@@ -257,7 +244,9 @@ class Controller:
         self.__update_state = {}
         self.enable_websocket = enable_websocket
 
-    async def connect(self, test_login=False, wake_if_asleep=False) -> Tuple[Text, Text]:
+    async def connect(
+        self, test_login=False, wake_if_asleep=False
+    ) -> Tuple[Text, Text]:
         """Connect controller to Tesla.
 
         Args
@@ -270,8 +259,6 @@ class Controller:
         """
 
         cars = await self.get_vehicles()
-        if test_login:
-            return (self.__connection.refresh_token, self.__connection.access_token)
         self._last_attempted_update_time = time.time()
         self.__controller_lock = asyncio.Lock()
 
@@ -312,11 +299,14 @@ class Controller:
             self.__components.append(Odometer(car, self))
             self.__components.append(OnlineSensor(car, self))
 
-        tasks = [self.update(car["id"], wake_if_asleep=wake_if_asleep) for car in cars]
-        try:
-            await asyncio.gather(*tasks)
-        except (TeslaException, RetryLimitError):
-            pass
+        if not test_login:
+            tasks = [
+                self.update(car["id"], wake_if_asleep=wake_if_asleep) for car in cars
+            ]
+            try:
+                await asyncio.gather(*tasks)
+            except (TeslaException, RetryLimitError):
+                pass
         return (self.__connection.refresh_token, self.__connection.access_token)
 
     def is_token_refreshed(self) -> bool:
@@ -446,7 +436,9 @@ class Controller:
             )
         )["response"]
 
-    @backoff.on_exception(min_expo, TeslaException, max_time=60, logger=__name__, min_value=15)
+    @backoff.on_exception(
+        min_expo, TeslaException, max_time=60, logger=__name__, min_value=15
+    )
     async def command(self, car_id, name, data=None, wake_if_asleep=True):
         """Post name command to the car_id.
 
@@ -576,7 +568,7 @@ class Controller:
             if self.__update_state[vin] != "normal":
                 self.__update_state[vin] = "normal"
                 _LOGGER.debug(
-                    "%s scanning every %s seconds", vin[-5:], self.update_interval,
+                    "%s scanning every %s seconds", vin[-5:], self.update_interval
                 )
             return self.update_interval
 
@@ -655,11 +647,13 @@ class Controller:
                             and self.get_drive_params(car_id).get("shift_state")
                             and self.get_drive_params(car_id).get("shift_state") != "P"
                         ):
-                            await self.__connection.websocket_connect(
-                                vin[-5:],
-                                self.__vin_vehicle_id_map[vin],
-                                on_message=self._process_websocket_message,
-                                on_disconnect=self._process_websocket_disconnect,
+                            asyncio.create_task(
+                                self.__connection.websocket_connect(
+                                    vin[-5:],
+                                    self.__vin_vehicle_id_map[vin],
+                                    on_message=self._process_websocket_message,
+                                    on_disconnect=self._process_websocket_disconnect,
+                                )
                             )
             return update_succeeded
 
