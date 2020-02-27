@@ -845,6 +845,7 @@ class Controller:
                 self.__driving[vin]["native_longitude"] = update_json[
                     "native_longitude"
                 ]
+                self.__driving[vin]["native_heading"] = update_json["native_heading"]
                 self.__driving[vin]["native_type"] = update_json["native_type"]
                 self.__driving[vin]["native_location_supported"] = update_json[
                     "native_location_supported"

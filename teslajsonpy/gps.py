@@ -62,9 +62,18 @@ class GPS(VehicleDevice):
         await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_drive_params(self._id)
         if data:
-            self.__longitude = data["longitude"]
-            self.__latitude = data["latitude"]
-            self.__heading = data["heading"]
+            if data["native_location_supported"]:
+                self.__longitude = data["native_longitude"]
+                self.__latitude = data["native_latitude"]
+                self.__heading = (
+                    data["native_heading"]
+                    if data.get("native_heading")
+                    else data["heading"]
+                )
+            else:
+                self.__longitude = data["longitude"]
+                self.__latitude = data["latitude"]
+                self.__heading = data["heading"]
             self.__speed = data["speed"] if data["speed"] else 0
 
     @staticmethod
