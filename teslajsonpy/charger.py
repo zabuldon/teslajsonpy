@@ -202,22 +202,22 @@ class ChargingSensor(VehicleDevice):
 
     @property
     def added_range(self) -> float:
-        """Return the charging rate."""
+        """Return the added range."""
         return self.__added_range
 
     @property
     def charge_current_request(self) -> float:
-        """Return the charging rate."""
+        """Return the requested current."""
         return self.__charge_current_request
 
     @property
     def charger_actual_current(self) -> float:
-        """Return the charging rate."""
+        """Return the actual current."""
         return self.__charger_actual_current
 
     @property
     def charger_voltage(self) -> float:
-        """Return the charging rate."""
+        """Return the voltage."""
         return self.__charger_voltage
 
     @property
