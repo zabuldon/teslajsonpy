@@ -155,6 +155,7 @@ class ChargingSensor(VehicleDevice):
         self.uniq_name: Text = self._uniq_name()
         self.bin_type: hex = 0xC
         self.__added_range = None
+        self.__charge_energy_added = None
         self.__charging_rate = None
         self.__time_to_full = None
         self.__charge_current_request = None
@@ -176,6 +177,7 @@ class ChargingSensor(VehicleDevice):
                 if self.__rated
                 else data["charge_miles_added_ideal"]
             )
+            self.__charge_energy_added = data["charge_energy_added"]
             self.__charging_rate = data["charge_rate"]
             self.__time_to_full = data["time_to_full_charge"]
             self.__charge_current_request = data["charge_current_request"]
@@ -219,6 +221,11 @@ class ChargingSensor(VehicleDevice):
     def charger_voltage(self) -> float:
         """Return the voltage."""
         return self.__charger_voltage
+
+    @property
+    def charge_energy_added(self) -> float:
+        """Return the energy added."""
+        return self.__charge_energy_added
 
     @property
     def device_class(self) -> Text:
