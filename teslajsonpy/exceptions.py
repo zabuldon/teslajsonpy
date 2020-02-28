@@ -27,6 +27,8 @@ class TeslaException(Exception):
             self.message = "NOT_FOUND"
         elif self.code == 405:
             self.message = "MOBILE_ACCESS_DISABLED"
+        elif self.code == 408:
+            self.message = "VEHICLE_UNAVAILABLE"
         elif self.code == 423:
             self.message = "ACCOUNT_LOCKED"
         elif self.code == 429:
@@ -35,8 +37,10 @@ class TeslaException(Exception):
             self.message = "SERVER_ERROR"
         elif self.code == 503:
             self.message = "SERVICE_MAINTENANCE"
+        elif self.code == 504:
+            self.message = "UPSTREAM_TIMEOUT"
         elif self.code > 299:
-            self.message = "UNKNOWN_ERROR"
+            self.message = f"UNKNOWN_ERROR_{self.code}"
 
 
 class RetryLimitError(TeslaException):

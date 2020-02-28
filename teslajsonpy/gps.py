@@ -30,10 +30,10 @@ class GPS(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__longitude = 0
-        self.__latitude = 0
-        self.__heading = 0
-        self.__speed = 0
+        self.__longitude = None
+        self.__latitude = None
+        self.__heading = None
+        self.__speed = None
         self.__location = {}
 
         self.last_seen = 0
@@ -48,17 +48,6 @@ class GPS(VehicleDevice):
 
     def get_location(self):
         """Return the current location."""
-        return self.__location
-
-    async def async_update(self):
-        """Update the current GPS location."""
-        await super().async_update()
-        data = self._controller.get_drive_params(self._id)
-        if data:
-            self.__longitude = data["longitude"]
-            self.__latitude = data["latitude"]
-            self.__heading = data["heading"]
-            self.__speed = data["speed"] if data["speed"] else 0
         if self.__longitude and self.__latitude and self.__heading:
             self.__location = {
                 "longitude": self.__longitude,
@@ -66,6 +55,26 @@ class GPS(VehicleDevice):
                 "heading": self.__heading,
                 "speed": self.__speed,
             }
+        return self.__location
+
+    async def async_update(self, wake_if_asleep=False) -> None:
+        """Update the current GPS location."""
+        await super().async_update(wake_if_asleep=wake_if_asleep)
+        data = self._controller.get_drive_params(self._id)
+        if data:
+            if data["native_location_supported"]:
+                self.__longitude = data["native_longitude"]
+                self.__latitude = data["native_latitude"]
+                self.__heading = (
+                    data["native_heading"]
+                    if data.get("native_heading")
+                    else data["heading"]
+                )
+            else:
+                self.__longitude = data["longitude"]
+                self.__latitude = data["latitude"]
+                self.__heading = data["heading"]
+            self.__speed = data["speed"] if data["speed"] else 0
 
     @staticmethod
     def has_battery():
@@ -93,7 +102,7 @@ class Odometer(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__odometer = 0
+        self.__odometer = None
         self.type = "mileage sensor"
         self.measurement = "LENGTH_MILES"
         self.hass_type = "sensor"
@@ -103,9 +112,9 @@ class Odometer(VehicleDevice):
         self.bin_type = 0xB
         self.__rated = True
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the odometer and the unit of measurement based on GUI."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_state_params(self._id)
         if data:
             self.__odometer = data["odometer"]
@@ -124,7 +133,7 @@ class Odometer(VehicleDevice):
 
     def get_value(self):
         """Return the odometer reading."""
-        return round(self.__odometer, 1)
+        return round(self.__odometer, 1) if self.__odometer else None
 
     @property
     def device_class(self) -> Text:

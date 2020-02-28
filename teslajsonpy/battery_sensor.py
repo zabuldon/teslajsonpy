@@ -23,7 +23,7 @@ class Battery(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__battery_level: int = 0
+        self.__battery_level: int = None
         self.__charging_state: bool = None
         self.__charge_port_door_open: bool = None
         self.type: Text = "battery sensor"
@@ -34,9 +34,9 @@ class Battery(VehicleDevice):
         self.uniq_name: Text = self._uniq_name()
         self.bin_type: hex = 0x5
 
-    async def async_update(self) -> None:
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the battery state."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_charging_params(self._id)
         if data:
             self.__battery_level = data["battery_level"]
@@ -85,9 +85,9 @@ class Range(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__battery_range = 0
-        self.__est_battery_range = 0
-        self.__ideal_battery_range = 0
+        self.__battery_range = None
+        self.__est_battery_range = None
+        self.__ideal_battery_range = None
         self.type = "range sensor"
         self.__rated = True
         self.measurement = "LENGTH_MILES"
@@ -97,9 +97,9 @@ class Range(VehicleDevice):
         self.uniq_name = self._uniq_name()
         self.bin_type = 0xA
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the battery range state."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_charging_params(self._id)
         if data:
             self.__battery_range = data["battery_range"]

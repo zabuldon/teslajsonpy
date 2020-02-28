@@ -6,6 +6,7 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import logging
+from typing import Dict, Text
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -42,6 +43,7 @@ class VehicleDevice:
         self._controller = controller
         self.should_poll = True
         self.type = "device"
+        self.attrs: Dict[Text, Text] = {}
 
     def _name(self):
         return (
@@ -59,6 +61,10 @@ class VehicleDevice:
         # pylint: disable=invalid-name
         """Return the id of this Vehicle."""
         return self._id
+
+    def vehicle_id(self):
+        """Return the vehicle_id of this Vehicle."""
+        return self._vehicle_id
 
     def car_name(self):
         """Return the car name of this Vehicle."""
@@ -87,9 +93,9 @@ class VehicleDevice:
             > self._controller.update_interval
         )
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False):
         """Update the car version."""
-        await self._controller.update(self.id(), wake_if_asleep=False)
+        await self._controller.update(self.id(), wake_if_asleep=wake_if_asleep)
         state = self._controller.get_state_params(self.id())
         if state and "car_version" in state:
             self._car_version = state["car_version"]

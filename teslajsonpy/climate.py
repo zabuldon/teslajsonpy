@@ -36,13 +36,13 @@ class Climate(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__is_auto_conditioning_on = False
-        self.__inside_temp = 0
-        self.__outside_temp = 0
-        self.__driver_temp_setting = 0
-        self.__passenger_temp_setting = 0
-        self.__is_climate_on = False
-        self.__fan_status = 0
+        self.__is_auto_conditioning_on = None
+        self.__inside_temp = None
+        self.__outside_temp = None
+        self.__driver_temp_setting = None
+        self.__passenger_temp_setting = None
+        self.__is_climate_on = None
+        self.__fan_status = None
         self.__manual_update_time = 0
 
         self.type = "HVAC (climate) system"
@@ -70,9 +70,9 @@ class Climate(VehicleDevice):
         """Return fan status."""
         return self.__fan_status
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the HVAC state."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_climate_params(self._id)
         if data:
             last_update = self._controller.get_last_update_time(self._id)
@@ -161,8 +161,8 @@ class TempSensor(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__inside_temp = 0
-        self.__outside_temp = 0
+        self.__inside_temp = None
+        self.__outside_temp = None
 
         self.type = "temperature sensor"
         self.measurement = "C"
@@ -180,9 +180,9 @@ class TempSensor(VehicleDevice):
         """Get outside temperature."""
         return self.__outside_temp
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the temperature."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_climate_params(self._id)
         if data:
             self.__inside_temp = (

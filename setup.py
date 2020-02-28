@@ -29,7 +29,7 @@ LICENSE = "Apache-2.0"
 VERSION = None
 
 # What packages are required for this module to be executed?
-REQUIRED = ["aiohttp"]
+REQUIRED = ["aiohttp", "backoff", "wrapt"]
 
 # What packages are optional?
 EXTRAS = {

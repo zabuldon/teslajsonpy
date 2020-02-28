@@ -32,16 +32,16 @@ class ChargerSwitch(VehicleDevice):
         """
         super().__init__(data, controller)
         self.__manual_update_time = 0
-        self.__charger_state = False
+        self.__charger_state = None
         self.type = "charger switch"
         self.hass_type = "switch"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x8
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the charging state of the Tesla Vehicle."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_charging_params(self._id)
@@ -87,16 +87,16 @@ class RangeSwitch(VehicleDevice):
         """Initialize the charger range switch."""
         super().__init__(data, controller)
         self.__manual_update_time = 0
-        self.__maxrange_state = False
+        self.__maxrange_state = None
         self.type = "maxrange switch"
         self.hass_type = "switch"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x9
 
-    async def async_update(self):
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the status of the range setting."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_charging_params(self._id)
@@ -154,27 +154,30 @@ class ChargingSensor(VehicleDevice):
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
         self.bin_type: hex = 0xC
-        self.__added_range = 0
-        self.__charging_rate = 0
-        self.__time_to_full = 0
-        self.__charge_current_request = 0
-        self.__charger_actual_current = 0
-        self.__charger_voltage = 0
+        self.__added_range = None
+        self.__charge_energy_added = None
+        self.__charging_rate = None
+        self.__time_to_full = None
+        self.__charge_current_request = None
+        self.__charger_actual_current = None
+        self.__charger_voltage = None
 
-    async def async_update(self) -> None:
+    async def async_update(self, wake_if_asleep=False) -> None:
         """Update the battery state."""
-        await super().async_update()
+        await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_gui_params(self._id)
         if data:
             self.measurement = data["gui_distance_units"]
             self.__rated = data["gui_range_display"] == "Rated"
         data = self._controller.get_charging_params(self._id)
         if data:
+            self.attrs["charger_phases"] = data["charger_phases"]
             self.__added_range = (
                 data["charge_miles_added_rated"]
                 if self.__rated
                 else data["charge_miles_added_ideal"]
             )
+            self.__charge_energy_added = data["charge_energy_added"]
             self.__charging_rate = data["charge_rate"]
             self.__time_to_full = data["time_to_full_charge"]
             self.__charge_current_request = data["charge_current_request"]
@@ -201,23 +204,28 @@ class ChargingSensor(VehicleDevice):
 
     @property
     def added_range(self) -> float:
-        """Return the charging rate."""
+        """Return the added range."""
         return self.__added_range
 
     @property
     def charge_current_request(self) -> float:
-        """Return the charging rate."""
+        """Return the requested current."""
         return self.__charge_current_request
 
     @property
     def charger_actual_current(self) -> float:
-        """Return the charging rate."""
+        """Return the actual current."""
         return self.__charger_actual_current
 
     @property
     def charger_voltage(self) -> float:
-        """Return the charging rate."""
+        """Return the voltage."""
         return self.__charger_voltage
+
+    @property
+    def charge_energy_added(self) -> float:
+        """Return the energy added."""
+        return self.__charge_energy_added
 
     @property
     def device_class(self) -> Text:
