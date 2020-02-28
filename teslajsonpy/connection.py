@@ -32,6 +32,7 @@ class Connection:
         password: Text = None,
         access_token: Text = None,
         refresh_token: Text = None,
+        expiration: int = 0,
     ) -> None:
         """Initialize connection object."""
         self.user_agent: Text = "Model S 2.1.79 (SM-G900V; Android REL 4.4.4; en_US"
@@ -45,15 +46,15 @@ class Connection:
         self.websocket_url: Text = "wss://streaming.vn.teslamotors.com/streaming"
         self.api: Text = "/api/1/"
         self.oauth: Dict[Text, Text] = {}
-        self.expiration: int = 0
-        self.access_token = None
+        self.expiration: int = expiration
+        self.access_token = access_token
         self.head = None
         self.refresh_token = refresh_token
         self.websession = websession
         self.token_refreshed = False
         self.generate_oauth(email, password, refresh_token)
-        if access_token:
-            self.__sethead(access_token)
+        if self.access_token:
+            self.__sethead(access_token=self.access_token, expiration=self.expiration)
             _LOGGER.debug("Connecting with existing access token")
         self.websocket = None
 
@@ -104,7 +105,9 @@ class Connection:
                 "Requesting new oauth token using %s", self.oauth["grant_type"]
             )
             auth = await self.__open("/oauth/token", "post", data=self.oauth)
-            self.__sethead(auth["access_token"], auth["expires_in"])
+            self.__sethead(
+                access_token=auth["access_token"], expires_in=auth["expires_in"]
+            )
             self.refresh_token = auth["refresh_token"]
             self.generate_oauth()
             self.token_refreshed = True
@@ -112,11 +115,16 @@ class Connection:
             f"{self.api}{command}", method=method, headers=self.head, data=data
         )
 
-    def __sethead(self, access_token: Text, expires_in: int = 1800):
+    def __sethead(
+        self, access_token: Text, expires_in: int = 1800, expiration: int = 0
+    ):
         """Set HTTP header."""
         self.access_token = access_token
-        now = calendar.timegm(datetime.datetime.now().timetuple())
-        self.expiration = now + expires_in
+        if expiration > 0:
+            self.expiration = expiration
+        else:
+            now = calendar.timegm(datetime.datetime.now().timetuple())
+            self.expiration = now + expires_in
         self.head = {
             "Authorization": f"Bearer {access_token}",
             "User-Agent": self.user_agent,

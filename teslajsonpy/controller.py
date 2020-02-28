@@ -199,6 +199,7 @@ class Controller:
         password: Text = None,
         access_token: Text = None,
         refresh_token: Text = None,
+        expiration: int = 0,
         update_interval: int = 300,
         enable_websocket: bool = False,
     ) -> None:
@@ -210,13 +211,14 @@ class Controller:
             password (Text, optional): Password. Defaults to None.
             access_token (Text, optional): Access token. Defaults to None.
             refresh_token (Text, optional): Refresh token. Defaults to None.
+            expiration (int, optional): Timestamp when access_token expires. Defaults to 0
             update_interval (int, optional): Seconds between allowed updates to the API.  This is to prevent
             being blocked by Tesla. Defaults to 300.
             enable_websocket (bool, optional): Whether to connect with websockets. Defaults to False.
 
         """
         self.__connection = Connection(
-            websession, email, password, access_token, refresh_token
+            websession, email, password, access_token, refresh_token, expiration
         )
         self.__components = []
         self._update_interval: int = update_interval
@@ -303,6 +305,7 @@ class Controller:
             tasks = [
                 self.update(car["id"], wake_if_asleep=wake_if_asleep) for car in cars
             ]
+            _LOGGER.debug("tasks %s %s", tasks, wake_if_asleep)
             try:
                 await asyncio.gather(*tasks)
             except (TeslaException, RetryLimitError):
@@ -329,6 +332,15 @@ class Controller:
         """
         self.__connection.token_refreshed = False
         return (self.__connection.refresh_token, self.__connection.access_token)
+
+    def get_expiration(self) -> int:
+        """Return expiration for oauth.
+
+        Returns
+            int: Returns timestamp when oauth expires
+
+        """
+        return self.__connection.expiration
 
     def register_websocket_callback(self, callback) -> int:
         """Register callback for websocket messages.
@@ -601,7 +613,7 @@ class Controller:
             async with self.__lock[vin]:
                 car_state = self.car_state[vin].get("state")
                 if (
-                    (online or (wake_if_asleep and car_state == "asleep"))
+                    (online or (wake_if_asleep and car_state in ["asleep", "offline"]))
                     and (  # pylint: disable=too-many-boolean-expressions
                         self.__update.get(vin)
                     )
