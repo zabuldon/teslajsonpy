@@ -54,23 +54,21 @@ class Lock(VehicleDevice):
 
     async def lock(self):
         """Lock the doors."""
-        if not self.__lock_state:
-            data = await self._controller.command(
-                self._id, "door_lock", wake_if_asleep=True
-            )
-            if data and data["response"]["result"]:
-                self.__lock_state = True
-            self.__manual_update_time = time.time()
+        data = await self._controller.command(
+            self._id, "door_lock", wake_if_asleep=True
+        )
+        if data and data["response"]["result"]:
+            self.__lock_state = True
+        self.__manual_update_time = time.time()
 
     async def unlock(self):
         """Unlock the doors and extend handles where applicable."""
-        if self.__lock_state:
-            data = await self._controller.command(
-                self._id, "door_unlock", wake_if_asleep=True
-            )
-            if data and data["response"]["result"]:
-                self.__lock_state = False
-            self.__manual_update_time = time.time()
+        data = await self._controller.command(
+            self._id, "door_unlock", wake_if_asleep=True
+        )
+        if data and data["response"]["result"]:
+            self.__lock_state = False
+        self.__manual_update_time = time.time()
 
     def is_locked(self):
         """Return whether doors are locked."""
@@ -133,23 +131,21 @@ class ChargerLock(VehicleDevice):
 
     async def lock(self):
         """Close the charger door."""
-        if not self.__lock_state:
-            data = await self._controller.command(
-                self._id, "charge_port_door_close", wake_if_asleep=True
-            )
-            if data and data["response"]["result"]:
-                self.__lock_state = True
-            self.__manual_update_time = time.time()
+        data = await self._controller.command(
+            self._id, "charge_port_door_close", wake_if_asleep=True
+        )
+        if data and data["response"]["result"]:
+            self.__lock_state = True
+        self.__manual_update_time = time.time()
 
     async def unlock(self):
         """Open the charger door."""
-        if self.__lock_state:
-            data = await self._controller.command(
-                self._id, "charge_port_door_open", wake_if_asleep=True
-            )
-            if data and data["response"]["result"]:
-                self.__lock_state = False
-            self.__manual_update_time = time.time()
+        data = await self._controller.command(
+            self._id, "charge_port_door_open", wake_if_asleep=True
+        )
+        if data and data["response"]["result"]:
+            self.__lock_state = False
+        self.__manual_update_time = time.time()
 
     def is_locked(self):
         """Return whether the charger is closed."""
