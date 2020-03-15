@@ -17,7 +17,7 @@ Also thanks to [Tim Dorr](https://tesla-api.timdorr.com/) for documenting the AP
 2.  [Fork the repository](https://github.com/zabuldon/teslajsonpy/fork/new).
 3.  Install the dev environment: `make init`.
 4.  Enter the virtual environment: `pipenv shell`
-5.  Code your new feature or bug fix.
+5.  Code your new feature or bug fix. [Developers Reference](DEVELOPERS.md)
 6.  Write a test that covers your new functionality.
 7.  Update `README.md` with any new documentation.
 8.  Run tests and ensure 100% code coverage for your contribution: `make coverage`
