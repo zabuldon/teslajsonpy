@@ -56,20 +56,18 @@ class SentryModeSwitch(VehicleDevice):
 
     async def enable_sentry_mode(self):
         """Enable the sentry mode."""
-        if not self.__sentry_mode:
-            data = await self._controller.command(
-                self._id, "set_sentry_mode", {"on": True}, wake_if_asleep=True
-            )
-            if data and data["response"]["result"]:
-                self.__sentry_mode = True
-            self.__manual_update_time = time.time()
+        data = await self._controller.command(
+            self._id, "set_sentry_mode", {"on": True}, wake_if_asleep=True
+        )
+        if data and data["response"]["result"]:
+            self.__sentry_mode = True
+        self.__manual_update_time = time.time()
 
     async def disable_sentry_mode(self):
         """Disable the sentry mode."""
-        if self.__sentry_mode:
-            data = await self._controller.command(
-                self._id, "set_sentry_mode", {"on": False}, wake_if_asleep=True
-            )
-            if data and data["response"]["result"]:
-                self.__sentry_mode = False
-            self.__manual_update_time = time.time()
+        data = await self._controller.command(
+            self._id, "set_sentry_mode", {"on": False}, wake_if_asleep=True
+        )
+        if data and data["response"]["result"]:
+            self.__sentry_mode = False
+        self.__manual_update_time = time.time()
