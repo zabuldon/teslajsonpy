@@ -40,6 +40,7 @@ class VehicleDevice:
         self._state = data["state"]
         self._car_type = f"Model {str(self._vin[3]).upper()}"
         self._car_version = ""
+        self._sentry_mode_available = False
         self._controller = controller
         self.should_poll = True
         self.type = "device"
@@ -84,6 +85,11 @@ class VehicleDevice:
         """Return the type of this Vehicle."""
         return self._car_type
 
+    @property
+    def sentry_mode_available(self):
+        """Return True if sentry mode is available on this Vehicle."""
+        return self._sentry_mode_available
+
     def assumed_state(self):
         # pylint: disable=protected-access
         """Return whether the data is from an online vehicle."""
@@ -94,11 +100,13 @@ class VehicleDevice:
         )
 
     async def async_update(self, wake_if_asleep=False):
-        """Update the car version."""
+        """Update the vehicle data."""
         await self._controller.update(self.id(), wake_if_asleep=wake_if_asleep)
         state = self._controller.get_state_params(self.id())
         if state and "car_version" in state:
             self._car_version = state["car_version"]
+        if state and "sentry_mode_available" in state:
+            self._sentry_mode_available = state["sentry_mode_available"]
 
     @staticmethod
     def is_armable():
