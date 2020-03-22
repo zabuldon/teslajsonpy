@@ -44,21 +44,21 @@ class SentryModeSwitch(VehicleDevice):
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_state_params(self._id)
-            self.__sentry_mode_available = data and data["sentry_mode_available"]
-            if self.__sentry_mode_available:
-                self.__sentry_mode = data["sentry_mode"]
+            if data and "sentry_mode_available" in data:
+                self.__sentry_mode_available = data["sentry_mode_available"]
+                if self.__sentry_mode_available and "sentry_mode" in data:
+                    self.__sentry_mode = data["sentry_mode"]
+            else:
+                self.__sentry_mode_available = False
+                self.__sentry_mode = False
 
-    def is_available(self):
+    def available(self):
         """Return whether the sentry mode is available."""
         return self.__sentry_mode_available
 
-    def is_enabled(self):
+    def is_on(self):
         """Return whether the sentry mode is enabled, always False if sentry mode is not available."""
         return self.__sentry_mode_available and self.__sentry_mode
-
-    def get_value(self):
-        """Return whether the sentry mode is enabled."""
-        return self.is_enabled()
 
     @staticmethod
     def has_battery():
