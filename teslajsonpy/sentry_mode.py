@@ -31,6 +31,7 @@ class SentryModeSwitch(VehicleDevice):
         """
         super().__init__(data, controller)
         self.__manual_update_time = 0
+        self.__sentry_mode_available = False
         self.__sentry_mode = False
         self.type = "sentry mode switch"
         self.hass_type = "switch"
@@ -43,11 +44,21 @@ class SentryModeSwitch(VehicleDevice):
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_state_params(self._id)
-            self.__sentry_mode = data and data["sentry_mode"]
+            if data and "sentry_mode_available" in data:
+                self.__sentry_mode_available = data["sentry_mode_available"]
+                if self.__sentry_mode_available and "sentry_mode" in data:
+                    self.__sentry_mode = data["sentry_mode"]
+            else:
+                self.__sentry_mode_available = False
+                self.__sentry_mode = False
 
-    def get_value(self):
-        """Return whether the sentry mode is enabled."""
-        return self.__sentry_mode
+    def available(self):
+        """Return whether the sentry mode is available."""
+        return self.__sentry_mode_available
+
+    def is_on(self):
+        """Return whether the sentry mode is enabled, always False if sentry mode is not available."""
+        return self.__sentry_mode_available and self.__sentry_mode
 
     @staticmethod
     def has_battery():
@@ -56,7 +67,7 @@ class SentryModeSwitch(VehicleDevice):
 
     async def enable_sentry_mode(self):
         """Enable the sentry mode."""
-        if not self.__sentry_mode:
+        if self.__sentry_mode_available and not self.__sentry_mode:
             data = await self._controller.command(
                 self._id, "set_sentry_mode", {"on": True}, wake_if_asleep=True
             )
@@ -66,7 +77,7 @@ class SentryModeSwitch(VehicleDevice):
 
     async def disable_sentry_mode(self):
         """Disable the sentry mode."""
-        if self.__sentry_mode:
+        if self.__sentry_mode_available and self.__sentry_mode:
             data = await self._controller.command(
                 self._id, "set_sentry_mode", {"on": False}, wake_if_asleep=True
             )
