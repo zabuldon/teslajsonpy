@@ -20,6 +20,14 @@ class TeslaMock:
         """
         self._monkeypatch = monkeypatch
         self._monkeypatch.setattr(Controller, "connect", self.mock_connect)
+        self._monkeypatch.setattr(Controller, "command", self.mock_command)
+        self._monkeypatch.setattr(
+            Controller, "get_state_params", self.mock_get_state_params
+        )
+        self._monkeypatch.setattr(
+            Controller, "get_last_update_time", self.mock_get_last_update_time
+        )
+        self._monkeypatch.setattr(Controller, "update", self.mock_update)
         self._monkeypatch.setattr(
             Connection, "generate_oauth", self.mock_generate_oauth
         )
@@ -29,10 +37,30 @@ class TeslaMock:
         """ Mock controller's connect method."""
         return self.controller_connect()
 
+    def mock_command(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's command method."""
+        return self.controller_command()
+
+    def mock_get_state_params(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's get_state_params method."""
+        return self.controller_get_state_params()
+
+    def mock_get_last_update_time(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's get_last_update_time method."""
+        return 123
+
+    def mock_update(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's update method."""
+        return self.controller_update()
+
     def mock_generate_oauth(self, *args, **kwargs):
         # pylint: disable=unused-argument
         """ Mock connection's generate_oauth method."""
-        return self.connexion_generate_oauth()
+        return self.connection_generate_oauth()
 
     @staticmethod
     def controller_connect():
@@ -40,8 +68,23 @@ class TeslaMock:
         return ("abc123", "cba321")
 
     @staticmethod
-    def connexion_generate_oauth():
-        """ Monkeypatch for connexion.generate_oauth()."""
+    async def controller_command():
+        """ Monkeypatch for controller.command()."""
+        return RESULT_OK
+
+    @staticmethod
+    def controller_get_state_params():
+        """ Monkeypatch for controller.get_state_params()."""
+        return VEHICLE_STATE
+
+    @staticmethod
+    async def controller_update():
+        """ Monkeypatch for controller.update()."""
+        return 123
+
+    @staticmethod
+    def connection_generate_oauth():
+        """ Monkeypatch for connection.generate_oauth()."""
         return
 
     @staticmethod
@@ -67,8 +110,10 @@ class TeslaMock:
     @staticmethod
     def command_ok():
         """ Simulates an OK result for a command. """
-        return {"reason": "", "result": True}
+        return RESULT_OK
 
+
+RESULT_OK = {"response": {"reason": "", "result": True}}
 
 DRIVE_STATE = {
     "gps_as_of": 1538363883,
