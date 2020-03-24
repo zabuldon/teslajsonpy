@@ -22,6 +22,9 @@ class TeslaMock:
         self._monkeypatch.setattr(Controller, "connect", self.mock_connect)
         self._monkeypatch.setattr(Controller, "command", self.mock_command)
         self._monkeypatch.setattr(
+            Controller, "get_drive_params", self.mock_get_drive_params
+        )
+        self._monkeypatch.setattr(
             Controller, "get_state_params", self.mock_get_state_params
         )
         self._monkeypatch.setattr(
@@ -41,6 +44,11 @@ class TeslaMock:
         # pylint: disable=unused-argument
         """ Mock controller's command method."""
         return self.controller_command()
+
+    def mock_get_drive_params(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's get_drive_params method."""
+        return self.controller_get_drive_params()
 
     def mock_get_state_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -71,6 +79,11 @@ class TeslaMock:
     async def controller_command():
         """ Monkeypatch for controller.command()."""
         return RESULT_OK
+
+    @staticmethod
+    def controller_get_drive_params():
+        """ Monkeypatch for controller.get_drive_params()."""
+        return DRIVE_STATE
 
     @staticmethod
     def controller_get_state_params():
@@ -114,6 +127,13 @@ class TeslaMock:
 
 
 RESULT_OK = {"response": {"reason": "", "result": True}}
+
+# 408 - Request Timeout
+RESULT_VEHICLE_UNAVAILABLE = {
+    "response": None,
+    "error": 'vehicle unavailable: {:error=>"vehicle unavailable:"}',
+    "error_description": "",
+}
 
 DRIVE_STATE = {
     "gps_as_of": 1538363883,
