@@ -33,6 +33,7 @@ class TeslaMock:
         self._monkeypatch.setattr(
             Controller, "get_state_params", self.mock_get_state_params
         )
+        self._monkeypatch.setattr(Controller, "get_vehicles", self.mock_get_vehicles)
         self._monkeypatch.setattr(
             Controller, "get_last_update_time", self.mock_get_last_update_time
         )
@@ -70,6 +71,11 @@ class TeslaMock:
         # pylint: disable=unused-argument
         """ Mock controller's get_state_params method."""
         return self.controller_get_state_params()
+
+    def mock_get_vehicles(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's get_vehicles method."""
+        return self.controller_get_vehicles()
 
     def mock_get_last_update_time(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -117,6 +123,11 @@ class TeslaMock:
         return VEHICLE_STATE
 
     @staticmethod
+    def controller_get_vehicles():
+        """ Monkeypatch for controller.get_vehicles()."""
+        return {SAMPLE_VEHICLE}
+
+    @staticmethod
     async def controller_update():
         """ Monkeypatch for controller.update()."""
         return 123
@@ -159,6 +170,23 @@ RESULT_VEHICLE_UNAVAILABLE = {
     "response": None,
     "error": 'vehicle unavailable: {:error=>"vehicle unavailable:"}',
     "error_description": "",
+}
+
+SAMPLE_VEHICLE = {
+    "id": 12345678901234567,
+    "vehicle_id": 1234567890,
+    "vin": "5YJSA11111111111",
+    "display_name": "Nikola 2.0",
+    "option_codes": "MDLS,RENA,AF02,APF1,APH2,APPB,AU01,BC0R,BP00,BR00,BS00,CDM0,CH05,PBCW,CW00,DCF0,DRLH,DSH7,DV4W,FG02,FR04,HP00,IDBA,IX01,LP01,ME02,MI01,PF01,PI01,PK00,PS01,PX00,PX4D,QTVB,RFP2,SC01,SP00,SR01,SU01,TM00,TP03,TR00,UTAB,WTAS,X001,X003,X007,X011,X013,X021,X024,X027,X028,X031,X037,X040,X044,YFFC,COUS",
+    "color": None,
+    "tokens": ["abcdef1234567890", "1234567890abcdef"],
+    "state": "online",
+    "in_service": False,
+    "id_s": "12345678901234567",
+    "calendar_enabled": True,
+    "api_version": 7,
+    "backseat_token": None,
+    "backseat_token_updated_at": None,
 }
 
 DRIVE_STATE = {
