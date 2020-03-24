@@ -15,9 +15,9 @@ def test_has_battery(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _battery = Battery(_data, _controller)
+    _sensor = Battery(_data, _controller)
 
-    assert _battery.has_battery()
+    assert _sensor.has_battery()
 
 
 def test_device_class(monkeypatch):
@@ -27,9 +27,9 @@ def test_device_class(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _battery = Battery(_data, _controller)
+    _sensor = Battery(_data, _controller)
 
-    assert _battery.device_class == "battery"
+    assert _sensor.device_class == "battery"
 
 
 def test_get_value_on_init(monkeypatch):
@@ -39,10 +39,10 @@ def test_get_value_on_init(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _battery = Battery(_data, _controller)
+    _sensor = Battery(_data, _controller)
 
-    assert not _battery is None
-    assert _battery.get_value() is None
+    assert not _sensor is None
+    assert _sensor.get_value() is None
 
 
 @pytest.mark.asyncio
@@ -53,13 +53,13 @@ async def test_get_value_after_update(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _battery = Battery(_data, _controller)
+    _sensor = Battery(_data, _controller)
 
-    await _battery.async_update()
+    await _sensor.async_update()
 
-    assert not _battery is None
-    assert not _battery.get_value() is None
-    assert _battery.get_value() == 64
+    assert not _sensor is None
+    assert not _sensor.get_value() is None
+    assert _sensor.get_value() == 64
 
 
 @pytest.mark.asyncio
@@ -70,13 +70,13 @@ async def test_battery_level(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _battery = Battery(_data, _controller)
+    _sensor = Battery(_data, _controller)
 
-    await _battery.async_update()
+    await _sensor.async_update()
 
-    assert not _battery is None
-    assert not _battery.get_value() is None
-    assert _battery.battery_level() == 64
+    assert not _sensor is None
+    assert not _sensor.get_value() is None
+    assert _sensor.battery_level() == 64
 
 
 @pytest.mark.asyncio
@@ -88,12 +88,12 @@ async def test_battery_charging_off(monkeypatch):
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charging_state"] = "Disconnected"
-    _battery = Battery(_data, _controller)
+    _sensor = Battery(_data, _controller)
 
-    await _battery.async_update()
+    await _sensor.async_update()
 
-    assert not _battery is None
-    assert not _battery.battery_charging()
+    assert not _sensor is None
+    assert not _sensor.battery_charging()
 
 
 @pytest.mark.asyncio
@@ -105,12 +105,12 @@ async def test_battery_charging_on(monkeypatch):
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charging_state"] = "Charging"
-    _battery = Battery(_data, _controller)
+    _sensor = Battery(_data, _controller)
 
-    await _battery.async_update()
+    await _sensor.async_update()
 
-    assert not _battery is None
-    assert _battery.battery_charging()
+    assert not _sensor is None
+    assert _sensor.battery_charging()
 
 
 @pytest.mark.asyncio
@@ -122,10 +122,10 @@ async def test_async_update(monkeypatch):
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["battery_level"] = 12.3
-    _battery = Battery(_data, _controller)
+    _sensor = Battery(_data, _controller)
 
-    await _battery.async_update()
+    await _sensor.async_update()
 
-    assert not _battery is None
-    assert not _battery.get_value() is None
-    assert _battery.get_value() == 12.3
+    assert not _sensor is None
+    assert not _sensor.get_value() is None
+    assert _sensor.get_value() == 12.3
