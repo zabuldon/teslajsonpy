@@ -28,6 +28,9 @@ class TeslaMock:
             Controller, "get_state_params", self.mock_get_state_params
         )
         self._monkeypatch.setattr(
+            Controller, "get_gui_params", self.mock_get_gui_params
+        )
+        self._monkeypatch.setattr(
             Controller, "get_last_update_time", self.mock_get_last_update_time
         )
         self._monkeypatch.setattr(Controller, "update", self.mock_update)
@@ -49,6 +52,11 @@ class TeslaMock:
         # pylint: disable=unused-argument
         """ Mock controller's get_drive_params method."""
         return self.controller_get_drive_params()
+
+    def mock_get_gui_params(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's get_gui_params method."""
+        return self.controller_get_gui_params()
 
     def mock_get_state_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -84,6 +92,11 @@ class TeslaMock:
     def controller_get_drive_params():
         """ Monkeypatch for controller.get_drive_params()."""
         return DRIVE_STATE
+
+    @staticmethod
+    def controller_get_gui_params():
+        """ Monkeypatch for controller.get_gui_params()."""
+        return GUI_SETTINGS
 
     @staticmethod
     def controller_get_state_params():
