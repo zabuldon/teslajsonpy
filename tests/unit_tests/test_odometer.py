@@ -15,9 +15,21 @@ def test_has_battery(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _odo = Odometer(_data, _controller)
+    _odometer = Odometer(_data, _controller)
 
-    assert not _odo.has_battery()
+    assert not _odometer.has_battery()
+
+
+def test_device_class(monkeypatch):
+    """Test device_class()."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_vehicle()
+    _odometer = Odometer(_data, _controller)
+
+    assert _odometer.device_class is None
 
 
 def test_get_value_on_init(monkeypatch):
@@ -27,10 +39,10 @@ def test_get_value_on_init(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _odo = Odometer(_data, _controller)
+    _odometer = Odometer(_data, _controller)
 
-    assert not _odo is None
-    assert _odo.get_value() is None
+    assert not _odometer is None
+    assert _odometer.get_value() is None
 
 
 @pytest.mark.asyncio
@@ -41,12 +53,12 @@ async def test_get_value_after_update(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _odo = Odometer(_data, _controller)
+    _odometer = Odometer(_data, _controller)
 
-    await _odo.async_update()
+    await _odometer.async_update()
 
-    assert not _odo is None
-    assert _odo.get_value() == 33561.4
+    assert not _odometer is None
+    assert _odometer.get_value() == 33561.4
 
 
 @pytest.mark.asyncio
@@ -58,10 +70,10 @@ async def test_async_update(monkeypatch):
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["odometer"] = 12345.6789
-    _odo = Odometer(_data, _controller)
+    _odometer = Odometer(_data, _controller)
 
-    await _odo.async_update()
+    await _odometer.async_update()
 
-    assert not _odo is None
-    assert not _odo.get_value() is None
-    assert _odo.get_value() == 12345.7
+    assert not _odometer is None
+    assert not _odometer.get_value() is None
+    assert _odometer.get_value() == 12345.7

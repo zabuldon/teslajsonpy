@@ -22,13 +22,16 @@ class TeslaMock:
         self._monkeypatch.setattr(Controller, "connect", self.mock_connect)
         self._monkeypatch.setattr(Controller, "command", self.mock_command)
         self._monkeypatch.setattr(
+            Controller, "get_charging_params", self.mock_get_charging_params
+        )
+        self._monkeypatch.setattr(
             Controller, "get_drive_params", self.mock_get_drive_params
         )
         self._monkeypatch.setattr(
-            Controller, "get_state_params", self.mock_get_state_params
+            Controller, "get_gui_params", self.mock_get_gui_params
         )
         self._monkeypatch.setattr(
-            Controller, "get_gui_params", self.mock_get_gui_params
+            Controller, "get_state_params", self.mock_get_state_params
         )
         self._monkeypatch.setattr(
             Controller, "get_last_update_time", self.mock_get_last_update_time
@@ -47,6 +50,11 @@ class TeslaMock:
         # pylint: disable=unused-argument
         """ Mock controller's command method."""
         return self.controller_command()
+
+    def mock_get_charging_params(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's get_charging_params method."""
+        return self.controller_get_charging_params()
 
     def mock_get_drive_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -87,6 +95,11 @@ class TeslaMock:
     async def controller_command():
         """ Monkeypatch for controller.command()."""
         return RESULT_OK
+
+    @staticmethod
+    def controller_get_charging_params():
+        """ Monkeypatch for controller.get_charging_params()."""
+        return CHARGE_STATE
 
     @staticmethod
     def controller_get_drive_params():
