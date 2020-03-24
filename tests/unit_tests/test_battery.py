@@ -1,4 +1,4 @@
-"""Test GPS."""
+"""Test battery sensor."""
 
 import pytest
 
