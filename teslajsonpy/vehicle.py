@@ -40,7 +40,11 @@ class VehicleDevice:
         self._state = data["state"]
         self._car_type = f"Model {str(self._vin[3]).upper()}"
         self._car_version = ""
-        self._sentry_mode_available = False
+        self._sentry_mode_available = (
+            "vehicle_state" in data
+            and "sentry_mode_available" in data["vehicle_state"]
+            and data["vehicle_state"]["sentry_mode_available"]
+        )
         self._controller = controller
         self.should_poll = True
         self.type = "device"
