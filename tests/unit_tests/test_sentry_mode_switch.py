@@ -236,3 +236,22 @@ async def test_async_update_with_change_but_not_available(monkeypatch):
 
     await _switch.async_update()
     assert not _switch.is_on()
+
+
+@pytest.mark.asyncio
+async def test_async_update_with_change_same_value(monkeypatch):
+    """Test async_update() with a state change, using same value."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_vehicle()
+    _data["vehicle_state"]["sentry_mode_available"] = True
+    _data["vehicle_state"]["sentry_mode"] = True
+    _switch = SentryModeSwitch(_data, _controller)
+
+    # Change state value
+    _data["vehicle_state"]["sentry_mode"] = True
+
+    await _switch.async_update()
+    assert _switch.is_on()
