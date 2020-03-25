@@ -25,6 +25,9 @@ class TeslaMock:
             Controller, "get_charging_params", self.mock_get_charging_params
         )
         self._monkeypatch.setattr(
+            Controller, "get_climate_params", self.mock_get_climate_params
+        )
+        self._monkeypatch.setattr(
             Controller, "get_drive_params", self.mock_get_drive_params
         )
         self._monkeypatch.setattr(
@@ -56,6 +59,11 @@ class TeslaMock:
         # pylint: disable=unused-argument
         """ Mock controller's get_charging_params method."""
         return self.controller_get_charging_params()
+
+    def mock_get_climate_params(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's get_climate_params method."""
+        return self.controller_get_climate_params()
 
     def mock_get_drive_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -106,6 +114,11 @@ class TeslaMock:
     def controller_get_charging_params():
         """ Monkeypatch for controller.get_charging_params()."""
         return CHARGE_STATE
+
+    @staticmethod
+    def controller_get_climate_params():
+        """ Monkeypatch for controller.get_climate_params()."""
+        return CLIMATE_STATE
 
     @staticmethod
     def controller_get_drive_params():
