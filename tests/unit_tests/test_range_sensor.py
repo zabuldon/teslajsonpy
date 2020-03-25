@@ -71,7 +71,7 @@ async def test_get_value_rated_on(monkeypatch):
 
     _data = _mock.data_request_vehicle()
     _range = Range(_data, _controller)
-    _data["charge_state"]["gui_range_display"] = "Rated"
+    _data["gui_settings"]["gui_range_display"] = "Rated"
     _data["charge_state"]["battery_range"] = 123.45
     _data["charge_state"]["est_battery_range"] = 234.56
     _data["charge_state"]["ideal_battery_range"] = 345.67
@@ -100,6 +100,48 @@ async def test_get_value_rated_off(monkeypatch):
     assert not _range is None
     assert not _range.get_value() is None
     assert _range.get_value() == 345.67
+
+
+@pytest.mark.asyncio
+async def test_get_value_in_kmh(monkeypatch):
+    """Test get_value() for units in km/h'."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_vehicle()
+    _range = Range(_data, _controller)
+    _data["gui_settings"]["gui_distance_units"] = "km/hr"
+    _data["gui_settings"]["gui_range_display"] = "Rated"
+    _data["charge_state"]["battery_range"] = 123.45
+    _data["charge_state"]["est_battery_range"] = 234.56
+    _data["charge_state"]["ideal_battery_range"] = 345.67
+    await _range.async_update()
+
+    assert not _range is None
+    assert not _range.get_value() is None
+    assert _range.get_value() == 123.45
+
+
+@pytest.mark.asyncio
+async def test_get_value_in_mph(monkeypatch):
+    """Test get_value() for units in mph'."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_vehicle()
+    _range = Range(_data, _controller)
+    _data["gui_settings"]["gui_distance_units"] = "mi/hr"
+    _data["gui_settings"]["gui_range_display"] = "Rated"
+    _data["charge_state"]["battery_range"] = 123.45
+    _data["charge_state"]["est_battery_range"] = 234.56
+    _data["charge_state"]["ideal_battery_range"] = 345.67
+    await _range.async_update()
+
+    assert not _range is None
+    assert not _range.get_value() is None
+    assert _range.get_value() == 123.45
 
 
 @pytest.mark.asyncio

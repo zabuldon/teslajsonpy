@@ -77,3 +77,41 @@ async def test_async_update(monkeypatch):
     assert not _odometer is None
     assert not _odometer.get_value() is None
     assert _odometer.get_value() == 12345.7
+
+
+@pytest.mark.asyncio
+async def test_async_update_in_kmh(monkeypatch):
+    """Test async_update() for units in km/h."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_vehicle()
+    _data["gui_settings"]["gui_distance_units"] = "km/hr"
+    _data["vehicle_state"]["odometer"] = 12345.6789
+    _odometer = Odometer(_data, _controller)
+
+    await _odometer.async_update()
+
+    assert not _odometer is None
+    assert not _odometer.get_value() is None
+    assert _odometer.get_value() == 12345.7
+
+
+@pytest.mark.asyncio
+async def test_async_update_in_mph(monkeypatch):
+    """Test async_update() for units in mph."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_vehicle()
+    _data["gui_settings"]["gui_distance_units"] = "mi/hr"
+    _data["vehicle_state"]["odometer"] = 12345.6789
+    _odometer = Odometer(_data, _controller)
+
+    await _odometer.async_update()
+
+    assert not _odometer is None
+    assert not _odometer.get_value() is None
+    assert _odometer.get_value() == 12345.7
