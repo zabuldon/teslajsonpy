@@ -3,7 +3,7 @@
 black:
 	pipenv run black teslajsonpy
 coverage:
-	pipenv run pytest -s --verbose --cov-report term-missing --cov-report xml --cov=teslajsonpy tests
+	pipenv run pytest -s --verbose --cov-report term-missing --cov-report xml --cov=teslajsonpy tests -Wi -Wd:::teslajsonpy
 clean:
 	rm -rf dist/ build/ .egg teslajsonpy.egg-info/
 init:
@@ -22,6 +22,6 @@ publish:
 	pipenv run twine upload dist/*
 	rm -rf dist/ build/ .egg teslajsonpy.egg-info/
 test:
-	pipenv run pytest
+	pipenv run pytest -s --verbose tests -Wi -Wd:::teslajsonpy
 typing:
 	pipenv run mypy --ignore-missing-imports teslajsonpy
