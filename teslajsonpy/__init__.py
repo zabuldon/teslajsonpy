@@ -18,7 +18,7 @@ from teslajsonpy.exceptions import TeslaException
 from teslajsonpy.gps import GPS, Odometer
 from teslajsonpy.lock import Lock
 from teslajsonpy.sentry_mode import SentryModeSwitch
-from teslajsonpy.trunk import TrunkSensor, FrunkSensor, TrunkSwitch
+from teslajsonpy.trunk import TrunkSensor, FrunkSensor, TrunkSwitch, FrunkSwitch
 
 from .__version__ import __version__
 
@@ -42,5 +42,6 @@ __all__ = [
     "TrunkSensor",
     "FrunkSensor",
     "TrunkSwitch",
+    "FrunkSwitch",
     "__version__",
 ]
