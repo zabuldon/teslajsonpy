@@ -1,4 +1,4 @@
-"""Test frunk sensor."""
+"""Test trunk switch."""
 
 import pytest
 
@@ -54,8 +54,8 @@ async def test_status_after_update(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_open_trunk_when_closed(monkeypatch):
-    """Test open_trunk() when trunk is closed."""
+async def test_open_when_closed(monkeypatch):
+    """Test open() when trunk is closed."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
@@ -65,7 +65,7 @@ async def test_open_trunk_when_closed(monkeypatch):
     _switch = TrunkSwitch(_data, _controller)
     await _switch.async_update()
 
-    await _switch.open_trunk()
+    await _switch.open()
 
     assert not _switch is None
     assert _switch.is_open
@@ -73,8 +73,8 @@ async def test_open_trunk_when_closed(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_open_trunk_when_open(monkeypatch):
-    """Test open_trunk() when trunk is open."""
+async def test_open_when_open(monkeypatch):
+    """Test open() when trunk is open."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
@@ -84,7 +84,7 @@ async def test_open_trunk_when_open(monkeypatch):
     _switch = TrunkSwitch(_data, _controller)
     await _switch.async_update()
 
-    await _switch.open_trunk()
+    await _switch.open()
 
     assert not _switch is None
     assert _switch.is_open
@@ -92,8 +92,8 @@ async def test_open_trunk_when_open(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_close_trunk_when_open(monkeypatch):
-    """Test close_trunk() when trunk is open."""
+async def test_close_when_open(monkeypatch):
+    """Test close() when trunk is open."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
@@ -103,7 +103,7 @@ async def test_close_trunk_when_open(monkeypatch):
     _switch = TrunkSwitch(_data, _controller)
     await _switch.async_update()
 
-    await _switch.close_trunk()
+    await _switch.close()
 
     assert not _switch is None
     assert not _switch.is_open
@@ -111,8 +111,8 @@ async def test_close_trunk_when_open(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_close_trunk_when_closed(monkeypatch):
-    """Test close_trunk() when trunk is closed."""
+async def test_close_when_closed(monkeypatch):
+    """Test close() when trunk is closed."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
@@ -122,7 +122,7 @@ async def test_close_trunk_when_closed(monkeypatch):
     _switch = TrunkSwitch(_data, _controller)
     await _switch.async_update()
 
-    await _switch.close_trunk()
+    await _switch.close()
 
     assert not _switch is None
     assert not _switch.is_open

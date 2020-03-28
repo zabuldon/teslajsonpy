@@ -85,7 +85,7 @@ class TrunkSwitch(TrunkSensor):
         self.hass_type: Text = "switch"
         self.__manual_update_time = 0
 
-    async def open_trunk(self):
+    async def open(self):
         """Open the rear trunk."""
         if self.is_closed:
             data = await self._controller.command(
@@ -95,7 +95,7 @@ class TrunkSwitch(TrunkSensor):
                 self.state_value = 255
             self.__manual_update_time = time.time()
 
-    async def close_trunk(self):
+    async def close(self):
         """Close the rear trunk."""
         if self.is_open:
             data = await self._controller.command(
@@ -125,11 +125,11 @@ class TrunkLock(TrunkSwitch):
 
     async def lock(self):
         """Close the rear trunk lock."""
-        await self.close_trunk()
+        await self.close()
 
     async def unlock(self):
         """Open the rear trunk lock."""
-        await self.open_trunk()
+        await self.open()
 
     def is_locked(self):
         """Return whether the rear trunk is closed."""
@@ -209,7 +209,7 @@ class FrunkSwitch(FrunkSensor):
         self.hass_type: Text = "switch"
         self.__manual_update_time = 0
 
-    async def open_frunk(self):
+    async def open(self):
         """Open the front trunk (frunk)."""
         if self.is_closed:
             data = await self._controller.command(
@@ -239,7 +239,7 @@ class FrunkLock(FrunkSwitch):
 
     async def unlock(self):
         """Open the front trunk (frunk) lock."""
-        await self.open_frunk()
+        await self.open()
 
     def is_locked(self):
         """Return whether the front trunk (frunk) is closed."""

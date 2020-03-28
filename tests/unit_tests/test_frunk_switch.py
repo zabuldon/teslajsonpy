@@ -1,4 +1,4 @@
-"""Test frunk sensor."""
+"""Test frunk switch."""
 
 import pytest
 
@@ -54,8 +54,8 @@ async def test_status_after_update(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_open_frunk_when_closed(monkeypatch):
-    """Test open_frunk() when frunk is closed."""
+async def test_open_when_closed(monkeypatch):
+    """Test open() when frunk is closed."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
@@ -65,7 +65,7 @@ async def test_open_frunk_when_closed(monkeypatch):
     _switch = FrunkSwitch(_data, _controller)
     await _switch.async_update()
 
-    await _switch.open_frunk()
+    await _switch.open()
 
     assert not _switch is None
     assert _switch.is_open
@@ -73,8 +73,8 @@ async def test_open_frunk_when_closed(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_open_frunk_when_open(monkeypatch):
-    """Test open_frunk() when frunk is open."""
+async def test_open_when_open(monkeypatch):
+    """Test open() when frunk is open."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
@@ -84,7 +84,7 @@ async def test_open_frunk_when_open(monkeypatch):
     _switch = FrunkSwitch(_data, _controller)
     await _switch.async_update()
 
-    await _switch.open_frunk()
+    await _switch.open()
 
     assert not _switch is None
     assert _switch.is_open
