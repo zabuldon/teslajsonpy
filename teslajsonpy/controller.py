@@ -32,7 +32,7 @@ from teslajsonpy.exceptions import RetryLimitError, TeslaException
 from teslajsonpy.gps import GPS, Odometer
 from teslajsonpy.lock import ChargerLock, Lock
 from teslajsonpy.sentry_mode import SentryModeSwitch
-from teslajsonpy.trunk import TrunkSensor
+from teslajsonpy.trunk import TrunkSensor, FrunkSensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -304,6 +304,7 @@ class Controller:
             self.__components.append(OnlineSensor(car, self))
             self.__components.append(SentryModeSwitch(car, self))
             self.__components.append(TrunkSensor(car, self))
+            self.__components.append(FrunkSensor(car, self))
 
         if not test_login:
             tasks = [
