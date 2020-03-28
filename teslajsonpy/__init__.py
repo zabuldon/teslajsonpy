@@ -24,6 +24,7 @@ from teslajsonpy.trunk import (
     TrunkSwitch,
     FrunkSwitch,
     TrunkLock,
+    FrunkLock,
 )
 
 from .__version__ import __version__
@@ -50,5 +51,6 @@ __all__ = [
     "TrunkSwitch",
     "FrunkSwitch",
     "TrunkLock",
+    "FrunkLock",
     "__version__",
 ]

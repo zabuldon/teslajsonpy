@@ -38,6 +38,7 @@ from teslajsonpy.trunk import (
     TrunkSwitch,
     FrunkSwitch,
     TrunkLock,
+    FrunkLock,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -314,6 +315,7 @@ class Controller:
             self.__components.append(TrunkSwitch(car, self))
             self.__components.append(FrunkSwitch(car, self))
             self.__components.append(TrunkLock(car, self))
+            self.__components.append(FrunkLock(car, self))
 
         if not test_login:
             tasks = [

@@ -1,11 +1,11 @@
-"""Test trunk lock."""
+"""Test frunk lock."""
 
 import pytest
 
 from tests.tesla_mock import TeslaMock
 
 from teslajsonpy.controller import Controller
-from teslajsonpy.trunk import TrunkLock
+from teslajsonpy.trunk import FrunkLock
 
 
 def test_has_battery(monkeypatch):
@@ -15,7 +15,7 @@ def test_has_battery(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _lock = TrunkLock(_data, _controller)
+    _lock = FrunkLock(_data, _controller)
 
     assert not _lock.has_battery()
 
@@ -27,7 +27,7 @@ def test_is_locked_on_init(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _lock = TrunkLock(_data, _controller)
+    _lock = FrunkLock(_data, _controller)
 
     assert not _lock is None
     assert not _lock.is_locked()
@@ -41,8 +41,8 @@ async def test_is_locked_after_update(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _data["vehicle_state"]["rt"] = 0
-    _lock = TrunkLock(_data, _controller)
+    _data["vehicle_state"]["ft"] = 0
+    _lock = FrunkLock(_data, _controller)
 
     await _lock.async_update()
 
@@ -58,8 +58,8 @@ async def test_unlock(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _data["vehicle_state"]["rt"] = 0
-    _lock = TrunkLock(_data, _controller)
+    _data["vehicle_state"]["ft"] = 0
+    _lock = FrunkLock(_data, _controller)
 
     await _lock.async_update()
     await _lock.unlock()
@@ -76,8 +76,8 @@ async def test_unlock_already_unlocked(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _data["vehicle_state"]["rt"] = 123
-    _lock = TrunkLock(_data, _controller)
+    _data["vehicle_state"]["ft"] = 123
+    _lock = FrunkLock(_data, _controller)
 
     await _lock.async_update()
     await _lock.unlock()
@@ -86,43 +86,4 @@ async def test_unlock_already_unlocked(monkeypatch):
     assert not _lock.is_locked()
 
     # Reset to default for next tests
-    _data["vehicle_state"]["rt"] = 0
-
-
-@pytest.mark.asyncio
-async def test_lock(monkeypatch):
-    """Test lock()."""
-
-    _mock = TeslaMock(monkeypatch)
-    _controller = Controller(None)
-
-    _data = _mock.data_request_vehicle()
-    _data["vehicle_state"]["rt"] = 123
-    _lock = TrunkLock(_data, _controller)
-
-    await _lock.async_update()
-    await _lock.lock()
-
-    assert not _lock is None
-    assert _lock.is_locked()
-
-    # Reset to default for next tests
-    _data["vehicle_state"]["rt"] = 0
-
-
-@pytest.mark.asyncio
-async def test_lock_already_locked(monkeypatch):
-    """Test lock() when already locked."""
-
-    _mock = TeslaMock(monkeypatch)
-    _controller = Controller(None)
-
-    _data = _mock.data_request_vehicle()
-    _data["vehicle_state"]["rt"] = 0
-    _lock = TrunkLock(_data, _controller)
-
-    await _lock.async_update()
-    await _lock.lock()
-
-    assert not _lock is None
-    assert _lock.is_locked()
+    _data["vehicle_state"]["ft"] = 0

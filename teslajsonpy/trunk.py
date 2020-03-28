@@ -123,11 +123,6 @@ class TrunkLock(TrunkSwitch):
         self.hass_type = "lock"
         self.bin_type = 0x7
 
-    @staticmethod
-    def has_battery():
-        """Return whether the device has a battery."""
-        return False
-
     async def lock(self):
         """Close the rear trunk lock."""
         await self.close_trunk()
@@ -137,7 +132,7 @@ class TrunkLock(TrunkSwitch):
         await self.open_trunk()
 
     def is_locked(self):
-        """Return whether the charger is closed."""
+        """Return whether the rear trunk is closed."""
         return self.is_closed
 
 
@@ -223,3 +218,29 @@ class FrunkSwitch(FrunkSensor):
             if data and data["response"]["result"]:
                 self.state_value = 255
             self.__manual_update_time = time.time()
+
+
+class FrunkLock(FrunkSwitch):
+    """Home-Assistant front trunk (frunk) lock for a Tesla VehicleDevice."""
+
+    def __init__(self, data, controller):
+        """Initialize the front trunk (frunk) lock.
+
+        Args:
+            data (Dict): The vehicle state for a Tesla vehicle.
+            https://tesla-api.timdorr.com/vehicle/state/vehiclestate
+            controller (Controller): The controller that controls updates to the Tesla API.
+
+        """
+        super().__init__(data, controller)
+        self.type = "frunk lock"
+        self.hass_type = "lock"
+        self.bin_type = 0x7
+
+    async def unlock(self):
+        """Open the front trunk (frunk) lock."""
+        await self.open_frunk()
+
+    def is_locked(self):
+        """Return whether the front trunk (frunk) is closed."""
+        return self.is_closed
