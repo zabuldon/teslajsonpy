@@ -40,5 +40,6 @@ __all__ = [
     "Lock",
     "SentryModeSwitch",
     "TrunkSensor",
+    "FrunkSensor",
     "__version__",
 ]
