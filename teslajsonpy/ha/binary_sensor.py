@@ -70,11 +70,59 @@ class BinarySensor(Entity):
         raise NotImplementedError
 
 
+class ChargerConnectionSensor(BinarySensor):
+    """Tesla charger connection sensor for Home Assistant."""
+
+    def __init__(self):
+        """Initialize the sensor.
+
+        Parameters
+        ----------
+        device_class : str
+            The class of the device
+
+        """
+
+        super().__init__(BinarySensorType.CONNECTIVITY)
+
+    def update(self) -> None:
+        """Fetch the latest state from the device and store it in the properties."""
+        raise NotImplementedError
+
+    async def async_update(self) -> None:
+        """Fetch asynchronously the latest state from the device and store it in the properties."""
+        raise NotImplementedError
+
+
+class OnlineSensor(BinarySensor):
+    """Tesla online sensor for Home Assistant."""
+
+    def __init__(self):
+        """Initialize the sensor.
+
+        Parameters
+        ----------
+        device_class : str
+            The class of the device
+
+        """
+
+        super().__init__(BinarySensorType.CONNECTIVITY)
+
+    def update(self) -> None:
+        """Fetch the latest state from the device and store it in the properties."""
+        raise NotImplementedError
+
+    async def async_update(self) -> None:
+        """Fetch asynchronously the latest state from the device and store it in the properties."""
+        raise NotImplementedError
+
+
 class ParkingSensor(BinarySensor):
     """Tesla parking sensor for Home Assistant."""
 
     def __init__(self):
-        """Initialize a the sensor.
+        """Initialize the sensor.
 
         Parameters
         ----------
