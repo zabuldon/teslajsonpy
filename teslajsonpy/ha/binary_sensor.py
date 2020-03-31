@@ -1,7 +1,5 @@
 #  SPDX-License-Identifier: Apache-2.0
-"""
-Home Assistant binary sensors.
-"""
+"""Home Assistant binary sensors."""
 
 from enum import Enum
 
@@ -10,7 +8,7 @@ from teslajsonpy.ha.entity import Entity
 
 class BinarySensorType(Enum):
     """List of binary sensor types from Home Assistant.
-    
+
     See also: https://developers.home-assistant.io/docs/entity_binary_sensor#available-device-classes
     """
 
@@ -40,19 +38,19 @@ class BinarySensorType(Enum):
 
 
 class BinarySensor(Entity):
-    """
-    Wrapper for a Home Assistant binary sensor.
+    """Wrapper for a Home Assistant binary sensor.
+
     See also: https://developers.home-assistant.io/docs/entity_binary_sensor
     """
 
     def __init__(self, device_class: str):
-        """
-        Initialize a binary sensor.
-        
+        """Initialize a binary sensor.
+
         Parameters
         ----------
         device_class : str
             The class of the device
+
         """
 
         super().__init__(device_class)
@@ -77,11 +75,12 @@ class ParkingSensor(BinarySensor):
 
     def __init__(self):
         """Initialize a the sensor.
-        
+
         Parameters
         ----------
         device_class : str
             The class of the device
+
         """
 
         super().__init__(BinarySensorType.POWER)
