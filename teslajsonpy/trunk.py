@@ -28,6 +28,7 @@ class TrunkSensor(VehicleDevice):
         self.__rt_value: int = None
         self.type: Text = "trunk sensor"
         self.hass_type = "binary_sensor"
+        self.sensor_type = "door"
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
 
@@ -42,6 +43,10 @@ class TrunkSensor(VehicleDevice):
     def has_battery() -> bool:
         """Return whether the device has a battery."""
         return False
+
+    def get_value(self):
+        """Return True if the rear trunk is open."""
+        return self.is_open
 
     @property
     def state_value(self) -> int:
@@ -83,6 +88,9 @@ class TrunkSwitch(TrunkSensor):
         super().__init__(data, controller)
         self.type: Text = "trunk switch"
         self.hass_type: Text = "switch"
+        self.sensor_type: Text = "switch"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
         self.__manual_update_time = 0
 
     async def open(self):
@@ -121,7 +129,10 @@ class TrunkLock(TrunkSwitch):
         super().__init__(data, controller)
         self.type = "trunk lock"
         self.hass_type = "lock"
+        self.sensor_type: Text = "door"
         self.bin_type = 0x7
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     async def lock(self):
         """Close the rear trunk lock."""
@@ -152,6 +163,7 @@ class FrunkSensor(VehicleDevice):
         self.__ft_value: int = None
         self.type: Text = "frunk sensor"
         self.hass_type = "binary_sensor"
+        self.sensor_type: Text = "door"
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
 
@@ -166,6 +178,10 @@ class FrunkSensor(VehicleDevice):
     def has_battery() -> bool:
         """Return whether the device has a battery."""
         return False
+
+    def get_value(self):
+        """Return True if the front trunk (frunk) is open."""
+        return self.is_open
 
     @property
     def state_value(self) -> int:
@@ -207,6 +223,9 @@ class FrunkSwitch(FrunkSensor):
         super().__init__(data, controller)
         self.type: Text = "frunk switch"
         self.hass_type: Text = "switch"
+        self.sensor_type: Text = "switch"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
         self.__manual_update_time = 0
 
     async def open(self):
@@ -235,7 +254,10 @@ class FrunkLock(FrunkSwitch):
         super().__init__(data, controller)
         self.type = "frunk lock"
         self.hass_type = "lock"
+        self.sensor_type: Text = "door"
         self.bin_type = 0x7
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     async def unlock(self):
         """Open the front trunk (frunk) lock."""
