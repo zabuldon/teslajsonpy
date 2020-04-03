@@ -1,7 +1,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 """Home Assistant entity."""
 
-from typing import Dict
+from typing import Dict, Text
 
 
 class Entity:
@@ -11,16 +11,16 @@ class Entity:
     See also: https://developers.home-assistant.io/docs/entity_index
     """
 
-    def __init__(self, device_class: str = None):
+    def __init__(self, device_class: Text = None):
         """Initialize the entity.
 
         Parameters
         ----------
-        device_class : str, optional
+        device_class : typing.Text, optional
             The class of the device
 
         """
-        self._device_class = device_class
+        self._device_class: Text = device_class
 
     @property
     def assumed_state(self) -> bool:
@@ -33,7 +33,7 @@ class Entity:
         return True
 
     @property
-    def device_class(self) -> str:
+    def device_class(self) -> Text:
         """Return extra classification of what the device is. Each domain specifies their own.
 
         Device classes can come with extra requirements for unit of measurement and supported features.
@@ -49,12 +49,12 @@ class Entity:
         return None
 
     @property
-    def entity_picture(self) -> str:
+    def entity_picture(self) -> Text:
         """Return the URL of a picture to show for the entity."""
         return None
 
     @property
-    def name(self) -> str:
+    def name(self) -> Text:
         """Return the name of the entity."""
         return None
 
@@ -67,7 +67,7 @@ class Entity:
         return True
 
     @property
-    def unique_id(self) -> str:
+    def unique_id(self) -> Text:
         """Return the unique identifier for this entity.
 
         Needs to be unique within a platform (ie light.hue).
@@ -85,7 +85,7 @@ class Entity:
         return False
 
     @property
-    def icon(self) -> str:
+    def icon(self) -> Text:
         """Return the icon to use in the frontend.
 
         Icons start with mdi: plus an identifier.
@@ -98,10 +98,6 @@ class Entity:
         """Indicate if the entity should be enabled or disabled when it is first added to the entity registry."""
         return True
 
-    def update(self) -> None:
+    async def update(self) -> None:
         """Fetch the latest state from the device and store it in the properties."""
-        raise NotImplementedError
-
-    async def async_update(self) -> None:
-        """Fetch asynchronously the latest state from the device and store it in the properties."""
         raise NotImplementedError

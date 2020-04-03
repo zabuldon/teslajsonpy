@@ -102,20 +102,11 @@ def test_entity_registry_enabled_default():
     assert _sensor.entity_registry_enabled_default
 
 
-def test_update():
+@pytest.mark.asyncio
+async def test_update():
     """Test update()."""
 
     _sensor = ParkingSensor()
 
     with pytest.raises(NotImplementedError):
-        _sensor.update()
-
-
-@pytest.mark.asyncio
-async def test_async_update():
-    """Test async_update()."""
-
-    _sensor = ParkingSensor()
-
-    with pytest.raises(NotImplementedError):
-        await _sensor.async_update()
+        await _sensor.update()

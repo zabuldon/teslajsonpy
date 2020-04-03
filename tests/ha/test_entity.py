@@ -93,20 +93,11 @@ def test_entity_registry_enabled_default():
     assert _entity.entity_registry_enabled_default
 
 
-def test_update():
+@pytest.mark.asyncio
+async def test_update():
     """Test update()."""
 
     _entity = Entity()
 
     with pytest.raises(NotImplementedError):
-        _entity.update()
-
-
-@pytest.mark.asyncio
-async def test_async_update():
-    """Test async_update()."""
-
-    _entity = Entity()
-
-    with pytest.raises(NotImplementedError):
-        await _entity.async_update()
+        await _entity.update()
