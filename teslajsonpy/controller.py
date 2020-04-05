@@ -137,7 +137,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         result,
         args,
         kwargs,
-        instance._id_to_vin(car_id)[-5:],
+        instance._id_to_vin(car_id)[-5:] if car_id else None,
         instance.car_online,
     )
     instance.car_online[instance._id_to_vin(car_id)] = False
@@ -628,6 +628,7 @@ class Controller:
                         )
                     )
                 ):  # Only update cars with update flag on
+                    _LOGGER.debug("Updating %s with state %s", vin[-5:], car_state)
                     try:
                         data = await self.get(
                             self.__vin_id_map[vin],
@@ -660,8 +661,13 @@ class Controller:
                         update_succeeded = True
                         if (
                             self.enable_websocket
-                            and self.get_drive_params(car_id).get("shift_state")
-                            and self.get_drive_params(car_id).get("shift_state") != "P"
+                            and self.get_drive_params(self.__vin_id_map[vin]).get(
+                                "shift_state"
+                            )
+                            and self.get_drive_params(self.__vin_id_map[vin]).get(
+                                "shift_state"
+                            )
+                            != "P"
                         ):
                             asyncio.create_task(
                                 self.__connection.websocket_connect(
@@ -671,7 +677,11 @@ class Controller:
                                     on_disconnect=self._process_websocket_disconnect,
                                 )
                             )
-            return update_succeeded
+                else:
+                    _LOGGER.debug(
+                        "Skipping update of %s with state %s", vin[-5:], car_state
+                    )
+        return update_succeeded
 
     def get_climate_params(self, car_id):
         """Return cached copy of climate_params for car_id."""
