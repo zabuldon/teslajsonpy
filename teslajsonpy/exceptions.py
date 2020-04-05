@@ -53,3 +53,9 @@ class IncompleteCredentials(TeslaException):
     """Class of exceptions for incomplete credentials."""
 
     pass
+
+
+class UnknownPresetMode(TeslaException):
+    """Class of exceptions for incomplete credentials."""
+
+    pass

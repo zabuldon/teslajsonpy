@@ -14,7 +14,7 @@ class TeslaMock:
     def __init__(self, monkeypatch) -> None:
         """
         Initialize mock.
-        
+
         Args:
             monkeypatch (pytest.Monkeypatch): Monkeypatch.
         """
@@ -177,6 +177,7 @@ class TeslaMock:
 
 
 RESULT_OK = {"response": {"reason": "", "result": True}}
+RESULT_NOT_OK = {"response": {"reason": "", "result": False}}
 
 # 408 - Request Timeout
 RESULT_VEHICLE_UNAVAILABLE = {

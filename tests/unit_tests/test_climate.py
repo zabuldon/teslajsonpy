@@ -6,6 +6,7 @@ from tests.tesla_mock import TeslaMock
 
 from teslajsonpy.controller import Controller
 from teslajsonpy.climate import Climate
+from teslajsonpy.exceptions import UnknownPresetMode
 
 
 def test_has_battery(monkeypatch):
@@ -34,6 +35,7 @@ def test_get_values_on_init(monkeypatch):
     assert _climate.get_fan_status() is None
     assert _climate.get_goal_temp() is None
     assert _climate.is_hvac_enabled() is None
+    assert _climate.preset_mode is None
 
 
 @pytest.mark.asyncio
@@ -57,6 +59,8 @@ async def test_get_values_after_update(monkeypatch):
     assert _climate.get_goal_temp() == 21.6
     assert not _climate.is_hvac_enabled() is None
     assert not _climate.is_hvac_enabled()
+    assert _climate.preset_mode is not None
+    assert _climate.preset_mode == "normal"
 
 
 @pytest.mark.asyncio
@@ -194,3 +198,28 @@ async def test_set_temperature(monkeypatch):
 
     assert not _climate.get_goal_temp() is None
     assert _climate.get_goal_temp() == 12.3
+
+
+@pytest.mark.asyncio
+async def test_set_preset_mode_no_success(monkeypatch):
+    """Test set_temperature()."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_vehicle()
+    _climate = Climate(_data, _controller)
+
+    await _climate.async_update()
+
+    preset_modes = _climate.preset_modes
+    for mode in preset_modes:
+        await _climate.set_preset_mode(mode)
+        assert _climate.preset_mode is not None
+        assert _climate.preset_mode == mode
+
+    with pytest.raises(UnknownPresetMode):
+        bad_modes = ["UKNOWN_MODE", "home", "auto", "away", "hot"]
+        for mode in bad_modes:
+            assert mode not in preset_modes
+            await _climate.set_preset_mode("mode")
