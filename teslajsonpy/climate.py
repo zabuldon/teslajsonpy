@@ -72,9 +72,9 @@ class Climate(VehicleDevice):
         """Return fan status."""
         return self.__fan_status
 
-    async def async_update(self, wake_if_asleep=False) -> None:
+    async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the HVAC state."""
-        await super().async_update(wake_if_asleep=wake_if_asleep)
+        await super().async_update(wake_if_asleep=wake_if_asleep, force=force)
         data = self._controller.get_climate_params(self._id)
         if data:
             last_update = self._controller.get_last_update_time(self._id)
@@ -100,7 +100,7 @@ class Climate(VehicleDevice):
             self.__fan_status = data["fan_status"]
             if data.get("defrost_mode") is not None:
                 self.__preset_mode = (
-                    "defrost" if data.get("defrost_mode") == 1 else "normal"
+                    "defrost" if data.get("defrost_mode") == 2 else "normal"
                 )
 
     async def set_temperature(self, temp):
@@ -140,8 +140,9 @@ class Climate(VehicleDevice):
         """Set new preset mode."""
         if preset_mode not in self.preset_modes:
             raise UnknownPresetMode(
-                f"{preset_mode} is not valid. Use {self.preset_modes}"
+                f"Preset mode '{preset_mode}' is not valid. Use {self.preset_modes}"
             )
+        self.__manual_update_time = time.time()
         data = await self._controller.command(
             self._id,
             "set_preconditioning_max",
@@ -150,6 +151,7 @@ class Climate(VehicleDevice):
         )
         if data and data["response"]["result"]:
             self.__preset_mode = preset_mode
+            await self.async_update(force=True)
 
     @property
     def preset_mode(self) -> Optional[str]:
@@ -217,7 +219,7 @@ class TempSensor(VehicleDevice):
         """Get outside temperature."""
         return self.__outside_temp
 
-    async def async_update(self, wake_if_asleep=False) -> None:
+    async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the temperature."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_climate_params(self._id)
