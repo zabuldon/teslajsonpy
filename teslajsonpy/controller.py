@@ -606,8 +606,8 @@ class Controller:
         # Note: This separate check is because there may be individual cars
         # to update.
         update_succeeded = False
-        car_vin = self._id_to_vin(car_id)
         car_id = self._update_id(car_id)
+        car_vin = self._id_to_vin(car_id)
         for vin, online in self.car_online.items():
             # If specific car_id provided, only update match
             if (car_vin and car_vin != vin) or self.car_state[vin].get("in_service"):
@@ -630,7 +630,9 @@ class Controller:
                 ):  # Only update cars with update flag on
                     try:
                         data = await self.get(
-                            car_id, "vehicle_data", wake_if_asleep=wake_if_asleep
+                            self.__vin_id_map[vin],
+                            "vehicle_data",
+                            wake_if_asleep=wake_if_asleep,
                         )
                     except TeslaException:
                         data = None
