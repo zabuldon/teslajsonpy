@@ -2,11 +2,11 @@
 
 import pytest
 
-from tests.tesla_mock import TeslaMock
-
-from teslajsonpy.controller import Controller
 from teslajsonpy.climate import Climate
+from teslajsonpy.controller import Controller
 from teslajsonpy.exceptions import UnknownPresetMode
+
+from tests.tesla_mock import TeslaMock
 
 
 def test_has_battery(monkeypatch):
@@ -30,7 +30,7 @@ def test_get_values_on_init(monkeypatch):
     _data = _mock.data_request_vehicle()
     _climate = Climate(_data, _controller)
 
-    assert not _climate is None
+    assert _climate is not None
     assert _climate.get_current_temp() is None
     assert _climate.get_fan_status() is None
     assert _climate.get_goal_temp() is None
@@ -50,7 +50,7 @@ async def test_get_values_after_update(monkeypatch):
 
     await _climate.async_update()
 
-    assert not _climate is None
+    assert _climate is not None
 
     assert _climate.get_current_temp() is None
     assert not _climate.get_fan_status() is None
