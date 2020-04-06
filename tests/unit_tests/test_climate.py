@@ -201,8 +201,8 @@ async def test_set_temperature(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_set_preset_mode_no_success(monkeypatch):
-    """Test set_temperature()."""
+async def test_set_preset_mode_success(monkeypatch):
+    """Test set_preset_mode()."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
@@ -218,8 +218,22 @@ async def test_set_preset_mode_no_success(monkeypatch):
         assert _climate.preset_mode is not None
         assert _climate.preset_mode == mode
 
+
+@pytest.mark.asyncio
+async def test_set_preset_mode_invalid_modes(monkeypatch):
+    """Test set_preset_mode() with invalid modes."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_vehicle()
+    _climate = Climate(_data, _controller)
+
+    await _climate.async_update()
+
+    preset_modes = _climate.preset_modes
     with pytest.raises(UnknownPresetMode):
         bad_modes = ["UKNOWN_MODE", "home", "auto", "away", "hot"]
         for mode in bad_modes:
             assert mode not in preset_modes
-            await _climate.set_preset_mode("mode")
+            await _climate.set_preset_mode(mode)

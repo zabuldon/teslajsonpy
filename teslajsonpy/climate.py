@@ -150,8 +150,8 @@ class Climate(VehicleDevice):
             wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
-            self.__preset_mode = preset_mode
             await self.async_update(force=True)
+            self.__preset_mode = preset_mode
 
     @property
     def preset_mode(self) -> Optional[str]:
