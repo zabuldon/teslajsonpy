@@ -231,9 +231,8 @@ async def test_set_preset_mode_invalid_modes(monkeypatch):
 
     await _climate.async_update()
 
-    preset_modes = _climate.preset_modes
-    with pytest.raises(UnknownPresetMode):
-        bad_modes = ["UKNOWN_MODE", "home", "auto", "away", "hot"]
-        for mode in bad_modes:
-            assert mode not in preset_modes
+    bad_modes = ["UKNOWN_MODE", "home", "auto", "away", "hot"]
+    for mode in bad_modes:
+        assert mode not in _climate.preset_modes
+        with pytest.raises(UnknownPresetMode):
             await _climate.set_preset_mode(mode)
