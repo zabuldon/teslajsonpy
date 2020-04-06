@@ -533,7 +533,7 @@ class Controller:
 
         """
 
-        def _calculate_next_interval(vin: int) -> int:
+        def _calculate_next_interval(vin: Text) -> int:
             cur_time = time.time()
             # _LOGGER.debug(
             #     "%s: %s > %s; shift_state: %s sentry: %s climate: %s, charging: %s ",
