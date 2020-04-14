@@ -14,7 +14,7 @@ from teslajsonpy.binary_sensor import (
 from teslajsonpy.charger import ChargerSwitch, ChargingSensor, RangeSwitch
 from teslajsonpy.climate import Climate, TempSensor
 from teslajsonpy.controller import Controller
-from teslajsonpy.exceptions import TeslaException
+from teslajsonpy.exceptions import TeslaException, UnknownPresetMode
 from teslajsonpy.gps import GPS, Odometer
 from teslajsonpy.lock import Lock
 from teslajsonpy.sentry_mode import SentryModeSwitch
@@ -34,6 +34,7 @@ __all__ = [
     "TempSensor",
     "Controller",
     "TeslaException",
+    "UnknownPresetMode",
     "GPS",
     "Odometer",
     "Lock",

@@ -34,7 +34,7 @@ class Battery(VehicleDevice):
         self.uniq_name: Text = self._uniq_name()
         self.bin_type: hex = 0x5
 
-    async def async_update(self, wake_if_asleep=False) -> None:
+    async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the battery state."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_charging_params(self._id)
@@ -97,7 +97,7 @@ class Range(VehicleDevice):
         self.uniq_name = self._uniq_name()
         self.bin_type = 0xA
 
-    async def async_update(self, wake_if_asleep=False) -> None:
+    async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the battery range state."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_charging_params(self._id)
