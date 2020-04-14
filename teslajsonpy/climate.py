@@ -6,9 +6,10 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import time
-from typing import Text
+from typing import List, Optional, Text
 
 from teslajsonpy.vehicle import VehicleDevice
+from teslajsonpy.exceptions import UnknownPresetMode
 
 
 class Climate(VehicleDevice):
@@ -43,6 +44,7 @@ class Climate(VehicleDevice):
         self.__passenger_temp_setting = None
         self.__is_climate_on = None
         self.__fan_status = None
+        self.__preset_mode: Text = None
         self.__manual_update_time = 0
 
         self.type = "HVAC (climate) system"
@@ -70,9 +72,9 @@ class Climate(VehicleDevice):
         """Return fan status."""
         return self.__fan_status
 
-    async def async_update(self, wake_if_asleep=False) -> None:
+    async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the HVAC state."""
-        await super().async_update(wake_if_asleep=wake_if_asleep)
+        await super().async_update(wake_if_asleep=wake_if_asleep, force=force)
         data = self._controller.get_climate_params(self._id)
         if data:
             last_update = self._controller.get_last_update_time(self._id)
@@ -96,6 +98,10 @@ class Climate(VehicleDevice):
                 data["outside_temp"] if data["outside_temp"] else self.__outside_temp
             )
             self.__fan_status = data["fan_status"]
+            if data.get("defrost_mode") is not None:
+                self.__preset_mode = (
+                    "defrost" if data.get("defrost_mode") == 2 else "normal"
+                )
 
     async def set_temperature(self, temp):
         """Set both the driver and passenger temperature to temp."""
@@ -129,6 +135,39 @@ class Climate(VehicleDevice):
                 self.__is_auto_conditioning_on = False
                 self.__is_climate_on = False
         await self.async_update()
+
+    async def set_preset_mode(self, preset_mode: str) -> None:
+        """Set new preset mode."""
+        if preset_mode not in self.preset_modes:
+            raise UnknownPresetMode(
+                f"Preset mode '{preset_mode}' is not valid. Use {self.preset_modes}"
+            )
+        self.__manual_update_time = time.time()
+        data = await self._controller.command(
+            self._id,
+            "set_preconditioning_max",
+            data={"on": preset_mode == "defrost"},
+            wake_if_asleep=True,
+        )
+        if data and data["response"]["result"]:
+            await self.async_update(force=True)
+            self.__preset_mode = preset_mode
+
+    @property
+    def preset_mode(self) -> Optional[str]:
+        """Return the current preset mode, e.g., home, away, temp.
+
+        Requires SUPPORT_PRESET_MODE.
+        """
+        return self.__preset_mode
+
+    @property
+    def preset_modes(self) -> Optional[List[str]]:
+        """Return a list of available preset modes.
+
+        Requires SUPPORT_PRESET_MODE.
+        """
+        return ["normal", "defrost"]
 
     @staticmethod
     def has_battery():
@@ -180,7 +219,7 @@ class TempSensor(VehicleDevice):
         """Get outside temperature."""
         return self.__outside_temp
 
-    async def async_update(self, wake_if_asleep=False) -> None:
+    async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the temperature."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
         data = self._controller.get_climate_params(self._id)

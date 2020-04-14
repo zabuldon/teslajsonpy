@@ -137,7 +137,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         result,
         args,
         kwargs,
-        instance._id_to_vin(car_id)[-5:],
+        instance._id_to_vin(car_id)[-5:] if car_id else None,
         instance.car_online,
     )
     instance.car_online[instance._id_to_vin(car_id)] = False
@@ -533,7 +533,7 @@ class Controller:
 
         """
 
-        def _calculate_next_interval(vin: int) -> int:
+        def _calculate_next_interval(vin: Text) -> int:
             cur_time = time.time()
             # _LOGGER.debug(
             #     "%s: %s > %s; shift_state: %s sentry: %s climate: %s, charging: %s ",
@@ -586,6 +586,57 @@ class Controller:
                 )
             return self.update_interval
 
+        async def _get_and_process_data(vin: Text) -> None:
+            async with self.__lock[vin]:
+                _LOGGER.debug("Updating %s", vin[-5:])
+                try:
+                    data = await self.get(
+                        self.__vin_id_map[vin],
+                        "vehicle_data",
+                        wake_if_asleep=wake_if_asleep,
+                    )
+                except TeslaException:
+                    data = None
+                if data and data["response"]:
+                    response = data["response"]
+                    self.__climate[vin] = response["climate_state"]
+                    self.__charging[vin] = response["charge_state"]
+                    self.__state[vin] = response["vehicle_state"]
+                    self.__config[vin] = response["vehicle_config"]
+                    if (
+                        self.__driving[vin].get("shift_state")
+                        and self.__driving[vin].get("shift_state")
+                        != response["drive_state"]["shift_state"]
+                        and (
+                            response["drive_state"]["shift_state"] is None
+                            or response["drive_state"]["shift_state"] == "P"
+                        )
+                    ):
+                        self.__last_parked_timestamp[vin] = (
+                            response["drive_state"]["timestamp"] / 1000
+                        )
+                    self.__driving[vin] = response["drive_state"]
+                    self.__gui[vin] = response["gui_settings"]
+                    self._last_update_time[vin] = time.time()
+                    if (
+                        self.enable_websocket
+                        and self.get_drive_params(self.__vin_id_map[vin]).get(
+                            "shift_state"
+                        )
+                        and self.get_drive_params(self.__vin_id_map[vin]).get(
+                            "shift_state"
+                        )
+                        != "P"
+                    ):
+                        asyncio.create_task(
+                            self.__connection.websocket_connect(
+                                vin[-5:],
+                                self.__vin_vehicle_id_map[vin],
+                                on_message=self._process_websocket_message,
+                                on_disconnect=self._process_websocket_disconnect,
+                            )
+                        )
+
         cur_time = time.time()
         async with self.__controller_lock:
             #  Update the online cars using get_vehicles()
@@ -605,9 +656,9 @@ class Controller:
         # The throttling is per car's last succesful update
         # Note: This separate check is because there may be individual cars
         # to update.
-        update_succeeded = False
-        car_vin = self._id_to_vin(car_id)
         car_id = self._update_id(car_id)
+        car_vin = self._id_to_vin(car_id)
+        tasks = []
         for vin, online in self.car_online.items():
             # If specific car_id provided, only update match
             if (car_vin and car_vin != vin) or self.car_state[vin].get("in_service"):
@@ -628,48 +679,12 @@ class Controller:
                         )
                     )
                 ):  # Only update cars with update flag on
-                    try:
-                        data = await self.get(
-                            car_id, "vehicle_data", wake_if_asleep=wake_if_asleep
-                        )
-                    except TeslaException:
-                        data = None
-                    if data and data["response"]:
-                        response = data["response"]
-                        self.__climate[vin] = response["climate_state"]
-                        self.__charging[vin] = response["charge_state"]
-                        self.__state[vin] = response["vehicle_state"]
-                        self.__config[vin] = response["vehicle_config"]
-                        if (
-                            self.__driving[vin].get("shift_state")
-                            and self.__driving[vin].get("shift_state")
-                            != response["drive_state"]["shift_state"]
-                            and (
-                                response["drive_state"]["shift_state"] is None
-                                or response["drive_state"]["shift_state"] == "P"
-                            )
-                        ):
-                            self.__last_parked_timestamp[vin] = (
-                                response["drive_state"]["timestamp"] / 1000
-                            )
-                        self.__driving[vin] = response["drive_state"]
-                        self.__gui[vin] = response["gui_settings"]
-                        self._last_update_time[vin] = time.time()
-                        update_succeeded = True
-                        if (
-                            self.enable_websocket
-                            and self.get_drive_params(car_id).get("shift_state")
-                            and self.get_drive_params(car_id).get("shift_state") != "P"
-                        ):
-                            asyncio.create_task(
-                                self.__connection.websocket_connect(
-                                    vin[-5:],
-                                    self.__vin_vehicle_id_map[vin],
-                                    on_message=self._process_websocket_message,
-                                    on_disconnect=self._process_websocket_disconnect,
-                                )
-                            )
-            return update_succeeded
+                    tasks.append(_get_and_process_data(vin))
+                else:
+                    _LOGGER.debug(
+                        "Skipping update of %s with state %s", vin[-5:], car_state
+                    )
+        return any(await asyncio.gather(*tasks))
 
     def get_climate_params(self, car_id):
         """Return cached copy of climate_params for car_id."""

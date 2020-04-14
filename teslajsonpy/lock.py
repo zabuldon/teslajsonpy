@@ -44,7 +44,7 @@ class Lock(VehicleDevice):
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x7
 
-    async def async_update(self, wake_if_asleep=False) -> None:
+    async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the lock state."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
         last_update = self._controller.get_last_update_time(self._id)
@@ -114,7 +114,7 @@ class ChargerLock(VehicleDevice):
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x7
 
-    async def async_update(self, wake_if_asleep=False) -> None:
+    async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update state of the charger lock."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
         last_update = self._controller.get_last_update_time(self._id)

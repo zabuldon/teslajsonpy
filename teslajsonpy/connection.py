@@ -144,7 +144,7 @@ class Connection:
             baseurl = self.baseurl
         url: URL = URL(baseurl + url)
 
-        _LOGGER.debug("%s: %s", method, url)
+        _LOGGER.debug("%s: %s %s", method, url, data)
 
         try:
             resp = await getattr(self.websession, method)(
