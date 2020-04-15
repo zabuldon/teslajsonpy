@@ -29,7 +29,7 @@ def test_is_locked_on_init(monkeypatch):
     _data = _mock.data_request_vehicle()
     _lock = TrunkLock(_data, _controller)
 
-    assert not _lock is None
+    assert _lock is not None
     assert not _lock.is_locked()
 
 
@@ -46,7 +46,7 @@ async def test_is_locked_after_update(monkeypatch):
 
     await _lock.async_update()
 
-    assert not _lock is None
+    assert _lock is not None
     assert _lock.is_locked()
 
 
@@ -64,7 +64,7 @@ async def test_unlock(monkeypatch):
     await _lock.async_update()
     await _lock.unlock()
 
-    assert not _lock is None
+    assert _lock is not None
     assert not _lock.is_locked()
 
 
@@ -82,7 +82,7 @@ async def test_unlock_already_unlocked(monkeypatch):
     await _lock.async_update()
     await _lock.unlock()
 
-    assert not _lock is None
+    assert _lock is not None
     assert not _lock.is_locked()
 
     # Reset to default for next tests
@@ -103,7 +103,7 @@ async def test_lock(monkeypatch):
     await _lock.async_update()
     await _lock.lock()
 
-    assert not _lock is None
+    assert _lock is not None
     assert _lock.is_locked()
 
     # Reset to default for next tests
@@ -124,5 +124,5 @@ async def test_lock_already_locked(monkeypatch):
     await _lock.async_update()
     await _lock.lock()
 
-    assert not _lock is None
+    assert _lock is not None
     assert _lock.is_locked()
