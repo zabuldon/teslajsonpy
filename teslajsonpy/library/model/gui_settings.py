@@ -1,7 +1,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 """Tesla vehicle GUI settings model."""
 
-from typing import Text
+from typing import Dict, Text
 
 
 class GuiSettingsModel:
@@ -21,6 +21,29 @@ class GuiSettingsModel:
         self.__gui_temperature_units = None
         self.__show_range_units = None
         self.__timestamp = None
+
+    def load(self, data: Dict) -> None:
+        """Load data from a JSON result."""
+
+        self.__gui_24_hour_time = (
+            data["gui_24_hour_time"] if "gui_24_hour_time" in data else None
+        )
+        self.__gui_charge_rate_units = (
+            data["gui_charge_rate_units"] if "gui_charge_rate_units" in data else None
+        )
+        self.__gui_distance_units = (
+            data["gui_distance_units"] if "gui_distance_units" in data else None
+        )
+        self.__gui_range_display = (
+            data["gui_range_display"] if "gui_range_display" in data else None
+        )
+        self.__gui_temperature_units = (
+            data["gui_temperature_units"] if "gui_temperature_units" in data else None
+        )
+        self.__show_range_units = (
+            data["show_range_units"] if "show_range_units" in data else None
+        )
+        self.__timestamp = data["timestamp"] if "timestamp" in data else None
 
     @property
     def gui_24_hour_time(self) -> bool:

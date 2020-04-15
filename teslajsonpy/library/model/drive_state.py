@@ -1,7 +1,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 """Tesla vehicle drive state model."""
 
-from typing import Text
+from typing import Dict, Text
 
 
 class DriveStateModel:
@@ -26,6 +26,30 @@ class DriveStateModel:
         self.__shift_state = None
         self.__speed = None
         self.__timestamp = None
+
+    def load(self, data: Dict) -> None:
+        """Load data from a JSON result."""
+
+        self.__gps_as_of = data["gps_as_of"] if "gps_as_of" in data else None
+        self.__heading = data["heading"] if "heading" in data else None
+        self.__latitude = data["latitude"] if "latitude" in data else None
+        self.__longitude = data["longitude"] if "longitude" in data else None
+        self.__native_latitude = (
+            data["native_latitude"] if "native_latitude" in data else None
+        )
+        self.__native_location_supported = (
+            data["native_location_supported"]
+            if "native_location_supported" in data
+            else None
+        )
+        self.__native_longitude = (
+            data["native_longitude"] if "native_longitude" in data else None
+        )
+        self.__native_type = data["native_type"] if "native_type" in data else None
+        self.__power = data["power"] if "power" in data else None
+        self.__shift_state = data["shift_state"] if "shift_state" in data else None
+        self.__speed = data["speed"] if "speed" in data else None
+        self.__timestamp = data["timestamp"] if "timestamp" in data else None
 
     @property
     def gps_as_of(self) -> int:

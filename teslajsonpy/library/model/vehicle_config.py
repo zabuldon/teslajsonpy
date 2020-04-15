@@ -1,7 +1,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 """Tesla vehicle config model."""
 
-from typing import Text
+from typing import Dict, Text
 
 
 class VehicleConfigModel:  # pylint: disable-msg=R0904
@@ -37,7 +37,65 @@ class VehicleConfigModel:  # pylint: disable-msg=R0904
         self.__third_row_seats = None
         self.__timestamp = None
         self.__trim_badging = None
+        self.__use_range_badging = None
         self.__wheel_type = None
+
+    def load(self, data: Dict) -> None:
+        """Load data from a JSON result."""
+
+        self.__can_accept_navigation_requests = (
+            data["can_accept_navigation_requests"]
+            if "can_accept_navigation_requests" in data
+            else None
+        )
+        self.__can_actuate_trunks = (
+            data["can_actuate_trunks"] if "can_actuate_trunks" in data else None
+        )
+        self.__car_special_type = (
+            data["car_special_type"] if "car_special_type" in data else None
+        )
+        self.__car_type = data["car_type"] if "car_type" in data else None
+        self.__charge_port_type = (
+            data["charge_port_type"] if "charge_port_type" in data else None
+        )
+        self.__eu_vehicle = data["eu_vehicle"] if "eu_vehicle" in data else None
+        self.__exterior_color = (
+            data["exterior_color"] if "exterior_color" in data else None
+        )
+        self.__has_air_suspension = (
+            data["has_air_suspension"] if "has_air_suspension" in data else None
+        )
+        self.__has_ludicrous_mode = (
+            data["has_ludicrous_mode"] if "has_ludicrous_mode" in data else None
+        )
+        self.__key_version = data["key_version"] if "key_version" in data else None
+        self.__motorized_charge_port = (
+            data["motorized_charge_port"] if "motorized_charge_port" in data else None
+        )
+        self.__perf_config = data["perf_config"] if "perf_config" in data else None
+        self.__plg = data["plg"] if "plg" in data else None
+        self.__rear_seat_heaters = (
+            data["rear_seat_heaters"] if "rear_seat_heaters" in data else None
+        )
+        self.__rear_seat_type = (
+            data["rear_seat_type"] if "rear_seat_type" in data else None
+        )
+        self.__rhd = data["rhd"] if "rhd" in data else None
+        self.__roof_color = data["roof_color"] if "roof_color" in data else None
+        self.__seat_type = data["seat_type"] if "seat_type" in data else None
+        self.__spoiler_type = data["spoiler_type"] if "spoiler_type" in data else None
+        self.__sun_roof_installed = (
+            data["sun_roof_installed"] if "sun_roof_installed" in data else None
+        )
+        self.__third_row_seats = (
+            data["third_row_seats"] if "third_row_seats" in data else None
+        )
+        self.__timestamp = data["timestamp"] if "timestamp" in data else None
+        self.__trim_badging = data["trim_badging"] if "trim_badging" in data else None
+        self.__use_range_badging = (
+            data["use_range_badging"] if "use_range_badging" in data else None
+        )
+        self.__wheel_type = data["wheel_type"] if "wheel_type" in data else None
 
     @property
     def can_accept_navigation_requests(self) -> bool:
@@ -153,6 +211,11 @@ class VehicleConfigModel:  # pylint: disable-msg=R0904
     def trim_badging(self) -> Text:
         """Return the trim_badging."""
         return self.__trim_badging
+
+    @property
+    def use_range_badging(self) -> bool:
+        """Return the use_range_badging."""
+        return self.__use_range_badging
 
     @property
     def wheel_type(self) -> Text:

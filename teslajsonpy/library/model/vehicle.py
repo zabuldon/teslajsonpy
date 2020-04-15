@@ -18,10 +18,10 @@ class VehicleModel:  # pylint: disable-msg=R0904
     See also: https://tesla-api.timdorr.com/vehicle/state/data
     """
 
-    def __init__(self):
+    def __init__(self, identifier: Text = None):
         """Initialize the model."""
 
-        self.__id = None
+        self.__id = identifier
         self.__user_id = None
         self.__vehicle_id = None
         self.__vin = None
@@ -41,6 +41,74 @@ class VehicleModel:  # pylint: disable-msg=R0904
         self.__gui_settings = None
         self.__vehicle_state = None
         self.__vehicle_config = None
+
+    def load(self, data: Dict) -> None:
+        """Load vehicle data from a JSON result."""
+
+        self.__id = data["id"] if "id" in data else None
+        self.__user_id = data["user_id"] if "user_id" in data else None
+        self.__vehicle_id = data["vehicle_id"] if "vehicle_id" in data else None
+        self.__vin = data["vin"] if "vin" in data else None
+        self.__display_name = data["display_name"] if "display_name" in data else None
+        self.__option_codes = data["option_codes"] if "option_codes" in data else None
+        self.__color = data["color"] if "color" in data else None
+        self.__tokens = data["tokens"] if "tokens" in data else None
+        self.__state = data["state"] if "state" in data else None
+        self.__in_service = data["in_service"] if "in_service" in data else False
+        self.__calendar_enabled = (
+            data["calendar_enabled"] if "calendar_enabled" in data else False
+        )
+        self.__api_version = data["api_version"] if "api_version" in data else None
+        self.__backseat_token = (
+            data["backseat_token"] if "backseat_token" in data else None
+        )
+        self.__backseat_token_updated_at = (
+            data["backseat_token_updated_at"]
+            if "backseat_token_updated_at" in data
+            else None
+        )
+
+        if "drive_state" in data:
+            drive_state = DriveStateModel()
+            drive_state.load(data["drive_state"])
+            self.__drive_state = drive_state
+        else:
+            self.__drive_state = None
+
+        if "climate_state" in data:
+            climate_state = ClimateStateModel()
+            climate_state.load(data["climate_state"])
+            self.__climate_state = climate_state
+        else:
+            self.__climate_state = None
+
+        if "charge_state" in data:
+            charge_state = ChargeStateModel()
+            charge_state.load(data["charge_state"])
+            self.__charge_state = charge_state
+        else:
+            self.__charge_state = None
+
+        if "gui_settings" in data:
+            gui_settings = GuiSettingsModel()
+            gui_settings.load(data["gui_settings"])
+            self.__gui_settings = gui_settings
+        else:
+            self.__gui_settings = None
+
+        if "vehicle_state" in data:
+            vehicle_state = VehicleStateModel()
+            vehicle_state.load(data["vehicle_state"])
+            self.__vehicle_state = vehicle_state
+        else:
+            self.__vehicle_state = None
+
+        if "vehicle_config" in data:
+            vehicle_config = VehicleConfigModel()
+            vehicle_config.load(data["vehicle_config"])
+            self.__vehicle_config = vehicle_config
+        else:
+            self.__vehicle_config = None
 
     @property
     def id(self) -> int:

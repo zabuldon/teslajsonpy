@@ -55,7 +55,7 @@ class DoorLock(Lock):
 
 
 class TrunkLock(Lock):
-    """Tesla trunk lock for Home Assistant."""
+    """Tesla rear trunk lock for Home Assistant."""
 
     async def update(self) -> None:
         """Fetch the latest state from the device and store it in the properties."""
@@ -63,7 +63,7 @@ class TrunkLock(Lock):
 
 
 class FrunkLock(Lock):
-    """Tesla trunk lock for Home Assistant."""
+    """Tesla front trunk (frunk) lock for Home Assistant."""
 
     async def update(self) -> None:
         """Fetch the latest state from the device and store it in the properties."""

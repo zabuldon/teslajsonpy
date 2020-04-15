@@ -1,7 +1,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 """Tesla vehicle state model."""
 
-from typing import Text
+from typing import Dict, Text
 
 
 class MediaStateModel:  # pylint: disable-msg=R0903
@@ -15,6 +15,13 @@ class MediaStateModel:  # pylint: disable-msg=R0903
         """Initialize the media state model."""
 
         self.__remote_control_enabled = None
+
+    def load(self, data: Dict) -> None:
+        """Load data from a JSON result."""
+
+        self.__remote_control_enabled = (
+            data["remote_control_enabled"] if "remote_control_enabled" in data else None
+        )
 
     @property
     def remote_control_enabled(self) -> bool:
@@ -38,6 +45,22 @@ class SoftwareUpdateModel:
         self.__scheduled_time_ms = None
         self.__status = None
         self.__version = None
+
+    def load(self, data: Dict) -> None:
+        """Load data from a JSON result."""
+
+        self.__download_perc = (
+            data["download_perc"] if "download_perc" in data else None
+        )
+        self.__expected_duration_sec = (
+            data["expected_duration_sec"] if "expected_duration_sec" in data else None
+        )
+        self.__install_perc = data["install_perc"] if "install_perc" in data else None
+        self.__scheduled_time_ms = (
+            data["scheduled_time_ms"] if "scheduled_time_ms" in data else None
+        )
+        self.__status = data["status"] if "status" in data else None
+        self.__version = data["version"] if "version" in data else None
 
     @property
     def download_perc(self) -> int:
@@ -85,6 +108,21 @@ class SpeedLimitModeModel:
         self.__max_limit_mph = None
         self.__min_limit_mph = None
         self.__pin_code_set = None
+
+    def load(self, data: Dict) -> None:
+        """Load data from a JSON result."""
+
+        self.__active = data["active"] if "active" in data else None
+        self.__current_limit_mph = (
+            data["current_limit_mph"] if "current_limit_mph" in data else None
+        )
+        self.__max_limit_mph = (
+            data["max_limit_mph"] if "max_limit_mph" in data else None
+        )
+        self.__min_limit_mph = (
+            data["min_limit_mph"] if "min_limit_mph" in data else None
+        )
+        self.__pin_code_set = data["pin_code_set"] if "pin_code_set" in data else None
 
     @property
     def active(self) -> bool:
@@ -162,6 +200,113 @@ class VehicleStateModel:  # pylint: disable-msg=R0904
         self.__valet_mode = None
         self.__valet_pin_needed = None
         self.__vehicle_name = None
+
+    # pylint: disable-msg=too-many-statements
+    def load(self, data: Dict) -> None:
+        """Load data from a JSON result."""
+
+        self.__api_version = data["api_version"] if "api_version" in data else None
+        self.__autopark_state_v3 = (
+            data["autopark_state_v3"] if "autopark_state_v3" in data else None
+        )
+        self.__autopark_style = (
+            data["autopark_style"] if "autopark_style" in data else None
+        )
+        self.__calendar_supported = (
+            data["calendar_supported"] if "calendar_supported" in data else None
+        )
+        self.__car_version = data["car_version"] if "car_version" in data else None
+        self.__center_display_state = (
+            data["center_display_state"] if "center_display_state" in data else None
+        )
+        self.__df = data["df"] if "df" in data else None
+        self.__dr = data["dr"] if "dr" in data else None
+        self.__fd_window = data["fd_window"] if "fd_window" in data else None
+        self.__fp_window = data["fp_window"] if "fp_window" in data else None
+        self.__ft = data["ft"] if "ft" in data else None
+        self.__homelink_device_count = (
+            data["homelink_device_count"] if "homelink_device_count" in data else None
+        )
+        self.__homelink_nearby = (
+            data["homelink_nearby"] if "homelink_nearby" in data else None
+        )
+        self.__is_user_present = (
+            data["is_user_present"] if "is_user_present" in data else None
+        )
+        self.__last_autopark_error = (
+            data["last_autopark_error"] if "last_autopark_error" in data else None
+        )
+        self.__locked = data["locked"] if "locked" in data else None
+
+        if "media_state" in data:
+            media_state = MediaStateModel()
+            media_state.load(data["media_state"])
+            self.__media_state = media_state
+        else:
+            self.__media_state = None
+
+        self.__notifications_supported = (
+            data["notifications_supported"]
+            if "notifications_supported" in data
+            else None
+        )
+        self.__odometer = data["odometer"] if "odometer" in data else None
+        self.__parsed_calendar_supported = (
+            data["parsed_calendar_supported"]
+            if "parsed_calendar_supported" in data
+            else None
+        )
+        self.__pf = data["pf"] if "pf" in data else None
+        self.__pr = data["pr"] if "pr" in data else None
+        self.__rd_window = data["rd_window"] if "rd_window" in data else None
+        self.__remote_start = data["remote_start"] if "remote_start" in data else None
+        self.__remote_start_enabled = (
+            data["remote_start_enabled"] if "remote_start_enabled" in data else None
+        )
+        self.__remote_start_supported = (
+            data["remote_start_supported"] if "remote_start_supported" in data else None
+        )
+        self.__rp_window = data["rp_window"] if "rp_window" in data else None
+        self.__rt = data["rt"] if "rt" in data else None
+        self.__sentry_mode = data["sentry_mode"] if "sentry_mode" in data else None
+        self.__sentry_mode_available = (
+            data["sentry_mode_available"] if "sentry_mode_available" in data else None
+        )
+        self.__smart_summon_available = (
+            data["smart_summon_available"] if "smart_summon_available" in data else None
+        )
+
+        if "software_update" in data:
+            software_update = SoftwareUpdateModel()
+            software_update.load(data["software_update"])
+            self.__software_update = software_update
+        else:
+            self.__software_update = None
+
+        if "speed_limit_mode" in data:
+            speed_limit_mode = SpeedLimitModeModel()
+            speed_limit_mode.load(data["speed_limit_mode"])
+            self.__speed_limit_mode = speed_limit_mode
+        else:
+            self.__speed_limit_mode = None
+
+        self.__summon_standby_mode_enabled = (
+            data["summon_standby_mode_enabled"]
+            if "summon_standby_mode_enabled" in data
+            else None
+        )
+        self.__sun_roof_percent_open = (
+            data["sun_roof_percent_open"] if "sun_roof_percent_open" in data else None
+        )
+        self.__sun_roof_state = (
+            data["sun_roof_state"] if "sun_roof_state" in data else None
+        )
+        self.__timestamp = data["timestamp"] if "timestamp" in data else None
+        self.__valet_mode = data["valet_mode"] if "valet_mode" in data else None
+        self.__valet_pin_needed = (
+            data["valet_pin_needed"] if "valet_pin_needed" in data else None
+        )
+        self.__vehicle_name = data["vehicle_name"] if "vehicle_name" in data else None
 
     @property
     def api_version(self) -> int:

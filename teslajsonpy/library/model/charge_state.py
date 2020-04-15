@@ -1,7 +1,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 """Tesla vehicle charge state model."""
 
-from typing import Text
+from typing import Dict, Text
 
 
 class ChargeStateModel:  # pylint: disable-msg=R0904
@@ -57,6 +57,159 @@ class ChargeStateModel:  # pylint: disable-msg=R0904
         self.__trip_charging = None
         self.__usable_battery_level = None
         self.__user_charge_enable_request = None
+
+    def load(self, data: Dict) -> None:
+        """Load data from a JSON result."""
+
+        self.__battery_heater_on = (
+            data["battery_heater_on"] if "battery_heater_on" in data else None
+        )
+        self.__battery_level = (
+            data["battery_level"] if "battery_level" in data else None
+        )
+        self.__battery_range = (
+            data["battery_range"] if "battery_range" in data else None
+        )
+        self.__charge_current_request = (
+            data["charge_current_request"] if "charge_current_request" in data else None
+        )
+        self.__charge_current_request_max = (
+            data["charge_current_request_max"]
+            if "charge_current_request_max" in data
+            else None
+        )
+        self.__charge_enable_request = (
+            data["charge_enable_request"] if "charge_enable_request" in data else None
+        )
+        self.__charge_energy_added = (
+            data["charge_energy_added"] if "charge_energy_added" in data else None
+        )
+        self.__charge_limit_soc = (
+            data["charge_limit_soc"] if "charge_limit_soc" in data else None
+        )
+        self.__charge_limit_soc_max = (
+            data["charge_limit_soc_max"] if "charge_limit_soc_max" in data else None
+        )
+        self.__charge_limit_soc_min = (
+            data["charge_limit_soc_min"] if "charge_limit_soc_min" in data else None
+        )
+        self.__charge_limit_soc_std = (
+            data["charge_limit_soc_std"] if "charge_limit_soc_std" in data else None
+        )
+        self.__charge_miles_added_ideal = (
+            data["charge_miles_added_ideal"]
+            if "charge_miles_added_ideal" in data
+            else None
+        )
+        self.__charge_miles_added_rated = (
+            data["charge_miles_added_rated"]
+            if "charge_miles_added_rated" in data
+            else None
+        )
+        self.__charge_port_cold_weather_mode = (
+            data["charge_port_cold_weather_mode"]
+            if "charge_port_cold_weather_mode" in data
+            else None
+        )
+        self.__charge_port_door_open = (
+            data["charge_port_door_open"] if "charge_port_door_open" in data else None
+        )
+        self.__charge_port_latch = (
+            data["charge_port_latch"] if "charge_port_latch" in data else None
+        )
+        self.__charge_rate = data["charge_rate"] if "charge_rate" in data else None
+        self.__charge_to_max_range = (
+            data["charge_to_max_range"] if "charge_to_max_range" in data else None
+        )
+        self.__charger_actual_current = (
+            data["charger_actual_current"] if "charger_actual_current" in data else None
+        )
+        self.__charger_phases = (
+            data["charger_phases"] if "charger_phases" in data else None
+        )
+        self.__charger_pilot_current = (
+            data["charger_pilot_current"] if "charger_pilot_current" in data else None
+        )
+        self.__charger_power = (
+            data["charger_power"] if "charger_power" in data else None
+        )
+        self.__charger_voltage = (
+            data["charger_voltage"] if "charger_voltage" in data else None
+        )
+        self.__charging_state = (
+            data["charging_state"] if "charging_state" in data else None
+        )
+        self.__conn_charge_cable = (
+            data["conn_charge_cable"] if "conn_charge_cable" in data else None
+        )
+        self.__est_battery_range = (
+            data["est_battery_range"] if "est_battery_range" in data else None
+        )
+        self.__fast_charger_brand = (
+            data["fast_charger_brand"] if "fast_charger_brand" in data else None
+        )
+        self.__fast_charger_present = (
+            data["fast_charger_present"] if "fast_charger_present" in data else None
+        )
+        self.__fast_charger_type = (
+            data["fast_charger_type"] if "fast_charger_type" in data else None
+        )
+        self.__ideal_battery_range = (
+            data["ideal_battery_range"] if "ideal_battery_range" in data else None
+        )
+        self.__managed_charging_active = (
+            data["managed_charging_active"]
+            if "managed_charging_active" in data
+            else None
+        )
+        self.__managed_charging_start_time = (
+            data["managed_charging_start_time"]
+            if "managed_charging_start_time" in data
+            else None
+        )
+        self.__managed_charging_user_canceled = (
+            data["managed_charging_user_canceled"]
+            if "managed_charging_user_canceled" in data
+            else None
+        )
+        self.__max_range_charge_counter = (
+            data["max_range_charge_counter"]
+            if "max_range_charge_counter" in data
+            else None
+        )
+        self.__minutes_to_full_charge = (
+            data["minutes_to_full_charge"] if "minutes_to_full_charge" in data else None
+        )
+        self.__not_enough_power_to_heat = (
+            data["not_enough_power_to_heat"]
+            if "not_enough_power_to_heat" in data
+            else None
+        )
+        self.__scheduled_charging_pending = (
+            data["scheduled_charging_pending"]
+            if "scheduled_charging_pending" in data
+            else None
+        )
+        self.__scheduled_charging_start_time = (
+            data["scheduled_charging_start_time"]
+            if "scheduled_charging_start_time" in data
+            else None
+        )
+        self.__time_to_full_charge = (
+            data["time_to_full_charge"] if "time_to_full_charge" in data else None
+        )
+        self.__timestamp = data["timestamp"] if "timestamp" in data else None
+        self.__trip_charging = (
+            data["trip_charging"] if "trip_charging" in data else None
+        )
+        self.__usable_battery_level = (
+            data["usable_battery_level"] if "usable_battery_level" in data else None
+        )
+        self.__user_charge_enable_request = (
+            data["user_charge_enable_request"]
+            if "user_charge_enable_request" in data
+            else None
+        )
 
     @property
     def battery_heater_on(self) -> bool:

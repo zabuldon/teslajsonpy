@@ -1,7 +1,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 """Tesla vehicle climate state model."""
 
-from typing import Text
+from typing import Dict, Text
 
 
 class ClimateStateModel:  # pylint: disable-msg=R0904
@@ -44,6 +44,102 @@ class ClimateStateModel:  # pylint: disable-msg=R0904
         self.__steering_wheel_heater = None
         self.__timestamp = None
         self.__wiper_blade_heater = None
+
+    def load(self, data: Dict) -> None:
+        """Load data from a JSON result."""
+
+        self.__battery_heater = (
+            data["battery_heater"] if "battery_heater" in data else None
+        )
+        self.__battery_heater_no_power = (
+            data["battery_heater_no_power"]
+            if "battery_heater_no_power" in data
+            else None
+        )
+        self.__climate_keeper_mode = (
+            data["climate_keeper_mode"] if "climate_keeper_mode" in data else None
+        )
+        self.__defrost_mode = data["defrost_mode"] if "defrost_mode" in data else None
+        self.__driver_temp_setting = (
+            data["driver_temp_setting"] if "driver_temp_setting" in data else None
+        )
+        self.__fan_status = data["fan_status"] if "fan_status" in data else None
+        self.__inside_temp = data["inside_temp"] if "inside_temp" in data else None
+        self.__is_auto_conditioning_on = (
+            data["is_auto_conditioning_on"]
+            if "is_auto_conditioning_on" in data
+            else None
+        )
+        self.__is_climate_on = (
+            data["is_climate_on"] if "is_climate_on" in data else None
+        )
+        self.__is_front_defroster_on = (
+            data["is_front_defroster_on"] if "is_front_defroster_on" in data else None
+        )
+        self.__is_preconditioning = (
+            data["is_preconditioning"] if "is_preconditioning" in data else None
+        )
+        self.__is_rear_defroster_on = (
+            data["is_rear_defroster_on"] if "is_rear_defroster_on" in data else None
+        )
+        self.__left_temp_direction = (
+            data["left_temp_direction"] if "left_temp_direction" in data else None
+        )
+        self.__max_avail_temp = (
+            data["max_avail_temp"] if "max_avail_temp" in data else None
+        )
+        self.__min_avail_temp = (
+            data["min_avail_temp"] if "min_avail_temp" in data else None
+        )
+        self.__outside_temp = data["outside_temp"] if "outside_temp" in data else None
+        self.__passenger_temp_setting = (
+            data["passenger_temp_setting"] if "passenger_temp_setting" in data else None
+        )
+        self.__remote_heater_control_enabled = (
+            data["remote_heater_control_enabled"]
+            if "remote_heater_control_enabled" in data
+            else None
+        )
+        self.__right_temp_direction = (
+            data["right_temp_direction"] if "right_temp_direction" in data else None
+        )
+        self.__seat_heater_left = (
+            data["seat_heater_left"] if "seat_heater_left" in data else None
+        )
+        self.__seat_heater_rear_center = (
+            data["seat_heater_rear_center"]
+            if "seat_heater_rear_center" in data
+            else None
+        )
+        self.__seat_heater_rear_left = (
+            data["seat_heater_rear_left"] if "seat_heater_rear_left" in data else None
+        )
+        self.__seat_heater_rear_left_back = (
+            data["seat_heater_rear_left_back"]
+            if "seat_heater_rear_left_back" in data
+            else None
+        )
+        self.__seat_heater_rear_right = (
+            data["seat_heater_rear_right"] if "seat_heater_rear_right" in data else None
+        )
+        self.__seat_heater_rear_right_back = (
+            data["seat_heater_rear_right_back"]
+            if "seat_heater_rear_right_back" in data
+            else None
+        )
+        self.__seat_heater_right = (
+            data["seat_heater_right"] if "seat_heater_right" in data else None
+        )
+        self.__side_mirror_heaters = (
+            data["side_mirror_heaters"] if "side_mirror_heaters" in data else None
+        )
+        self.__steering_wheel_heater = (
+            data["steering_wheel_heater"] if "steering_wheel_heater" in data else None
+        )
+        self.__timestamp = data["timestamp"] if "timestamp" in data else None
+        self.__wiper_blade_heater = (
+            data["wiper_blade_heater"] if "wiper_blade_heater" in data else None
+        )
 
     @property
     def battery_heater(self) -> bool:
