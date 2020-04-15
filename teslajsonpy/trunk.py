@@ -25,7 +25,7 @@ class TrunkLock(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__rt_value: int = None
+        self.__lock_state: int = None
         self.type: Text = "trunk lock"
         self.hass_type: Text = "lock"
         self.sensor_type: Text = "door"
@@ -36,14 +36,15 @@ class TrunkLock(VehicleDevice):
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the rear trunk state."""
-        await super().async_update(wake_if_asleep=wake_if_asleep)
-        data = self._controller.get_state_params(self._id)
-        if data:
-            self.__rt_value = data["rt"]
+        await super().async_update(wake_if_asleep=wake_if_asleep, force=force)
+        last_update = self._controller.get_last_update_time(self._id)
+        if last_update >= self.__manual_update_time:
+            data = self._controller.get_state_params(self._id)
+            self.__lock_state = data["rt"] if (data and "rt" in data) else None
 
     def is_locked(self):
         """Return whether the rear trunk is closed."""
-        return self.__rt_value == 0
+        return self.__lock_state == 0
 
     async def unlock(self):
         """Open the rear trunk."""
@@ -52,7 +53,7 @@ class TrunkLock(VehicleDevice):
                 self._id, "actuate_trunk", {"which_trunk": "rear"}, wake_if_asleep=True
             )
             if data and data["response"]["result"]:
-                self.__rt_value = 255
+                self.__lock_state = 255
             self.__manual_update_time = time.time()
 
     async def lock(self):
@@ -62,7 +63,7 @@ class TrunkLock(VehicleDevice):
                 self._id, "actuate_trunk", {"which_trunk": "rear"}, wake_if_asleep=True
             )
             if data and data["response"]["result"]:
-                self.__rt_value = 0
+                self.__lock_state = 0
             self.__manual_update_time = time.time()
 
     @staticmethod
@@ -84,8 +85,8 @@ class FrunkLock(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__ft_value: int = None
-        self.type: Text = "trunk lock"
+        self.__lock_state: int = None
+        self.type: Text = "frunk lock"
         self.hass_type: Text = "lock"
         self.sensor_type: Text = "door"
         self.bin_type = 0x7
@@ -95,14 +96,15 @@ class FrunkLock(VehicleDevice):
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the front trunk (frunk) state."""
-        await super().async_update(wake_if_asleep=wake_if_asleep)
-        data = self._controller.get_state_params(self._id)
-        if data:
-            self.__ft_value = data["ft"]
+        await super().async_update(wake_if_asleep=wake_if_asleep, force=force)
+        last_update = self._controller.get_last_update_time(self._id)
+        if last_update >= self.__manual_update_time:
+            data = self._controller.get_state_params(self._id)
+            self.__lock_state = data["ft"] if (data and "ft" in data) else None
 
     def is_locked(self):
         """Return whether the front trunk (frunk) is closed."""
-        return self.__ft_value == 0
+        return self.__lock_state == 0
 
     async def unlock(self):
         """Open the front trunk (frunk)."""
@@ -111,7 +113,7 @@ class FrunkLock(VehicleDevice):
                 self._id, "actuate_trunk", {"which_trunk": "front"}, wake_if_asleep=True
             )
             if data and data["response"]["result"]:
-                self.__ft_value = 255
+                self.__lock_state = 255
             self.__manual_update_time = time.time()
 
     async def lock(self):
@@ -121,7 +123,7 @@ class FrunkLock(VehicleDevice):
                 self._id, "actuate_trunk", {"which_trunk": "front"}, wake_if_asleep=True
             )
             if data and data["response"]["result"]:
-                self.__ft_value = 0
+                self.__lock_state = 0
             self.__manual_update_time = time.time()
 
     @staticmethod
