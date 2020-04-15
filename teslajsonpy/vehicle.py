@@ -103,9 +103,11 @@ class VehicleDevice:
             > self._controller.update_interval
         )
 
-    async def async_update(self, wake_if_asleep=False):
+    async def async_update(self, wake_if_asleep=False, force=False):
         """Update the vehicle data."""
-        await self._controller.update(self.id(), wake_if_asleep=wake_if_asleep)
+        await self._controller.update(
+            self.id(), wake_if_asleep=wake_if_asleep, force=force
+        )
         state = self._controller.get_state_params(self.id())
         if state and "car_version" in state:
             self._car_version = state["car_version"]

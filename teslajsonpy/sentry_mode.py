@@ -42,7 +42,7 @@ class SentryModeSwitch(VehicleDevice):
             and data["vehicle_state"]["sentry_mode"]
         )
 
-    async def async_update(self, wake_if_asleep=False):
+    async def async_update(self, wake_if_asleep=False, force=False):
         """Update the sentry mode of the vehicle."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
         last_update = self._controller.get_last_update_time(self._id)
