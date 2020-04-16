@@ -141,6 +141,7 @@ class OnlineSensor(VehicleDevice):
         self.__online_state: bool = None
         self.type: Text = "online sensor"
         self.hass_type = "binary_sensor"
+        self.sensor_type = "connectivity"
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
 
