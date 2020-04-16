@@ -32,6 +32,7 @@ from teslajsonpy.exceptions import RetryLimitError, TeslaException
 from teslajsonpy.gps import GPS, Odometer
 from teslajsonpy.lock import ChargerLock, Lock
 from teslajsonpy.sentry_mode import SentryModeSwitch
+from teslajsonpy.trunk import TrunkLock, FrunkLock
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -287,21 +288,7 @@ class Controller:
             self.__driving[vin] = {}
             self.__gui[vin] = {}
 
-            self.__components.append(Climate(car, self))
-            self.__components.append(Battery(car, self))
-            self.__components.append(Range(car, self))
-            self.__components.append(TempSensor(car, self))
-            self.__components.append(Lock(car, self))
-            self.__components.append(ChargerLock(car, self))
-            self.__components.append(ChargerConnectionSensor(car, self))
-            self.__components.append(ChargingSensor(car, self))
-            self.__components.append(ChargerSwitch(car, self))
-            self.__components.append(RangeSwitch(car, self))
-            self.__components.append(ParkingSensor(car, self))
-            self.__components.append(GPS(car, self))
-            self.__components.append(Odometer(car, self))
-            self.__components.append(OnlineSensor(car, self))
-            self.__components.append(SentryModeSwitch(car, self))
+            self._add_components(car)
 
         if not test_login:
             tasks = [
@@ -488,6 +475,25 @@ class Controller:
         Use get_vehicles() for general API use.
         """
         return self.__components
+
+    def _add_components(self, car):
+        self.__components.append(Climate(car, self))
+        self.__components.append(Battery(car, self))
+        self.__components.append(Range(car, self))
+        self.__components.append(TempSensor(car, self))
+        self.__components.append(Lock(car, self))
+        self.__components.append(ChargerLock(car, self))
+        self.__components.append(ChargerConnectionSensor(car, self))
+        self.__components.append(ChargingSensor(car, self))
+        self.__components.append(ChargerSwitch(car, self))
+        self.__components.append(RangeSwitch(car, self))
+        self.__components.append(ParkingSensor(car, self))
+        self.__components.append(GPS(car, self))
+        self.__components.append(Odometer(car, self))
+        self.__components.append(OnlineSensor(car, self))
+        self.__components.append(SentryModeSwitch(car, self))
+        self.__components.append(TrunkLock(car, self))
+        self.__components.append(FrunkLock(car, self))
 
     async def _wake_up(self, car_id):
         car_vin = self._id_to_vin(car_id)
