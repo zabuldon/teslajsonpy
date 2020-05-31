@@ -12,6 +12,7 @@ from typing import Callable, Optional, Text, Tuple
 
 import backoff
 import wrapt
+from aiohttp import ClientConnectorError
 
 from teslajsonpy.battery_sensor import Battery, Range
 from teslajsonpy.binary_sensor import (
@@ -344,6 +345,7 @@ class Controller:
         self.__websocket_listeners.append(callback)
         return len(self.__websocket_listeners) - 1
 
+    @backoff.on_exception(min_expo, ClientConnectorError, max_time=10, logger=__name__)
     async def get_vehicles(self):
         """Get vehicles json from TeslaAPI."""
         return (await self.__connection.get("vehicles"))["response"]
