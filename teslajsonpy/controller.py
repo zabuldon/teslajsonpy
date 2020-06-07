@@ -31,7 +31,7 @@ from teslajsonpy.const import (
 )
 from teslajsonpy.exceptions import RetryLimitError, TeslaException
 from teslajsonpy.gps import GPS, Odometer
-from teslajsonpy.lock import ChargerLock, Lock
+from teslajsonpy.lock import Lock, ChargerLock, WindowLock
 from teslajsonpy.sentry_mode import SentryModeSwitch
 from teslajsonpy.trunk import TrunkLock, FrunkLock
 
@@ -485,6 +485,7 @@ class Controller:
         self.__components.append(TempSensor(car, self))
         self.__components.append(Lock(car, self))
         self.__components.append(ChargerLock(car, self))
+        self.__components.append(WindowLock(car, self))
         self.__components.append(ChargerConnectionSensor(car, self))
         self.__components.append(ChargingSensor(car, self))
         self.__components.append(ChargerSwitch(car, self))
