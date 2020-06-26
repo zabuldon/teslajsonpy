@@ -236,7 +236,7 @@ class Controller:
         self._last_wake_up_time = {}  # succesful wake_ups by car
         self._last_attempted_update_time = 0  # all attempts by controller
         self.__lock = {}
-        self.__controller_lock = None
+        self.__controller_lock = None  # controls access to self.car_online
         self.__wakeup_conds = {}
         self.car_online = {}
         self.car_state = {}
@@ -250,13 +250,14 @@ class Controller:
         self.enable_websocket = enable_websocket
 
     async def connect(
-        self, test_login=False, wake_if_asleep=False
+        self, test_login=False, wake_if_asleep=False, filtered_vins=None
     ) -> Tuple[Text, Text]:
         """Connect controller to Tesla.
 
         Args
             test_login (bool, optional): Whether to test credentials only. Defaults to False.
             wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update state. Defaults to False.
+            filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.
 
         Returns
             Tuple[Text, Text]: Returns the refresh_token and access_token
@@ -269,6 +270,10 @@ class Controller:
 
         for car in cars:
             vin = car["vin"]
+            if filtered_vins and vin not in filtered_vins:
+                _LOGGER.debug("Skipping car with VIN: %s", vin)
+                continue
+
             self.__id_vin_map[car["id"]] = vin
             self.__vin_id_map[vin] = car["id"]
             self.__vin_vehicle_id_map[vin] = car["vehicle_id"]
@@ -502,19 +507,20 @@ class Controller:
         car_id = self._update_id(car_id)
         async with self.__wakeup_conds[car_vin]:
             cur_time = int(time.time())
-            if not self.car_online[car_vin] or (
-                cur_time - self._last_wake_up_time[car_vin] > self.update_interval
-            ):
-                result = await self.post(
-                    car_id, "wake_up", wake_if_asleep=False
-                )  # avoid wrapper loop
-                self.car_online[car_vin] = result["response"]["state"] == "online"
-                self.car_state[car_vin] = result["response"]
-                self._last_wake_up_time[car_vin] = cur_time
-                _LOGGER.debug(
-                    "Wakeup %s: %s", car_vin[-5:], self.car_state[car_vin]["state"]
-                )
-            return self.car_online[car_vin]
+            async with self.__controller_lock:
+                if not self.car_online[car_vin] or (
+                    cur_time - self._last_wake_up_time[car_vin] > self.update_interval
+                ):
+                    result = await self.post(
+                        car_id, "wake_up", wake_if_asleep=False
+                    )  # avoid wrapper loop
+                    self.car_online[car_vin] = result["response"]["state"] == "online"
+                    self.car_state[car_vin] = result["response"]
+                    self._last_wake_up_time[car_vin] = cur_time
+                    _LOGGER.debug(
+                        "Wakeup %s: %s", car_vin[-5:], self.car_state[car_vin]["state"]
+                    )
+                return self.car_online[car_vin]
 
     async def update(self, car_id=None, wake_if_asleep=False, force=False):
         #  pylint: disable=too-many-locals,too-many-statements
@@ -660,39 +666,44 @@ class Controller:
                     self.car_online[car["vin"]] = car["state"] == "online"
                     self.car_state[car["vin"]] = car
                 self._last_attempted_update_time = cur_time
-        # Only update online vehicles that haven't been updated recently
-        # The throttling is per car's last succesful update
-        # Note: This separate check is because there may be individual cars
-        # to update.
-        car_id = self._update_id(car_id)
-        car_vin = self._id_to_vin(car_id)
-        tasks = []
-        for vin, online in self.car_online.items():
-            # If specific car_id provided, only update match
-            if (car_vin and car_vin != vin) or self.car_state[vin].get("in_service"):
-                continue
-            async with self.__lock[vin]:
-                car_state = self.car_state[vin].get("state")
-                if (
-                    (online or (wake_if_asleep and car_state in ["asleep", "offline"]))
-                    and (  # pylint: disable=too-many-boolean-expressions
-                        self.__update.get(vin)
-                    )
-                    and (
-                        force
-                        or vin not in self._last_update_time
-                        or (
-                            (cur_time - self._last_update_time[vin])
-                            > _calculate_next_interval(vin)
+            # Only update online vehicles that haven't been updated recently
+            # The throttling is per car's last succesful update
+            # Note: This separate check is because there may be individual cars
+            # to update.
+            car_id = self._update_id(car_id)
+            car_vin = self._id_to_vin(car_id)
+            tasks = []
+            for vin, online in self.car_online.items():
+                # If specific car_id provided, only update match
+                if (car_vin and car_vin != vin) or self.car_state[vin].get(
+                    "in_service"
+                ):
+                    continue
+                async with self.__lock[vin]:
+                    car_state = self.car_state[vin].get("state")
+                    if (
+                        (
+                            online
+                            or (wake_if_asleep and car_state in ["asleep", "offline"])
                         )
-                    )
-                ):  # Only update cars with update flag on
-                    tasks.append(_get_and_process_data(vin))
-                else:
-                    _LOGGER.debug(
-                        "Skipping update of %s with state %s", vin[-5:], car_state
-                    )
-        return any(await asyncio.gather(*tasks))
+                        and (  # pylint: disable=too-many-boolean-expressions
+                            self.__update.get(vin)
+                        )
+                        and (
+                            force
+                            or vin not in self._last_update_time
+                            or (
+                                (cur_time - self._last_update_time[vin])
+                                > _calculate_next_interval(vin)
+                            )
+                        )
+                    ):  # Only update cars with update flag on
+                        tasks.append(_get_and_process_data(vin))
+                    else:
+                        _LOGGER.debug(
+                            "Skipping update of %s with state %s", vin[-5:], car_state
+                        )
+            return any(await asyncio.gather(*tasks))
 
     def get_climate_params(self, car_id):
         """Return cached copy of climate_params for car_id."""
