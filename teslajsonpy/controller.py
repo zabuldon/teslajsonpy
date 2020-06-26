@@ -250,13 +250,14 @@ class Controller:
         self.enable_websocket = enable_websocket
 
     async def connect(
-        self, test_login=False, wake_if_asleep=False
+        self, test_login=False, wake_if_asleep=False, filtered_vins=None
     ) -> Tuple[Text, Text]:
         """Connect controller to Tesla.
 
         Args
             test_login (bool, optional): Whether to test credentials only. Defaults to False.
             wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update state. Defaults to False.
+            filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.
 
         Returns
             Tuple[Text, Text]: Returns the refresh_token and access_token
@@ -269,6 +270,10 @@ class Controller:
 
         for car in cars:
             vin = car["vin"]
+            if filtered_vins and vin not in filtered_vins:
+                _LOGGER.debug("Skipping car with VIN: %s", vin)
+                continue
+
             self.__id_vin_map[car["id"]] = vin
             self.__vin_id_map[vin] = car["id"]
             self.__vin_vehicle_id_map[vin] = car["vehicle_id"]
