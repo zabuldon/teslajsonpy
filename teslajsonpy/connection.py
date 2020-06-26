@@ -154,7 +154,7 @@ class Connection:
             _LOGGER.debug("%s: %s", resp.status, json.dumps(data))
             if resp.status > 299:
                 if resp.status == 401:
-                    if data.get("error") == "invalid_token":
+                    if data and data.get("error") == "invalid_token":
                         raise TeslaException(resp.status, "invalid_token")
                 elif resp.status == 408:
                     raise TeslaException(resp.status, "vehicle_unavailable")
