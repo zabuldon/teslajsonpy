@@ -41,7 +41,6 @@ class WindowCover(VehicleDevice):
         self.name = self._name()
 
         self.uniq_name = self._uniq_name()
-        self.bin_type = 0x7
 
     async def async_update(self, wake_if_asleep: bool = False, force: bool = False) -> None:
         """Update state of the windows."""
