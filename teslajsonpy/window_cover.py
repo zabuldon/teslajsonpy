@@ -83,7 +83,7 @@ class WindowCover(VehicleDevice):
 
     def device_class(self) -> str:
         """Return the class of this sensor."""
-        return "window"
+        return "car_window" # pending HA solution to handle reverse window opening direction from the standard 'window' device class.
 
     @staticmethod
     def has_battery() -> bool:
