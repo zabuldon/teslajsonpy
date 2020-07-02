@@ -9,14 +9,13 @@ import time
 
 from teslajsonpy.vehicle import VehicleDevice
 
-
 class WindowCover(VehicleDevice):
     """Home-assistant cover class for the windows of Tesla vehicles.
 
     This is intended to be partially inherited by a Home-Assitant entity.
     """
 
-    def __init__(self, data, controller):
+    def __init__(self, data: dict, controller: 'teslajsonpy.Controller') -> None:
         """Initialize the window cover entity for the vehicle.
 
         Parameters
@@ -44,7 +43,7 @@ class WindowCover(VehicleDevice):
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x7
 
-    async def async_update(self, wake_if_asleep=False, force=False) -> None:
+    async def async_update(self, wake_if_asleep: bool = False, force: bool = False) -> None:
         """Update state of the windows."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
         last_update = self._controller.get_last_update_time(self._id)
@@ -61,7 +60,7 @@ class WindowCover(VehicleDevice):
                 else None
             )
 
-    async def close(self):
+    async def close(self) -> None:
         """Close the windows."""
         data = await self._controller.command(
             self._id, "window_control", {"command": "close", "lat": 0, "lon": 0}, wake_if_asleep=True
@@ -70,7 +69,7 @@ class WindowCover(VehicleDevice):
             self.__closed_state = True
         self.__manual_update_time = time.time()
 
-    async def open(self):
+    async def open(self) -> None:
         """Vent the windows."""
         data = await self._controller.command(
             self._id, "window_control", {"command": "vent", "lat": 0, "lon": 0}, wake_if_asleep=True
@@ -79,15 +78,15 @@ class WindowCover(VehicleDevice):
             self.__closed_state = False
         self.__manual_update_time = time.time()
 
-    def is_closed(self):
+    def is_closed(self) -> bool:
         """Return whether the windows are closed."""
         return self.__closed_state
 
-    def device_class(self):
+    def device_class(self) -> str:
         """Return the class of this sensor."""
         return "window"
 
     @staticmethod
-    def has_battery():
+    def has_battery() -> bool:
         """Return whether the device has a battery."""
         return False
