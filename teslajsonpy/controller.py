@@ -584,15 +584,16 @@ class Controller:
             ):
                 if self.__update_state[vin] != "trying_to_sleep":
                     self.__update_state[vin] = "trying_to_sleep"
+                    sleep_interval = max(SLEEP_INTERVAL, self.update_interval)
                     _LOGGER.debug(
                         "%s trying to sleep; scan throttled to %s seconds and will ignore updates for %s seconds",
                         vin[-5:],
-                        SLEEP_INTERVAL,
+                        sleep_interval,
                         round(
-                            SLEEP_INTERVAL + self._last_update_time[vin] - cur_time, 2
+                            sleep_interval + self._last_update_time[vin] - cur_time, 2,
                         ),
                     )
-                return SLEEP_INTERVAL
+                return sleep_interval
             if self.__update_state[vin] != "normal":
                 self.__update_state[vin] = "normal"
                 _LOGGER.debug(
