@@ -33,15 +33,15 @@ class WindowCover(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__manual_update_time = 0
-        self.__closed_state = None
+        self.__manual_update_time: int = 0
+        self.__closed_state: bool = None
 
-        self.type = "window cover"
-        self.hass_type = "cover"
+        self.type: str = "window cover"
+        self.hass_type: str = "cover"
 
-        self.name = self._name()
+        self.name: str = self._name()
 
-        self.uniq_name = self._uniq_name()
+        self.uniq_name: str = self._uniq_name()
 
     async def async_update(self, wake_if_asleep: bool = False, force: bool = False) -> None:
         """Update state of the windows."""
