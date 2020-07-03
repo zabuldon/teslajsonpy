@@ -9,13 +9,14 @@ import time
 
 from teslajsonpy.vehicle import VehicleDevice
 
+
 class WindowCover(VehicleDevice):
     """Home-assistant cover class for the windows of Tesla vehicles.
 
     This is intended to be partially inherited by a Home-Assitant entity.
     """
 
-    def __init__(self, data: dict, controller: 'teslajsonpy.Controller') -> None:
+    def __init__(self, data: dict, controller: 'teslajsonpy.Controller') -> None:  # noqa: F821
         """Initialize the window cover entity for the vehicle.
 
         Parameters
@@ -81,9 +82,10 @@ class WindowCover(VehicleDevice):
         """Return whether the windows are closed."""
         return self.__closed_state
 
-    def device_class(self) -> str:
+    @staticmethod
+    def device_class() -> str:
         """Return the class of this sensor."""
-        return "car_window" # pending HA solution to handle reverse window opening direction from the standard 'window' device class.
+        return "car_window"  # pending HA solution to handle reverse window opening direction from the standard 'window' device class.
 
     @staticmethod
     def has_battery() -> bool:
