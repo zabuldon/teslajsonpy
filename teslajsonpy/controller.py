@@ -582,9 +582,9 @@ class Controller:
                 or self.__climate[vin].get("is_climate_on")
                 or self.__charging[vin].get("charging_state") == "Charging"
             ):
+                sleep_interval = max(SLEEP_INTERVAL, self.update_interval)
                 if self.__update_state[vin] != "trying_to_sleep":
                     self.__update_state[vin] = "trying_to_sleep"
-                    sleep_interval = max(SLEEP_INTERVAL, self.update_interval)
                     _LOGGER.debug(
                         "%s trying to sleep; scan throttled to %s seconds and will ignore updates for %s seconds",
                         vin[-5:],
