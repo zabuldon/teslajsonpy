@@ -20,6 +20,18 @@ def test_has_battery(monkeypatch):
     assert not _cover.has_battery()
 
 
+def test_device_class(monkeypatch):
+    """Test device_class()."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_vehicle()
+    _cover = WindowCover(_data, _controller)
+
+    assert _cover.device_class() == "car_window"
+
+
 def test_is_closed_on_init(monkeypatch):
     """Test is_closed() after initialization."""
 
