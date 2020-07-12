@@ -6,4 +6,4 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 
-__version__ = "0.9.2"
+__version__ = "0.9.3"
