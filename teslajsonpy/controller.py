@@ -236,7 +236,7 @@ class Controller:
         self._last_wake_up_time = {}  # succesful wake_ups by car
         self._last_attempted_update_time = 0  # all attempts by controller
         self.__lock = {}
-        self.__controller_lock = None  # controls access to self.car_online
+        self.__update_lock = None  # controls access to update function
         self.__wakeup_conds = {}
         self.car_online = {}
         self.car_state = {}
@@ -266,7 +266,7 @@ class Controller:
 
         cars = await self.get_vehicles()
         self._last_attempted_update_time = time.time()
-        self.__controller_lock = asyncio.Lock()
+        self.__update_lock = asyncio.Lock()
 
         for car in cars:
             vin = car["vin"]
@@ -507,20 +507,19 @@ class Controller:
         car_id = self._update_id(car_id)
         async with self.__wakeup_conds[car_vin]:
             cur_time = int(time.time())
-            async with self.__controller_lock:
-                if not self.car_online[car_vin] or (
-                    cur_time - self._last_wake_up_time[car_vin] > self.update_interval
-                ):
-                    result = await self.post(
-                        car_id, "wake_up", wake_if_asleep=False
-                    )  # avoid wrapper loop
-                    self.car_online[car_vin] = result["response"]["state"] == "online"
-                    self.car_state[car_vin] = result["response"]
-                    self._last_wake_up_time[car_vin] = cur_time
-                    _LOGGER.debug(
-                        "Wakeup %s: %s", car_vin[-5:], self.car_state[car_vin]["state"]
-                    )
-                return self.car_online[car_vin]
+            if not self.car_online[car_vin] or (
+                cur_time - self._last_wake_up_time[car_vin] > self.update_interval
+            ):
+                result = await self.post(
+                    car_id, "wake_up", wake_if_asleep=False
+                )  # avoid wrapper loop
+                self.car_online[car_vin] = result["response"]["state"] == "online"
+                self.car_state[car_vin] = result["response"]
+                self._last_wake_up_time[car_vin] = cur_time
+                _LOGGER.debug(
+                    "Wakeup %s: %s", car_vin[-5:], self.car_state[car_vin]["state"]
+                )
+            return self.car_online[car_vin]
 
     async def update(self, car_id=None, wake_if_asleep=False, force=False):
         #  pylint: disable=too-many-locals,too-many-statements
@@ -652,8 +651,8 @@ class Controller:
                             )
                         )
 
-        cur_time = time.time()
-        async with self.__controller_lock:
+        async with self.__update_lock:
+            cur_time = time.time()
             #  Update the online cars using get_vehicles()
             last_update = self._last_attempted_update_time
             if force or cur_time - last_update > ONLINE_INTERVAL:
