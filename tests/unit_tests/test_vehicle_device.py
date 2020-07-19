@@ -97,6 +97,36 @@ async def test_values_after_update(monkeypatch):
     assert _device.vehicle_id is not None
     assert _device.vehicle_id() == 1234567890
 
+    assert _device.update_available
+    assert _device.update_version == "2019.40.2.1"
+
+
+@pytest.mark.asyncio
+async def test_values_after_update_no_vehicle_update(monkeypatch):
+    """Test values after update."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_vehicle()
+    monkeypatch.setitem(
+        _data["vehicle_state"],
+        "software_update",
+        {
+            "download_perc": 0,
+            "expected_duration_sec": 2700,
+            "install_perc": 1,
+            "scheduled_time_ms": None,
+            "status": "",
+            "version": "",
+        },
+    )
+    _device = VehicleDevice(_data, _controller)
+    await _device.async_update()
+
+    assert not _device.update_available
+    assert _device.update_version == ""
+
 
 @pytest.mark.asyncio
 async def test_assumed_state_online(monkeypatch):

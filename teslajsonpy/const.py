@@ -10,3 +10,4 @@ ONLINE_INTERVAL = 60  # interval for checking online state; does not hit individ
 SLEEP_INTERVAL = 660  # interval required to let vehicle sleep; based on testing
 DRIVING_INTERVAL = 60  # interval when driving detected
 WEBSOCKET_TIMEOUT = 11  # time for websocket to timeout
+RELEASE_NOTES_URL = "https://teslascope.com/teslapedia/software/"

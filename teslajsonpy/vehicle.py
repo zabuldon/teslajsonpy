@@ -49,6 +49,12 @@ class VehicleDevice:
         self.should_poll: bool = True
         self.type: Text = "device"
         self.attrs: Dict[Text, Text] = {}
+        self._update_available: bool = (
+            data.get("software_update", {}).get("status") == "available"
+        )
+        self._update_version: Optional[Text] = data.get("software_update", {}).get(
+            "version"
+        )
 
     def _name(self) -> Text:
         return (
@@ -85,6 +91,16 @@ class VehicleDevice:
         return self._car_version
 
     @property
+    def update_available(self) -> bool:
+        """Return whether an update is available for this Vehicle."""
+        return self._update_available
+
+    @property
+    def update_version(self) -> Optional[Text]:
+        """Return the update version of this Vehicle."""
+        return self._update_version
+
+    @property
     def car_type(self) -> Text:
         """Return the type of this Vehicle."""
         return self._car_type
@@ -115,6 +131,11 @@ class VehicleDevice:
             self._car_version = state["car_version"]
         if state and "sentry_mode_available" in state:
             self._sentry_mode_available = state["sentry_mode_available"]
+        self._update_available = state.get("software_update", {}).get("status") in {
+            "available",
+            "scheduled",
+        }
+        self._update_version = state.get("software_update", {}).get("version")
 
     @staticmethod
     def is_armable() -> bool:
