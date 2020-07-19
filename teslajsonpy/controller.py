@@ -19,6 +19,7 @@ from teslajsonpy.binary_sensor import (
     ChargerConnectionSensor,
     OnlineSensor,
     ParkingSensor,
+    UpdateSensor,
 )
 from teslajsonpy.charger import ChargerSwitch, ChargingSensor, RangeSwitch
 from teslajsonpy.climate import Climate, TempSensor
@@ -501,6 +502,7 @@ class Controller:
         self.__components.append(SentryModeSwitch(car, self))
         self.__components.append(TrunkLock(car, self))
         self.__components.append(FrunkLock(car, self))
+        self.__components.append(UpdateSensor(car, self))
 
     async def _wake_up(self, car_id):
         car_vin = self._id_to_vin(car_id)
