@@ -5,13 +5,14 @@ Python Package for controlling Tesla API.
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
-from typing import Dict, Text
+from typing import Dict, Optional, Text
 
 from teslajsonpy.vehicle import VehicleDevice
+from teslajsonpy.const import RELEASE_NOTES_URL
 
 
-class ParkingSensor(VehicleDevice):
-    """Home-assistant parking brake class for Tesla vehicles.
+class BinarySensor(VehicleDevice):
+    """Home-assistant binary sensor class for Tesla vehicles.
 
     This is intended to be partially inherited by a Home-Assitant entity.
     """
@@ -35,14 +36,60 @@ class ParkingSensor(VehicleDevice):
         super().__init__(data, controller)
         self.__state = None
 
+        self.type = "binary sensor"
+        self.hass_type = "binary_sensor"
+        self._sensor_type = "connectivity"
+        self.name = self._name()
+        self.uniq_name = self._uniq_name()
+
+    async def async_update(self, wake_if_asleep=False, force=False) -> None:
+        """Update the binary sensor."""
+        await super().async_update(wake_if_asleep=wake_if_asleep)
+
+    def get_value(self):
+        """Return whether binary sensor is true."""
+        return self.__state
+
+    @property
+    def sensor_type(self):
+        """Return the sensor_type for use by HA as a device_class."""
+        return self._sensor_type
+
+    @staticmethod
+    def has_battery():
+        """Return whether the device has a battery."""
+        return False
+
+
+class ParkingSensor(BinarySensor):
+    """Home-assistant parking brake class for Tesla vehicles.
+
+    This is intended to be partially inherited by a Home-Assitant entity.
+    """
+
+    def __init__(self, data: Dict, controller):
+        """Initialize the parking brake sensor.
+
+        Parameters
+        ----------
+        data : dict
+            The base state for a Tesla vehicle.
+            https://tesla-api.timdorr.com/vehicle/state/data
+        controller : teslajsonpy.Controller
+            The controller that controls updates to the Tesla API.
+
+        Returns
+        -------
+        None
+
+        """
+        super().__init__(data, controller)
+        self.__state = None
         self.type = "parking brake sensor"
         self.hass_type = "binary_sensor"
-        self.sensor_type = "power"
-
+        self._sensor_type = "power"
         self.name = self._name()
-
         self.uniq_name = self._uniq_name()
-        self.bin_type = 0x1
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the parking brake sensor."""
@@ -61,13 +108,8 @@ class ParkingSensor(VehicleDevice):
         """Return whether parking brake engaged."""
         return self.__state
 
-    @staticmethod
-    def has_battery():
-        """Return whether the device has a battery."""
-        return False
 
-
-class ChargerConnectionSensor(VehicleDevice):
+class ChargerConnectionSensor(BinarySensor):
     """Home-assistant charger connection class for Tesla vehicles.
 
     This is intended to be partially inherited by a Home-Assitant entity.
@@ -91,14 +133,11 @@ class ChargerConnectionSensor(VehicleDevice):
         """
         super().__init__(data, controller)
         self.__state = None
-
         self.type = "charger sensor"
         self.hass_type = "binary_sensor"
+        self._sensor_type = "connectivity"
         self.name = self._name()
-        self.sensor_type = "connectivity"
-
         self.uniq_name = self._uniq_name()
-        self.bin_type = 0x2
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the charger connection sensor."""
@@ -119,13 +158,8 @@ class ChargerConnectionSensor(VehicleDevice):
         """Return whether the charger cable is connected."""
         return self.__state
 
-    @staticmethod
-    def has_battery():
-        """Return whether the device has a battery."""
-        return False
 
-
-class OnlineSensor(VehicleDevice):
+class OnlineSensor(BinarySensor):
     """Home-Assistant Online sensor class for a Tesla VehicleDevice."""
 
     def __init__(self, data: Dict, controller) -> None:
@@ -138,12 +172,12 @@ class OnlineSensor(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__online_state: bool = None
+        self.__online_state: Optional[bool] = None
         self.type: Text = "online sensor"
         self.hass_type = "binary_sensor"
-        self.sensor_type = "connectivity"
-        self.name: Text = self._name()
-        self.uniq_name: Text = self._uniq_name()
+        self._sensor_type = "connectivity"
+        self.name = self._name()
+        self.uniq_name = self._uniq_name()
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the battery state."""
@@ -151,11 +185,47 @@ class OnlineSensor(VehicleDevice):
         self.__online_state = self._controller.car_online[self._vin]
         self.attrs["state"] = self._controller.car_state[self._vin].get("state")
 
-    @staticmethod
-    def has_battery() -> bool:
-        """Return whether the device has a battery."""
-        return False
-
-    def get_value(self) -> bool:
+    def get_value(self) -> Optional[bool]:
         """Return the car is online."""
         return self.__online_state
+
+
+class UpdateSensor(BinarySensor):
+    """Home-Assistant update sensor class for a Tesla VehicleDevice."""
+
+    def __init__(self, data: Dict, controller) -> None:
+        """Initialize the Update sensor.
+
+        Args:
+            data (Dict): Thes base state for a Tesla vehicle.
+                https://tesla-api.timdorr.com/vehicle/state/data
+            controller (Controller): The controller that controls updates to the Tesla API.
+
+        """
+        super().__init__(data, controller)
+        self.type: Text = "update available sensor"
+        self._sensor_type = "problem"
+        self.name = self._name()
+        self.uniq_name = self._uniq_name()
+
+    async def async_update(self, wake_if_asleep=False, force=False) -> None:
+        """Update the battery state."""
+        await super().async_update(wake_if_asleep=wake_if_asleep)
+        self.attrs = (
+            self.device_state_attributes.copy() if self.device_state_attributes else {}
+        )
+
+    def get_value(self) -> Optional[bool]:
+        """Return the car is online."""
+        return self.update_available
+
+    @property
+    def device_state_attributes(self) -> Optional[dict]:
+        """Return the optional state attributes."""
+        if not self.update_available:
+            return None
+        data = {}
+        data["release_notes"] = f"{RELEASE_NOTES_URL}{self.update_version}"
+        data["update_version"] = self.update_version
+        data["installed_version"] = self.car_version
+        return data
