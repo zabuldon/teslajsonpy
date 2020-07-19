@@ -6,7 +6,7 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import logging
-from typing import Dict, Text
+from typing import Dict, Optional, Text
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,45 +33,45 @@ class VehicleDevice:
         None
 
         """
-        self._id = data["id"]
-        self._vehicle_id = data["vehicle_id"]
-        self._display_name = data["display_name"]
-        self._vin = data["vin"]
+        self._id: int = data["id"]
+        self._vehicle_id: int = data["vehicle_id"]
+        self._display_name: Text = data["display_name"]
+        self._vin: Text = data["vin"]
         self._state = data["state"]
-        self._car_type = f"Model {str(self._vin[3]).upper()}"
-        self._car_version = ""
-        self._sentry_mode_available = (
+        self._car_type: Text = f"Model {str(self._vin[3]).upper()}"
+        self._car_version: Text = ""
+        self._sentry_mode_available: bool = (
             "vehicle_state" in data
             and "sentry_mode_available" in data["vehicle_state"]
             and data["vehicle_state"]["sentry_mode_available"]
         )
         self._controller = controller
-        self.should_poll = True
-        self.type = "device"
+        self.should_poll: bool = True
+        self.type: Text = "device"
         self.attrs: Dict[Text, Text] = {}
 
-    def _name(self):
+    def _name(self) -> Text:
         return (
             "{} {}".format(self._display_name, self.type)
             if self._display_name is not None and self._display_name != self._vin[-6:]
             else "Tesla Model {} {}".format(str(self._vin[3]).upper(), self.type)
         )
 
-    def _uniq_name(self):
+    def _uniq_name(self) -> Text:
         return "Tesla Model {} {} {}".format(
             str(self._vin[3]).upper(), self._vin[-6:], self.type
         )
 
-    def id(self):
+    def id(self) -> int:
         # pylint: disable=invalid-name
         """Return the id of this Vehicle."""
         return self._id
 
-    def vehicle_id(self):
+    def vehicle_id(self) -> int:
         """Return the vehicle_id of this Vehicle."""
         return self._vehicle_id
 
-    def car_name(self):
+    def car_name(self) -> Text:
         """Return the car name of this Vehicle."""
         return (
             self._display_name
@@ -80,21 +80,21 @@ class VehicleDevice:
         )
 
     @property
-    def car_version(self):
+    def car_version(self) -> Text:
         """Return the software version of this Vehicle."""
         return self._car_version
 
     @property
-    def car_type(self):
+    def car_type(self) -> Text:
         """Return the type of this Vehicle."""
         return self._car_type
 
     @property
-    def sentry_mode_available(self):
+    def sentry_mode_available(self) -> bool:
         """Return True if sentry mode is available on this Vehicle."""
         return self._sentry_mode_available
 
-    def assumed_state(self):
+    def assumed_state(self) -> bool:
         # pylint: disable=protected-access
         """Return whether the data is from an online vehicle."""
         return not self._controller.car_online[self.id()] and (
@@ -103,7 +103,9 @@ class VehicleDevice:
             > self._controller.update_interval
         )
 
-    async def async_update(self, wake_if_asleep=False, force=False):
+    async def async_update(
+        self, wake_if_asleep: bool = False, force: bool = False
+    ) -> None:
         """Update the vehicle data."""
         await self._controller.update(
             self.id(), wake_if_asleep=wake_if_asleep, force=force
@@ -115,11 +117,11 @@ class VehicleDevice:
             self._sentry_mode_available = state["sentry_mode_available"]
 
     @staticmethod
-    def is_armable():
+    def is_armable() -> bool:
         """Return whether the data is from an online vehicle."""
         return False
 
     @staticmethod
-    def is_armed():
+    def is_armed() -> bool:
         """Return whether the vehicle is armed."""
         return False

@@ -41,25 +41,28 @@ def test_values_on_init(monkeypatch):
     _data = _mock.data_request_vehicle()
     _device = VehicleDevice(_data, _controller)
 
-    assert not _device is None
+    assert _device is not None
 
-    assert not _device.car_name() is None
+    assert _device.car_name() is not None
     assert _device.car_name() == "Nikola 2.0"
 
-    assert not _device.car_type is None
+    assert _device.car_type is not None
     assert _device.car_type == "Model S"
 
-    assert not _device.car_version is None
+    assert _device.car_version is not None
     assert _device.car_version == ""
 
-    assert not _device.id() is None
+    assert _device.id() is not None
     assert _device.id() == 12345678901234567
 
-    assert not _device.sentry_mode_available is None
+    assert _device.sentry_mode_available is not None
     assert _device.sentry_mode_available
 
-    assert not _device.vehicle_id is None
+    assert _device.vehicle_id is not None
     assert _device.vehicle_id() == 1234567890
+
+    assert not _device.update_available
+    assert _device.update_version is None
 
 
 @pytest.mark.asyncio
@@ -74,24 +77,24 @@ async def test_values_after_update(monkeypatch):
 
     await _device.async_update()
 
-    assert not _device is None
+    assert _device is not None
 
     assert not _device.car_name() is None
     assert _device.car_name() == "Nikola 2.0"
 
-    assert not _device.car_type is None
+    assert _device.car_type is not None
     assert _device.car_type == "Model S"
 
-    assert not _device.car_version is None
+    assert _device.car_version is not None
     assert _device.car_version == "2019.40.2.1 38f55d9f9205"
 
-    assert not _device.id() is None
+    assert _device.id() is not None
     assert _device.id() == 12345678901234567
 
-    assert not _device.sentry_mode_available is None
+    assert _device.sentry_mode_available is not None
     assert _device.sentry_mode_available
 
-    assert not _device.vehicle_id is None
+    assert _device.vehicle_id is not None
     assert _device.vehicle_id() == 1234567890
 
 
@@ -113,7 +116,7 @@ async def test_assumed_state_online(monkeypatch):
 
     await _device.async_update()
 
-    assert not _device is None
+    assert _device is not None
     assert not _device.assumed_state() is None
     assert not _device.assumed_state()
 
@@ -136,6 +139,6 @@ async def test_assumed_state_offline(monkeypatch):
 
     await _device.async_update()
 
-    assert not _device is None
+    assert _device is not None
     assert not _device.assumed_state() is None
     assert _device.assumed_state()
