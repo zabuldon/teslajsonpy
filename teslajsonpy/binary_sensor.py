@@ -204,7 +204,7 @@ class UpdateSensor(BinarySensor):
         """
         super().__init__(data, controller)
         self.type: Text = "update available sensor"
-        self._sensor_type = "problem"
+        self._sensor_type = None
         self.name = self._name()
         self.uniq_name = self._uniq_name()
 
