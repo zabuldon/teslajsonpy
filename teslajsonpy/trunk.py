@@ -37,6 +37,14 @@ class TrunkLock(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the rear trunk state."""
         await super().async_update(wake_if_asleep=wake_if_asleep, force=force)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_state_params(self._id)
@@ -97,6 +105,14 @@ class FrunkLock(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the front trunk (frunk) state."""
         await super().async_update(wake_if_asleep=wake_if_asleep, force=force)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_state_params(self._id)

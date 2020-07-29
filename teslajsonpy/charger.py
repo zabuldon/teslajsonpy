@@ -42,6 +42,14 @@ class ChargerSwitch(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the charging state of the Tesla Vehicle."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_charging_params(self._id)
@@ -97,6 +105,14 @@ class RangeSwitch(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the status of the range setting."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_charging_params(self._id)
@@ -165,6 +181,14 @@ class ChargingSensor(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the battery state."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
         data = self._controller.get_gui_params(self._id)
         if data:
             self.measurement = data["gui_distance_units"]
