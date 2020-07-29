@@ -8,8 +8,8 @@ https://github.com/zabuldon/teslajsonpy
 import time
 from typing import List, Optional, Text
 
-from teslajsonpy.vehicle import VehicleDevice
 from teslajsonpy.exceptions import UnknownPresetMode
+from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
 
 class Climate(VehicleDevice):
@@ -75,6 +75,14 @@ class Climate(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the HVAC state."""
         await super().async_update(wake_if_asleep=wake_if_asleep, force=force)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
         data = self._controller.get_climate_params(self._id)
         if data:
             last_update = self._controller.get_last_update_time(self._id)
@@ -222,6 +230,14 @@ class TempSensor(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the temperature."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
         data = self._controller.get_climate_params(self._id)
         if data:
             self.__inside_temp = (

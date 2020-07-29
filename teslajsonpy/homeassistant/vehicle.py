@@ -122,10 +122,21 @@ class VehicleDevice:
     async def async_update(
         self, wake_if_asleep: bool = False, force: bool = False
     ) -> None:
-        """Update the vehicle data."""
+        """Update the vehicle data.
+
+        This function will call a controller update.
+        """
         await self._controller.update(
             self.id(), wake_if_asleep=wake_if_asleep, force=force
         )
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh the vehicle data.
+
+        This assumes the controller has already been updated. This should be
+        called by inherited classes so the overall vehicle information is updated.
+        """
         state = self._controller.get_state_params(self.id())
         if state and "car_version" in state:
             self._car_version = state["car_version"]

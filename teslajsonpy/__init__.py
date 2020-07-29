@@ -5,20 +5,21 @@ Python Package for controlling Tesla API.
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
-from teslajsonpy.battery_sensor import Battery, Range
-from teslajsonpy.binary_sensor import (
+from teslajsonpy.controller import Controller
+from teslajsonpy.exceptions import TeslaException, UnknownPresetMode
+from teslajsonpy.homeassistant.battery_sensor import Battery, Range
+from teslajsonpy.homeassistant.binary_sensor import (
     ChargerConnectionSensor,
     OnlineSensor,
     ParkingSensor,
+    UpdateSensor,
 )
-from teslajsonpy.charger import ChargerSwitch, ChargingSensor, RangeSwitch
-from teslajsonpy.climate import Climate, TempSensor
-from teslajsonpy.controller import Controller
-from teslajsonpy.exceptions import TeslaException, UnknownPresetMode
-from teslajsonpy.gps import GPS, Odometer
-from teslajsonpy.lock import Lock
-from teslajsonpy.sentry_mode import SentryModeSwitch
-from teslajsonpy.trunk import TrunkLock, FrunkLock
+from teslajsonpy.homeassistant.charger import ChargerSwitch, ChargingSensor, RangeSwitch
+from teslajsonpy.homeassistant.climate import Climate, TempSensor
+from teslajsonpy.homeassistant.gps import GPS, Odometer
+from teslajsonpy.homeassistant.lock import Lock
+from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
+from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
 
 from .__version__ import __version__
 
@@ -29,6 +30,7 @@ __all__ = [
     "ChargingSensor",
     "OnlineSensor",
     "ParkingSensor",
+    "UpdateSensor",
     "ChargerSwitch",
     "RangeSwitch",
     "Climate",

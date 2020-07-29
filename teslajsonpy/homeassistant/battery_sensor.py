@@ -7,7 +7,7 @@ https://github.com/zabuldon/teslajsonpy
 """
 from typing import Dict, Optional, Text
 
-from teslajsonpy.vehicle import VehicleDevice
+from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
 
 class Battery(VehicleDevice):
@@ -37,6 +37,14 @@ class Battery(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the battery state."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
         data = self._controller.get_charging_params(self._id)
         if data:
             self.__battery_level = data["battery_level"]
@@ -100,6 +108,14 @@ class Range(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the battery range state."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
         data = self._controller.get_charging_params(self._id)
         if data:
             self.__battery_range = data["battery_range"]
