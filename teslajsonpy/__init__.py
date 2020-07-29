@@ -12,6 +12,7 @@ from teslajsonpy.homeassistant.binary_sensor import (
     ChargerConnectionSensor,
     OnlineSensor,
     ParkingSensor,
+    UpdateSensor,
 )
 from teslajsonpy.homeassistant.charger import ChargerSwitch, ChargingSensor, RangeSwitch
 from teslajsonpy.homeassistant.climate import Climate, TempSensor
@@ -29,6 +30,7 @@ __all__ = [
     "ChargingSensor",
     "OnlineSensor",
     "ParkingSensor",
+    "UpdateSensor",
     "ChargerSwitch",
     "RangeSwitch",
     "Climate",
