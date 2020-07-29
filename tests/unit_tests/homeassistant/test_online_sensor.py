@@ -2,10 +2,10 @@
 
 import pytest
 
-from tests.tesla_mock import TeslaMock
-
 from teslajsonpy.controller import Controller
-from teslajsonpy.binary_sensor import OnlineSensor
+from teslajsonpy.homeassistant.binary_sensor import OnlineSensor
+
+from tests.tesla_mock import TeslaMock
 
 
 def test_has_battery(monkeypatch):

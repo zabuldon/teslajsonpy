@@ -2,10 +2,10 @@
 
 import pytest
 
-from tests.tesla_mock import TeslaMock
-
 from teslajsonpy.controller import Controller
-from teslajsonpy.climate import TempSensor
+from teslajsonpy.homeassistant.climate import TempSensor
+
+from tests.tesla_mock import TeslaMock
 
 
 def test_has_battery(monkeypatch):

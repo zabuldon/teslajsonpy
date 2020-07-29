@@ -7,7 +7,7 @@ https://github.com/zabuldon/teslajsonpy
 """
 import time
 
-from teslajsonpy.vehicle import VehicleDevice
+from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
 
 class Lock(VehicleDevice):
@@ -47,6 +47,14 @@ class Lock(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the lock state."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_state_params(self._id)
@@ -117,6 +125,14 @@ class ChargerLock(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update state of the charger lock."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
+        self.refresh()
+
+    def refresh(self) -> None:
+        """Refresh data.
+
+        This assumes the controller has already been updated
+        """
+        super().refresh()
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_charging_params(self._id)

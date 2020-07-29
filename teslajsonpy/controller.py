@@ -10,19 +10,10 @@ import logging
 import time
 from typing import Callable, Optional, Text, Tuple
 
+from aiohttp import ClientConnectorError
 import backoff
 import wrapt
-from aiohttp import ClientConnectorError
 
-from teslajsonpy.battery_sensor import Battery, Range
-from teslajsonpy.binary_sensor import (
-    ChargerConnectionSensor,
-    OnlineSensor,
-    ParkingSensor,
-    UpdateSensor,
-)
-from teslajsonpy.charger import ChargerSwitch, ChargingSensor, RangeSwitch
-from teslajsonpy.climate import Climate, TempSensor
 from teslajsonpy.connection import Connection
 from teslajsonpy.const import (
     DRIVING_INTERVAL,
@@ -31,10 +22,19 @@ from teslajsonpy.const import (
     SLEEP_INTERVAL,
 )
 from teslajsonpy.exceptions import RetryLimitError, TeslaException
-from teslajsonpy.gps import GPS, Odometer
-from teslajsonpy.lock import ChargerLock, Lock
-from teslajsonpy.sentry_mode import SentryModeSwitch
-from teslajsonpy.trunk import TrunkLock, FrunkLock
+from teslajsonpy.homeassistant.battery_sensor import Battery, Range
+from teslajsonpy.homeassistant.binary_sensor import (
+    ChargerConnectionSensor,
+    OnlineSensor,
+    ParkingSensor,
+    UpdateSensor,
+)
+from teslajsonpy.homeassistant.charger import ChargerSwitch, ChargingSensor, RangeSwitch
+from teslajsonpy.homeassistant.climate import Climate, TempSensor
+from teslajsonpy.homeassistant.gps import GPS, Odometer
+from teslajsonpy.homeassistant.lock import ChargerLock, Lock
+from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
+from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
 
 _LOGGER = logging.getLogger(__name__)
 
