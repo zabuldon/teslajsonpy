@@ -8,8 +8,8 @@ https://github.com/zabuldon/teslajsonpy
 import time
 from typing import List, Optional, Text
 
-from teslajsonpy.vehicle import VehicleDevice
 from teslajsonpy.exceptions import UnknownPresetMode
+from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
 
 class Climate(VehicleDevice):

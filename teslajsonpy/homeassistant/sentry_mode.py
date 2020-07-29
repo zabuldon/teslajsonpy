@@ -7,7 +7,7 @@ https://github.com/zabuldon/teslajsonpy
 """
 import time
 
-from teslajsonpy.vehicle import VehicleDevice
+from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
 
 class SentryModeSwitch(VehicleDevice):

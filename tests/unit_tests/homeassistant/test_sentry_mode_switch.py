@@ -2,10 +2,10 @@
 
 import pytest
 
-from tests.tesla_mock import TeslaMock
-
 from teslajsonpy.controller import Controller
-from teslajsonpy.sentry_mode import SentryModeSwitch
+from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
+
+from tests.tesla_mock import TeslaMock
 
 
 def test_has_battery(monkeypatch):

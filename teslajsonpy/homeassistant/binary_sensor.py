@@ -7,8 +7,8 @@ https://github.com/zabuldon/teslajsonpy
 """
 from typing import Dict, Optional, Text
 
-from teslajsonpy.vehicle import VehicleDevice
 from teslajsonpy.const import RELEASE_NOTES_URL
+from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
 
 class BinarySensor(VehicleDevice):

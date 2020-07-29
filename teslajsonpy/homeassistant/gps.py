@@ -7,7 +7,7 @@ https://github.com/zabuldon/teslajsonpy
 """
 from typing import Optional, Text
 
-from teslajsonpy.vehicle import VehicleDevice
+from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
 
 class GPS(VehicleDevice):

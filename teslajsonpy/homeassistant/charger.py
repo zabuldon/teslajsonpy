@@ -8,7 +8,7 @@ https://github.com/zabuldon/teslajsonpy
 import time
 from typing import Dict, Optional, Text
 
-from teslajsonpy.vehicle import VehicleDevice
+from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
 
 class ChargerSwitch(VehicleDevice):

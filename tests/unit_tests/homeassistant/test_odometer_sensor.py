@@ -2,10 +2,10 @@
 
 import pytest
 
-from tests.tesla_mock import TeslaMock
-
 from teslajsonpy.controller import Controller
-from teslajsonpy.gps import Odometer
+from teslajsonpy.homeassistant.gps import Odometer
+
+from tests.tesla_mock import TeslaMock
 
 
 def test_has_battery(monkeypatch):

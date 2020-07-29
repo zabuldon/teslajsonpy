@@ -2,9 +2,9 @@
 
 import pytest
 
-from teslajsonpy.climate import Climate
 from teslajsonpy.controller import Controller
 from teslajsonpy.exceptions import UnknownPresetMode
+from teslajsonpy.homeassistant.climate import Climate
 
 from tests.tesla_mock import TeslaMock
 

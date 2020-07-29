@@ -2,10 +2,10 @@
 
 import pytest
 
-from tests.tesla_mock import TeslaMock
-
 from teslajsonpy.controller import Controller
-from teslajsonpy.vehicle import VehicleDevice
+from teslajsonpy.homeassistant.vehicle import VehicleDevice
+
+from tests.tesla_mock import TeslaMock
 
 
 def test_is_armable(monkeypatch):

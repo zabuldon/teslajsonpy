@@ -6,10 +6,9 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import time
-
 from typing import Text
 
-from teslajsonpy.vehicle import VehicleDevice
+from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
 
 class TrunkLock(VehicleDevice):
