@@ -6,6 +6,7 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import time
+from typing import Optional
 
 from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
@@ -61,20 +62,22 @@ class SentryModeSwitch(VehicleDevice):
             else:
                 self.__sentry_mode = False
 
-    def available(self):
+    def available(self) -> bool:
         """Return whether the sentry mode is available."""
         return self.sentry_mode_available
 
-    def is_on(self):
-        """Return whether the sentry mode is enabled, always False if sentry mode is not available."""
+    def is_on(self) -> Optional[bool]:
+        """Return whether the sentry mode is enabled, or None if sentry mode is not available."""
+        if not self.sentry_mode_available:
+            return None
         return self.sentry_mode_available and self.__sentry_mode
 
     @staticmethod
-    def has_battery():
+    def has_battery() -> bool:
         """Return whether the device has a battery."""
         return False
 
-    async def enable_sentry_mode(self):
+    async def enable_sentry_mode(self) -> None:
         """Enable the sentry mode."""
         if self.sentry_mode_available and not self.__sentry_mode:
             data = await self._controller.command(
@@ -84,7 +87,7 @@ class SentryModeSwitch(VehicleDevice):
                 self.__sentry_mode = True
             self.__manual_update_time = time.time()
 
-    async def disable_sentry_mode(self):
+    async def disable_sentry_mode(self) -> None:
         """Disable the sentry mode."""
         if self.sentry_mode_available and self.__sentry_mode:
             data = await self._controller.command(
