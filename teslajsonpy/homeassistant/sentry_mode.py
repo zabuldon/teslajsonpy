@@ -65,8 +65,9 @@ class SentryModeSwitch(VehicleDevice):
         """Return whether the sentry mode is available."""
         return self.sentry_mode_available
 
-    def is_on(self):
-        """Return whether the sentry mode is enabled, always False if sentry mode is not available."""
+        """Return whether the sentry mode is enabled, or None if sentry mode is not available."""
+        if not self.sentry_mode_available:
+            return None
         return self.sentry_mode_available and self.__sentry_mode
 
     @staticmethod
