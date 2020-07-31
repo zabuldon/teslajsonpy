@@ -34,7 +34,7 @@ class Lock(VehicleDevice):
         """
         super().__init__(data, controller)
         self.__manual_update_time = 0
-        self.__lock_state = False
+        self.__lock_state = None
 
         self.type = "door lock"
         self.hass_type = "lock"
