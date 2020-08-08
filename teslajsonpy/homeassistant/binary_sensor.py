@@ -34,29 +34,31 @@ class BinarySensor(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__state = None
+        self.__state: Optional[bool] = None
 
-        self.type = "binary sensor"
-        self.hass_type = "binary_sensor"
-        self._sensor_type = "connectivity"
-        self.name = self._name()
-        self.uniq_name = self._uniq_name()
+        self.type: Text = "binary sensor"
+        self.hass_type: Text = "binary_sensor"
+        # this will be returned to HA as a device_class
+        # https://developers.home-assistant.io/docs/core/entity/binary-sensor
+        self._sensor_type: Optional[Text] = None
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the binary sensor."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
 
-    def get_value(self):
+    def get_value(self) -> Optional[bool]:
         """Return whether binary sensor is true."""
         return self.__state
 
     @property
-    def sensor_type(self):
+    def sensor_type(self) -> Optional[Text]:
         """Return the sensor_type for use by HA as a device_class."""
         return self._sensor_type
 
     @staticmethod
-    def has_battery():
+    def has_battery() -> bool:
         """Return whether the device has a battery."""
         return False
 
@@ -84,12 +86,12 @@ class ParkingSensor(BinarySensor):
 
         """
         super().__init__(data, controller)
-        self.__state = None
-        self.type = "parking brake sensor"
-        self.hass_type = "binary_sensor"
-        self._sensor_type = "power"
-        self.name = self._name()
-        self.uniq_name = self._uniq_name()
+        self.__state: Optional[bool] = None
+        self.type: Text = "parking brake sensor"
+        self.hass_type: Text = "binary_sensor"
+        self._sensor_type: Optional[Text] = None
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the parking brake sensor."""
@@ -112,7 +114,7 @@ class ParkingSensor(BinarySensor):
             else:
                 self.__state = False
 
-    def get_value(self):
+    def get_value(self) -> Optional[bool]:
         """Return whether parking brake engaged."""
         return self.__state
 
@@ -140,12 +142,12 @@ class ChargerConnectionSensor(BinarySensor):
 
         """
         super().__init__(data, controller)
-        self.__state = None
-        self.type = "charger sensor"
-        self.hass_type = "binary_sensor"
-        self._sensor_type = "connectivity"
-        self.name = self._name()
-        self.uniq_name = self._uniq_name()
+        self.__state: Optional[bool] = None
+        self.type: Text = "charger sensor"
+        self.hass_type: Text = "binary_sensor"
+        self._sensor_type: Optional[Text] = None
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the charger connection sensor."""
@@ -170,7 +172,7 @@ class ChargerConnectionSensor(BinarySensor):
             else:
                 self.__state = True
 
-    def get_value(self):
+    def get_value(self) -> Optional[bool]:
         """Return whether the charger cable is connected."""
         return self.__state
 
@@ -190,10 +192,10 @@ class OnlineSensor(BinarySensor):
         super().__init__(data, controller)
         self.__online_state: Optional[bool] = None
         self.type: Text = "online sensor"
-        self.hass_type = "binary_sensor"
-        self._sensor_type = "connectivity"
-        self.name = self._name()
-        self.uniq_name = self._uniq_name()
+        self.hass_type: Text = "binary_sensor"
+        self._sensor_type: Optional[Text] = "connectivity"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the battery state."""
@@ -228,9 +230,9 @@ class UpdateSensor(BinarySensor):
         """
         super().__init__(data, controller)
         self.type: Text = "update available sensor"
-        self._sensor_type = None
-        self.name = self._name()
-        self.uniq_name = self._uniq_name()
+        self._sensor_type: Optional[Text] = None
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the battery state."""
