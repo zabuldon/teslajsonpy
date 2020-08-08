@@ -38,7 +38,7 @@ class BinarySensor(VehicleDevice):
 
         self.type = "binary sensor"
         self.hass_type = "binary_sensor"
-        self._sensor_type = "connectivity"
+        self._sensor_type = None
         self.name = self._name()
         self.uniq_name = self._uniq_name()
 
@@ -87,7 +87,7 @@ class ParkingSensor(BinarySensor):
         self.__state = None
         self.type = "parking brake sensor"
         self.hass_type = "binary_sensor"
-        self._sensor_type = "power"
+        self._sensor_type = None
         self.name = self._name()
         self.uniq_name = self._uniq_name()
 
@@ -143,7 +143,7 @@ class ChargerConnectionSensor(BinarySensor):
         self.__state = None
         self.type = "charger sensor"
         self.hass_type = "binary_sensor"
-        self._sensor_type = "connectivity"
+        self._sensor_type = None
         self.name = self._name()
         self.uniq_name = self._uniq_name()
 
