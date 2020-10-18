@@ -26,6 +26,7 @@ class Battery(VehicleDevice):
         self.__battery_level: int = None
         self.__charging_state: bool = None
         self.__charge_port_door_open: bool = None
+        self.__charge_limit_soc = int = None
         self.type: Text = "battery sensor"
         self.measurement: Text = "%"
         self.hass_type: Text = "sensor"
@@ -49,6 +50,7 @@ class Battery(VehicleDevice):
         if data:
             self.__battery_level = data["battery_level"]
             self.__charging_state = data["charging_state"] == "Charging"
+            self.__charge_limit_soc = data["charge_limit_soc"]
 
     @staticmethod
     def has_battery() -> bool:
