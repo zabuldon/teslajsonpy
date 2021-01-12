@@ -256,7 +256,7 @@ class ChargingSensor(VehicleDevice):
 
     @property
     def charge_soc_limit(self) -> int:
-        """Return the energy added."""
+        """Return the state of charge limit."""
         return self.__charge_limit_soc
 
     @property
