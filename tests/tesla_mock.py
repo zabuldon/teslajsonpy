@@ -41,9 +41,6 @@ class TeslaMock:
             Controller, "get_last_update_time", self.mock_get_last_update_time
         )
         self._monkeypatch.setattr(Controller, "update", self.mock_update)
-        self._monkeypatch.setattr(
-            Connection, "generate_oauth", self.mock_generate_oauth
-        )
 
     def mock_connect(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -94,11 +91,6 @@ class TeslaMock:
         # pylint: disable=unused-argument
         """ Mock controller's update method."""
         return self.controller_update()
-
-    def mock_generate_oauth(self, *args, **kwargs):
-        # pylint: disable=unused-argument
-        """ Mock connection's generate_oauth method."""
-        return self.connection_generate_oauth()
 
     @staticmethod
     def controller_connect():
