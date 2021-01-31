@@ -177,7 +177,7 @@ class ChargingSensor(VehicleDevice):
         self.__charge_current_request = None
         self.__charger_actual_current = None
         self.__charger_voltage = None
-        self.__charger_soc_limit = None
+        self.__charge_limit_soc = None
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the battery state."""
@@ -209,7 +209,7 @@ class ChargingSensor(VehicleDevice):
             self.__charger_actual_current = data["charger_actual_current"]
             self.__charger_voltage = data["charger_voltage"]
             self.__charge_limit_soc = data["charge_limit_soc"]
-            self.attrs["charge_soc_limit"] = self.charge_soc_limit
+            self.attrs["charge_limit_soc"] = self.charge_limit_soc
             if self.measurement != "mi/hr":
                 self.__added_range = round(self.__added_range / 0.621371, 2)
                 self.__charging_rate = round(self.__charging_rate / 0.621371, 2)
@@ -255,7 +255,7 @@ class ChargingSensor(VehicleDevice):
         return self.__charge_energy_added
 
     @property
-    def charge_soc_limit(self) -> int:
+    def charge_limit_soc(self) -> int:
         """Return the state of charge limit."""
         return self.__charge_limit_soc
 
