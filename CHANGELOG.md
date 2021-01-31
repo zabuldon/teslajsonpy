@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.3 (2021-01-31)
+### Fix
+* Detect missing name/password ([`c4f8c54`](https://github.com/zabuldon/teslajsonpy/commit/c4f8c54d0149fa0b22dfcb299cb4ae6b4cbffaa3))
+
+## v0.11.2 (2021-01-31)
+### Fix
+* Add bs4 as dependency for install ([`2a3c154`](https://github.com/zabuldon/teslajsonpy/commit/2a3c15488b26f116a40156bdd8e3ae0b6d24ec01))
+
 ## v0.11.1 (2021-01-31)
 ### Fix
 * Use oauth3 login ([`487c7b4`](https://github.com/zabuldon/teslajsonpy/commit/487c7b4d3ff2cddf3bf3fdd099dc8a51ae2d4e5d))
