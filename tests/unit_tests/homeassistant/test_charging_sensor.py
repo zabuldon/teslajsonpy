@@ -49,7 +49,7 @@ def test_get_value_on_init(monkeypatch):
     assert _sensor.charger_actual_current is None
     assert _sensor.charger_voltage is None
     assert _sensor.charge_energy_added is None
-    assert _sensor.charge_limit_soc is None
+    assert _sensor.charge_soc_limit is None
 
 
 @pytest.mark.asyncio
@@ -72,7 +72,7 @@ async def test_get_value_after_update(monkeypatch):
     assert _sensor.charger_actual_current == 0
     assert _sensor.charger_voltage == 0
     assert _sensor.charge_energy_added == 12.41
-    assert _sensor.charge_limit_soc == 90
+    assert _sensor.charge_soc_limit == 90
 
 
 @pytest.mark.asyncio
@@ -95,7 +95,7 @@ async def test_async_update(monkeypatch):
     assert _sensor.charger_actual_current == 0
     assert _sensor.charger_voltage == 0
     assert _sensor.charge_energy_added == 12.41
-    assert _sensor.charge_limit_soc == 90
+    assert _sensor.charge_soc_limit == 90
 
 
 @pytest.mark.asyncio

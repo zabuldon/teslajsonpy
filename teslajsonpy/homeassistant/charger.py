@@ -209,7 +209,7 @@ class ChargingSensor(VehicleDevice):
             self.__charger_actual_current = data["charger_actual_current"]
             self.__charger_voltage = data["charger_voltage"]
             self.__charge_limit_soc = data["charge_limit_soc"]
-            self.attrs["charge_limit_soc"] = self.charge_soc_limit
+            self.attrs["charge_soc_limit"] = self.charge_soc_limit
             if self.measurement != "mi/hr":
                 self.__added_range = round(self.__added_range / 0.621371, 2)
                 self.__charging_rate = round(self.__charging_rate / 0.621371, 2)
