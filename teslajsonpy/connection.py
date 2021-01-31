@@ -216,7 +216,7 @@ class Connection:
                     f'{data.get("error")}:{data.get("error_description")}'
                 )
         except aiohttp.ClientResponseError as exception_:
-            raise TeslaException(exception_.status)
+            raise TeslaException(exception_.status) from exception_
         return data
 
     async def websocket_connect(self, vin: int, vehicle_id: int, **kwargs):
