@@ -20,6 +20,7 @@ black = "*"
 [packages]
 aiohttp = "*"
 backoff = "*"
+bs4 = "*"
 wrapt = "*"
 
 [pipenv]
