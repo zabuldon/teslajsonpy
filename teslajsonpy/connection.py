@@ -434,10 +434,10 @@ class Connection:
             "refresh_token": refresh_token,
             "scope": "openid email offline_access",
         }
-        auth = await self.websession.post(
-            "https://auth.tesla.com/oauth2/v3/token", data=oauth,
+        auth = await self.__open(
+            "/oauth2/v3/token", "post", data=oauth, baseurl="https://auth.tesla.com",
         )
-        return await auth.json()
+        return auth
 
     async def get_bearer_token(self, access_token):
         """Get bearer token. This is used by the owners API."""
