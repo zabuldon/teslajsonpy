@@ -135,11 +135,13 @@ class Connection:
         url: Text,
         method: Text = "get",
         headers=None,
+        cookies=None,
         data=None,
         baseurl: Text = "",
     ) -> None:
         """Open url."""
         headers = headers or {}
+        cookies = cookies or {}
         if not baseurl:
             baseurl = self.baseurl
         url: URL = URL(baseurl + url)
@@ -148,7 +150,7 @@ class Connection:
 
         try:
             resp = await getattr(self.websession, method)(
-                url, headers=headers, data=data
+                url, data=data, headers=headers, cookies=cookies
             )
             data = await resp.json()
             _LOGGER.debug("%s: %s", resp.status, json.dumps(data))
