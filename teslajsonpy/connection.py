@@ -216,7 +216,7 @@ class Connection:
                     f'{data.get("error")}:{data.get("error_description")}'
                 )
         except aiohttp.ClientResponseError as exception_:
-            raise TeslaException(exception_.status)
+            raise TeslaException(exception_.status) from exception_
         return data
 
     async def websocket_connect(self, vin: int, vehicle_id: int, **kwargs):
@@ -434,10 +434,10 @@ class Connection:
             "refresh_token": refresh_token,
             "scope": "openid email offline_access",
         }
-        auth = await self.__open(
-            "/oauth2/v3/token", "post", data=oauth, baseurl="https://auth.tesla.com",
+        auth = await self.websession.post(
+            "https://auth.tesla.com/oauth2/v3/token", data=oauth,
         )
-        return auth
+        return await auth.json()
 
     async def get_bearer_token(self, access_token):
         """Get bearer token. This is used by the owners API."""
