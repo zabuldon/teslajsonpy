@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.4 (2021-02-02)
+### Fix
+* Check for existence of input field in form ([`613406e`](https://github.com/zabuldon/teslajsonpy/commit/613406e4f6bc95f7306b18e54ba47ea718b63fd8))
+
 ## v0.11.3 (2021-01-31)
 ### Fix
 * Detect missing name/password ([`c4f8c54`](https://github.com/zabuldon/teslajsonpy/commit/c4f8c54d0149fa0b22dfcb299cb4ae6b4cbffaa3))
