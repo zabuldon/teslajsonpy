@@ -436,7 +436,7 @@ def get_inputs(soup: BeautifulSoup, searchfield=None) -> Dict[str, str]:
     form = soup.find("form", searchfield)
     if not form:
         form = soup.find("form")
-    if form.find_all("input"):
+    if form:
         for field in form.find_all("input"):
             try:
                 data[field["name"]] = ""
