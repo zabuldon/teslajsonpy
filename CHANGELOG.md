@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.11.5 (2021-02-02)
+### Fix
+* Address attribute error properly for form ([`11f59ea`](https://github.com/zabuldon/teslajsonpy/commit/11f59eaa398d70e1444151414cc5235ce68584d9))
+
 ## v0.11.4 (2021-02-02)
 ### Fix
 * Check for existence of input field in form ([`613406e`](https://github.com/zabuldon/teslajsonpy/commit/613406e4f6bc95f7306b18e54ba47ea718b63fd8))
