@@ -1,4 +1,12 @@
 # teslajsonpy
+[![Version status](https://img.shields.io/pypi/status/teslajsonpy)](https://pypi.org/project/teslajsonpy)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Python version compatibility](https://img.shields.io/pypi/pyversions/teslajsonpy)](https://pypi.org/project/teslajsonpy)
+[![Version on Github](https://img.shields.io/github/v/release/zabuldon/teslajsonpy?include_prereleases&label=GitHub)](https://github.com/zabuldon/teslajsonpy/releases)
+[![Version on PyPi](https://img.shields.io/pypi/v/teslajsonpy)](https://pypi.org/project/teslajsonpy)
+![PyPI - Downloads](https://img.shields.io/pypi/dd/teslajsonpy)
+![PyPI - Downloads](https://img.shields.io/pypi/dw/teslajsonpy)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/teslajsonpy)
 
 Async python module for Tesla API primarily for enabling Home-Assistant.
 
