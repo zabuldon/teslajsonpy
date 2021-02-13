@@ -15,6 +15,7 @@ tox = "*"
 tox-pipenv = "*"
 twine = "*"
 black = "*"
+typing-extensions = "*"
 
 [packages]
 aiohttp = "*"
