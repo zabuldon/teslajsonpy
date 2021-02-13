@@ -37,7 +37,7 @@ class Connection:
         password: Text = None,
         access_token: Text = None,
         refresh_token: Text = None,
-        authorization_token=None,
+        authorization_token: Text = None,
         expiration: int = 0,
     ) -> None:
         """Initialize connection object."""
@@ -80,6 +80,10 @@ class Connection:
     async def post(self, command, method="post", data=None):
         """Post data to API."""
         now = calendar.timegm(datetime.datetime.now().timetuple())
+        _LOGGER.debug(
+            "Token expiration in %s",
+            str(datetime.timedelta(seconds=self.expiration - now)),
+        )
         if now > self.expiration:
             self.token_refreshed = False
             auth = {}
@@ -91,11 +95,13 @@ class Connection:
                     and not self.sso_oauth.get("refresh_token")
                 )
             ):
-                _LOGGER.debug("Getting sso auth code using credentials")
                 if self.email and self.password:
+                    _LOGGER.debug("Getting sso auth code using credentials")
                     self.code = await self.get_authorization_code(
                         self.email, self.password
                     )
+                else:
+                    _LOGGER.debug("Using existing authorization code")
                 auth = await self.get_sso_auth_token(self.code)
             elif self.sso_oauth.get("refresh_token") and now > self.sso_oauth.get(
                 "expires_in", 0
@@ -104,23 +110,39 @@ class Connection:
                 auth = await self.refresh_access_token(
                     refresh_token=self.sso_oauth.get("refresh_token")
                 )
-            if auth:
+            if auth and all(
+                [
+                    auth.get(item)
+                    for item in ["access_token", "refresh_token", "expires_in"]
+                ]
+            ):
                 self.sso_oauth = {
                     "access_token": auth["access_token"],
                     "refresh_token": auth["refresh_token"],
                     "expires_in": auth["expires_in"] + now,
                 }
-                _LOGGER.debug("Saving new auth info %s", self.sso_oauth)
+                _LOGGER.debug("Saved new auth info %s", self.sso_oauth)
             else:
                 _LOGGER.debug("Unable to refresh sso oauth token")
+                if auth:
+                    _LOGGER.debug("Auth returned %s", auth)
+                self.code = None
                 self.sso_oauth = {}
                 raise IncompleteCredentials("Need oauth credentials")
             auth = await self.get_bearer_token(
                 access_token=self.sso_oauth.get("access_token")
             )
-            self.__sethead(
-                access_token=auth["access_token"], expires_in=auth["expires_in"]
-            )
+            _LOGGER.debug("Received bearer token %s", auth)
+            if auth.get("created_at"):
+                # use server time if available
+                self.__sethead(
+                    access_token=auth["access_token"],
+                    expiration=auth["expires_in"] + auth["created_at"],
+                )
+            else:
+                self.__sethead(
+                    access_token=auth["access_token"], expires_in=auth["expires_in"]
+                )
             self.refresh_token = auth["refresh_token"]
             self.token_refreshed = True
             _LOGGER.debug("Successfully refreshed oauth")
@@ -347,7 +369,29 @@ class Connection:
         if not (email and password):
             _LOGGER.debug("No email or password for login; unable to login.")
             return
+        url = self.get_authorization_code_link(new=True)
+        resp = await self.websession.get(url)
+        html = await resp.text()
+        soup: BeautifulSoup = BeautifulSoup(html, "html.parser")
+        data = get_inputs(soup)
+        data["identity"] = self.email
+        data["credential"] = self.password
+        resp = await self.websession.post(url, data=data)
+        _process_resp(resp)
+        code_url = URL(resp.history[-1].url)
+        return code_url.query.get("code")
 
+    def get_authorization_code_link(self, new=False) -> yarl.URL:
+        """Get authorization code url for the oauth3 login method."""
+        # https://tesla-api.timdorr.com/api-basics/authentication#step-2-obtain-an-authorization-code
+        if new:
+            self.code_verifier: Text = secrets.token_urlsafe(64)
+            self.code_challenge = str(
+                base64.urlsafe_b64encode(
+                    hashlib.sha256(self.code_verifier.encode()).hexdigest().encode()
+                ),
+                "utf-8",
+            )
         state = secrets.token_urlsafe(64)
         query = {
             "client_id": "ownerapi",
@@ -360,17 +404,7 @@ class Connection:
         }
         url = yarl.URL("https://auth.tesla.com/oauth2/v3/authorize")
         url = url.update_query(query)
-        _LOGGER.debug("Getting sso auth token from %s", url)
-        resp = await self.websession.get(url)
-        html = await resp.text()
-        soup: BeautifulSoup = BeautifulSoup(html, "html.parser")
-        data = get_inputs(soup)
-        data["identity"] = self.email
-        data["credential"] = self.password
-        resp = await self.websession.post(url, data=data)
-        _process_resp(resp)
-        code_url = URL(resp.history[-1].url)
-        return code_url.query.get("code")
+        return url
 
     async def get_sso_auth_token(self, code):
         """Get sso auth token."""

@@ -8,11 +8,12 @@ https://github.com/zabuldon/teslajsonpy
 import asyncio
 import logging
 import time
-from typing import Callable, Optional, Text, Tuple
+from typing import Callable, Dict, Optional, Text
 
 from aiohttp import ClientConnectorError
 import backoff
 import wrapt
+from yarl import URL
 
 from teslajsonpy.connection import Connection
 from teslajsonpy.const import (
@@ -222,7 +223,12 @@ class Controller:
 
         """
         self.__connection = Connection(
-            websession, email, password, access_token, refresh_token, expiration
+            websession=websession,
+            email=email,
+            password=password,
+            access_token=access_token,
+            refresh_token=refresh_token,
+            expiration=expiration,
         )
         self.__components = []
         self._update_interval: int = update_interval
@@ -252,7 +258,7 @@ class Controller:
 
     async def connect(
         self, test_login=False, wake_if_asleep=False, filtered_vins=None
-    ) -> Tuple[Text, Text]:
+    ) -> Dict[Text, Text]:
         """Connect controller to Tesla.
 
         Args
@@ -261,7 +267,7 @@ class Controller:
             filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.
 
         Returns
-            Tuple[Text, Text]: Returns the refresh_token and access_token
+            Dict[Text, Text]: Returns the refresh_token, access_token, and expires_in time
 
         """
 
@@ -306,7 +312,11 @@ class Controller:
                 await asyncio.gather(*tasks)
             except (TeslaException, RetryLimitError):
                 pass
-        return (self.__connection.refresh_token, self.__connection.access_token)
+        return {
+            "refresh_token": self.__connection.refresh_token,
+            "access_token": self.__connection.access_token,
+            "expiration": self.__connection.expiration,
+        }
 
     def is_token_refreshed(self) -> bool:
         """Return whether token has been changed and not retrieved.
@@ -317,17 +327,21 @@ class Controller:
         """
         return self.__connection.token_refreshed
 
-    def get_tokens(self) -> Tuple[Text, Text]:
-        """Return refresh and access tokens.
+    def get_tokens(self) -> Dict[Text, Text]:
+        """Return oauth data including refresh and access tokens, and expires time.
 
         This will set the the self.__connection token_refreshed to False.
 
         Returns
-            Tuple[Text, Text]: Returns a tuple of refresh and access tokens
+            Dict[Text, Text]: Returns the refresh_token, access_token, and expires time
 
         """
         self.__connection.token_refreshed = False
-        return (self.__connection.refresh_token, self.__connection.access_token)
+        return {
+            "refresh_token": self.__connection.refresh_token,
+            "access_token": self.__connection.access_token,
+            "expiration": self.__connection.expiration,
+        }
 
     def get_expiration(self) -> int:
         """Return expiration for oauth.
@@ -337,6 +351,14 @@ class Controller:
 
         """
         return self.__connection.expiration
+
+    def get_oauth_url(self) -> URL:
+        """Return oauth url."""
+        return self.__connection.get_authorization_code_link(new=True)
+
+    def set_authorization_code(self, code: Text) -> None:
+        """Set authorization code in Connection."""
+        self.__connection.code = code
 
     def register_websocket_callback(self, callback) -> int:
         """Register callback for websocket messages.
