@@ -189,6 +189,7 @@
                 "sha256:99d4073b617d30288f569d3f13d2bd7548c3a7e4c8de87db09a9d29bb3a4a60c",
                 "sha256:dafc7639cde7f1b6e1acc0f457842a83e722ccca8eef5270af2d74792619a89f"
             ],
+            "markers": "python_version < '3.8'",
             "version": "==3.7.4.3"
         },
         "wrapt": {
@@ -479,6 +480,14 @@
             ],
             "markers": "python_version >= '3.4'",
             "version": "==3.1"
+        },
+        "importlib-metadata": {
+            "hashes": [
+                "sha256:ace61d5fc652dc280e7b6b4ff732a9c2d40db2c0f92bc6cb74e07b73d53a1771",
+                "sha256:fa5daa4477a7414ae34e95942e4dd07f62adf589143c875c133c1e53c4eff38d"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==3.4.0"
         },
         "iniconfig": {
             "hashes": [
@@ -844,6 +853,7 @@
                 "sha256:d746a437cdbca200622385305aedd9aef68e8a645e385cc483bdc5e488f07166",
                 "sha256:e683e409e5c45d5c9082dc1daf13f6374300806240719f95dc783d1fc942af10"
             ],
+            "markers": "python_version < '3.8' and implementation_name == 'cpython'",
             "version": "==1.4.2"
         },
         "typing-extensions": {
@@ -852,6 +862,7 @@
                 "sha256:99d4073b617d30288f569d3f13d2bd7548c3a7e4c8de87db09a9d29bb3a4a60c",
                 "sha256:dafc7639cde7f1b6e1acc0f457842a83e722ccca8eef5270af2d74792619a89f"
             ],
+            "markers": "python_version < '3.8'",
             "version": "==3.7.4.3"
         },
         "urllib3": {
@@ -890,6 +901,14 @@
                 "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"
             ],
             "version": "==1.12.1"
+        },
+        "zipp": {
+            "hashes": [
+                "sha256:102c24ef8f171fd729d46599845e95c7ab894a4cf45f5de11a44cc7444fb1108",
+                "sha256:ed5eee1974372595f9e416cc7bbeeb12335201d8081ca8a0743c954d4446e5cb"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==3.4.0"
         }
     }
 }
