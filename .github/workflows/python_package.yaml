@@ -28,7 +28,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install pipenv
-        pipenv install -e . --dev
+        pipenv install --three --dev
     - name: Lint
       run: |
         make lint
