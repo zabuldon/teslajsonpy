@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.12.0 (2021-02-13)
+### Feature
+* Add teslaproxy to capture oauth credentials ([`dd209d9`](https://github.com/zabuldon/teslajsonpy/commit/dd209d9c9f7d78b6cc2e2ca0da083054a58f0bc1))
+
+### Documentation
+* Add badges ([`02b583b`](https://github.com/zabuldon/teslajsonpy/commit/02b583b3ab4a53579bf8c68c03f03ee4405f6559))
+
 ## v0.11.5 (2021-02-02)
 ### Fix
 * Address attribute error properly for form ([`11f59ea`](https://github.com/zabuldon/teslajsonpy/commit/11f59eaa398d70e1444151414cc5235ce68584d9))
