@@ -24,12 +24,12 @@ DESCRIPTION = "A library to work with Tesla API."
 URL = "https://github.com/zabuldon/teslajsonpy"
 EMAIL = "sergey.isachenkol@bool.by"
 AUTHOR = "Sergey Isachenko"
-REQUIRES_PYTHON = ">=3.6"
+REQUIRES_PYTHON = ">=3.6.1"
 LICENSE = "Apache-2.0"
 VERSION = None
 
 # What packages are required for this module to be executed?
-REQUIRED = ["aiohttp", "backoff", "beautifulsoup4", "wrapt"]
+REQUIRED = ["aiohttp", "authcaptureproxy", "backoff", "beautifulsoup4", "wrapt"]
 
 # What packages are optional?
 EXTRAS = {

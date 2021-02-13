@@ -14,14 +14,14 @@ pytest-cov = "*"
 tox = "*"
 tox-pipenv = "*"
 twine = "*"
-python-semantic-release = "*"
 black = "*"
 
 [packages]
 aiohttp = "*"
 backoff = "*"
-bs4 = "*"
+beautifulsoup4 = "*"
 wrapt = "*"
+authcaptureproxy = "0.4.0"
 
 [pipenv]
 allow_prereleases = true
