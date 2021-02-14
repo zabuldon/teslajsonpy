@@ -2,6 +2,8 @@
 """
 Python Package for controlling Tesla API.
 
+Underlying connection logic.
+
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
@@ -285,7 +287,8 @@ class Connection:
             )
             await asyncio.sleep(WEBSOCKET_TIMEOUT - 1)
         _LOGGER.debug(
-            "%s:Exiting websocket_connect", vin[-5:],
+            "%s:Exiting websocket_connect",
+            vin[-5:],
         )
 
     # async def websocket_connect2(self, vin: int, vehicle_id: int, **kwargs):
@@ -421,7 +424,8 @@ class Connection:
             "redirect_uri": "https://auth.tesla.com/void/callback",
         }
         auth = await self.websession.post(
-            "https://auth.tesla.com/oauth2/v3/token", data=oauth,
+            "https://auth.tesla.com/oauth2/v3/token",
+            data=oauth,
         )
         return await auth.json()
 
@@ -439,7 +443,8 @@ class Connection:
             "scope": "openid email offline_access",
         }
         auth = await self.websession.post(
-            "https://auth.tesla.com/oauth2/v3/token", data=oauth,
+            "https://auth.tesla.com/oauth2/v3/token",
+            data=oauth,
         )
         return await auth.json()
 

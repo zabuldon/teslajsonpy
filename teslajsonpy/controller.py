@@ -2,6 +2,8 @@
 """
 Python Package for controlling Tesla API.
 
+Controller to control access to the Tesla API.
+
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
@@ -545,7 +547,12 @@ class Controller:
                 )
             return self.car_online[car_vin]
 
-    async def update(self, car_id=None, wake_if_asleep=False, force=False):
+    async def update(
+        self,
+        car_id: Optional[Text] = None,
+        wake_if_asleep: bool = False,
+        force: bool = False,
+    ) -> bool:
         #  pylint: disable=too-many-locals,too-many-statements
         """Update all vehicle attributes in the cache.
 
@@ -555,18 +562,15 @@ class Controller:
         assuming no update has occurred for at least the [update_interval].
 
         Args
-        inst (Controller): The instance of a controller
-        car_id (string): The vehicle to update. If None, all cars are updated.
-        wake_if_asleep (bool): Keyword arg to force a vehicle awake. This is
-                               processed by the wake_up decorator.
-        force (bool): Keyword arg to force a vehicle update regardless of the
-                      update_interval
+            car_id (Text, optional): The vehicle to update. If None, all cars are updated. Defaults to None.
+            wake_if_asleep (bool, optional): force a vehicle awake. This is processed by the wake_up decorator. Defaults to False.
+            force (bool, optional): force a vehicle update regardless of the update_interval. Defaults to False.
 
         Returns
-        True if any update succeeded for any vehicle else false
+            Whether update was successful.
 
-        Throws
-        RetryLimitError
+        Raises
+            RetryLimitError
 
         """
 
@@ -613,7 +617,8 @@ class Controller:
                         vin[-5:],
                         sleep_interval,
                         round(
-                            sleep_interval + self._last_update_time[vin] - cur_time, 2,
+                            sleep_interval + self._last_update_time[vin] - cur_time,
+                            2,
                         ),
                     )
                 return sleep_interval
