@@ -26,4 +26,6 @@ test:
 typing:
 	pipenv run mypy --ignore-missing-imports teslajsonpy
 docs: docstyle
+	pipenv lock -r > docs/requirements.txt
+	pipenv lock -r --dev-only >> docs/requirements.txt
 	pipenv run sphinx-build -b html docs docs/html
