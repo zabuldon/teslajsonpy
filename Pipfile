@@ -16,6 +16,10 @@ tox-pipenv = "*"
 twine = "*"
 black = "*"
 typing-extensions = "*"
+sphinx = "*"
+autoapi = "*"
+sphinx-rtd-theme = "*"
+m2r2 = "*"
 
 [packages]
 aiohttp = "*"
