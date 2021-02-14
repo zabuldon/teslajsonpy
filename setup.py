@@ -29,7 +29,7 @@ LICENSE = "Apache-2.0"
 VERSION = None
 
 # What packages are required for this module to be executed?
-REQUIRED = ["aiohttp", "authcaptureproxy", "backoff", "beautifulsoup4", "wrapt"]
+REQUIRED = ["aiohttp", "authcaptureproxy>=0.4.1,<1.0.0", "backoff", "beautifulsoup4", "wrapt"]
 
 # What packages are optional?
 EXTRAS = {
