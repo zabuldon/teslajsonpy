@@ -20,6 +20,8 @@ sphinx = "*"
 autoapi = "*"
 sphinx-rtd-theme = "*"
 m2r2 = "*"
+sphinx-autoapi = "*"
+sphinx-copybutton = "*"
 
 [packages]
 aiohttp = "*"
