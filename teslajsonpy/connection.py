@@ -1,6 +1,7 @@
-#  SPDX-License-Identifier: Apache-2.0
 """
 Python Package for controlling Tesla API.
+
+SPDX-License-Identifier: Apache-2.0
 
 Underlying connection logic.
 
