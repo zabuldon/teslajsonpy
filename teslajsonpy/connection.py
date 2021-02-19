@@ -367,7 +367,14 @@ class Connection:
     #         }
     #     )
 
-    async def get_authorization_code(self, email, password) -> Text:
+    async def get_authorization_code(
+        self,
+        email: Text,
+        password: Text,
+        mfa_code: Text = "",
+        mfa_device: int = 0,
+        retry_limit: int = 3,
+    ) -> Text:
         """Get authorization code from the oauth3 login method."""
         # https://tesla-api.timdorr.com/api-basics/authentication#step-2-obtain-an-authorization-code
         if not (email and password):
@@ -378,10 +385,68 @@ class Connection:
         html = await resp.text()
         soup: BeautifulSoup = BeautifulSoup(html, "html.parser")
         data = get_inputs(soup)
-        data["identity"] = self.email
-        data["credential"] = self.password
-        resp = await self.websession.post(url, data=data)
-        _process_resp(resp)
+        data["identity"] = email
+        data["credential"] = password
+        transaction_id: Text = data.get("transaction_id")
+        for attempt in range(retry_limit):
+            _LOGGER.debug("Attempt #%s", attempt)
+            resp = await self.websession.post(url, data=data)
+            _process_resp(resp)
+            if not resp.history:
+                html = await resp.text()
+                if "/mfa/verify" in html:
+                    mfa_resp = await self.websession.get(
+                        "https://auth.tesla.com/oauth2/v3/authorize/mfa/factors",
+                        params={"transaction_id": transaction_id},
+                    )
+                    _process_resp(mfa_resp)
+                    # {
+                    #     "data": [
+                    #         {
+                    #         "dispatchRequired": false,
+                    #         "id": "X-4Y-44e4-b9a4-54e114a13c40",
+                    #         "name": "Pixel",
+                    #         "factorType": "token:software",
+                    #         "factorProvider": "TESLA",
+                    #         "securityLevel": 1,
+                    #         "activatedAt": "2021-02-10T23:53:40.000Z",
+                    #         "updatedAt": "2021-02-10T23:54:20.000Z"
+                    #         }
+                    #     ]
+                    # }
+                    mfa_json = await mfa_resp.json()
+                    if len(mfa_json.get("data", [])) > 1:
+                        factor_id = mfa_json["data"][mfa_device]["id"]
+                    if not mfa_code:
+                        _LOGGER.debug("No MFA provided")
+                        _LOGGER.debug("MFA Devices: %s", mfa_json["data"])
+                        raise IncompleteCredentials(
+                            "MFA Code missing", devices=mfa_json["data"]
+                        )
+                    mfa_resp = await self.websession.post(
+                        "https://auth.tesla.com/oauth2/v3/authorize/mfa/verify",
+                        json={
+                            "transaction_id": transaction_id,
+                            "factor_id": factor_id,
+                            "passcode": mfa_code,
+                        },
+                    )
+                    _process_resp(mfa_resp)
+                    mfa_json = await mfa_resp.json()
+                    if not (
+                        mfa_json["data"].get("approved")
+                        and mfa_json["data"].get("valid")
+                    ):
+                        _LOGGER.debug("MFA Code invalid")
+                        raise IncompleteCredentials(
+                            "MFA Code invalid", devices=mfa_json["data"]
+                        )
+                    resp = await self.websession.post(url, data=data)
+                    _process_resp(resp)
+            await asyncio.sleep(3)
+        if not (resp.history):
+            _LOGGER.debug("Failed to authenticate")
+            raise IncompleteCredentials("Unable to login with credentials")
         code_url = URL(resp.history[-1].url)
         return code_url.query.get("code")
 
