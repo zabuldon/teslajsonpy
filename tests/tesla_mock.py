@@ -2,6 +2,8 @@
 Tesla mock.
 """
 
+import copy
+
 from teslajsonpy.connection import Connection
 from teslajsonpy.controller import Controller
 
@@ -41,6 +43,21 @@ class TeslaMock:
             Controller, "get_last_update_time", self.mock_get_last_update_time
         )
         self._monkeypatch.setattr(Controller, "update", self.mock_update)
+
+        self._drive_state = copy.deepcopy(DRIVE_STATE)
+        self._climate_state = copy.deepcopy(CLIMATE_STATE)
+        self._charge_state = copy.deepcopy(CHARGE_STATE)
+        self._gui_settings = copy.deepcopy(GUI_SETTINGS)
+        self._vehicle_state = copy.deepcopy(VEHICLE_STATE)
+        self._vehicle_config = copy.deepcopy(VEHICLE_CONFIG)
+
+        self._vehicle = copy.deepcopy(VEHICLE)
+        self._vehicle["drive_state"] = self._drive_state
+        self._vehicle["climate_state"] = self._climate_state
+        self._vehicle["charge_state"] = self._charge_state
+        self._vehicle["gui_settings"] = self._gui_settings
+        self._vehicle["vehicle_state"] = self._vehicle_state
+        self._vehicle["vehicle_config"] = self._vehicle_config
 
     def mock_connect(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -102,30 +119,25 @@ class TeslaMock:
         """ Monkeypatch for controller.command()."""
         return RESULT_OK
 
-    @staticmethod
-    def controller_get_charging_params():
+    def controller_get_charging_params(self):
         """ Monkeypatch for controller.get_charging_params()."""
-        return CHARGE_STATE
+        return self._charge_state
 
-    @staticmethod
-    def controller_get_climate_params():
+    def controller_get_climate_params(self):
         """ Monkeypatch for controller.get_climate_params()."""
-        return CLIMATE_STATE
+        return self._climate_state
 
-    @staticmethod
-    def controller_get_drive_params():
+    def controller_get_drive_params(self):
         """ Monkeypatch for controller.get_drive_params()."""
-        return DRIVE_STATE
+        return self._drive_state
 
-    @staticmethod
-    def controller_get_gui_params():
+    def controller_get_gui_params(self):
         """ Monkeypatch for controller.get_gui_params()."""
-        return GUI_SETTINGS
+        return self._gui_settings
 
-    @staticmethod
-    def controller_get_state_params():
+    def controller_get_state_params(self):
         """ Monkeypatch for controller.get_state_params()."""
-        return VEHICLE_STATE
+        return self._vehicle_state
 
     @staticmethod
     def controller_get_vehicles():
@@ -142,25 +154,21 @@ class TeslaMock:
         """ Monkeypatch for connection.generate_oauth()."""
         return
 
-    @staticmethod
-    def data_request_vehicle():
+    def data_request_vehicle(self):
         """ Simulates the result of vehicle data request. """
-        return VEHICLE
+        return self._vehicle
 
-    @staticmethod
-    def data_request_charge_state():
+    def data_request_charge_state(self):
         """ Simulates the result of charge state data request. """
-        return CHARGE_STATE
+        return self._charge_state
 
-    @staticmethod
-    def data_request_climate_state():
+    def data_request_climate_state(self):
         """ Simulates the result of climate state data request. """
-        return CLIMATE_STATE
+        return self._climate_state
 
-    @staticmethod
-    def data_request_vehicle_state():
+    def data_request_vehicle_state(self):
         """ Simulates the result of vehicle state data request. """
-        return VEHICLE_STATE
+        return self._vehicle_state
 
     @staticmethod
     def command_ok():
@@ -399,10 +407,10 @@ VEHICLE = {
     "api_version": 7,
     "backseat_token": None,
     "backseat_token_updated_at": None,
-    "drive_state": DRIVE_STATE,
-    "climate_state": CLIMATE_STATE,
-    "charge_state": CHARGE_STATE,
-    "gui_settings": GUI_SETTINGS,
-    "vehicle_state": VEHICLE_STATE,
-    "vehicle_config": VEHICLE_CONFIG,
+    "drive_state": None,
+    "climate_state": None,
+    "charge_state": None,
+    "gui_settings": None,
+    "vehicle_state": None,
+    "vehicle_config": None,
 }
