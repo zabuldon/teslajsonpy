@@ -130,7 +130,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
             result = await wrapped(*args, **kwargs)
         except TeslaException as ex:
             _LOGGER.debug(
-                "Exception: %s\n%s(%s %s)", ex.message, wrapped.__name__, args, kwargs
+                "Exception: %s\n%s(%s %s)", str(ex), wrapped.__name__, args, kwargs
             )
             raise
     if valid_result(result) or is_wake_command:
@@ -187,7 +187,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         )
     except TeslaException as ex:
         _LOGGER.debug(
-            "Exception: %s\n%s(%s %s)", ex.message, wrapped.__name__, args, kwargs
+            "Exception: %s\n%s(%s %s)", str(ex), wrapped.__name__, args, kwargs
         )
         raise
     if valid_result(result):

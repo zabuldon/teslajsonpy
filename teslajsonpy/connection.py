@@ -377,6 +377,7 @@ class Connection:
     ) -> Text:
         """Get authorization code from the oauth3 login method."""
         # https://tesla-api.timdorr.com/api-basics/authentication#step-2-obtain-an-authorization-code
+        # pylint: disable=too-many-locals
         if not (email and password):
             _LOGGER.debug("No email or password for login; unable to login.")
             return
