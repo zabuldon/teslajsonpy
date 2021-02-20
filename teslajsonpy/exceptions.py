@@ -6,6 +6,7 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import logging
+from typing import Any, Dict, Text
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ _LOGGER = logging.getLogger(__name__)
 class TeslaException(Exception):
     """Class of Tesla API exceptions."""
 
-    def __init__(self, code, *args, **kwargs):
+    def __init__(self, code: Text, *args, **kwargs):
         """Initialize exceptions for the Tesla API."""
         self.message = ""
         super().__init__(*args, **kwargs)
@@ -52,7 +53,10 @@ class RetryLimitError(TeslaException):
 class IncompleteCredentials(TeslaException):
     """Class of exceptions for incomplete credentials."""
 
-    pass
+    def __init__(self, code: Text, *args, devices: Dict[Any, Any] = None, **kwargs):
+        """Initialize exception to include list of devices."""
+        super().__init__(code, *args, **kwargs)
+        self.devices = devices or {}
 
 
 class UnknownPresetMode(TeslaException):

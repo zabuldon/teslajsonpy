@@ -47,7 +47,16 @@ class TeslaProxy(AuthCaptureProxy):
         }
 
         self.modifiers.update(
-            {"prepend_url_ajax": partial(self.prepend_relative_urls, self.access_url())}
+            {
+                "prepend_url_ajax": partial(
+                    self.prepend_relative_urls, self.access_url()
+                ),
+                "application/javascript": {
+                    "prepend_url_i18n": partial(
+                        self.prepend_i18n_path, URL(self.access_url().path)
+                    )
+                },
+            }
         )
 
     async def test_url(
@@ -117,6 +126,31 @@ class TeslaProxy(AuthCaptureProxy):
             partial(prepend_url, base_url),
             {
                 "method_func": r"""(?:\(\s*?["'](?:get|post|delete|put|patch|head|options)["'],\s*?["'])([^'"]*)["']\s*?,[^\)]*?\)""",
+            },
+            html=html,
+        )
+
+    async def prepend_i18n_path(self, base_url: URL, html: Text) -> Text:
+        """Prepend path for i18n loadPath so it'll reach the proxy.
+
+        This is intended to be used for to place the proxy_url path in front of relative urls for loadPath in i18next.
+
+        Args:
+            base_url (URL): Base URL to prepend
+            html (Text): Text to replace
+
+        Returns
+            Text: Replaced text
+
+        """
+        if not base_url:
+            _LOGGER.debug("No base_url specified")
+            return html
+
+        return await find_regex_urls(
+            partial(prepend_url, base_url, encoded=True),
+            {
+                "method_func": r"""(?:loadPath:)\s*?["']([^"']*)[\"\']""",
             },
             html=html,
         )
