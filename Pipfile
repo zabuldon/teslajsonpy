@@ -28,7 +28,7 @@ aiohttp = "*"
 backoff = "*"
 beautifulsoup4 = "*"
 wrapt = "*"
-authcaptureproxy = "0.4.0"
+authcaptureproxy = "~=0.4.2"
 
 [pipenv]
 allow_prereleases = true
