@@ -41,7 +41,7 @@ async def test_get_value_after_update(monkeypatch):
     _controller = Controller(None)
     monkeypatch.setitem(_controller.car_online, "5YJSA11111111111", True)
     monkeypatch.setitem(
-        _controller.car_state, "5YJSA11111111111", TeslaMock.data_request_vehicle()
+        _controller.car_state, "5YJSA11111111111", _mock.data_request_vehicle()
     )
 
     _data = _mock.data_request_vehicle()
@@ -62,7 +62,7 @@ async def test_get_value_on(monkeypatch):
     _controller = Controller(None)
     monkeypatch.setitem(_controller.car_online, "5YJSA11111111111", True)
     monkeypatch.setitem(
-        _controller.car_state, "5YJSA11111111111", TeslaMock.data_request_vehicle()
+        _controller.car_state, "5YJSA11111111111", _mock.data_request_vehicle()
     )
 
     _data = _mock.data_request_vehicle()
@@ -84,7 +84,7 @@ async def test_get_value_off(monkeypatch):
     _controller = Controller(None)
     monkeypatch.setitem(_controller.car_online, "5YJSA11111111111", False)
     monkeypatch.setitem(
-        _controller.car_state, "5YJSA11111111111", TeslaMock.data_request_vehicle()
+        _controller.car_state, "5YJSA11111111111", _mock.data_request_vehicle()
     )
 
     _data = _mock.data_request_vehicle()

@@ -25,3 +25,7 @@ test:
 	pipenv run pytest -s --verbose tests -Wi -Wd:::teslajsonpy
 typing:
 	pipenv run mypy --ignore-missing-imports teslajsonpy
+docs: docstyle
+	pipenv lock -r --dev > docs/requirements.txt
+	echo "teslajsonpy" >> docs/requirements.txt
+	pipenv run sphinx-build -b html docs docs/html
