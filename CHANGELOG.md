@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.13.0 (2021-02-20)
+### Feature
+* Add mfa support ([`413b585`](https://github.com/zabuldon/teslajsonpy/commit/413b585b306304e970cefd6c71182f47bdd95b52))
+
+### Fix
+* Process i18n urls ([`a4a40fd`](https://github.com/zabuldon/teslajsonpy/commit/a4a40fdf896e99fd9deea711e4aacc5e5a846f1e))
+
+### Documentation
+* Add sphinx support ([`483ddd0`](https://github.com/zabuldon/teslajsonpy/commit/483ddd099df0ecffaa7397b1dfb70d875d1d4161))
+
 ## v0.12.3 (2021-02-14)
 ### Fix
 * Increase delay for refresh and update message ([`af78a8b`](https://github.com/zabuldon/teslajsonpy/commit/af78a8b9eed4630a0ec4889280a26403c86be09f))
