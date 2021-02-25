@@ -78,17 +78,19 @@ class TeslaProxy(AuthCaptureProxy):
             Optional[Union[URL, Text]]: URL for a http 302 redirect or Text to display on success. None indicates test did not pass.
 
         """
-
-        if str(resp.url) == "https://auth.tesla.com/static/404.html":
+        code: Text = ""
+        if resp.url.path == "/void/callback":
+            code = resp.url.query.get("code")
+        if resp.url.path == "/static/404.html":
             code = URL(resp.history[-1].url).query.get("code")
+        if code:
             username = data.get("identity")
             self._callback_url = self.init_query.get("callback_url")
-            if code:
-                _LOGGER.debug("Success! Oauth code %s for %s captured.", code, username)
-                # 302 redirect
-                return URL(self._callback_url).update_query(
-                    {"code": code, "username": username}
-                )
+            _LOGGER.debug("Success! Oauth code %s for %s captured.", code, username)
+            # 302 redirect
+            return URL(self._callback_url).update_query(
+                {"code": code, "username": username}
+            )
         if resp.content_type == "text/html":
             text = await resp.text()
             if "<noscript>Please enable JavaScript to view the page content." in text:
