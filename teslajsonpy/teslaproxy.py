@@ -38,7 +38,7 @@ class TeslaProxy(AuthCaptureProxy):
         self._config_flow_id = None
         self._callback_url = None
         self.waf_retry = 0
-        self.waf_limit = 7
+        self.waf_limit = 30
         self.tests = {"test_url": self.test_url}
 
         self.headers = {
@@ -78,17 +78,19 @@ class TeslaProxy(AuthCaptureProxy):
             Optional[Union[URL, Text]]: URL for a http 302 redirect or Text to display on success. None indicates test did not pass.
 
         """
-
-        if str(resp.url) == "https://auth.tesla.com/static/404.html":
+        code: Text = ""
+        if resp.url.path == "/void/callback":
+            code = resp.url.query.get("code")
+        if resp.url.path == "/static/404.html":
             code = URL(resp.history[-1].url).query.get("code")
+        if code:
             username = data.get("identity")
             self._callback_url = self.init_query.get("callback_url")
-            if code:
-                _LOGGER.debug("Success! Oauth code %s for %s captured.", code, username)
-                # 302 redirect
-                return URL(self._callback_url).update_query(
-                    {"code": code, "username": username}
-                )
+            _LOGGER.debug("Success! Oauth code %s for %s captured.", code, username)
+            # 302 redirect
+            return URL(self._callback_url).update_query(
+                {"code": code, "username": username}
+            )
         if resp.content_type == "text/html":
             text = await resp.text()
             if "<noscript>Please enable JavaScript to view the page content." in text:
@@ -97,7 +99,7 @@ class TeslaProxy(AuthCaptureProxy):
                 return return_timer_countdown_refresh_html(
                     max(30 * (self.waf_retry - self.waf_limit), 120)
                     if self.waf_retry > self.waf_limit
-                    else random.random() * self.waf_retry + 10,
+                    else random.random() * self.waf_retry + 5,
                     f"Detected Tesla web application firewall block #{self.waf_retry}. Please wait and then reload the page or wait for the auto reload.",
                 )
             self.waf_retry = 0
@@ -129,6 +131,14 @@ class TeslaProxy(AuthCaptureProxy):
             },
             html=html,
         )
+
+    async def reset_data(self) -> None:
+        """Reset all stored data.
+
+        A proxy may need to service multiple login requests if the route is not torn down. This function will reset all data between logins.
+        """
+        self.waf_retry = 0
+        await super().reset_data()
 
     async def prepend_i18n_path(self, base_url: URL, html: Text) -> Text:
         """Prepend path for i18n loadPath so it'll reach the proxy.
