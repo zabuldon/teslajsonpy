@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.14.0 (2021-02-25)
+### Feature
+* Allow reset of proxy ([`2218c57`](https://github.com/zabuldon/teslajsonpy/commit/2218c570fb35b26a962cfff8287ac66d126fe3ab))
+
+### Fix
+* Catch code even without redirect ([`37207ce`](https://github.com/zabuldon/teslajsonpy/commit/37207cea14b19d7961f2d6f774d2ba4ffadce043))
+
 ## v0.13.0 (2021-02-20)
 ### Feature
 * Add mfa support ([`413b585`](https://github.com/zabuldon/teslajsonpy/commit/413b585b306304e970cefd6c71182f47bdd95b52))
