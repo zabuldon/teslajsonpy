@@ -130,6 +130,14 @@ class TeslaProxy(AuthCaptureProxy):
             html=html,
         )
 
+    async def reset_data(self) -> None:
+        """Reset all stored data.
+
+        A proxy may need to service multiple login requests if the route is not torn down. This function will reset all data between logins.
+        """
+        self.waf_retry = 0
+        await super().reset_data()
+
     async def prepend_i18n_path(self, base_url: URL, html: Text) -> Text:
         """Prepend path for i18n loadPath so it'll reach the proxy.
 
