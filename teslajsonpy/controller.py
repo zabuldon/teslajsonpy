@@ -119,6 +119,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
             )
         except TypeError as exception:
             _LOGGER.error("Result: %s, %s", result, exception)
+            return False
 
     retries = 0
     sleep_delay = 2
