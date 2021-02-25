@@ -38,7 +38,7 @@ class TeslaProxy(AuthCaptureProxy):
         self._config_flow_id = None
         self._callback_url = None
         self.waf_retry = 0
-        self.waf_limit = 7
+        self.waf_limit = 30
         self.tests = {"test_url": self.test_url}
 
         self.headers = {
@@ -99,7 +99,7 @@ class TeslaProxy(AuthCaptureProxy):
                 return return_timer_countdown_refresh_html(
                     max(30 * (self.waf_retry - self.waf_limit), 120)
                     if self.waf_retry > self.waf_limit
-                    else random.random() * self.waf_retry + 10,
+                    else random.random() * self.waf_retry + 5,
                     f"Detected Tesla web application firewall block #{self.waf_retry}. Please wait and then reload the page or wait for the auto reload.",
                 )
             self.waf_retry = 0
