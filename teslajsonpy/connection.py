@@ -75,6 +75,7 @@ class Connection:
             self.__sethead(access_token=self.access_token, expiration=self.expiration)
             _LOGGER.debug("Connecting with existing access token")
         self.websocket = None
+        self.mfa_code: Text = ""
 
     async def get(self, command):
         """Get data from API."""
@@ -101,7 +102,7 @@ class Connection:
                 if self.email and self.password:
                     _LOGGER.debug("Getting sso auth code using credentials")
                     self.code = await self.get_authorization_code(
-                        self.email, self.password
+                        self.email, self.password, mfa_code=self.mfa_code
                     )
                 else:
                     _LOGGER.debug("Using existing authorization code")
@@ -396,6 +397,7 @@ class Connection:
             if not resp.history:
                 html = await resp.text()
                 if "/mfa/verify" in html:
+                    _LOGGER.debug("Detected MFA request")
                     mfa_resp = await self.websession.get(
                         "https://auth.tesla.com/oauth2/v3/authorize/mfa/factors",
                         params={"transaction_id": transaction_id},
@@ -416,7 +418,7 @@ class Connection:
                     #     ]
                     # }
                     mfa_json = await mfa_resp.json()
-                    if len(mfa_json.get("data", [])) > 1:
+                    if len(mfa_json.get("data", [])) >= 1:
                         factor_id = mfa_json["data"][mfa_device]["id"]
                     if not mfa_code:
                         _LOGGER.debug("No MFA provided")
@@ -445,10 +447,11 @@ class Connection:
                     resp = await self.websession.post(url, data=data)
                     _process_resp(resp)
             await asyncio.sleep(3)
-        if not (resp.history):
+        if not resp.history or not URL(resp.history[-1].url).query.get("code"):
             _LOGGER.debug("Failed to authenticate")
             raise IncompleteCredentials("Unable to login with credentials")
         code_url = URL(resp.history[-1].url)
+        _LOGGER.debug("Found code %s", code_url.query.get("code"))
         return code_url.query.get("code")
 
     def get_authorization_code_link(self, new=False) -> yarl.URL:
