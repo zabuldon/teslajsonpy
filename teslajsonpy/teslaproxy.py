@@ -100,8 +100,9 @@ class TeslaProxy(AuthCaptureProxy):
                 return return_timer_countdown_refresh_html(
                     max(30 * (self.waf_retry - self.waf_limit), 120)
                     if self.waf_retry > self.waf_limit
-                    else random.random() * self.waf_retry + 5,
+                    else random.random() * self.waf_retry + 10,
                     f"Detected Tesla web application firewall block #{self.waf_retry}. Please wait and then reload the page or wait for the auto reload.",
+                    False,
                 )
             self.waf_retry = 0
         if resp.content_type == "application/json":
