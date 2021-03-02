@@ -86,6 +86,7 @@ class TeslaProxy(AuthCaptureProxy):
         if code:
             username = data.get("identity")
             self._callback_url = self.init_query.get("callback_url")
+            self.waf_retry = 0
             _LOGGER.debug("Success! Oauth code %s for %s captured.", code, username)
             # 302 redirect
             return URL(self._callback_url).update_query(
