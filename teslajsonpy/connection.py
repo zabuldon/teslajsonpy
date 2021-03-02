@@ -18,10 +18,10 @@ import logging
 import secrets
 import time
 from typing import Dict, Text
-from bs4 import BeautifulSoup
-import yarl
 
 import aiohttp
+from bs4 import BeautifulSoup
+import yarl
 from yarl import URL
 
 from teslajsonpy.const import (
@@ -122,10 +122,10 @@ class Connection:
                     refresh_token=self.sso_oauth.get("refresh_token")
                 )
             if auth and all(
-                [
+                (
                     auth.get(item)
                     for item in ["access_token", "refresh_token", "expires_in"]
-                ]
+                )
             ):
                 self.sso_oauth = {
                     "access_token": auth["access_token"],
