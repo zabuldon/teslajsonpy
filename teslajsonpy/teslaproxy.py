@@ -90,7 +90,7 @@ class TeslaProxy(AuthCaptureProxy):
             _LOGGER.debug("Success! Oauth code %s for %s captured.", code, username)
             # 302 redirect
             return URL(self._callback_url).update_query(
-                {"code": code, "username": username}
+                {"code": code, "username": username, "domain": self._host_url.host}
             )
         if resp.content_type == "text/html":
             text = await resp.text()
@@ -183,7 +183,7 @@ class TeslaProxy(AuthCaptureProxy):
         result = await super().modify_headers(site, request)
         method = request.method
         if (
-            str(site) == "https://auth.tesla.com/oauth2/v3/authorize/mfa/verify"
+            str(site.path) == "/oauth2/v3/authorize/mfa/verify"
             and method == "POST"
             and not await request.post()
         ):

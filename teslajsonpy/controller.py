@@ -370,6 +370,15 @@ class Controller:
         """Set authorization code in Connection."""
         self.__connection.code = code
 
+    def set_authorization_domain(self, domain: Text) -> None:
+        """Set authorization domain in Connection."""
+        if not domain:
+            return
+        if self.__connection.auth_domain.host != domain:
+            self.__connection.auth_domain = self.__connection.auth_domain.with_host(
+                domain
+            )
+
     def register_websocket_callback(self, callback) -> int:
         """Register callback for websocket messages.
 
