@@ -1,6 +1,7 @@
-#  SPDX-License-Identifier: Apache-2.0
 """
 Python Package for controlling Tesla API.
+
+SPDX-License-Identifier: Apache-2.0
 
 Controller to control access to the Tesla API.
 
@@ -10,7 +11,7 @@ https://github.com/zabuldon/teslajsonpy
 import asyncio
 import logging
 import time
-from typing import Callable, Dict, Optional, Text
+from typing import Callable, Dict, List, Optional, Text
 
 from aiohttp import ClientConnectorError
 import backoff
@@ -260,7 +261,11 @@ class Controller:
         self.enable_websocket = enable_websocket
 
     async def connect(
-        self, test_login=False, wake_if_asleep=False, filtered_vins=None
+        self,
+        test_login: bool = False,
+        wake_if_asleep: bool = False,
+        filtered_vins: Optional[List[Text]] = None,
+        mfa_code: Text = "",
     ) -> Dict[Text, Text]:
         """Connect controller to Tesla.
 
@@ -268,12 +273,15 @@ class Controller:
             test_login (bool, optional): Whether to test credentials only. Defaults to False.
             wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update state. Defaults to False.
             filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.
+            mfa_code (Text, optional): MFA code to use for connection
 
         Returns
             Dict[Text, Text]: Returns the refresh_token, access_token, and expires_in time
 
         """
 
+        if mfa_code:
+            self.__connection.mfa_code = mfa_code
         cars = await self.get_vehicles()
         self._last_attempted_update_time = time.time()
         self.__update_lock = asyncio.Lock()
@@ -362,6 +370,15 @@ class Controller:
     def set_authorization_code(self, code: Text) -> None:
         """Set authorization code in Connection."""
         self.__connection.code = code
+
+    def set_authorization_domain(self, domain: Text) -> None:
+        """Set authorization domain in Connection."""
+        if not domain:
+            return
+        if self.__connection.auth_domain.host != domain:
+            self.__connection.auth_domain = self.__connection.auth_domain.with_host(
+                domain
+            )
 
     def register_websocket_callback(self, callback) -> int:
         """Register callback for websocket messages.

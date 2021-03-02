@@ -86,10 +86,11 @@ class TeslaProxy(AuthCaptureProxy):
         if code:
             username = data.get("identity")
             self._callback_url = self.init_query.get("callback_url")
+            self.waf_retry = 0
             _LOGGER.debug("Success! Oauth code %s for %s captured.", code, username)
             # 302 redirect
             return URL(self._callback_url).update_query(
-                {"code": code, "username": username}
+                {"code": code, "username": username, "domain": self._host_url.host}
             )
         if resp.content_type == "text/html":
             text = await resp.text()
@@ -99,8 +100,9 @@ class TeslaProxy(AuthCaptureProxy):
                 return return_timer_countdown_refresh_html(
                     max(30 * (self.waf_retry - self.waf_limit), 120)
                     if self.waf_retry > self.waf_limit
-                    else random.random() * self.waf_retry + 5,
+                    else random.random() * self.waf_retry + 10,
                     f"Detected Tesla web application firewall block #{self.waf_retry}. Please wait and then reload the page or wait for the auto reload.",
+                    False,
                 )
             self.waf_retry = 0
         if resp.content_type == "application/json":
@@ -181,7 +183,7 @@ class TeslaProxy(AuthCaptureProxy):
         result = await super().modify_headers(site, request)
         method = request.method
         if (
-            str(site) == "https://auth.tesla.com/oauth2/v3/authorize/mfa/verify"
+            str(site.path) == "/oauth2/v3/authorize/mfa/verify"
             and method == "POST"
             and not await request.post()
         ):

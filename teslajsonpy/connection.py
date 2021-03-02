@@ -18,13 +18,19 @@ import logging
 import secrets
 import time
 from typing import Dict, Text
-from bs4 import BeautifulSoup
-import yarl
 
 import aiohttp
+from bs4 import BeautifulSoup
+import yarl
 from yarl import URL
 
-from teslajsonpy.const import DRIVING_INTERVAL, WEBSOCKET_TIMEOUT
+from teslajsonpy.const import (
+    API_URL,
+    AUTH_DOMAIN,
+    DRIVING_INTERVAL,
+    WEBSOCKET_TIMEOUT,
+    WS_URL,
+)
 from teslajsonpy.exceptions import IncompleteCredentials, TeslaException
 
 _LOGGER = logging.getLogger(__name__)
@@ -51,8 +57,8 @@ class Connection:
         self.client_secret: Text = (
             "c7257eb71a564034f9419ee651c7d0e5f7" "aa6bfbd18bafb5c5c033b093bb2fa3"
         )
-        self.baseurl: Text = "https://owner-api.teslamotors.com"
-        self.websocket_url: Text = "wss://streaming.vn.teslamotors.com/streaming"
+        self.baseurl: Text = API_URL
+        self.websocket_url: Text = WS_URL
         self.api: Text = "/api/1/"
         self.expiration: int = expiration
         self.access_token = access_token
@@ -75,6 +81,8 @@ class Connection:
             self.__sethead(access_token=self.access_token, expiration=self.expiration)
             _LOGGER.debug("Connecting with existing access token")
         self.websocket = None
+        self.mfa_code: Text = ""
+        self.auth_domain: URL = URL(AUTH_DOMAIN)
 
     async def get(self, command):
         """Get data from API."""
@@ -101,7 +109,7 @@ class Connection:
                 if self.email and self.password:
                     _LOGGER.debug("Getting sso auth code using credentials")
                     self.code = await self.get_authorization_code(
-                        self.email, self.password
+                        self.email, self.password, mfa_code=self.mfa_code
                     )
                 else:
                     _LOGGER.debug("Using existing authorization code")
@@ -114,10 +122,10 @@ class Connection:
                     refresh_token=self.sso_oauth.get("refresh_token")
                 )
             if auth and all(
-                [
+                (
                     auth.get(item)
                     for item in ["access_token", "refresh_token", "expires_in"]
-                ]
+                )
             ):
                 self.sso_oauth = {
                     "access_token": auth["access_token"],
@@ -382,8 +390,22 @@ class Connection:
             _LOGGER.debug("No email or password for login; unable to login.")
             return
         url = self.get_authorization_code_link(new=True)
-        resp = await self.websession.get(url)
+        resp = await self.websession.get(url.update_query({"login_hint": email}))
         html = await resp.text()
+        if resp.history:
+            for item in resp.history:
+                if (
+                    item.status in [301, 302, 303, 304, 305, 306, 307, 308]
+                    and resp.url.host != self.auth_domain.host
+                ):
+                    _LOGGER.debug(
+                        "Detected %s redirect from %s to %s; changing proxy host",
+                        item.status,
+                        item.url.host,
+                        resp.url.host,
+                    )
+                    self.auth_domain = self.auth_domain.with_host(str(resp.url.host))
+                    url = self.get_authorization_code_link()
         soup: BeautifulSoup = BeautifulSoup(html, "html.parser")
         data = get_inputs(soup)
         data["identity"] = email
@@ -396,8 +418,9 @@ class Connection:
             if not resp.history:
                 html = await resp.text()
                 if "/mfa/verify" in html:
+                    _LOGGER.debug("Detected MFA request")
                     mfa_resp = await self.websession.get(
-                        "https://auth.tesla.com/oauth2/v3/authorize/mfa/factors",
+                        self.auth_domain.with_path("/oauth2/v3/authorize/mfa/factors"),
                         params={"transaction_id": transaction_id},
                     )
                     _process_resp(mfa_resp)
@@ -416,7 +439,7 @@ class Connection:
                     #     ]
                     # }
                     mfa_json = await mfa_resp.json()
-                    if len(mfa_json.get("data", [])) > 1:
+                    if len(mfa_json.get("data", [])) >= 1:
                         factor_id = mfa_json["data"][mfa_device]["id"]
                     if not mfa_code:
                         _LOGGER.debug("No MFA provided")
@@ -425,7 +448,7 @@ class Connection:
                             "MFA Code missing", devices=mfa_json["data"]
                         )
                     mfa_resp = await self.websession.post(
-                        "https://auth.tesla.com/oauth2/v3/authorize/mfa/verify",
+                        self.auth_domain.with_path("/oauth2/v3/authorize/mfa/verify"),
                         json={
                             "transaction_id": transaction_id,
                             "factor_id": factor_id,
@@ -445,10 +468,11 @@ class Connection:
                     resp = await self.websession.post(url, data=data)
                     _process_resp(resp)
             await asyncio.sleep(3)
-        if not (resp.history):
+        if not resp.history or not URL(resp.history[-1].url).query.get("code"):
             _LOGGER.debug("Failed to authenticate")
             raise IncompleteCredentials("Unable to login with credentials")
         code_url = URL(resp.history[-1].url)
+        _LOGGER.debug("Found code %s", code_url.query.get("code"))
         return code_url.query.get("code")
 
     def get_authorization_code_link(self, new=False) -> yarl.URL:
@@ -472,7 +496,7 @@ class Connection:
             "scope": "openid email offline_access",
             "state": state,
         }
-        url = yarl.URL("https://auth.tesla.com/oauth2/v3/authorize")
+        url = self.auth_domain.with_path("/oauth2/v3/authorize")
         url = url.update_query(query)
         return url
 
@@ -491,7 +515,7 @@ class Connection:
             "redirect_uri": "https://auth.tesla.com/void/callback",
         }
         auth = await self.websession.post(
-            "https://auth.tesla.com/oauth2/v3/token",
+            self.auth_domain.with_path("/oauth2/v3/token"),
             data=oauth,
         )
         return await auth.json()
@@ -510,7 +534,7 @@ class Connection:
             "scope": "openid email offline_access",
         }
         auth = await self.websession.post(
-            "https://auth.tesla.com/oauth2/v3/token",
+            self.auth_domain.with_path("/oauth2/v3/token"),
             data=oauth,
         )
         return await auth.json()
