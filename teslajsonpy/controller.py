@@ -211,7 +211,7 @@ class Controller:
         expiration: int = 0,
         update_interval: int = 300,
         enable_websocket: bool = False,
-        wake_up_policy: Text = 'charging',
+        wake_up_policy: Text = None,
     ) -> None:
         """Initialize controller.
 
@@ -226,10 +226,11 @@ class Controller:
             being blocked by Tesla. Defaults to 300.
             enable_websocket (bool, optional): Whether to connect with websockets. Defaults to False.
             wake_up_policy (Text, optional): How aggressively will we poll the car. Possible values: 
-            'charging' - Only keep the car awake while it is actively charging or driving (default).
+            Not set - Only keep the car awake while it is actively charging or driving, and while sentry
+            mode is enabled (default).
             'connected' - Also keep the car awake while it is connected to a charger, even if the charging
             session is complete.
-            'always' - Keep polling the car at all times.  Will possible never allow the car to sleep.
+            'always' - Keep polling the car at all times.  Will possibly never allow the car to sleep.
 
         """
         self.__connection = Connection(
@@ -636,6 +637,7 @@ class Controller:
                     self.car_state[vin].get("state"),
                     self.update_interval,
                 )
+                self.__update_state[vin] = "normal"
                 return self.update_interval
             if self.wake_up_policy == "connected" and (
                 self.__state[vin].get("sentry_mode")
@@ -653,6 +655,7 @@ class Controller:
                     self.__charging[vin].get("charging_state"),
                     self.update_interval,
                 )
+                self.__update_state[vin] = "normal"
                 return self.update_interval
             if (cur_time - self.__last_parked_timestamp[vin] > IDLE_INTERVAL) and not (
                 self.__state[vin].get("sentry_mode")
