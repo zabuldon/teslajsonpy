@@ -225,7 +225,7 @@ class Controller:
             update_interval (int, optional): Seconds between allowed updates to the API.  This is to prevent
             being blocked by Tesla. Defaults to 300.
             enable_websocket (bool, optional): Whether to connect with websockets. Defaults to False.
-            polling_policy (Text, optional): How aggressively will we poll the car. Possible values: 
+            polling_policy (Text, optional): How aggressively will we poll the car. Possible values:
             Not set - Only keep the car awake while it is actively charging or driving, and while sentry
             mode is enabled (default).
             'connected' - Also keep the car awake while it is connected to a charger, even if the charging
@@ -643,14 +643,14 @@ class Controller:
                 self.__state[vin].get("sentry_mode")
                 or self.__climate[vin].get("is_climate_on")
                 or (
-                    self.__charging[vin].get("charging_state") 
+                    self.__charging[vin].get("charging_state")
                     and self.__charging[vin].get("charging_state") != "Disconnected"
                     and self.__charging[vin].get("charging_state") != ""
                 )
             ):
                 _LOGGER.debug(
-                    "%s %s; Wake up policy set to 'connected'. " 
-                    "Sentry mode: %s, Climate: %s, Charging State: %s. " 
+                    "%s %s; Wake up policy set to 'connected'. "
+                    "Sentry mode: %s, Climate: %s, Charging State: %s. "
                     "Scanning every %s seconds",
                     vin[-5:],
                     self.car_state[vin].get("state"),
