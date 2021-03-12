@@ -211,7 +211,7 @@ class Controller:
         expiration: int = 0,
         update_interval: int = 300,
         enable_websocket: bool = False,
-        wake_up_policy: Text = None,
+        polling_policy: Text = None,
     ) -> None:
         """Initialize controller.
 
@@ -225,7 +225,7 @@ class Controller:
             update_interval (int, optional): Seconds between allowed updates to the API.  This is to prevent
             being blocked by Tesla. Defaults to 300.
             enable_websocket (bool, optional): Whether to connect with websockets. Defaults to False.
-            wake_up_policy (Text, optional): How aggressively will we poll the car. Possible values: 
+            polling_policy (Text, optional): How aggressively will we poll the car. Possible values: 
             Not set - Only keep the car awake while it is actively charging or driving, and while sentry
             mode is enabled (default).
             'connected' - Also keep the car awake while it is connected to a charger, even if the charging
@@ -266,7 +266,7 @@ class Controller:
         self.__last_parked_timestamp = {}
         self.__update_state = {}
         self.enable_websocket = enable_websocket
-        self.wake_up_policy = wake_up_policy
+        self.polling_policy = polling_policy
 
     async def connect(
         self,
@@ -630,7 +630,7 @@ class Controller:
                         DRIVING_INTERVAL,
                     )
                 return DRIVING_INTERVAL
-            if self.wake_up_policy == "always":
+            if self.polling_policy == "always":
                 _LOGGER.debug(
                     "%s %s; Wake up policy set to 'always'. Scanning every %s seconds",
                     vin[-5:],
@@ -639,7 +639,7 @@ class Controller:
                 )
                 self.__update_state[vin] = "normal"
                 return self.update_interval
-            if self.wake_up_policy == "connected" and (
+            if self.polling_policy == "connected" and (
                 self.__state[vin].get("sentry_mode")
                 or self.__climate[vin].get("is_climate_on")
                 or self.__charging[vin].get("charging_state") != "Disconnected"
