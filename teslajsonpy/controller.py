@@ -649,8 +649,8 @@ class Controller:
                 )
             ):
                 _LOGGER.debug(
-                    "%s %s; Wake up policy set to 'connected'. " \
-                    "Sentry mode: %s, Climate: %s, Charging State: %s. " \
+                    "%s %s; Wake up policy set to 'connected'. " 
+                    "Sentry mode: %s, Climate: %s, Charging State: %s. " 
                     "Scanning every %s seconds",
                     vin[-5:],
                     self.car_state[vin].get("state"),
