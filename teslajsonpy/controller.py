@@ -642,7 +642,11 @@ class Controller:
             if self.polling_policy == "connected" and (
                 self.__state[vin].get("sentry_mode")
                 or self.__climate[vin].get("is_climate_on")
-                or self.__charging[vin].get("charging_state") != "Disconnected"
+                or (
+                    self.__charging[vin].get("charging_state") 
+                    and self.__charging[vin].get("charging_state") != "Disconnected"
+                    and self.__charging[vin].get("charging_state") != ""
+                )
             ):
                 _LOGGER.debug(
                     "%s %s; Wake up policy set to 'connected'. " \
