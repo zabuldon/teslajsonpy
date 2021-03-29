@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.16.0 (2021-03-29)
+### Feature
+* Use auth.cn as initial start ([`6b2ca52`](https://github.com/zabuldon/teslajsonpy/commit/6b2ca52f66c37fc2b8eb8b6ed07bb7bad1fa091e))
+
 ## v0.15.1 (2021-03-20)
 ### Fix
 * Bump deps ([`601a237`](https://github.com/zabuldon/teslajsonpy/commit/601a2375c66353e5d2c5342404ef0ff8023e66c0))
