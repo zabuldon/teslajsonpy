@@ -23,6 +23,7 @@ m2r2 = "*"
 sphinx-autoapi = "*"
 sphinx-copybutton = "*"
 bandit = "*"
+pipenv-setup = "*"
 
 [packages]
 aiohttp = "*"

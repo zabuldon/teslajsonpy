@@ -28,13 +28,6 @@ REQUIRES_PYTHON = ">=3.6.1"
 LICENSE = "Apache-2.0"
 VERSION = None
 
-# What packages are required for this module to be executed?
-REQUIRED = ["aiohttp", "authcaptureproxy>=0.7.1,<1.0.0", "backoff", "beautifulsoup4", "wrapt"]
-
-# What packages are optional?
-EXTRAS = {
-    # "fancy feature": ["django"],
-}
 
 # The rest you shouldn"t have to touch too much :)
 # ------------------------------------------------
@@ -116,8 +109,17 @@ setup(
     # entry_points={
     #     "console_scripts": ["mycli=mymodule:cli"],
     # },
-    install_requires=REQUIRED,
-    extras_require=EXTRAS,
+    # What packages are required for this module to be executed?
+    install_requires=[
+        "aiohttp",
+        "backoff",
+        "beautifulsoup4",
+        "wrapt",
+        "authcaptureproxy~=0.7.1",
+    ],
+    # What packages are optional?
+    extras_require={},
+    dependency_links=[],
     include_package_data=True,
     license=LICENSE,
     classifiers=[

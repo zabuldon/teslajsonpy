@@ -6,18 +6,20 @@ coverage:
 	pipenv run pytest -s --verbose --cov-report term-missing --cov-report xml --cov=teslajsonpy tests -Wi -Wd:::teslajsonpy
 clean:
 	rm -rf dist/ build/ .egg teslajsonpy.egg-info/
+sync_deps:
+	pipenv-setup sync --pipfile
 init:
 	pip3 install --upgrade pip pipenv
 	pipenv lock
 	pipenv install --three --dev
-lint: flake8 docstyle pylint
+lint: flake8 docstyle pylint sync_deps
 flake8:
 	pipenv run flake8 teslajsonpy
 docstyle:
 	pipenv run pydocstyle teslajsonpy
 pylint:
 	pipenv run pylint teslajsonpy
-publish:
+publish: sync_deps
 	pipenv run python setup.py sdist bdist_wheel
 	pipenv run twine upload dist/*
 	rm -rf dist/ build/ .egg teslajsonpy.egg-info/
