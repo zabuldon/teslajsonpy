@@ -22,6 +22,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install python-semantic-release pipenv
           make init
+          make sync_deps
       - name: Make documentation
         run: |
           make docs
