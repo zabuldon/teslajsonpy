@@ -9,96 +9,115 @@
 # requirements. To emit only development requirements, pass "--dev-only".
 
 -i https://pypi.python.org/simple
-aiohttp==3.7.4
+aiohttp==3.7.4.post0
 alabaster==0.7.12
 appdirs==1.4.4
-astroid==2.4.2; python_version >= '3.5'
+astroid==2.5.2; python_version >= '3.6'
 async-timeout==3.0.1; python_full_version >= '3.5.3'
 attrs==20.3.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-authcaptureproxy==0.4.1
+authcaptureproxy==0.7.1
 autoapi==2.0.1
 babel==2.9.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 backoff==1.10.0
+bandit==1.7.0
 beautifulsoup4==4.9.3
-black==20.8b1
+black==19.10b0
 bleach==3.3.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+cached-property==1.5.2
+cerberus==1.3.2
 certifi==2020.12.5
-chardet==3.0.4
+chardet==4.0.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 click==7.1.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 colorama==0.4.4; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
-coverage==5.4; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'
+coverage==5.5; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'
 detox==0.19
 distlib==0.3.1
 dnspython==1.16.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 docutils==0.16; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
-eventlet==0.30.1
+eventlet==0.30.2
 filelock==3.0.12
-flake8==3.8.4
+flake8==3.9.0
+gitdb==4.0.7; python_version >= '3.4'
+gitpython==3.1.14; python_version >= '3.4'
 greenlet==1.0.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 idna==3.1; python_version >= '3.4'
 imagesize==1.2.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-importlib-metadata==3.4.0; python_version >= '3.6'
+importlib-metadata==3.10.0; python_version >= '3.6'
 iniconfig==1.1.1
-isort==5.7.0; python_version >= '3.6' and python_version < '4.0'
+isort==5.8.0; python_version >= '3.6' and python_version < '4.0'
 jinja2==2.11.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
-keyring==22.0.1; python_version >= '3.6'
-lazy-object-proxy==1.4.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+keyring==23.0.1; python_version >= '3.6'
+lazy-object-proxy==1.6.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
 m2r2==0.2.7
 markupsafe==1.1.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 mccabe==0.6.1
 mistune==0.8.4
 multidict==5.1.0; python_version >= '3.6'
 mypy-extensions==0.4.3
-mypy==0.800
+mypy==0.812
+orderedmultidict==1.0.1
 packaging==20.9; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pathspec==0.8.1
+pbr==5.5.1; python_version >= '2.6'
+pep517==0.10.0
+pip-shims==0.5.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+pipenv-setup==3.1.1
 pipenv==2020.11.15; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+pipfile==0.0.2
 pkginfo==1.7.0
+plette[validation]==0.2.3; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pluggy==0.13.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 py==1.10.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-pycodestyle==2.6.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-pydocstyle==5.1.1
-pyflakes==2.2.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-pygments==2.8.0; python_version >= '3.5'
-pylint==2.6.0
+pycodestyle==2.7.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+pydocstyle==6.0.0
+pyflakes==2.3.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+pygments==2.8.1; python_version >= '3.5'
+pylint==2.7.3
 pyparsing==2.4.7; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pytest-asyncio==0.14.0
 pytest-cov==2.11.1
 pytest==6.2.2
+python-dateutil==2.8.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 pytz==2021.1
 pyyaml==5.4.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
-readme-renderer==28.0
-regex==2020.11.13
+readme-renderer==29.0
+regex==2021.3.17
 requests-toolbelt==0.9.1
 requests==2.25.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+requirementslib==1.5.16; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 rfc3986==1.4.0
 six==1.15.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+smmap==4.0.0; python_version >= '3.5'
 snowballstemmer==2.1.0
-soupsieve==2.2; python_version >= '3.0'
+soupsieve==2.2.1; python_version >= '3.0'
 sphinx-autoapi==1.7.0
 sphinx-copybutton==0.3.1
 sphinx-rtd-theme==0.5.1
-sphinx==3.5.0
+sphinx==3.5.3
 sphinxcontrib-applehelp==1.0.2; python_version >= '3.5'
 sphinxcontrib-devhelp==1.0.2; python_version >= '3.5'
 sphinxcontrib-htmlhelp==1.0.3; python_version >= '3.5'
 sphinxcontrib-jsmath==1.0.1; python_version >= '3.5'
 sphinxcontrib-qthelp==1.0.3; python_version >= '3.5'
 sphinxcontrib-serializinghtml==1.1.4; python_version >= '3.5'
+stevedore==3.3.0; python_version >= '3.6'
 toml==0.10.2; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
+tomlkit==0.7.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 tox-pipenv==1.10.1
 tox==3.6.1
-tqdm==4.56.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-twine==3.3.0
+tqdm==4.59.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+twine==3.4.1
 typed-ast==1.4.2
 typer==0.3.2; python_version >= '3.6'
 typing-extensions==3.7.4.3
 unidecode==1.2.0
-urllib3==1.26.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'
+urllib3==1.26.4; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'
 virtualenv-clone==0.5.4; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
-virtualenv==20.4.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+virtualenv==20.4.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+vistir==0.5.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 webencodings==0.5.1
+wheel==0.36.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
 wrapt==1.12.1
 yarl==1.6.3; python_version >= '3.6'
-zipp==3.4.0; python_version >= '3.6'
+zipp==3.4.1; python_version >= '3.6'
 teslajsonpy

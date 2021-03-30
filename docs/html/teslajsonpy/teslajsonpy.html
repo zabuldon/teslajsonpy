@@ -273,7 +273,7 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py method">
 <dt id="teslajsonpy.Connection.get_authorization_code">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">get_authorization_code</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">email</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#teslajsonpy.Connection.get_authorization_code" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">get_authorization_code</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mfa_code</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mfa_device</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">retry_limit</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#teslajsonpy.Connection.get_authorization_code" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get authorization code from the oauth3 login method.</p>
 </dd></dl>
 
@@ -365,12 +365,13 @@ should wake up the vehicle or retry.</p></li>
 
 <dl class="py method">
 <dt id="teslajsonpy.Controller.connect">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">connect</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_login</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtered_vins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#teslajsonpy.Controller.connect" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">connect</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_login</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filtered_vins</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mfa_code</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#teslajsonpy.Controller.connect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect controller to Tesla.</p>
 <dl class="simple">
 <dt>Args</dt><dd><p>test_login (bool, optional): Whether to test credentials only. Defaults to False.
 wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update state. Defaults to False.
-filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.</p>
+filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.
+mfa_code (Text, optional): MFA code to use for connection</p>
 </dd>
 <dt>Returns</dt><dd><p>Dict[Text, Text]: Returns the refresh_token, access_token, and expires_in time</p>
 </dd>
@@ -601,6 +602,12 @@ should wake up the vehicle or retry.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="teslajsonpy.Controller.set_authorization_domain">
+<code class="sig-name descname"><span class="pre">set_authorization_domain</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_authorization_domain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set authorization domain in Connection.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="teslajsonpy.Controller.set_updates">
 <code class="sig-name descname"><span class="pre">set_updates</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_updates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set updates dictionary.</p>
@@ -687,6 +694,25 @@ size=&quot;8.0, 12.0&quot;;
 </dd></dl>
 
 <dl class="py method">
+<dt id="teslajsonpy.TeslaProxy.prepend_i18n_path">
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">prepend_i18n_path</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yarl.URL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#teslajsonpy.TeslaProxy.prepend_i18n_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepend path for i18n loadPath so it’ll reach the proxy.</p>
+<p>This is intended to be used for to place the proxy_url path in front of relative urls for loadPath in i18next.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_url</strong> (<em>URL</em>) – Base URL to prepend</p></li>
+<li><p><strong>html</strong> (<em>Text</em>) – Text to replace</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><p>Text: Replaced text</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="teslajsonpy.TeslaProxy.prepend_relative_urls">
 <em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">prepend_relative_urls</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yarl.URL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#teslajsonpy.TeslaProxy.prepend_relative_urls" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepend relative urls with url host.</p>
@@ -703,6 +729,13 @@ size=&quot;8.0, 12.0&quot;;
 <dt>Returns</dt><dd><p>Text: Replaced text</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.TeslaProxy.reset_data">
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">reset_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.TeslaProxy.reset_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset all stored data.</p>
+<p>A proxy may need to service multiple login requests if the route is not torn down. This function will reset all data between logins.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1637,7 +1670,7 @@ Class of exceptions for incomplete credentials.</p></li>
 </ul>
 <dl class="py exception">
 <dt id="teslajsonpy.TeslaException">
-<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">TeslaException</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.TeslaException" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">TeslaException</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.TeslaException" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class of Tesla API exceptions.</p>
 <p class="rubric">Inheritance</p>
 digraph inheritancea58a391388 {
@@ -1650,7 +1683,7 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py exception">
 <dt id="teslajsonpy.UnknownPresetMode">
-<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">UnknownPresetMode</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.UnknownPresetMode" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">UnknownPresetMode</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.UnknownPresetMode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class of exceptions for Unknown Preset.</p>
 <p class="rubric">Inheritance</p>
 digraph inheritancec2ed502f44 {
@@ -1665,7 +1698,7 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py exception">
 <dt id="teslajsonpy.RetryLimitError">
-<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">RetryLimitError</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.RetryLimitError" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">RetryLimitError</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.RetryLimitError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class of exceptions for hitting retry limits.</p>
 <p class="rubric">Inheritance</p>
 digraph inheritancefae8dcd8d6 {
@@ -1680,7 +1713,7 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py exception">
 <dt id="teslajsonpy.IncompleteCredentials">
-<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">IncompleteCredentials</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.IncompleteCredentials" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">IncompleteCredentials</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.IncompleteCredentials" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class of exceptions for incomplete credentials.</p>
 <p class="rubric">Inheritance</p>
 digraph inheritance49d735891d {
@@ -1711,7 +1744,7 @@ Otherwise, returns the result of object.__str__() (if defined)
 or repr(object).
 encoding defaults to sys.getdefaultencoding().
 errors defaults to ‘strict’.</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&#39;0.11.5&#39;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&#39;0.14.0&#39;
 </pre></div>
 </div>
 </dd></dl>
