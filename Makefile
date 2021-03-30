@@ -12,7 +12,7 @@ init:
 	pip3 install --upgrade pip pipenv
 	pipenv lock
 	pipenv install --three --dev
-lint: flake8 docstyle pylint sync_deps
+lint: flake8 docstyle pylint
 flake8:
 	pipenv run flake8 teslajsonpy
 docstyle:
