@@ -20,8 +20,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install python-semantic-release pipenv
+          pip install python-semantic-release poetry
           make init
+          make sync_deps
       - name: Make documentation
         run: |
           make docs
