@@ -34,7 +34,9 @@ class HeatedSeatSwitch(VehicleDevice):
             https://tesla-api.timdorr.com/vehicle/state/data
         controller : teslajsonpy.Controller
             The controller that controls updates to the Tesla API.
-
+        seat_name : string
+            The name of the seat to control. 
+            One of "left", "right", "rear_left", "rear_center", "rear_right."
         Returns
         -------
         None
