@@ -17,6 +17,7 @@ seat_id_map = {
     "rear_right": 5,
 }
 
+
 class HeatedSeatSwitch(VehicleDevice):
     """Home-assistant heated seat class for Tesla vehicles.
 
@@ -44,14 +45,13 @@ class HeatedSeatSwitch(VehicleDevice):
         self.__seat_heat_level = data['climate_state'][f'seat_heater_{seat_name}']
         self.__seat_name = seat_name
 
-
         self.type = "heated seat"
         self.hass_type = "switch"
 
         self.name = self._name()
 
-        self.uniq_name = self._uniq_name() # TODO
-        self.bin_type = 0x7 # TODO
+        self.uniq_name = self._uniq_name()
+        self.bin_type = 0x7
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the seat state."""
@@ -89,4 +89,3 @@ class HeatedSeatSwitch(VehicleDevice):
     def has_battery():
         """Return whether the device has a battery."""
         return False
-
