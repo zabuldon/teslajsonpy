@@ -35,7 +35,7 @@ class HeatedSeatSwitch(VehicleDevice):
         controller : teslajsonpy.Controller
             The controller that controls updates to the Tesla API.
         seat_name : string
-            The name of the seat to control. 
+            The name of the seat to control.
             One of "left", "right", "rear_left", "rear_center", "rear_right."
         Returns
         -------
@@ -47,7 +47,7 @@ class HeatedSeatSwitch(VehicleDevice):
         self.__seat_heat_level = data['climate_state'][f'seat_heater_{seat_name}']
         self.__seat_name = seat_name
 
-        self.type = "heated seat"
+        self.type = f"heated seat {seat_name}"
         self.hass_type = "switch"
 
         self.name = self._name()
