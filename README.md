@@ -34,6 +34,9 @@ Also thanks to [Tim Dorr](https://tesla-api.timdorr.com/) for documenting the AP
 11. Add yourself to `AUTHORS.md`.
 12. Submit a [pull request](https://github.com/zabuldon/teslajsonpy/pulls)!
 
+# Documentation
+[API docs](https://teslajsonpy.readthedocs.io/en/latest/).
+
 # License
 
 [Apache-2.0](LICENSE). By providing a contribution, you agree the contribution is licensed under Apache-2.0.
