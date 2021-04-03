@@ -23,4 +23,5 @@ If you're looking to add functionality to Home Assistant you will need to do the
     - https://www.teslaapi.io/
     - https://tesla-api.timdorr.com/
 2. Build a proper abstraction inheriting from the [vehicle.py](teslajsonpy/vehicle.py).  Check out [lock.py](teslajsonpy/lock.py).
+3. Add abstraction to the controller [_add_components](https://github.com/zabuldon/teslajsonpy/blob/dev/teslajsonpy/controller.py#L530) so it will be discoverable.
 3. Add changes to Home Assistant to access your abstraction and submit a PR per HA guidelines.
