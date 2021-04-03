@@ -10,15 +10,15 @@ https://github.com/zabuldon/teslajsonpy
 """
 from functools import partial
 import logging
-from typing import Any, Dict, Text
-
 import random
+from typing import Any, Dict, Optional
+
 from aiohttp import ClientResponse, web
 from authcaptureproxy import AuthCaptureProxy, return_timer_countdown_refresh_html
 from authcaptureproxy.examples.modifiers import find_regex_urls
 from authcaptureproxy.helper import prepend_url
-from yarl import URL
 import multidict
+from yarl import URL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,11 +35,11 @@ class TeslaProxy(AuthCaptureProxy):
 
         """
         super().__init__(URL(proxy_url), URL(host_url))
-        self._config_flow_id = None
-        self._callback_url = None
-        self.waf_retry = 0
-        self.waf_limit = 30
-        self.tests = {"test_url": self.test_url}
+        self._config_flow_id: Optional[str] = None
+        self._callback_url: Optional[str] = None
+        self.waf_retry: int = 0
+        self.waf_limit: int = 30
+        self.tests: Dict[str, str] = {"test_url": self.test_url}
 
         self.headers = {
             "x-tesla-user-agent": "TeslaApp/3.10.9-433/adff2e065/android/10",
@@ -62,8 +62,8 @@ class TeslaProxy(AuthCaptureProxy):
     async def test_url(
         self,
         resp: ClientResponse,
-        data: Dict[Text, Any],
-        query: Dict[Text, Any],  # pylint: disable=unused-argument
+        data: Dict[str, Any],
+        query: Dict[str, Any],  # pylint: disable=unused-argument
     ):
         """Test for a successful Tesla URL.
 
@@ -71,14 +71,14 @@ class TeslaProxy(AuthCaptureProxy):
 
         Args:
             resp (ClientResponse): The aiohttp response.
-            data (Dict[Text, Any]): Dictionary of all post data captured through proxy with overwrites for duplicate keys.
-            query (Dict[Text, Any]): Dictionary of all query data with overwrites for duplicate keys.
+            data (Dict[str, Any]): Dictionary of all post data captured through proxy with overwrites for duplicate keys.
+            query (Dict[str, Any]): Dictionary of all query data with overwrites for duplicate keys.
 
         Returns
-            Optional[Union[URL, Text]]: URL for a http 302 redirect or Text to display on success. None indicates test did not pass.
+            Optional[Union[URL, str]]: URL for a http 302 redirect or str to display on success. None indicates test did not pass.
 
         """
-        code: Text = ""
+        code: str = ""
         if resp.url.path == "/void/callback":
             code = resp.url.query.get("code")
         if resp.url.path == "/static/404.html":
@@ -109,17 +109,17 @@ class TeslaProxy(AuthCaptureProxy):
             text = await resp.json()
             _LOGGER.debug("Json response: %s", text)
 
-    async def prepend_relative_urls(self, base_url: URL, html: Text) -> Text:
+    async def prepend_relative_urls(self, base_url: URL, html: str) -> str:
         """Prepend relative urls with url host.
 
         This is intended to be used for to place the proxy_url in front of relative urls in src="/
 
         Args:
             base_url (URL): Base URL to prepend
-            html (Text): Text to replace
+            html (str): text to replace
 
         Returns
-            Text: Replaced text
+            str: Replaced text
 
         """
         if not base_url:
@@ -142,17 +142,17 @@ class TeslaProxy(AuthCaptureProxy):
         self.waf_retry = 0
         await super().reset_data()
 
-    async def prepend_i18n_path(self, base_url: URL, html: Text) -> Text:
+    async def prepend_i18n_path(self, base_url: URL, html: str) -> str:
         """Prepend path for i18n loadPath so it'll reach the proxy.
 
         This is intended to be used for to place the proxy_url path in front of relative urls for loadPath in i18next.
 
         Args:
             base_url (URL): Base URL to prepend
-            html (Text): Text to replace
+            html (str): text to replace
 
         Returns
-            Text: Replaced text
+            str: Replaced text
 
         """
         if not base_url:
@@ -161,9 +161,7 @@ class TeslaProxy(AuthCaptureProxy):
 
         return await find_regex_urls(
             partial(prepend_url, base_url, encoded=True),
-            {
-                "method_func": r"""(?:loadPath:)\s*?["']([^"']*)[\"\']""",
-            },
+            {"method_func": r"""(?:loadPath:)\s*?["']([^"']*)[\"\']"""},
             html=html,
         )
 
