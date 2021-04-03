@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v0.17.1 (2021-04-03)
+### Fix
+* Fix china authentication ([`45dec97`](https://github.com/zabuldon/teslajsonpy/commit/45dec971b9dbeb3a70acbd96093ca5a4777be821))
+* Catch keyerror for missing seatwarmers ([`9436684`](https://github.com/zabuldon/teslajsonpy/commit/9436684214be96aeedc276e859ee70e57d8e560e))
+
+### Documentation
+* Update docs ([`e9b149a`](https://github.com/zabuldon/teslajsonpy/commit/e9b149aee97c216e2f3c8cd23200152ca4a61b4f))
+
 ## v0.17.0 (2021-04-02)
 ### Feature
 * Add heated seats switch ([#180](https://github.com/zabuldon/teslajsonpy/issues/180)) ([`69599db`](https://github.com/zabuldon/teslajsonpy/commit/69599db08678066bbd78705147399435d9f9e90b))
