@@ -11,6 +11,6 @@ SLEEP_INTERVAL = 660  # interval required to let vehicle sleep; based on testing
 DRIVING_INTERVAL = 60  # interval when driving detected
 WEBSOCKET_TIMEOUT = 11  # time for websocket to timeout
 RELEASE_NOTES_URL = "https://teslascope.com/teslapedia/software/"
-AUTH_DOMAIN = "https://auth.tesla.cn"
+AUTH_DOMAIN = "https://auth.tesla.com"
 API_URL = "https://owner-api.teslamotors.com"
 WS_URL = "wss://streaming.vn.teslamotors.com/streaming"
