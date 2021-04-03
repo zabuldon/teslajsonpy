@@ -15,6 +15,7 @@ from typing import Any, Dict, Optional
 
 from aiohttp import ClientResponse, web
 from authcaptureproxy import AuthCaptureProxy, return_timer_countdown_refresh_html
+from authcaptureproxy.const import SKIP_AUTO_HEADERS
 from authcaptureproxy.examples.modifiers import find_regex_urls
 from authcaptureproxy.helper import prepend_url
 import multidict
@@ -58,6 +59,7 @@ class TeslaProxy(AuthCaptureProxy):
                 },
             }
         )
+        self.redirect_filters = {"url": ["^.*/static/404.html$"]}
 
     async def test_url(
         self,
@@ -170,6 +172,11 @@ class TeslaProxy(AuthCaptureProxy):
     ) -> multidict.MultiDict:
         """Modify headers.
 
+        Return modified headers based on site and request. To disable auto header generation,
+        pass in a key const.SKIP_AUTO_HEADERS with a list of keys to not generate.
+
+        For example, to prevent User-Agent generation: {SKIP_AUTO_HEADERS : ["User-Agent"]}
+
         Args:
             site (URL): URL of the next host request.
             request (web.Request): Proxy directed request. This will need to be changed for the actual host request.
@@ -180,6 +187,7 @@ class TeslaProxy(AuthCaptureProxy):
         """
         result = await super().modify_headers(site, request)
         method = request.method
+        result.update({SKIP_AUTO_HEADERS: ["User-Agent"]})
         if (
             str(site.path) == "/oauth2/v3/authorize/mfa/verify"
             and method == "POST"
