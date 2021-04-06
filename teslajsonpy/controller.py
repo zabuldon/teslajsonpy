@@ -40,7 +40,6 @@ from teslajsonpy.homeassistant.heated_seats import HeatedSeatSwitch
 from teslajsonpy.homeassistant.lock import ChargerLock, Lock
 from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
 from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
-from teslajsonpy.homeassistant.heated_seats import HeatedSeatSwitch
 
 _LOGGER = logging.getLogger(__name__)
 
