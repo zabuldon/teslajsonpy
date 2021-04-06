@@ -547,7 +547,7 @@ class Controller:
         self.__components.append(TrunkLock(car, self))
         self.__components.append(FrunkLock(car, self))
         self.__components.append(UpdateSensor(car, self))
-        for seat in ['left', 'right', 'rear_left', 'rear_center', 'rear_right']:
+        for seat in ["left", "right", "rear_left", "rear_center", "rear_right"]:
             try:
                 self.__components.append(HeatedSeatSwitch(car, self, seat))
             except KeyError:
