@@ -30,7 +30,7 @@ def test_get_seat_heat_level_on_init(monkeypatch):
     _seat = HeatedSeatSwitch(_data, _controller, 'left')
 
     assert not _seat is None
-    assert _seat.get_seat_heat_level() == 3 # 3 is mocked initial level for left seat from tesla_mock.py
+    assert not _seat.get_seat_heat_level()
 
 
 @pytest.mark.asyncio

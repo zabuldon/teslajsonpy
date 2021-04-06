@@ -546,11 +546,11 @@ class Controller:
         self.__components.append(TrunkLock(car, self))
         self.__components.append(FrunkLock(car, self))
         self.__components.append(UpdateSensor(car, self))
-        self.__components.append(HeatedSeatSwitch(car, self, 'left'))
-        self.__components.append(HeatedSeatSwitch(car, self, 'right'))
-        self.__components.append(HeatedSeatSwitch(car, self, 'rear_left'))
-        self.__components.append(HeatedSeatSwitch(car, self, 'rear_center'))
-        self.__components.append(HeatedSeatSwitch(car, self, 'rear_right'))
+        self.__components.append(HeatedSeatSwitch(car, self, "left"))
+        self.__components.append(HeatedSeatSwitch(car, self, "right"))
+        self.__components.append(HeatedSeatSwitch(car, self, "rear_left"))
+        self.__components.append(HeatedSeatSwitch(car, self, "rear_center"))
+        self.__components.append(HeatedSeatSwitch(car, self, "rear_right"))
 
     async def _wake_up(self, car_id):
         car_vin = self._id_to_vin(car_id)

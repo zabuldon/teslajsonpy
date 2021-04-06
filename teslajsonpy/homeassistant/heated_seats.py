@@ -44,7 +44,7 @@ class HeatedSeatSwitch(VehicleDevice):
         """
         super().__init__(data, controller)
         self.__manual_update_time = 0
-        self.__seat_heat_level = data['climate_state'][f'seat_heater_{seat_name}']
+        self.__seat_heat_level = None
         self.__seat_name = seat_name
 
         self.type = f"heated seat {seat_name}"
@@ -69,15 +69,17 @@ class HeatedSeatSwitch(VehicleDevice):
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_climate_params(self._id)
-            self.__seat_heat_level = data[f'seat_heater_{self.__seat_name}'] if data else None
+            self.__seat_heat_level = (
+                data[f"seat_heater_{self.__seat_name}"] if data else None
+            )
 
     async def set_seat_heat_level(self, level):
         """Set heated seat level."""
         data = await self._controller.command(
-            self._id, "remote_seat_heater_request", data={
-                'heater': seat_id_map[self.__seat_name],
-                'level': level
-            }, wake_if_asleep=True
+            self._id,
+            "remote_seat_heater_request",
+            data={"heater": seat_id_map[self.__seat_name], "level": level},
+            wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
             self.__seat_heat_level = level
