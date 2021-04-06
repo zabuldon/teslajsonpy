@@ -24,7 +24,7 @@ Also thanks to [Tim Dorr](https://tesla-api.timdorr.com/) for documenting the AP
     or [initiate a discussion on one](https://github.com/zabuldon/teslajsonpy/issues/new).
 2.  [Fork the repository](https://github.com/zabuldon/teslajsonpy/fork/new).
 3.  Install the dev environment: `make init`.
-4.  Enter the virtual environment: `pipenv shell`
+4.  Enter the virtual environment: `poetry shell`
 5.  Code your new feature or bug fix. [Developers Reference](DEVELOPERS.md)
 6.  Write a test that covers your new functionality.
 7.  Update `README.md` with any new documentation.
@@ -33,6 +33,9 @@ Also thanks to [Tim Dorr](https://tesla-api.timdorr.com/) for documenting the AP
 10. Ensure you have typed your code correctly: `make typing`
 11. Add yourself to `AUTHORS.md`.
 12. Submit a [pull request](https://github.com/zabuldon/teslajsonpy/pulls)!
+
+# Documentation
+[API docs](https://teslajsonpy.readthedocs.io/en/latest/).
 
 # License
 

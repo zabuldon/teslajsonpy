@@ -36,6 +36,7 @@ from teslajsonpy.homeassistant.binary_sensor import (
 from teslajsonpy.homeassistant.charger import ChargerSwitch, ChargingSensor, RangeSwitch
 from teslajsonpy.homeassistant.climate import Climate, TempSensor
 from teslajsonpy.homeassistant.gps import GPS, Odometer
+from teslajsonpy.homeassistant.heated_seats import HeatedSeatSwitch
 from teslajsonpy.homeassistant.lock import ChargerLock, Lock
 from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
 from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
@@ -546,11 +547,11 @@ class Controller:
         self.__components.append(TrunkLock(car, self))
         self.__components.append(FrunkLock(car, self))
         self.__components.append(UpdateSensor(car, self))
-        self.__components.append(HeatedSeatSwitch(car, self, "left"))
-        self.__components.append(HeatedSeatSwitch(car, self, "right"))
-        self.__components.append(HeatedSeatSwitch(car, self, "rear_left"))
-        self.__components.append(HeatedSeatSwitch(car, self, "rear_center"))
-        self.__components.append(HeatedSeatSwitch(car, self, "rear_right"))
+        for seat in ['left', 'right', 'rear_left', 'rear_center', 'rear_right']:
+            try:
+                self.__components.append(HeatedSeatSwitch(car, self, seat))
+            except KeyError:
+                _LOGGER.debug("Seat warmer %s not detected", seat)
 
     async def _wake_up(self, car_id):
         car_vin = self._id_to_vin(car_id)

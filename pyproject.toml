@@ -1,10 +1,29 @@
 [tool.poetry]
 name = "teslajsonpy"
-version = "0.14.0"
+version = "0.17.1"
 description = "A library to work with Tesla API."
 authors = ["Sergey Isachenko <sergey.isachenkol@bool.by>"]
 license = "Apache-2.0"
 repository = "https://github.com/zabuldon/teslajsonpy"
+readme = "README.md"
+homepage = "https://github.com/zabuldon/teslajsonpy"
+documentation = "https://teslajsonpy.readthedocs.io"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+	"Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+    "Topic :: Software Development :: Libraries :: Python Modules"
+]
+include = [
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+]
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
@@ -12,7 +31,7 @@ aiohttp = "^3.7.4"
 backoff = "^1.10.0"
 beautifulsoup4 = "^4.9.3"
 wrapt = "^1.12.1"
-authcaptureproxy = "~=0.7.1"
+authcaptureproxy = "~=0.8.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.0"
@@ -35,3 +54,7 @@ pylint = "^2.7.3"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[metadata]
+description-file = "README.md"
+
