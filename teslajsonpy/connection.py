@@ -21,6 +21,7 @@ from typing import Dict, Text
 
 import aiohttp
 from bs4 import BeautifulSoup
+import httpx
 import yarl
 from yarl import URL
 
@@ -41,7 +42,7 @@ class Connection:
 
     def __init__(
         self,
-        websession: aiohttp.ClientSession,
+        websession: httpx.AsyncClient,
         email: Text = None,
         password: Text = None,
         access_token: Text = None,
@@ -193,18 +194,23 @@ class Connection:
         _LOGGER.debug("%s: %s %s", method, url, data)
 
         try:
-            resp = await getattr(self.websession, method)(
-                url, data=data, headers=headers, cookies=cookies
-            )
-            data = await resp.json()
-            _LOGGER.debug("%s: %s", resp.status, json.dumps(data))
-            if resp.status > 299:
-                if resp.status == 401:
+            if data:
+                resp = await getattr(self.websession, method)(
+                    str(url), data=data, headers=headers, cookies=cookies
+                )
+            else:
+                resp = await getattr(self.websession, method)(
+                    str(url), headers=headers, cookies=cookies
+                )
+            data = resp.json()
+            _LOGGER.debug("%s: %s", resp.status_code, json.dumps(data))
+            if resp.status_code > 299:
+                if resp.status_code == 401:
                     if data and data.get("error") == "invalid_token":
-                        raise TeslaException(resp.status, "invalid_token")
-                elif resp.status == 408:
-                    raise TeslaException(resp.status, "vehicle_unavailable")
-                raise TeslaException(resp.status)
+                        raise TeslaException(resp.status_code, "invalid_token")
+                elif resp.status_code == 408:
+                    raise TeslaException(resp.status_code, "vehicle_unavailable")
+                raise TeslaException(resp.status_code)
             if data.get("error"):
                 # known errors:
                 #     'vehicle unavailable: {:error=>"vehicle unavailable:"}',
@@ -216,8 +222,8 @@ class Connection:
                 raise TeslaException(
                     f'{data.get("error")}:{data.get("error_description")}'
                 )
-        except aiohttp.ClientResponseError as exception_:
-            raise TeslaException(exception_.status) from exception_
+        except httpx.HTTPStatusError as exception_:
+            raise TeslaException(exception_.request.status_code) from exception_
         return data
 
     async def websocket_connect(self, vin: int, vehicle_id: int, **kwargs):
@@ -375,6 +381,11 @@ class Connection:
     #         }
     #     )
 
+    async def close(self) -> None:
+        """Close connection."""
+        await self.websession.aclose()
+        _LOGGER.debug("Connection closed.")
+
     async def get_authorization_code(
         self,
         email: Text,
@@ -390,7 +401,7 @@ class Connection:
             _LOGGER.debug("No email or password for login; unable to login.")
             return
         url = self.get_authorization_code_link(new=True)
-        resp = await self.websession.get(url.update_query({"login_hint": email}))
+        resp = await self.websession.get(str(url.update_query({"login_hint": email})))
         html = await resp.text()
         if resp.history:
             for item in resp.history:
@@ -413,14 +424,18 @@ class Connection:
         transaction_id: Text = data.get("transaction_id")
         for attempt in range(retry_limit):
             _LOGGER.debug("Attempt #%s", attempt)
-            resp = await self.websession.post(url, data=data)
+            resp = await self.websession.post(str(url), data=data)
             _process_resp(resp)
             if not resp.history:
                 html = await resp.text()
                 if "/mfa/verify" in html:
                     _LOGGER.debug("Detected MFA request")
                     mfa_resp = await self.websession.get(
-                        self.auth_domain.with_path("/oauth2/v3/authorize/mfa/factors"),
+                        str(
+                            self.auth_domain.with_path(
+                                "/oauth2/v3/authorize/mfa/factors"
+                            )
+                        ),
                         params={"transaction_id": transaction_id},
                     )
                     _process_resp(mfa_resp)
@@ -438,7 +453,7 @@ class Connection:
                     #         }
                     #     ]
                     # }
-                    mfa_json = await mfa_resp.json()
+                    mfa_json = mfa_resp.json()
                     if len(mfa_json.get("data", [])) >= 1:
                         factor_id = mfa_json["data"][mfa_device]["id"]
                     if not mfa_code:
@@ -448,7 +463,11 @@ class Connection:
                             "MFA Code missing", devices=mfa_json["data"]
                         )
                     mfa_resp = await self.websession.post(
-                        self.auth_domain.with_path("/oauth2/v3/authorize/mfa/verify"),
+                        str(
+                            self.auth_domain.with_path(
+                                "/oauth2/v3/authorize/mfa/verify"
+                            )
+                        ),
                         json={
                             "transaction_id": transaction_id,
                             "factor_id": factor_id,
@@ -456,7 +475,7 @@ class Connection:
                         },
                     )
                     _process_resp(mfa_resp)
-                    mfa_json = await mfa_resp.json()
+                    mfa_json = mfa_resp.json()
                     if not (
                         mfa_json["data"].get("approved")
                         and mfa_json["data"].get("valid")
@@ -465,7 +484,7 @@ class Connection:
                         raise IncompleteCredentials(
                             "MFA Code invalid", devices=mfa_json["data"]
                         )
-                    resp = await self.websession.post(url, data=data)
+                    resp = await self.websession.post(str(url), data=data)
                     _process_resp(resp)
             await asyncio.sleep(3)
         if not resp.history or not URL(resp.history[-1].url).query.get("code"):
@@ -515,10 +534,10 @@ class Connection:
             "redirect_uri": "https://auth.tesla.com/void/callback",
         }
         auth = await self.websession.post(
-            self.auth_domain.with_path("/oauth2/v3/token"),
+            str(self.auth_domain.with_path("/oauth2/v3/token")),
             data=oauth,
         )
-        return await auth.json()
+        return auth.json()
 
     async def refresh_access_token(self, refresh_token):
         """Refresh access token from sso."""
@@ -537,7 +556,7 @@ class Connection:
             self.auth_domain.with_path("/oauth2/v3/token"),
             data=oauth,
         )
-        return await auth.json()
+        return auth.json()
 
     async def get_bearer_token(self, access_token):
         """Get bearer token. This is used by the owners API."""
@@ -556,7 +575,7 @@ class Connection:
         auth = await self.websession.post(
             "https://owner-api.teslamotors.com/oauth/token", headers=head, data=oauth
         )
-        return await auth.json()
+        return auth.json()
 
 
 def get_inputs(soup: BeautifulSoup, searchfield=None) -> Dict[str, str]:
@@ -583,7 +602,7 @@ def _process_resp(resp) -> Text:
             _LOGGER.debug("%s: redirected from\n%s", item.method, item.url)
     url = str(resp.request_info.url)
     method = resp.request_info.method
-    status = resp.status
+    status = resp.status_code
     reason = resp.reason
     headers = resp.request_info.headers
     _LOGGER.debug(
