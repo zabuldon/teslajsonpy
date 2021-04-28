@@ -13,8 +13,8 @@ import logging
 import time
 from typing import Callable, Dict, List, Optional, Text
 
-from aiohttp import ClientConnectorError
 import backoff
+import httpx
 import wrapt
 from yarl import URL
 
@@ -204,7 +204,7 @@ class Controller:
 
     def __init__(
         self,
-        websession,
+        websession: Optional[httpx.AsyncClient] = None,
         email: Text = None,
         password: Text = None,
         access_token: Text = None,
@@ -228,7 +228,9 @@ class Controller:
 
         """
         self.__connection = Connection(
-            websession=websession,
+            websession=websession
+            if websession and isinstance(websession, httpx.AsyncClient)
+            else httpx.AsyncClient(timeout=60),
             email=email,
             password=password,
             access_token=access_token,
@@ -330,6 +332,11 @@ class Controller:
             "expiration": self.__connection.expiration,
         }
 
+    async def disconnect(self) -> None:
+        """Disconnect from Tesla api."""
+        _LOGGER.debug("Disconnecting controller.")
+        await self.__connection.close()
+
     def is_token_refreshed(self) -> bool:
         """Return whether token has been changed and not retrieved.
 
@@ -394,7 +401,7 @@ class Controller:
         self.__websocket_listeners.append(callback)
         return len(self.__websocket_listeners) - 1
 
-    @backoff.on_exception(min_expo, ClientConnectorError, max_time=10, logger=__name__)
+    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_vehicles(self):
         """Get vehicles json from TeslaAPI."""
         return (await self.__connection.get("vehicles"))["response"]
@@ -546,7 +553,7 @@ class Controller:
         self.__components.append(TrunkLock(car, self))
         self.__components.append(FrunkLock(car, self))
         self.__components.append(UpdateSensor(car, self))
-        for seat in ['left', 'right', 'rear_left', 'rear_center', 'rear_right']:
+        for seat in ["left", "right", "rear_left", "rear_center", "rear_right"]:
             try:
                 self.__components.append(HeatedSeatSwitch(car, self, seat))
             except KeyError:

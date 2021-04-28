@@ -13,11 +13,11 @@ import logging
 import random
 from typing import Any, Dict, Optional
 
-from aiohttp import ClientResponse, web
+from aiohttp import web
+import httpx
 from authcaptureproxy import AuthCaptureProxy, return_timer_countdown_refresh_html
-from authcaptureproxy.const import SKIP_AUTO_HEADERS
 from authcaptureproxy.examples.modifiers import find_regex_urls
-from authcaptureproxy.helper import prepend_url
+from authcaptureproxy.helper import get_content_type, prepend_url
 import multidict
 from yarl import URL
 
@@ -63,7 +63,7 @@ class TeslaProxy(AuthCaptureProxy):
 
     async def test_url(
         self,
-        resp: ClientResponse,
+        resp: httpx.Response,
         data: Dict[str, Any],
         query: Dict[str, Any],  # pylint: disable=unused-argument
     ):
@@ -72,7 +72,7 @@ class TeslaProxy(AuthCaptureProxy):
         https://tesla-api.timdorr.com/api-basics/authentication#step-2-obtain-an-authorization-code
 
         Args:
-            resp (ClientResponse): The aiohttp response.
+            resp (httpx.Response): The httpx response.
             data (Dict[str, Any]): Dictionary of all post data captured through proxy with overwrites for duplicate keys.
             query (Dict[str, Any]): Dictionary of all query data with overwrites for duplicate keys.
 
@@ -84,18 +84,19 @@ class TeslaProxy(AuthCaptureProxy):
         if resp.url.path == "/void/callback":
             code = resp.url.query.get("code")
         if resp.url.path == "/static/404.html":
-            code = URL(resp.history[-1].url).query.get("code")
+            code = URL(str(resp.history[-1].url)).query.get("code")
         if code:
             username = data.get("identity")
             self._callback_url = self.init_query.get("callback_url")
             self.waf_retry = 0
             _LOGGER.debug("Success! Oauth code %s for %s captured.", code, username)
+            await self.session.aclose()
             # 302 redirect
             return URL(self._callback_url).update_query(
                 {"code": code, "username": username, "domain": self._host_url.host}
             )
-        if resp.content_type == "text/html":
-            text = await resp.text()
+        if get_content_type(resp) == "text/html":
+            text = resp.text
             if "<noscript>Please enable JavaScript to view the page content." in text:
                 _LOGGER.debug("WAF discovered %s times in a row.", self.waf_retry)
                 self.waf_retry += 1
@@ -107,8 +108,8 @@ class TeslaProxy(AuthCaptureProxy):
                     False,
                 )
             self.waf_retry = 0
-        if resp.content_type == "application/json":
-            text = await resp.json()
+        if get_content_type(resp) == "application/json":
+            text = resp.json()
             _LOGGER.debug("Json response: %s", text)
 
     async def prepend_relative_urls(self, base_url: URL, html: str) -> str:
@@ -182,12 +183,12 @@ class TeslaProxy(AuthCaptureProxy):
             request (web.Request): Proxy directed request. This will need to be changed for the actual host request.
 
         Returns
-            multidict.MultiDict: Headers after modifications
+            dict: Headers after modifications
 
         """
         result = await super().modify_headers(site, request)
         method = request.method
-        result.update({SKIP_AUTO_HEADERS: ["User-Agent"]})
+        # result.update({SKIP_AUTO_HEADERS: ["User-Agent"]})
         if (
             str(site.path) == "/oauth2/v3/authorize/mfa/verify"
             and method == "POST"
@@ -195,5 +196,5 @@ class TeslaProxy(AuthCaptureProxy):
         ):
             # allow post json to autogenerate headers.
             # https://github.com/timdorr/tesla-api/discussions/316.
-            return multidict.MultiDict({})
-        return multidict.MultiDict(result)
+            return {}
+        return result
