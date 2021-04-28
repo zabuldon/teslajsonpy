@@ -31,7 +31,8 @@ aiohttp = "^3.7.4"
 backoff = "^1.10.0"
 beautifulsoup4 = "^4.9.3"
 wrapt = "^1.12.1"
-authcaptureproxy = "~=0.8.1"
+authcaptureproxy = "~=1.0.0"
+httpx = "^0.17.1"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.0"
