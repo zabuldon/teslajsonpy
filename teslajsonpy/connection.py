@@ -202,8 +202,7 @@ class Connection:
                 resp = await getattr(self.websession, method)(
                     str(url), headers=headers, cookies=cookies
                 )
-            data = resp.json()
-            _LOGGER.debug("%s: %s", resp.status_code, json.dumps(data))
+            _LOGGER.debug("%s: %s", resp.status_code, resp.text)
             if resp.status_code > 299:
                 if resp.status_code == 401:
                     if data and data.get("error") == "invalid_token":
@@ -211,6 +210,7 @@ class Connection:
                 elif resp.status_code == 408:
                     raise TeslaException(resp.status_code, "vehicle_unavailable")
                 raise TeslaException(resp.status_code)
+            data = resp.json()
             if data.get("error"):
                 # known errors:
                 #     'vehicle unavailable: {:error=>"vehicle unavailable:"}',
