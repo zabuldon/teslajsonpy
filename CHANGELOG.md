@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.3 (2021-05-01)
+### Fix
+* Check response before json ([#202](https://github.com/zabuldon/teslajsonpy/issues/202)) ([`2df733a`](https://github.com/zabuldon/teslajsonpy/commit/2df733a5401500298c54094de0f4e1430d600ee1))
+
 ## v0.18.2 (2021-05-01)
 ### Fix
 * Fix attribute error in debug statement ([`48898f9`](https://github.com/zabuldon/teslajsonpy/commit/48898f9b2d981ab696dbcdfa16efa57faf10a1fd))
