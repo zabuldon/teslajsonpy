@@ -406,12 +406,12 @@ class Connection:
         if resp.history:
             for item in resp.history:
                 if (
-                    item.status in [301, 302, 303, 304, 305, 306, 307, 308]
+                    item.status_code in [301, 302, 303, 304, 305, 306, 307, 308]
                     and resp.url.host != self.auth_domain.host
                 ):
                     _LOGGER.debug(
                         "Detected %s redirect from %s to %s; changing proxy host",
-                        item.status,
+                        item.status_code,
                         item.url.host,
                         resp.url.host,
                     )
@@ -487,10 +487,10 @@ class Connection:
                     resp = await self.websession.post(str(url), data=data)
                     _process_resp(resp)
             await asyncio.sleep(3)
-        if not resp.history or not URL(resp.history[-1].url).query.get("code"):
+        if not resp.history or not URL(str(resp.history[-1].url)).query.get("code"):
             _LOGGER.debug("Failed to authenticate")
             raise IncompleteCredentials("Unable to login with credentials")
-        code_url = URL(resp.history[-1].url)
+        code_url = URL(str(resp.history[-1].url))
         _LOGGER.debug("Found code %s", code_url.query.get("code"))
         return code_url.query.get("code")
 
@@ -599,7 +599,7 @@ def get_inputs(soup: BeautifulSoup, searchfield=None) -> Dict[str, str]:
 def _process_resp(resp) -> Text:
     if resp.history:
         for item in resp.history:
-            _LOGGER.debug("%s: redirected from\n%s", item.method, item.url)
+            _LOGGER.debug("%s: redirected from\n%s", item.resp.method, item.url)
     url = str(resp.request.url)
     method = resp.request.method
     status = resp.status_code
