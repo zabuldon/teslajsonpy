@@ -599,7 +599,7 @@ def get_inputs(soup: BeautifulSoup, searchfield=None) -> Dict[str, str]:
 def _process_resp(resp) -> Text:
     if resp.history:
         for item in resp.history:
-            _LOGGER.debug("%s: redirected from\n%s", item.resp.method, item.url)
+            _LOGGER.debug("%s: redirected from\n%s", item.request.method, item.url)
     url = str(resp.request.url)
     method = resp.request.method
     status = resp.status_code
