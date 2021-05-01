@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.1 (2021-05-01)
+### Fix
+* Fix syntax errors due to httpx ([`cea4135`](https://github.com/zabuldon/teslajsonpy/commit/cea4135aa913cdfad77fe69871e2d21e7aabc697))
+* Loosen dependency requirements ([`598d600`](https://github.com/zabuldon/teslajsonpy/commit/598d60039244292cdb47bfd99f0b388c68264bb6))
+* Fix initialization of heated seats ([#189](https://github.com/zabuldon/teslajsonpy/issues/189)) ([`ddde348`](https://github.com/zabuldon/teslajsonpy/commit/ddde34855635954c46269286178d8f2edfce8c19))
+
 ## v0.18.0 (2021-04-28)
 ### Feature
 * Swap to httpx ([`5843932`](https://github.com/zabuldon/teslajsonpy/commit/58439327ab9aabf8d17b6abef45511ed3996d798))
