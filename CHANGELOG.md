@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v0.18.2 (2021-05-01)
+### Fix
+* Fix attribute error in debug statement ([`48898f9`](https://github.com/zabuldon/teslajsonpy/commit/48898f9b2d981ab696dbcdfa16efa57faf10a1fd))
+* Fix give up condition for command retries ([`8954299`](https://github.com/zabuldon/teslajsonpy/commit/8954299e17231e695a759abf1ba518ca0fc2b6ff))
+* Fix get_authorization_code syntax ([`ef46aef`](https://github.com/zabuldon/teslajsonpy/commit/ef46aefa6e790c05d8d67f6b99329b5cec0d14ff))
+
 ## v0.18.1 (2021-05-01)
 ### Fix
 * Fix syntax errors due to httpx ([`cea4135`](https://github.com/zabuldon/teslajsonpy/commit/cea4135aa913cdfad77fe69871e2d21e7aabc697))
