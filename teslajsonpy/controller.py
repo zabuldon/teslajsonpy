@@ -25,7 +25,7 @@ from teslajsonpy.const import (
     ONLINE_INTERVAL,
     SLEEP_INTERVAL,
 )
-from teslajsonpy.exceptions import RetryLimitError, TeslaException
+from teslajsonpy.exceptions import should_giveup, RetryLimitError, TeslaException
 from teslajsonpy.homeassistant.battery_sensor import Battery, Range
 from teslajsonpy.homeassistant.binary_sensor import (
     ChargerConnectionSensor,
@@ -496,7 +496,12 @@ class Controller:
         )["response"]
 
     @backoff.on_exception(
-        min_expo, TeslaException, max_time=60, logger=__name__, min_value=15
+        min_expo,
+        TeslaException,
+        max_time=60,
+        logger=__name__,
+        min_value=15,
+        giveup=should_giveup,
     )
     async def command(self, car_id, name, data=None, wake_if_asleep=True):
         """Post name command to the car_id.
