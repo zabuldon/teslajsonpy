@@ -402,7 +402,7 @@ class Connection:
             return
         url = self.get_authorization_code_link(new=True)
         resp = await self.websession.get(str(url.update_query({"login_hint": email})))
-        html = await resp.text()
+        html = resp.text
         if resp.history:
             for item in resp.history:
                 if (
@@ -427,7 +427,7 @@ class Connection:
             resp = await self.websession.post(str(url), data=data)
             _process_resp(resp)
             if not resp.history:
-                html = await resp.text()
+                html = resp.text
                 if "/mfa/verify" in html:
                     _LOGGER.debug("Detected MFA request")
                     mfa_resp = await self.websession.get(
@@ -600,11 +600,11 @@ def _process_resp(resp) -> Text:
     if resp.history:
         for item in resp.history:
             _LOGGER.debug("%s: redirected from\n%s", item.method, item.url)
-    url = str(resp.request_info.url)
-    method = resp.request_info.method
+    url = str(resp.request.url)
+    method = resp.request.method
     status = resp.status_code
-    reason = resp.reason
-    headers = resp.request_info.headers
+    reason = resp.reason_phrase
+    headers = resp.request.headers
     _LOGGER.debug(
         "%s: \n%s with\n%s\n returned %s:%s with response %s",
         method,
