@@ -63,3 +63,23 @@ class UnknownPresetMode(TeslaException):
     """Class of exceptions for Unknown Preset."""
 
     pass
+
+
+def should_giveup(ex: TeslaException) -> bool:
+    """Test whether the exception should result in a retry.
+
+    This is consumed by backoff.
+
+    Args
+        ex (TeslaException): The exception
+
+    Returns
+        bool: whether backoff should give up
+
+    """
+    return isinstance(ex, (IncompleteCredentials, RetryLimitError)) or ex.code in [
+        401,
+        404,
+        405,
+        423,
+    ]
