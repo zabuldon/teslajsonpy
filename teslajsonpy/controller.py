@@ -212,6 +212,7 @@ class Controller:
         expiration: int = 0,
         update_interval: int = 300,
         enable_websocket: bool = False,
+        polling_policy: Text = None,
     ) -> None:
         """Initialize controller.
 
@@ -225,6 +226,12 @@ class Controller:
             update_interval (int, optional): Seconds between allowed updates to the API.  This is to prevent
             being blocked by Tesla. Defaults to 300.
             enable_websocket (bool, optional): Whether to connect with websockets. Defaults to False.
+            polling_policy (Text, optional): How aggressively will we poll the car. Possible values:
+            Not set - Only keep the car awake while it is actively charging or driving, and while sentry
+            mode is enabled (default).
+            'connected' - Also keep the car awake while it is connected to a charger, even if the charging
+            session is complete.
+            'always' - Keep polling the car at all times.  Will possibly never allow the car to sleep.
 
         """
         self.__connection = Connection(
@@ -262,6 +269,7 @@ class Controller:
         self.__last_parked_timestamp = {}
         self.__update_state = {}
         self.enable_websocket = enable_websocket
+        self.polling_policy = polling_policy
 
     async def connect(
         self,
@@ -640,6 +648,37 @@ class Controller:
                         DRIVING_INTERVAL,
                     )
                 return DRIVING_INTERVAL
+            if self.polling_policy == "always":
+                _LOGGER.debug(
+                    "%s %s; Wake up policy set to 'always'. Scanning every %s seconds",
+                    vin[-5:],
+                    self.car_state[vin].get("state"),
+                    self.update_interval,
+                )
+                self.__update_state[vin] = "normal"
+                return self.update_interval
+            if self.polling_policy == "connected" and (
+                self.__state[vin].get("sentry_mode")
+                or self.__climate[vin].get("is_climate_on")
+                or (
+                    self.__charging[vin].get("charging_state")
+                    and self.__charging[vin].get("charging_state") != "Disconnected"
+                    and self.__charging[vin].get("charging_state") != ""
+                )
+            ):
+                _LOGGER.debug(
+                    "%s %s; Wake up policy set to 'connected'. "
+                    "Sentry mode: %s, Climate: %s, Charging State: %s. "
+                    "Scanning every %s seconds",
+                    vin[-5:],
+                    self.car_state[vin].get("state"),
+                    self.__state[vin].get("sentry_mode"),
+                    self.__climate[vin].get("is_climate_on"),
+                    self.__charging[vin].get("charging_state"),
+                    self.update_interval,
+                )
+                self.__update_state[vin] = "normal"
+                return self.update_interval
             if (cur_time - self.__last_parked_timestamp[vin] > IDLE_INTERVAL) and not (
                 self.__state[vin].get("sentry_mode")
                 or self.__climate[vin].get("is_climate_on")
