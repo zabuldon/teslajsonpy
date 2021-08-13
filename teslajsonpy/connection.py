@@ -553,7 +553,7 @@ class Connection:
             "scope": "openid email offline_access",
         }
         auth = await self.websession.post(
-            self.auth_domain.with_path("/oauth2/v3/token"),
+            str(self.auth_domain.with_path("/oauth2/v3/token")),
             data=oauth,
         )
         return auth.json()
