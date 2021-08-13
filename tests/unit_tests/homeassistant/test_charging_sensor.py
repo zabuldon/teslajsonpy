@@ -71,6 +71,7 @@ async def test_get_value_after_update(monkeypatch):
     assert _sensor.charge_current_request == 48
     assert _sensor.charger_actual_current == 0
     assert _sensor.charger_voltage == 0
+    assert _sensor.charger_power == 0
     assert _sensor.charge_energy_added == 12.41
     assert _sensor.charge_limit_soc == 90
 
@@ -131,6 +132,7 @@ async def test_async_update_in_mph(monkeypatch):
     _data["gui_settings"]["gui_range_display"] = "Rated"
     _data["charge_state"]["charge_rate"] = 22
     _data["charge_state"]["charge_miles_added_rated"] = 44
+    _data["charge_state"]["charger_power"] = 100.2
     _sensor = ChargingSensor(_data, _controller)
 
     await _sensor.async_update()
@@ -138,3 +140,20 @@ async def test_async_update_in_mph(monkeypatch):
     assert _sensor is not None
     assert _sensor.charging_rate == 22
     assert _sensor.added_range == 44
+    assert _sensor.charger_power == 100.2
+
+
+@pytest.mark.asyncio
+async def test_async_update_charger_power(monkeypatch):
+    """Test async_update() for charger_power."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_vehicle()
+    _data["charge_state"]["charger_power"] = 100.2
+    _sensor = ChargingSensor(_data, _controller)
+
+    await _sensor.async_update()
+
+    assert _sensor.charger_power == 100.2
