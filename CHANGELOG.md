@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v0.19.0 (2021-08-13)
+### Feature
+* Add ChargingEnergySensor ([`3e3d1a3`](https://github.com/zabuldon/teslajsonpy/commit/3e3d1a384eb19cf13c07d78c2c46ea747c0c9be3))
+* Add charger power ([`a5f8858`](https://github.com/zabuldon/teslajsonpy/commit/a5f885885b9586d406aef2800e613e55ff95b092))
+
+### Fix
+* Fix multiple cookies error ([`150f6e2`](https://github.com/zabuldon/teslajsonpy/commit/150f6e2d2eb880cd7ecf2306dc2ea4fe5a715f46))
+* Fix multiple cookies error ([`8537158`](https://github.com/zabuldon/teslajsonpy/commit/8537158ee217e73a54592777a178abb9804906be))
+* Fix casting of url for refresh_access_token ([`ba19cc1`](https://github.com/zabuldon/teslajsonpy/commit/ba19cc1d3182979d6ae49bb7606bf74853d586db))
+
 ## v0.18.3 (2021-05-01)
 ### Fix
 * Check response before json ([#202](https://github.com/zabuldon/teslajsonpy/issues/202)) ([`2df733a`](https://github.com/zabuldon/teslajsonpy/commit/2df733a5401500298c54094de0f4e1430d600ee1))
