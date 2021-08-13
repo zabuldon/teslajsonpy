@@ -33,7 +33,12 @@ from teslajsonpy.homeassistant.binary_sensor import (
     ParkingSensor,
     UpdateSensor,
 )
-from teslajsonpy.homeassistant.charger import ChargerSwitch, ChargingSensor, RangeSwitch
+from teslajsonpy.homeassistant.charger import (
+    ChargerSwitch,
+    ChargingEnergySensor,
+    ChargingSensor,
+    RangeSwitch,
+)
 from teslajsonpy.homeassistant.climate import Climate, TempSensor
 from teslajsonpy.homeassistant.gps import GPS, Odometer
 from teslajsonpy.homeassistant.heated_seats import HeatedSeatSwitch
@@ -548,6 +553,7 @@ class Controller:
         self.__components.append(ChargerLock(car, self))
         self.__components.append(ChargerConnectionSensor(car, self))
         self.__components.append(ChargingSensor(car, self))
+        self.__components.append(ChargingEnergySensor(car, self))
         self.__components.append(ChargerSwitch(car, self))
         self.__components.append(RangeSwitch(car, self))
         self.__components.append(ParkingSensor(car, self))
