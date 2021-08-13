@@ -41,7 +41,7 @@ def test_get_value_on_init(monkeypatch):
     _data = _mock.data_request_vehicle()
     _sensor = Battery(_data, _controller)
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert _sensor.get_value() is None
 
 
@@ -57,7 +57,7 @@ async def test_get_value_after_update(monkeypatch):
 
     await _sensor.async_update()
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert not _sensor.get_value() is None
     assert _sensor.get_value() == 64
 
@@ -74,7 +74,7 @@ async def test_battery_level(monkeypatch):
 
     await _sensor.async_update()
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert not _sensor.get_value() is None
     assert _sensor.battery_level() == 64
 
@@ -92,7 +92,7 @@ async def test_battery_charging_off(monkeypatch):
 
     await _sensor.async_update()
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert not _sensor.battery_charging()
 
 
@@ -109,7 +109,7 @@ async def test_battery_charging_on(monkeypatch):
 
     await _sensor.async_update()
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert _sensor.battery_charging()
 
 
@@ -126,6 +126,6 @@ async def test_async_update(monkeypatch):
 
     await _sensor.async_update()
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert not _sensor.get_value() is None
     assert _sensor.get_value() == 12.3

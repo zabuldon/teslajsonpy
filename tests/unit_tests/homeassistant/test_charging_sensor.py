@@ -64,7 +64,7 @@ async def test_get_value_after_update(monkeypatch):
 
     await _sensor.async_update()
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert _sensor.charging_rate == 0
     assert _sensor.time_left == 0
     assert _sensor.added_range == 40
@@ -87,7 +87,7 @@ async def test_async_update(monkeypatch):
 
     await _sensor.async_update()
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert _sensor.charging_rate == 0
     assert _sensor.time_left == 0
     assert _sensor.added_range == 40
@@ -114,7 +114,7 @@ async def test_async_update_in_kmh(monkeypatch):
 
     await _sensor.async_update()
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert _sensor.charging_rate == 35.41
     assert _sensor.added_range == 70.81
 
@@ -135,6 +135,6 @@ async def test_async_update_in_mph(monkeypatch):
 
     await _sensor.async_update()
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert _sensor.charging_rate == 22
     assert _sensor.added_range == 44
