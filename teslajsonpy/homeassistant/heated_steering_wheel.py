@@ -35,6 +35,7 @@ class HeatedSteeringWheelSwitch(VehicleDevice):
         self.__manual_update_time = 0
         self.__steering_wheel_heated = None
 
+        self.type = "heated steering switch"
         self.hass_type = "switch"
 
         self.name = self._name()
