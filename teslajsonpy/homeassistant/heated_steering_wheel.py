@@ -26,6 +26,7 @@ class HeatedSteeringWheelSwitch(VehicleDevice):
             https://tesla-api.timdorr.com/vehicle/state/data
         controller : teslajsonpy.Controller
             The controller that controls updates to the Tesla API.
+
         Returns
         -------
         None
