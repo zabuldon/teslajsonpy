@@ -18,7 +18,7 @@ seat_id_map = {
 }
 
 
-class HeatedSeatSwitch(VehicleDevice):
+class HeatedSeatSelect(VehicleDevice):
     """Home-assistant heated seat class for Tesla vehicles.
 
     This is intended to be partially inherited by a Home-Assitant entity.
@@ -48,7 +48,7 @@ class HeatedSeatSwitch(VehicleDevice):
         self.__seat_name = seat_name
 
         self.type = f"heated seat {seat_name}"
-        self.hass_type = "switch"
+        self.hass_type = "select"
 
         self.name = self._name()
 

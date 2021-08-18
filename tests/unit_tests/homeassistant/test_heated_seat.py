@@ -3,7 +3,7 @@
 import pytest
 
 from teslajsonpy.controller import Controller
-from teslajsonpy.homeassistant.heated_seats import HeatedSeatSwitch
+from teslajsonpy.homeassistant.heated_seats import HeatedSeatSelect
 
 from tests.tesla_mock import TeslaMock
 
@@ -15,7 +15,7 @@ def test_has_battery(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _seat = HeatedSeatSwitch(_data, _controller, 'left')
+    _seat = HeatedSeatSelect(_data, _controller, 'left')
 
     assert not _seat.has_battery()
 
@@ -27,7 +27,7 @@ def test_get_seat_heat_level_on_init(monkeypatch):
     _controller = Controller(None)
 
     _data = _mock.data_request_vehicle()
-    _seat = HeatedSeatSwitch(_data, _controller, 'left')
+    _seat = HeatedSeatSelect(_data, _controller, 'left')
 
     assert not _seat is None
     assert not _seat.get_seat_heat_level()
@@ -44,7 +44,7 @@ async def test_get_seat_heat_level_after_update(monkeypatch):
 
     _data = _mock.data_request_vehicle()
     _data["climate_state"]['seat_heater_left'] = NEW_LEVEL
-    _seat = HeatedSeatSwitch(_data, _controller, 'left')
+    _seat = HeatedSeatSelect(_data, _controller, 'left')
 
     await _seat.async_update()
 
@@ -54,7 +54,7 @@ async def test_get_seat_heat_level_after_update(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_set_get_seat_heat_level(monkeypatch):
-    """Test HeatedSeatSwitch()."""
+    """Test HeatedSeatSelect()."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
@@ -64,7 +64,7 @@ async def test_set_get_seat_heat_level(monkeypatch):
 
     _data = _mock.data_request_vehicle()
     _data["climate_state"]["seat_heater_left"] = ORIG_LEVEL
-    _seat = HeatedSeatSwitch(_data, _controller, 'left')
+    _seat = HeatedSeatSelect(_data, _controller, 'left')
 
     await _seat.async_update()
 
@@ -85,7 +85,7 @@ async def test_seat_same_level(monkeypatch):
 
     _data = _mock.data_request_vehicle()
     _data["climate_state"]["seat_heater_left"] = ORIG_LEVEL
-    _seat = HeatedSeatSwitch(_data, _controller, 'left')
+    _seat = HeatedSeatSelect(_data, _controller, 'left')
 
     await _seat.async_update()
 
