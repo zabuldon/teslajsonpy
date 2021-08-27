@@ -122,6 +122,10 @@ class Connection:
                 auth = await self.refresh_access_token(
                     refresh_token=self.sso_oauth.get("refresh_token")
                 )
+            elif self.refresh_token:
+                auth = await self.refresh_access_token(
+                    refresh_token=self.refresh_token
+                )
             if auth and all(
                 (
                     auth.get(item)
