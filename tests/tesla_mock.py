@@ -42,7 +42,8 @@ class TeslaMock:
         self._monkeypatch.setattr(
             Controller, "get_last_update_time", self.mock_get_last_update_time
         )
-        self._monkeypatch.setattr(Controller, "update", self.mock_update)
+        self._monkeypatch.setattr(Controller, "update_vehicle", self.mock_update_vehicle)
+        self._monkeypatch.setattr(Controller, "update_energy_site", self.mock_update_energy_site)
 
         self._drive_state = copy.deepcopy(DRIVE_STATE)
         self._climate_state = copy.deepcopy(CLIMATE_STATE)
@@ -104,10 +105,15 @@ class TeslaMock:
         """ Mock controller's get_last_update_time method."""
         return 123
 
-    def mock_update(self, *args, **kwargs):
+    def mock_update_vehicle(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's update method."""
-        return self.controller_update()
+        """ Mock controller's update vehicle method."""
+        return self.controller_update_vehicle()
+
+    def mock_update_energy_site(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's update energy site method."""
+        return self.controller_update_energy_site()
 
     @staticmethod
     def controller_connect():
@@ -145,8 +151,13 @@ class TeslaMock:
         return {SAMPLE_VEHICLE}
 
     @staticmethod
-    async def controller_update():
-        """ Monkeypatch for controller.update()."""
+    async def controller_update_vehicle():
+        """ Monkeypatch for controller.update_vehicle()."""
+        return 123
+
+    @staticmethod
+    async def controller_update_energy_site():
+        """ Monkeypatch for controller.update_energy_site()."""
         return 123
 
     @staticmethod
