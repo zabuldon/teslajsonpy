@@ -251,8 +251,8 @@ class Controller:
         self.__config = {}
         self.__driving = {}
         self.__gui = {}
-        self._last_update_time = {}  # succesful update attempts by car
-        self._last_wake_up_time = {}  # succesful wake_ups by car
+        self._last_update_time = {}  # successful update attempts by car
+        self._last_wake_up_time = {}  # successful wake_ups by car
         self._last_attempted_update_time = 0  # all attempts by controller
         self.__lock = {}
         self.__update_lock = None  # controls access to update function
@@ -266,6 +266,15 @@ class Controller:
         self.__websocket_listeners = []
         self.__last_parked_timestamp = {}
         self.__update_state = {}
+
+        self.__update_energy_site_lock = None  # controls access to update_energy_site function
+        self.__last_energy_site_update_time = {}  # successful update attempts by energy_site
+        self.__id_energy_site_map = {}
+        self.__energy_site_id_map = {}
+        self.__energy_site_lock = {}
+        self.__live_energy_status = {}
+        self.__energy_site_state = {}
+
         self.enable_websocket = enable_websocket
 
     async def connect(
@@ -291,6 +300,7 @@ class Controller:
         if mfa_code:
             self.__connection.mfa_code = mfa_code
         cars = await self.get_vehicles()
+        products = await self.get_products()
         self._last_attempted_update_time = time.time()
         self.__update_lock = asyncio.Lock()
 
@@ -320,11 +330,27 @@ class Controller:
             self.__driving[vin] = {}
             self.__gui[vin] = {}
 
-            self._add_components(car)
+            self._add_car_components(car)
+
+        for product in products:
+            if product["resource_type"] != "solar":
+                _LOGGER.debug("Skipping product id: %s, due to unknown resource type: %s",
+                              product["id"],
+                              product["resource_type"])
+                continue
+            energy_site_id = product["energy_site_id"]
+
+            self.__id_energy_site_map[product["id"]] = energy_site_id
+            self.__energy_site_id_map[energy_site_id] = product["id"]
+            self.__energy_site_lock[energy_site_id] = asyncio.Lock()
+            self.__energy_site_state = product
+            self.__live_energy_status[energy_site_id] = {}
+
+            self._add_energy_site_components(product)
 
         if not test_login:
             tasks = [
-                self.update(car["id"], wake_if_asleep=wake_if_asleep) for car in cars
+                self.update_vehicle(car["id"], wake_if_asleep=wake_if_asleep) for car in cars
             ]
             _LOGGER.debug("tasks %s %s", tasks, wake_if_asleep)
             try:
@@ -410,6 +436,30 @@ class Controller:
     async def get_vehicles(self):
         """Get vehicles json from TeslaAPI."""
         return (await self.__connection.get("vehicles"))["response"]
+
+    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
+    async def get_products(self):
+        """Get products (powerwall/solar) json from TeslaAPI."""
+        return (await self.__connection.get("products"))["response"]
+
+    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
+    async def get_energy_site_live_status(self, site_id: int):
+        """Get the live energy status of a site.
+
+        Parameters
+        ----------
+        site_id : string
+            Identifier for the energy site on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
+            https://www.teslaapi.io/energy-sites/state-and-settings
+
+        Returns
+        -------
+        dict
+            Tesla json object.
+
+        """
+        return (await self.__connection.get(f"energy_sites/{site_id}/live_status"))["response"]
 
     @wake_up
     async def post(self, car_id, command, data=None, wake_if_asleep=True):
@@ -540,11 +590,11 @@ class Controller:
     def get_homeassistant_components(self):
         """Return list of Tesla components for Home Assistant setup.
 
-        Use get_vehicles() for general API use.
+        Use get_vehicles() or get_products() for general API use.
         """
         return self.__components
 
-    def _add_components(self, car):
+    def _add_car_components(self, car):
         self.__components.append(Climate(car, self))
         self.__components.append(Battery(car, self))
         self.__components.append(Range(car, self))
@@ -570,6 +620,10 @@ class Controller:
             except KeyError:
                 _LOGGER.debug("Seat warmer %s not detected", seat)
 
+    def _add_energy_site_components(self, energy_site):
+        return
+
+
     async def _wake_up(self, car_id):
         car_vin = self._id_to_vin(car_id)
         car_id = self._update_id(car_id)
@@ -589,7 +643,7 @@ class Controller:
                 )
             return self.car_online[car_vin]
 
-    async def update(
+    async def update_vehicle(
         self,
         car_id: Optional[Text] = None,
         wake_if_asleep: bool = False,
@@ -776,6 +830,40 @@ class Controller:
                         )
             return any(await asyncio.gather(*tasks))
 
+    async def update_energy_site(
+        self,
+        energy_site_id: int,
+    ) -> bool:
+        #  pylint: disable=too-many-locals,too-many-statements
+        """Update all energy_site attributes in the cache.
+
+        This command will connect to the Tesla API and update the energy_site
+
+        Args
+            energy_site_id (Text): The energy_site to update.
+
+        Returns
+            Whether update was successful.
+
+        Raises
+            RetryLimitError
+
+        """
+        async with self.__energy_site_lock[energy_site_id]:
+            _LOGGER.debug("Updating energy site id %s", energy_site_id)
+            try:
+                data = await self.get_energy_site_live_status(
+                    energy_site_id
+                )
+            except TeslaException:
+                data = None
+            if data and data["response"]:
+                response = data["response"]
+                self.__live_energy_status[energy_site_id] = response
+                self.__last_energy_site_update_time[energy_site_id] = time.time()
+                return True
+            return False
+
     def get_climate_params(self, car_id):
         """Return cached copy of climate_params for car_id."""
         vin = self._id_to_vin(car_id)
@@ -795,6 +883,12 @@ class Controller:
         vin = self._id_to_vin(car_id)
         if vin:
             return self.__state[vin]
+        return {}
+
+    def get_energy_site_live_params(self, energy_site_id):
+        """Return cached copy of live status for energy_site_id."""
+        if self.__live_energy_status[energy_site_id]:
+            return self.__live_energy_status[energy_site_id]
         return {}
 
     def get_config_params(self, car_id):

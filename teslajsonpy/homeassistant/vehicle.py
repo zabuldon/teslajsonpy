@@ -126,7 +126,7 @@ class VehicleDevice:
 
         This function will call a controller update.
         """
-        await self._controller.update(
+        await self._controller.update_vehicle(
             self.id(), wake_if_asleep=wake_if_asleep, force=force
         )
         self.refresh()
