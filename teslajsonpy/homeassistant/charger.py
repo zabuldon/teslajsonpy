@@ -277,6 +277,7 @@ class ChargingSensor(VehicleDevice):
         """Return the state class."""
         return "measurement"
 
+
 class ChargingEnergySensor(VehicleDevice):
     """Home-Assistant energy sensor class for a Tesla VehicleDevice."""
 
