@@ -110,7 +110,7 @@ async def test_get_value_after_update(monkeypatch):
     assert _sensor2.charge_energy_added == 12.41
     assert _sensor2.charge_limit_soc == 90
     assert _sensor2.last_reset != 0
-    assert _sensor2.state_class == "measurement"
+    assert _sensor2.state_class == "total_increasing"
     assert _sensor2.device_class == "energy"
 
 @pytest.mark.asyncio
