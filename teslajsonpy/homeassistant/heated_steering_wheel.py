@@ -9,23 +9,15 @@ import time
 
 from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
-seat_id_map = {
-    "left": 0,
-    "right": 1,
-    "rear_left": 2,
-    "rear_center": 4,
-    "rear_right": 5,
-}
 
-
-class HeatedSeatSelect(VehicleDevice):
-    """Home-assistant heated seat class for Tesla vehicles.
+class HeatedSteeringWheelSwitch(VehicleDevice):
+    """Home-assistant heated steering wheel class for Tesla vehicles.
 
     This is intended to be partially inherited by a Home-Assitant entity.
     """
 
-    def __init__(self, data, controller, seat_name):
-        """Initialize a heated seat for the vehicle.
+    def __init__(self, data, controller):
+        """Initialize a heated steering wheel for the vehicle.
 
         Parameters
         ----------
@@ -34,9 +26,7 @@ class HeatedSeatSelect(VehicleDevice):
             https://tesla-api.timdorr.com/vehicle/state/data
         controller : teslajsonpy.Controller
             The controller that controls updates to the Tesla API.
-        seat_name : string
-            The name of the seat to control.
-            One of "left", "right", "rear_left", "rear_center", "rear_right."
+
         Returns
         -------
         None
@@ -44,11 +34,10 @@ class HeatedSeatSelect(VehicleDevice):
         """
         super().__init__(data, controller)
         self.__manual_update_time = 0
-        self.__seat_heat_level = None
-        self.__seat_name = seat_name
+        self.__steering_wheel_heated = None
 
-        self.type = f"heated seat {seat_name}"
-        self.hass_type = "select"
+        self.type = "heated steering switch"
+        self.hass_type = "switch"
 
         self.name = self._name()
 
@@ -56,7 +45,7 @@ class HeatedSeatSelect(VehicleDevice):
         self.bin_type = 0x7
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
-        """Update the seat state."""
+        """Update the steering wheel state."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
         self.refresh()
 
@@ -69,25 +58,25 @@ class HeatedSeatSelect(VehicleDevice):
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_climate_params(self._id)
-            self.__seat_heat_level = (
-                data[f"seat_heater_{self.__seat_name}"] if data else None
+            self.__steering_wheel_heated = (
+                data["steering_wheel_heater"] if data else None
             )
 
-    async def set_seat_heat_level(self, level):
-        """Set heated seat level."""
+    async def set_steering_wheel_heat(self, value: bool):
+        """Set heated steering wheel."""
         data = await self._controller.command(
             self._id,
-            "remote_seat_heater_request",
-            data={"heater": seat_id_map[self.__seat_name], "level": level},
+            "remote_steering_wheel_heater_request",
+            data={"on": value},
             wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
-            self.__seat_heat_level = level
+            self.__steering_wheel_heated = value
         self.__manual_update_time = time.time()
 
-    def get_seat_heat_level(self):
-        """Return current heated seat level."""
-        return self.__seat_heat_level
+    def get_steering_wheel_heat(self):
+        """Return current heated setting."""
+        return self.__steering_wheel_heated
 
     @staticmethod
     def has_battery():
