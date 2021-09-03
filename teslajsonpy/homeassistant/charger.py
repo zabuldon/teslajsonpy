@@ -272,6 +272,10 @@ class ChargingSensor(VehicleDevice):
         """Return the HA device class."""
         return self._device_class
 
+    @property
+    def state_class(self) -> Text:
+        """Return the state class."""
+        return "measurement"
 
 class ChargingEnergySensor(VehicleDevice):
     """Home-Assistant energy sensor class for a Tesla VehicleDevice."""
@@ -410,7 +414,7 @@ class ChargingEnergySensor(VehicleDevice):
     @property
     def state_class(self) -> Text:
         """Return the state class."""
-        return "measurement"
+        return "total_increasing"
 
     def get_value(self) -> float:
         """Return charge energy added."""
