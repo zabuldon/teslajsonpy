@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v0.20.0 (2021-09-04)
+### Feature
+* Add steering wheel and change heated seats to select ([`6ecd9df`](https://github.com/zabuldon/teslajsonpy/commit/6ecd9dfa73158b4b613aa2b26e032aea3162f10d))
+
+### Fix
+* Allow auth using refresh_token ([#211](https://github.com/zabuldon/teslajsonpy/issues/211)) ([`09b7fbe`](https://github.com/zabuldon/teslajsonpy/commit/09b7fbe1e4a5090f4620d1d3b52bf0c20de5f1f2))
+
 ## v0.19.1 (2021-09-03)
 ### Fix
 * Update HA energy sensors ([`a14cc6f`](https://github.com/zabuldon/teslajsonpy/commit/a14cc6f9c919ef48e0bc6cbb679a5599378b2923))
