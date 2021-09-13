@@ -137,6 +137,7 @@ class Connection:
                     "expires_in": auth["expires_in"] + now,
                 }
                 self.id_token = auth["id_token"]
+                self.refresh_token = auth["refresh_token"]
                 _LOGGER.debug("Saved new auth info %s", self.sso_oauth)
             else:
                 _LOGGER.debug("Unable to refresh sso oauth token")
@@ -159,7 +160,6 @@ class Connection:
                 self.__sethead(
                     access_token=auth["access_token"], expires_in=auth["expires_in"]
                 )
-            self.refresh_token = auth["refresh_token"]
             self.token_refreshed = True
             _LOGGER.debug("Successfully refreshed oauth")
         return await self.__open(
