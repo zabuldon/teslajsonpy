@@ -63,6 +63,7 @@ class Connection:
         self.api: Text = "/api/1/"
         self.expiration: int = expiration
         self.access_token = access_token
+        self.id_token = None
         self.head = None
         self.refresh_token = refresh_token
         self.websession = websession
@@ -123,9 +124,7 @@ class Connection:
                     refresh_token=self.sso_oauth.get("refresh_token")
                 )
             elif self.refresh_token:
-                auth = await self.refresh_access_token(
-                    refresh_token=self.refresh_token
-                )
+                auth = await self.refresh_access_token(refresh_token=self.refresh_token)
             if auth and all(
                 (
                     auth.get(item)
@@ -137,6 +136,8 @@ class Connection:
                     "refresh_token": auth["refresh_token"],
                     "expires_in": auth["expires_in"] + now,
                 }
+                self.id_token = auth["id_token"]
+                self.refresh_token = auth["refresh_token"]
                 _LOGGER.debug("Saved new auth info %s", self.sso_oauth)
             else:
                 _LOGGER.debug("Unable to refresh sso oauth token")
@@ -159,7 +160,6 @@ class Connection:
                 self.__sethead(
                     access_token=auth["access_token"], expires_in=auth["expires_in"]
                 )
-            self.refresh_token = auth["refresh_token"]
             self.token_refreshed = True
             _LOGGER.debug("Successfully refreshed oauth")
         return await self.__open(

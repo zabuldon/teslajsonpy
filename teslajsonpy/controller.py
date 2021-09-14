@@ -285,7 +285,7 @@ class Controller:
             mfa_code (Text, optional): MFA code to use for connection
 
         Returns
-            Dict[Text, Text]: Returns the refresh_token, access_token, and expires_in time
+            Dict[Text, Text]: Returns the refresh_token, access_token, id_token and expires_in time
 
         """
 
@@ -336,6 +336,7 @@ class Controller:
             "refresh_token": self.__connection.refresh_token,
             "access_token": self.__connection.access_token,
             "expiration": self.__connection.expiration,
+            "id_token": self.__connection.id_token,
         }
 
     async def disconnect(self) -> None:
@@ -358,7 +359,7 @@ class Controller:
         This will set the the self.__connection token_refreshed to False.
 
         Returns
-            Dict[Text, Text]: Returns the refresh_token, access_token, and expires time
+            Dict[Text, Text]: Returns the refresh_token, access_token, id_token and expires time
 
         """
         self.__connection.token_refreshed = False
@@ -366,6 +367,7 @@ class Controller:
             "refresh_token": self.__connection.refresh_token,
             "access_token": self.__connection.access_token,
             "expiration": self.__connection.expiration,
+            "id_token": self.__connection.id_token,
         }
 
     def get_expiration(self) -> int:
