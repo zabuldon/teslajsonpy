@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.21.0 (2021-09-14)
+### Feature
+* Add id_token to connect() response and return correct refresh_token ([#217](https://github.com/zabuldon/teslajsonpy/issues/217)) ([`6d837ed`](https://github.com/zabuldon/teslajsonpy/commit/6d837ed1b3a9794f4e9ffc3a0c59afc33702137e))
+
 ## v0.20.0 (2021-09-04)
 ### Feature
 * Add steering wheel and change heated seats to select ([`6ecd9df`](https://github.com/zabuldon/teslajsonpy/commit/6ecd9dfa73158b4b613aa2b26e032aea3162f10d))
