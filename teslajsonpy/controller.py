@@ -24,6 +24,8 @@ from teslajsonpy.const import (
     IDLE_INTERVAL,
     ONLINE_INTERVAL,
     SLEEP_INTERVAL,
+    TESLA_PRODUCT_TYPE_ENERGY_SITES,
+    TESLA_PRODUCT_TYPE_VEHICLES,
 )
 from teslajsonpy.exceptions import should_giveup, RetryLimitError, TeslaException
 from teslajsonpy.homeassistant.battery_sensor import Battery, Range
@@ -46,6 +48,7 @@ from teslajsonpy.homeassistant.lock import ChargerLock, Lock
 from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
 from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
 from teslajsonpy.homeassistant.heated_steering_wheel import HeatedSteeringWheelSwitch
+from teslajsonpy.homeassistant.power import PowerSensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -131,10 +134,15 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
 
     retries = 0
     sleep_delay = 2
-    car_id = args[0]
-    is_wake_command = len(args) >= 2 and args[1] == "wake_up"
+    car_id = args[1]  # we added a call type argument
+    is_wake_command = len(args) >= 3 and args[2] == "wake_up"
+    is_energysite_command = args[0] == "energy_sites"
     result = None
-    if instance.car_online.get(instance._id_to_vin(car_id)) or is_wake_command:
+    if (
+        instance.car_online.get(instance._id_to_vin(car_id))
+        or is_wake_command
+        or is_energysite_command
+    ):
         try:
             result = await wrapped(*args, **kwargs)
         except TeslaException as ex:
@@ -147,14 +155,17 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
     _LOGGER.debug(
         "wake_up needed for %s -> %s \n"
         "Info: args:%s, kwargs:%s, "
-        "VIN:%s, car_online:%s",
+        "ID:%s, car_online:%s",
         wrapped.__name__,
         result,
         args,
         kwargs,
-        instance._id_to_vin(car_id)[-5:] if car_id else None,
-        instance.car_online,
+        car_id if car_id else None,
+        instance.car_online if instance.car_online else None,
     )
+    # if we got here and it's an energy site that doesn't go to sleep, there is a problem; raise and exception
+    if is_energysite_command:
+        raise TeslaException("could_not_read_energy_site")
     instance.car_online[instance._id_to_vin(car_id)] = False
     while (
         kwargs.get("wake_if_asleep")
@@ -268,6 +279,12 @@ class Controller:
         self.__last_parked_timestamp = {}
         self.__update_state = {}
         self.enable_websocket = enable_websocket
+        self.__energysite_name = {}
+        self.__energysite_type = {}
+        self.__power = {}
+        self.energysites = {}
+        self.__id_energysiteid_map = {}
+        self.__energysiteid_id_map = {}
 
     async def connect(
         self,
@@ -295,6 +312,8 @@ class Controller:
         self._last_attempted_update_time = time.time()
         self.__update_lock = asyncio.Lock()
 
+        energysites = await self.get_energysites()
+
         for car in cars:
             vin = car["vin"]
             if filtered_vins and vin not in filtered_vins:
@@ -321,7 +340,17 @@ class Controller:
             self.__driving[vin] = {}
             self.__gui[vin] = {}
 
-            self._add_components(car)
+            self._add_car_components(car)
+
+        for energysite in energysites:
+            energysite_id = energysite["energy_site_id"]
+            self.__id_energysiteid_map[energysite["id"]] = energysite_id
+            self.__energysiteid_id_map[energysite_id] = energysite["id"]
+            self.__energysite_name[energysite_id] = energysite["site_name"]
+            self.__energysite_type[energysite_id] = energysite["solar_type"]
+            self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
+            self.__lock[energysite_id] = asyncio.Lock()
+            self._add_energysite_components(energysite)
 
         if not test_login:
             tasks = [
@@ -336,7 +365,7 @@ class Controller:
             "refresh_token": self.__connection.refresh_token,
             "access_token": self.__connection.access_token,
             "expiration": self.__connection.expiration,
-            "id_token": self.__connection.id_token,
+            "id_token": self.__connection.id_token,												   
         }
 
     async def disconnect(self) -> None:
@@ -367,7 +396,7 @@ class Controller:
             "refresh_token": self.__connection.refresh_token,
             "access_token": self.__connection.access_token,
             "expiration": self.__connection.expiration,
-            "id_token": self.__connection.id_token,
+            "id_token": self.__connection.id_token,												   
         }
 
     def get_expiration(self) -> int:
@@ -414,8 +443,17 @@ class Controller:
         """Get vehicles json from TeslaAPI."""
         return (await self.__connection.get("vehicles"))["response"]
 
+    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
+    async def get_energysites(self):
+        """Get energy sites json from TeslaAPI."""
+        return [
+            p
+            for p in (await self.__connection.get("products"))["response"]
+            if p.get("resource_type") == "solar"
+        ]
+
     @wake_up
-    async def post(self, car_id, command, data=None, wake_if_asleep=True):
+    async def post(self, product_type, car_id, command, data=None, wake_if_asleep=True):
         #  pylint: disable=unused-argument
         """Send post command to the car_id.
 
@@ -443,10 +481,12 @@ class Controller:
         """
         car_id = self._update_id(car_id)
         data = data or {}
-        return await self.__connection.post(f"vehicles/{car_id}/{command}", data=data)
+        return await self.__connection.post(
+            f"{product_type}/{car_id}/{command}", data=data
+        )
 
     @wake_up
-    async def get(self, car_id, command, wake_if_asleep=False):
+    async def get(self, product_type, car_id, command, wake_if_asleep=False):
         #  pylint: disable=unused-argument
         """Send get command to the car_id.
 
@@ -471,9 +511,9 @@ class Controller:
 
         """
         car_id = self._update_id(car_id)
-        return await self.__connection.get(f"vehicles/{car_id}/{command}")
+        return await self.__connection.get(f"{product_type}/{car_id}/{command}")
 
-    async def data_request(self, car_id, name, wake_if_asleep=False):
+    async def vehicle_data_request(self, car_id, name, wake_if_asleep=False):
         """Get requested data from car_id.
 
         Parameters
@@ -499,7 +539,10 @@ class Controller:
         car_id = self._update_id(car_id)
         return (
             await self.get(
-                car_id, f"vehicle_data/{name}", wake_if_asleep=wake_if_asleep
+                TESLA_PRODUCT_TYPE_VEHICLES,
+                car_id,
+                f"vehicle_data/{name}",
+                wake_if_asleep=wake_if_asleep,
             )
         )["response"]
 
@@ -511,7 +554,7 @@ class Controller:
         min_value=15,
         giveup=should_giveup,
     )
-    async def command(self, car_id, name, data=None, wake_if_asleep=True):
+    async def command(self, product_type, car_id, name, data=None, wake_if_asleep=True):
         """Post name command to the car_id.
 
         Parameters
@@ -537,7 +580,11 @@ class Controller:
         car_id = self._update_id(car_id)
         data = data or {}
         return await self.post(
-            car_id, f"command/{name}", data=data, wake_if_asleep=wake_if_asleep
+            product_type,
+            car_id,
+            f"command/{name}",
+            data=data,
+            wake_if_asleep=wake_if_asleep,
         )
 
     def get_homeassistant_components(self):
@@ -547,7 +594,10 @@ class Controller:
         """
         return self.__components
 
-    def _add_components(self, car):
+    def _add_energysite_components(self, energysite):
+        self.__components.append(PowerSensor(energysite, self))
+
+    def _add_car_components(self, car):
         self.__components.append(Climate(car, self))
         self.__components.append(Battery(car, self))
         self.__components.append(Range(car, self))
@@ -583,7 +633,7 @@ class Controller:
                 cur_time - self._last_wake_up_time[car_vin] > self.update_interval
             ):
                 result = await self.post(
-                    car_id, "wake_up", wake_if_asleep=False
+                    TESLA_PRODUCT_TYPE_VEHICLES, car_id, "wake_up", wake_if_asleep=False
                 )  # avoid wrapper loop
                 self.car_online[car_vin] = result["response"]["state"] == "online"
                 self.car_state[car_vin] = result["response"]
@@ -675,7 +725,7 @@ class Controller:
                 )
             return self.update_interval
 
-        async def _get_and_process_data(vin: Text) -> None:
+        async def _get_and_process_car_data(vin: Text) -> None:
             async with self.__lock[vin]:
                 _LOGGER.debug("Updating %s", vin[-5:])
                 try:
@@ -726,6 +776,22 @@ class Controller:
                             )
                         )
 
+        async def _get_and_process_energysite_data(energysite_id: Text) -> None:
+            async with self.__lock[energysite_id]:
+                _LOGGER.debug("Updating %s", energysite_id)
+                try:
+                    data = await self.get(
+                        TESLA_PRODUCT_TYPE_ENERGY_SITES,
+                        energysite_id,
+                        "live_status",
+                        wake_if_asleep=wake_if_asleep,
+                    )
+                except TeslaException:
+                    data = None
+                if data and data["response"]:
+                    response = data["response"]
+                    self.__power[energysite_id] = response
+
         async with self.__update_lock:
             cur_time = time.time()
             #  Update the online cars using get_vehicles()
@@ -741,6 +807,9 @@ class Controller:
                     self.car_online[car["vin"]] = car["state"] == "online"
                     self.car_state[car["vin"]] = car
                 self._last_attempted_update_time = cur_time
+
+                self.energysites = {}
+                self.energysites = await self.get_energysites()
             # Only update online vehicles that haven't been updated recently
             # The throttling is per car's last succesful update
             # Note: This separate check is because there may be individual cars
@@ -773,11 +842,17 @@ class Controller:
                             )
                         )
                     ):  # Only update cars with update flag on
-                        tasks.append(_get_and_process_data(vin))
+                        tasks.append(_get_and_process_car_data(vin))
                     else:
                         _LOGGER.debug(
                             "Skipping update of %s with state %s", vin[-5:], car_state
                         )
+
+            for energysite in self.energysites:
+                energysite_id = energysite["energy_site_id"]
+                async with self.__lock[energysite_id]:
+                    tasks.append(_get_and_process_energysite_data(energysite_id))
+
             return any(await asyncio.gather(*tasks))
 
     def get_climate_params(self, car_id):
@@ -793,6 +868,11 @@ class Controller:
         if vin:
             return self.__charging[vin]
         return {}
+
+    def get_power_params(self, site_id):
+        energysite_id = self._id_to_energysiteid(site_id)
+        """Return cached copy of charging_params for car_id."""
+        return self.__power[energysite_id]
 
     def get_state_params(self, car_id):
         """Return cached copy of state_params for car_id."""
@@ -907,6 +987,9 @@ class Controller:
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
         return self.__id_vin_map.get(car_id)
+
+    def _id_to_energysiteid(self, site_id: Text) -> Optional[Text]:
+        return self.__id_energysiteid_map.get(site_id)
 
     def _update_id(self, car_id: Text) -> Optional[Text]:
         new_car_id = self.__vin_id_map.get(self._id_to_vin(car_id))
