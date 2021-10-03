@@ -365,7 +365,7 @@ class Controller:
             "refresh_token": self.__connection.refresh_token,
             "access_token": self.__connection.access_token,
             "expiration": self.__connection.expiration,
-            "id_token": self.__connection.id_token,												   
+            "id_token": self.__connection.id_token,
         }
 
     async def disconnect(self) -> None:
@@ -396,7 +396,7 @@ class Controller:
             "refresh_token": self.__connection.refresh_token,
             "access_token": self.__connection.access_token,
             "expiration": self.__connection.expiration,
-            "id_token": self.__connection.id_token,												   
+            "id_token": self.__connection.id_token,
         }
 
     def get_expiration(self) -> int:
@@ -461,6 +461,8 @@ class Controller:
 
         Parameters
         ----------
+        product_type: string
+            Indicates whether this is a vehicle or a energy site
         car_id : string
             Identifier for the car on the owner-api endpoint. It is the id
             field for identifying the car across the owner-api endpoint.
@@ -494,6 +496,8 @@ class Controller:
 
         Parameters
         ----------
+        product_type: string
+            Indicates whether this is a vehicle or a energy site
         car_id : string
             Identifier for the car on the owner-api endpoint. It is the id
             field for identifying the car across the owner-api endpoint.
@@ -559,6 +563,8 @@ class Controller:
 
         Parameters
         ----------
+        product_type: string
+            Indicates whether this is a vehicle or a energy site
         car_id : string
             Identifier for the car on the owner-api endpoint. It is the id
             field for identifying the car across the owner-api endpoint.
@@ -730,6 +736,7 @@ class Controller:
                 _LOGGER.debug("Updating %s", vin[-5:])
                 try:
                     data = await self.get(
+                        TESLA_PRODUCT_TYPE_VEHICLES,
                         self.__vin_id_map[vin],
                         "vehicle_data",
                         wake_if_asleep=wake_if_asleep,
@@ -870,8 +877,8 @@ class Controller:
         return {}
 
     def get_power_params(self, site_id):
-        energysite_id = self._id_to_energysiteid(site_id)
         """Return cached copy of charging_params for car_id."""
+        energysite_id = self._id_to_energysiteid(site_id)
         return self.__power[energysite_id]
 
     def get_state_params(self, car_id):

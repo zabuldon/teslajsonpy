@@ -1,23 +1,11 @@
 """
 Python Package for controlling Tesla API.
 
-
-"""
-import time
-import teslajsonpy
-
-from typing import List, Optional, Text
-
-from teslajsonpy.exceptions import UnknownPresetMode
-
-"""
-Python Package for controlling Tesla API.
-
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import logging
-from typing import Dict, Optional, Text
+from typing import Dict, Text
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -157,16 +145,12 @@ class PowerSensor(EnergySiteDevice):
         if data:
             if "grid_status" in data and data["grid_status"] == "Unknown":
                 return
-            else:
-                self.__power = data["solar_power"]
+
+            self.__power = data["solar_power"]
+            if data["solar_power"] is not None:
                 self.__generating_status = (
                     "Generating" if data["solar_power"] > 0 else "Idle"
                 )
-
-    # @staticmethod
-    # def has_battery():
-    #     """Return whether the device has a battery."""
-    #     return False
 
     def get_value(self) -> float:
         """Return the battery level."""
