@@ -83,17 +83,7 @@ class EnergySiteDevice:
         This assumes the controller has already been updated. This should be
         called by inherited classes so the overall vehicle information is updated.
         """
-        # state = self._controller.get_state_params(self.id())
-        # if state and "car_version" in state:
-        #     self._car_version = state["car_version"]
-        # if state and "sentry_mode_available" in state:
-        #     self._sentry_mode_available = state["sentry_mode_available"]
-        # self._update_available = state.get("software_update", {}).get("status") in {
-        #     "available",
-        #     "scheduled",
-        # }
-        # self._update_version = state.get("software_update", {}).get("version")
-
+        return
 
 class PowerSensor(EnergySiteDevice):
     """Home-assistant class of temperature sensors for Tesla vehicles.
@@ -126,6 +116,7 @@ class PowerSensor(EnergySiteDevice):
         self.measurement = "W"
         self.hass_type = "sensor"
         self._device_class: Text = "power"
+        self._state_class: Text = "measurement"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x4
@@ -168,3 +159,8 @@ class PowerSensor(EnergySiteDevice):
     def device_class(self) -> Text:
         """Return the HA device class."""
         return self._device_class
+
+    @property
+    def state_class(self) -> Text:
+        """Return the HA state class."""
+        return self._state_class

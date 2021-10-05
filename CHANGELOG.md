@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.21.2 (2021-10-05)
+### Feature
+* Add State Class on Power Sensor
+
 ## v0.21.1 (2021-10-02)
 ### Feature
 * Add Support for Energy Sites
