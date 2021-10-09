@@ -14,3 +14,7 @@ RELEASE_NOTES_URL = "https://teslascope.com/teslapedia/software/"
 AUTH_DOMAIN = "https://auth.tesla.com"
 API_URL = "https://owner-api.teslamotors.com"
 WS_URL = "wss://streaming.vn.teslamotors.com/streaming"
+
+TESLA_PRODUCT_TYPE_VEHICLES = "vehicles"
+TESLA_PRODUCT_TYPE_ENERGY_SITES = "energy_sites"
+TESLA_PRODUCT_TYPE_POWERWALLS = "powerwalls"
