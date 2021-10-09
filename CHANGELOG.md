@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.0 (2021-10-09)
+### Feature
+* Added support for energy sites ([#219](https://github.com/zabuldon/teslajsonpy/issues/219)) ([`e9798b7`](https://github.com/zabuldon/teslajsonpy/commit/e9798b7fdae70b177ce1537af3d2c14e6583a700))
+
+### Breaking
+* Product_type added to functions (get, post, command) to differentiate between vehicles or energy sites. data_request rename to vehicle_data_request.  ([`e9798b7`](https://github.com/zabuldon/teslajsonpy/commit/e9798b7fdae70b177ce1537af3d2c14e6583a700))
+
 ## v0.21.0 (2021-09-14)
 ### Feature
 * Add id_token to connect() response and return correct refresh_token ([#217](https://github.com/zabuldon/teslajsonpy/issues/217)) ([`6d837ed`](https://github.com/zabuldon/teslajsonpy/commit/6d837ed1b3a9794f4e9ffc3a0c59afc33702137e))
