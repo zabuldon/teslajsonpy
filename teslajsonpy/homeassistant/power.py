@@ -42,7 +42,7 @@ class EnergySiteDevice:
         self.attrs: Dict[Text, Text] = {}
 
     def _name(self) -> Text:
-        return "{} {}".format(self._display_name, self.type)
+        return f"{self._display_name} {self.type}"
 
     def _uniq_name(self) -> Text:
         return self._name()
@@ -77,6 +77,7 @@ class EnergySiteDevice:
         )
         self.refresh()
 
+    # pylint: disable=no-self-use
     def refresh(self) -> None:
         """Refresh the vehicle data.
 
