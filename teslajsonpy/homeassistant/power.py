@@ -85,6 +85,7 @@ class EnergySiteDevice:
         """
         return
 
+
 class PowerSensor(EnergySiteDevice):
     """Home-assistant class of temperature sensors for Tesla vehicles.
 

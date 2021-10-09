@@ -2,14 +2,6 @@
 
 <!--next-version-placeholder-->
 
-## v0.21.2 (2021-10-05)
-### Feature
-* Add State Class on Power Sensor
-
-## v0.21.1 (2021-10-02)
-### Feature
-* Add Support for Energy Sites
-
 ## v0.21.0 (2021-09-14)
 ### Feature
 * Add id_token to connect() response and return correct refresh_token ([#217](https://github.com/zabuldon/teslajsonpy/issues/217)) ([`6d837ed`](https://github.com/zabuldon/teslajsonpy/commit/6d837ed1b3a9794f4e9ffc3a0c59afc33702137e))
