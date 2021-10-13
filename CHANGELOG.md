@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.0.1 (2021-10-13)
+### Fix
+* Change product_type to kwarg ([`41ea289`](https://github.com/zabuldon/teslajsonpy/commit/41ea289cea7f83d8bc778ef017ac529754936fa0))
+
 ## v1.0.0 (2021-10-09)
 ### Feature
 * Added support for energy sites ([#219](https://github.com/zabuldon/teslajsonpy/issues/219)) ([`e9798b7`](https://github.com/zabuldon/teslajsonpy/commit/e9798b7fdae70b177ce1537af3d2c14e6583a700))
