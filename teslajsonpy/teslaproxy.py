@@ -104,7 +104,8 @@ class TeslaProxy(AuthCaptureProxy):
                     max(30 * (self.waf_retry - self.waf_limit), 120)
                     if self.waf_retry > self.waf_limit
                     else random.random() * self.waf_retry + 10,
-                    f"Detected Tesla web application firewall block #{self.waf_retry}. Please wait and then reload the page or wait for the auto reload.",
+                    f"Detected Tesla web application firewall block #{self.waf_retry}. "
+                    f"Please wait and then reload the page or wait for the auto reload.",
                     False,
                 )
             self.waf_retry = 0
@@ -112,7 +113,8 @@ class TeslaProxy(AuthCaptureProxy):
             text = resp.json()
             _LOGGER.debug("Json response: %s", text)
 
-    async def prepend_relative_urls(self, base_url: URL, html: str) -> str:
+    @staticmethod
+    async def prepend_relative_urls(base_url: URL, html: str) -> str:
         """Prepend relative urls with url host.
 
         This is intended to be used for to place the proxy_url in front of relative urls in src="/
@@ -145,7 +147,8 @@ class TeslaProxy(AuthCaptureProxy):
         self.waf_retry = 0
         await super().reset_data()
 
-    async def prepend_i18n_path(self, base_url: URL, html: str) -> str:
+    @staticmethod
+    async def prepend_i18n_path(base_url: URL, html: str) -> str:
         """Prepend path for i18n loadPath so it'll reach the proxy.
 
         This is intended to be used for to place the proxy_url path in front of relative urls for loadPath in i18next.

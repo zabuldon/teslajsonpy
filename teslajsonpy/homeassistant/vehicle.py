@@ -58,15 +58,13 @@ class VehicleDevice:
 
     def _name(self) -> Text:
         return (
-            "{} {}".format(self._display_name, self.type)
+            f"{self._display_name} {self.type}"
             if self._display_name is not None and self._display_name != self._vin[-6:]
-            else "Tesla Model {} {}".format(str(self._vin[3]).upper(), self.type)
+            else f"Tesla Model {str(self._vin[3]).upper()} {self.type}"
         )
 
     def _uniq_name(self) -> Text:
-        return "Tesla Model {} {} {}".format(
-            str(self._vin[3]).upper(), self._vin[-6:], self.type
-        )
+        return f"Tesla Model {str(self._vin[3]).upper()} {self._vin[-6:]} {self.type}"
 
     def id(self) -> int:
         # pylint: disable=invalid-name
