@@ -134,9 +134,9 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
 
     retries = 0
     sleep_delay = 2
-    car_id = args[1]  # we added a call type argument
-    is_wake_command = len(args) >= 3 and args[2] == "wake_up"
-    is_energysite_command = args[0] == "energy_sites"
+    car_id = args[0]
+    is_wake_command = len(args) >= 2 and args[1] == "wake_up"
+    is_energysite_command = kwargs.get("product_type") == TESLA_PRODUCT_TYPE_ENERGY_SITES
     result = None
     if (
         instance.car_online.get(instance._id_to_vin(car_id))
@@ -163,7 +163,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         car_id if car_id else None,
         instance.car_online if instance.car_online else None,
     )
-    # if we got here and it's an energy site that doesn't go to sleep, there is a problem; raise and exception
+    # if we got here and it's an energy site that doesn't go to sleep, there is a problem; raise an exception
     if is_energysite_command:
         raise TeslaException("could_not_read_energy_site")
     instance.car_online[instance._id_to_vin(car_id)] = False
@@ -453,7 +453,14 @@ class Controller:
         ]
 
     @wake_up
-    async def post(self, product_type, car_id, command, data=None, wake_if_asleep=True):
+    async def post(
+        self,
+        car_id,
+        command,
+        data=None,
+        wake_if_asleep=True,
+        product_type: str = TESLA_PRODUCT_TYPE_VEHICLES,
+    ):
         #  pylint: disable=unused-argument
         """Send post command to the car_id.
 
@@ -461,8 +468,6 @@ class Controller:
 
         Parameters
         ----------
-        product_type: string
-            Indicates whether this is a vehicle or a energy site
         car_id : string
             Identifier for the car on the owner-api endpoint. It is the id
             field for identifying the car across the owner-api endpoint.
@@ -474,6 +479,8 @@ class Controller:
         wake_if_asleep : bool
             Function for wake_up decorator indicating whether a failed response
             should wake up the vehicle or retry.
+        product_type: string
+            Indicates whether this is a vehicle or a energy site. Defaults to TESLA_PRODUCT_TYPE_VEHICLES
 
         Returns
         -------
@@ -488,7 +495,13 @@ class Controller:
         )
 
     @wake_up
-    async def get(self, product_type, car_id, command, wake_if_asleep=False):
+    async def get(
+        self,
+        car_id,
+        command,
+        wake_if_asleep=False,
+        product_type: str = TESLA_PRODUCT_TYPE_VEHICLES,
+    ):
         #  pylint: disable=unused-argument
         """Send get command to the car_id.
 
@@ -496,8 +509,6 @@ class Controller:
 
         Parameters
         ----------
-        product_type: string
-            Indicates whether this is a vehicle or a energy site
         car_id : string
             Identifier for the car on the owner-api endpoint. It is the id
             field for identifying the car across the owner-api endpoint.
@@ -507,6 +518,8 @@ class Controller:
         wake_if_asleep : bool
             Function for wake_up decorator indicating whether a failed response
             should wake up the vehicle or retry.
+        product_type: string
+            Indicates whether this is a vehicle or a energy site. Defaults to TESLA_PRODUCT_TYPE_VEHICLES
 
         Returns
         -------
@@ -543,10 +556,7 @@ class Controller:
         car_id = self._update_id(car_id)
         return (
             await self.get(
-                TESLA_PRODUCT_TYPE_VEHICLES,
-                car_id,
-                f"vehicle_data/{name}",
-                wake_if_asleep=wake_if_asleep,
+                car_id, f"vehicle_data/{name}", wake_if_asleep=wake_if_asleep,
             )
         )["response"]
 
@@ -558,13 +568,18 @@ class Controller:
         min_value=15,
         giveup=should_giveup,
     )
-    async def command(self, product_type, car_id, name, data=None, wake_if_asleep=True):
+    async def command(
+        self,
+        car_id,
+        name,
+        data=None,
+        wake_if_asleep=True,
+        product_type: str = TESLA_PRODUCT_TYPE_VEHICLES,
+    ):
         """Post name command to the car_id.
 
         Parameters
         ----------
-        product_type: string
-            Indicates whether this is a vehicle or a energy site
         car_id : string
             Identifier for the car on the owner-api endpoint. It is the id
             field for identifying the car across the owner-api endpoint.
@@ -576,6 +591,8 @@ class Controller:
         wake_if_asleep : bool
             Function for underlying api call for whether a failed response
             should wake up the vehicle or retry.
+        product_type: string
+            Indicates whether this is a vehicle or a energy site. Defaults to TESLA_PRODUCT_TYPE_VEHICLES
 
         Returns
         -------
@@ -586,11 +603,11 @@ class Controller:
         car_id = self._update_id(car_id)
         data = data or {}
         return await self.post(
-            product_type,
             car_id,
             f"command/{name}",
             data=data,
             wake_if_asleep=wake_if_asleep,
+            product_type=product_type,
         )
 
     def get_homeassistant_components(self):
@@ -639,7 +656,7 @@ class Controller:
                 cur_time - self._last_wake_up_time[car_vin] > self.update_interval
             ):
                 result = await self.post(
-                    TESLA_PRODUCT_TYPE_VEHICLES, car_id, "wake_up", wake_if_asleep=False
+                    car_id, "wake_up", wake_if_asleep=False
                 )  # avoid wrapper loop
                 self.car_online[car_vin] = result["response"]["state"] == "online"
                 self.car_state[car_vin] = result["response"]
@@ -719,8 +736,7 @@ class Controller:
                         vin[-5:],
                         sleep_interval,
                         round(
-                            sleep_interval + self._last_update_time[vin] - cur_time,
-                            2,
+                            sleep_interval + self._last_update_time[vin] - cur_time, 2,
                         ),
                     )
                 return sleep_interval
@@ -736,7 +752,6 @@ class Controller:
                 _LOGGER.debug("Updating %s", vin[-5:])
                 try:
                     data = await self.get(
-                        TESLA_PRODUCT_TYPE_VEHICLES,
                         self.__vin_id_map[vin],
                         "vehicle_data",
                         wake_if_asleep=wake_if_asleep,
@@ -788,10 +803,10 @@ class Controller:
                 _LOGGER.debug("Updating %s", energysite_id)
                 try:
                     data = await self.get(
-                        TESLA_PRODUCT_TYPE_ENERGY_SITES,
                         energysite_id,
                         "live_status",
                         wake_if_asleep=wake_if_asleep,
+                        product_type=TESLA_PRODUCT_TYPE_ENERGY_SITES,
                     )
                 except TeslaException:
                     data = None
@@ -826,9 +841,9 @@ class Controller:
             tasks = []
             for vin, online in self.car_online.items():
                 # If specific car_id provided, only update match
-                if (car_vin and car_vin != vin) or self.car_state[vin].get(
+                if (car_vin and car_vin != vin) or (vin and self.car_state[vin].get(
                     "in_service"
-                ):
+                )):
                     continue
                 async with self.__lock[vin]:
                     car_state = self.car_state[vin].get("state")
