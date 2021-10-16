@@ -346,7 +346,10 @@ class Controller:
             energysite_id = energysite["energy_site_id"]
             self.__id_energysiteid_map[energysite["id"]] = energysite_id
             self.__energysiteid_id_map[energysite_id] = energysite["id"]
-            self.__energysite_name[energysite_id] = energysite["site_name"]
+            if "site_name" in energysite:
+                self.__energysite_name[energysite_id] = energysite["site_name"]
+            else:
+                self.__energysite_name[energysite_id] = "My Home"
             self.__energysite_type[energysite_id] = energysite["solar_type"]
             self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
             self.__lock[energysite_id] = asyncio.Lock()
