@@ -75,10 +75,11 @@ class HeatedSeatSelect(VehicleDevice):
 
     async def set_seat_heat_level(self, level):
         """Set heated seat level."""
-        data = await self._controller.command(
-            self._id,
-            "remote_seat_heater_request",
-            data={"heater": seat_id_map[self.__seat_name], "level": level},
+        data = await self._controller.api(
+            "REMOTE_SEAT_HEATER_REQUEST",
+            path_vars={"vehicle_id": self._id},
+            heater=seat_id_map[self.__seat_name],
+            level=level,
             wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
