@@ -62,8 +62,8 @@ class ChargerSwitch(VehicleDevice):
     async def start_charge(self):
         """Start charging the Tesla Vehicle."""
         if not self.__charger_state:
-            data = await self._controller.command(
-                self._id, "charge_start", wake_if_asleep=True
+            data = await self._controller.api(
+                "START_CHARGE", path_vars={"vehicle_id": self._id}, wake_if_asleep=True
             )
             if data and data["response"]["result"]:
                 self.__charger_state = True
@@ -72,8 +72,8 @@ class ChargerSwitch(VehicleDevice):
     async def stop_charge(self):
         """Stop charging the Tesla Vehicle."""
         if self.__charger_state:
-            data = await self._controller.command(
-                self._id, "charge_stop", wake_if_asleep=True
+            data = await self._controller.api(
+                "STOP_CHARGE", path_vars={"vehicle_id": self._id}, wake_if_asleep=True
             )
             if data and data["response"]["result"]:
                 self.__charger_state = False
@@ -123,8 +123,8 @@ class RangeSwitch(VehicleDevice):
     async def set_max(self):
         """Set the charger to max range for trips."""
         if not self.__maxrange_state:
-            data = await self._controller.command(
-                self._id, "charge_max_range", wake_if_asleep=True
+            data = await self._controller.api(
+                "CHANGE_CHARGE_MAX", path_vars={"vehicle_id": self._id}, wake_if_asleep=True
             )
             if data and data["response"]["result"]:
                 self.__maxrange_state = True
@@ -133,8 +133,8 @@ class RangeSwitch(VehicleDevice):
     async def set_standard(self):
         """Set the charger to standard range for daily commute."""
         if self.__maxrange_state:
-            data = await self._controller.command(
-                self._id, "charge_standard", wake_if_asleep=True
+            data = await self._controller.api(
+                "CHANGE_CHARGE_STANDARD", path_vars={"vehicle_id": self._id}, wake_if_asleep=True
             )
             if data and data["response"]["result"]:
                 self.__maxrange_state = False

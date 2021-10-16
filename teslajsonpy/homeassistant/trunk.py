@@ -56,8 +56,11 @@ class TrunkLock(VehicleDevice):
     async def unlock(self):
         """Open the rear trunk."""
         if self.is_locked():
-            data = await self._controller.command(
-                self._id, "actuate_trunk", {"which_trunk": "rear"}, wake_if_asleep=True
+            data = await self._controller.api(
+                "ACTUATE_TRUNK",
+                path_vars={"vehicle_id": self._id},
+                which_trunk="rear",
+                wake_if_asleep=True,
             )
             if data and data["response"]["result"]:
                 self.__lock_state = 255
@@ -66,8 +69,11 @@ class TrunkLock(VehicleDevice):
     async def lock(self):
         """Close the rear trunk."""
         if not self.is_locked():
-            data = await self._controller.command(
-                self._id, "actuate_trunk", {"which_trunk": "rear"}, wake_if_asleep=True
+            data = await self._controller.api(
+                "ACTUATE_TRUNK",
+                path_vars={"vehicle_id": self._id},
+                which_trunk="rear",
+                wake_if_asleep=True,
             )
             if data and data["response"]["result"]:
                 self.__lock_state = 0
@@ -124,8 +130,11 @@ class FrunkLock(VehicleDevice):
     async def unlock(self):
         """Open the front trunk (frunk)."""
         if self.is_locked():
-            data = await self._controller.command(
-                self._id, "actuate_trunk", {"which_trunk": "front"}, wake_if_asleep=True
+            data = await self._controller.api(
+                "ACTUATE_TRUNK",
+                path_vars={"vehicle_id": self._id},
+                which_trunk="front",
+                wake_if_asleep=True,
             )
             if data and data["response"]["result"]:
                 self.__lock_state = 255
@@ -134,8 +143,11 @@ class FrunkLock(VehicleDevice):
     async def lock(self):
         """Close the front trunk (frunk)."""
         if not self.is_locked():
-            data = await self._controller.command(
-                self._id, "actuate_trunk", {"which_trunk": "front"}, wake_if_asleep=True
+            data = await self._controller.api(
+                "ACTUATE_TRUNK",
+                path_vars={"vehicle_id": self._id},
+                which_trunk="front",
+                wake_if_asleep=True,
             )
             if data and data["response"]["result"]:
                 self.__lock_state = 0
