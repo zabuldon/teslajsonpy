@@ -23,6 +23,7 @@ class TeslaMock:
         self._monkeypatch = monkeypatch
         self._monkeypatch.setattr(Controller, "connect", self.mock_connect)
         self._monkeypatch.setattr(Controller, "command", self.mock_command)
+        self._monkeypatch.setattr(Controller, "api", self.mock_api)
         self._monkeypatch.setattr(
             Controller, "get_charging_params", self.mock_get_charging_params
         )
@@ -62,6 +63,11 @@ class TeslaMock:
         self._vehicle["gui_settings"] = self._gui_settings
         self._vehicle["vehicle_state"] = self._vehicle_state
         self._vehicle["vehicle_config"] = self._vehicle_config
+
+    def mock_api(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's api method."""
+        return self.controller_api()
 
     def mock_connect(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -122,6 +128,11 @@ class TeslaMock:
     def controller_connect():
         """ Monkeypatch for controller.connect()."""
         return ("abc123", "cba321")
+
+    @staticmethod
+    async def controller_api():
+        """ Monkeypatch for controller.command()."""
+        return RESULT_OK
 
     @staticmethod
     async def controller_command():

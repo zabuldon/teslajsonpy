@@ -10,6 +10,8 @@ https://github.com/zabuldon/teslajsonpy
 """
 import asyncio
 import logging
+import json
+import pkgutil
 import time
 from typing import Callable, Dict, List, Optional, Text
 
@@ -119,11 +121,19 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
                     result is True
                     or (
                         isinstance(result, dict)
-                        and isinstance(result["response"], dict)
                         and (
-                            result["response"].get("result") is True
-                            or result["response"].get("reason")
-                            != "could_not_wake_buses"
+                            (
+                                isinstance(result["response"], dict)
+                                and (
+                                    result["response"].get("result") is True
+                                    or result["response"].get("reason")
+                                    != "could_not_wake_buses"
+                                )
+                                or (
+                                    isinstance(result, dict)
+                                    and isinstance(result["response"], list)
+                                )
+                            )
                         )
                     )
                 )
@@ -134,12 +144,21 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
 
     retries = 0
     sleep_delay = 2
-    car_id = args[0]
-    is_wake_command = len(args) >= 2 and args[1] == "wake_up"
-    is_energysite_command = kwargs.get("product_type") == TESLA_PRODUCT_TYPE_ENERGY_SITES
+    car_id = ""
+    is_wake_command = False
+    is_energysite_command = False
+    if wrapped.__name__ == "api":
+        car_id = kwargs.get("vehicle_id", "")
+    else:
+        car_id = args[0] if not kwargs.get("vehicle_id") else kwargs.get("vehicle_id")
+        is_wake_command = len(args) >= 2 and args[1] == "wake_up"
+        is_energysite_command = (
+            kwargs.get("product_type") == TESLA_PRODUCT_TYPE_ENERGY_SITES
+        )
     result = None
     if (
-        instance.car_online.get(instance._id_to_vin(car_id))
+        instance._id_to_vin(car_id) is None
+        or (car_id and instance.car_online.get(instance._id_to_vin(car_id)))
         or is_wake_command
         or is_energysite_command
     ):
@@ -150,7 +169,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
                 "Exception: %s\n%s(%s %s)", str(ex), wrapped.__name__, args, kwargs
             )
             raise
-    if valid_result(result) or is_wake_command:
+    if valid_result(result) or is_wake_command or is_energysite_command:
         return result
     _LOGGER.debug(
         "wake_up needed for %s -> %s \n"
@@ -285,6 +304,7 @@ class Controller:
         self.energysites = {}
         self.__id_energysiteid_map = {}
         self.__energysiteid_id_map = {}
+        self.endpoints = {}
 
     async def connect(
         self,
@@ -441,14 +461,14 @@ class Controller:
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_vehicles(self):
         """Get vehicles json from TeslaAPI."""
-        return (await self.__connection.get("vehicles"))["response"]
+        return (await self.api("VEHICLE_LIST"))["response"]
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_energysites(self):
         """Get energy sites json from TeslaAPI."""
         return [
             p
-            for p in (await self.__connection.get("products"))["response"]
+            for p in (await self.api("PRODUCT_LIST"))["response"]
             if p.get("resource_type") == "solar"
         ]
 
@@ -556,7 +576,9 @@ class Controller:
         car_id = self._update_id(car_id)
         return (
             await self.get(
-                car_id, f"vehicle_data/{name}", wake_if_asleep=wake_if_asleep,
+                car_id,
+                f"vehicle_data/{name}",
+                wake_if_asleep=wake_if_asleep,
             )
         )["response"]
 
@@ -577,6 +599,8 @@ class Controller:
         product_type: str = TESLA_PRODUCT_TYPE_VEHICLES,
     ):
         """Post name command to the car_id.
+
+        This will be deprecated. Use self.api instead.
 
         Parameters
         ----------
@@ -736,7 +760,8 @@ class Controller:
                         vin[-5:],
                         sleep_interval,
                         round(
-                            sleep_interval + self._last_update_time[vin] - cur_time, 2,
+                            sleep_interval + self._last_update_time[vin] - cur_time,
+                            2,
                         ),
                     )
                 return sleep_interval
@@ -751,9 +776,9 @@ class Controller:
             async with self.__lock[vin]:
                 _LOGGER.debug("Updating %s", vin[-5:])
                 try:
-                    data = await self.get(
-                        self.__vin_id_map[vin],
-                        "vehicle_data",
+                    data = await self.api(
+                        "VEHICLE_DATA",
+                        path_vars={"vehicle_id": self.__vin_id_map[vin]},
                         wake_if_asleep=wake_if_asleep,
                     )
                 except TeslaException:
@@ -802,9 +827,9 @@ class Controller:
             async with self.__lock[energysite_id]:
                 _LOGGER.debug("Updating %s", energysite_id)
                 try:
-                    data = await self.get(
-                        energysite_id,
-                        "live_status",
+                    data = await self.api(
+                        "SITE_DATA",
+                        path_vars={"site_id": energysite_id},
                         wake_if_asleep=wake_if_asleep,
                         product_type=TESLA_PRODUCT_TYPE_ENERGY_SITES,
                     )
@@ -841,9 +866,9 @@ class Controller:
             tasks = []
             for vin, online in self.car_online.items():
                 # If specific car_id provided, only update match
-                if (car_vin and car_vin != vin) or (vin and self.car_state[vin].get(
-                    "in_service"
-                )):
+                if (car_vin and car_vin != vin) or (
+                    vin and self.car_state[vin].get("in_service")
+                ):
                     continue
                 async with self.__lock[vin]:
                     car_state = self.car_state[vin].get("state")
@@ -1100,3 +1125,58 @@ class Controller:
         vehicle_id = int(data["tag"])
         vin = self.__vehicle_id_vin_map[vehicle_id]
         _LOGGER.debug("Disconnected %s from websocket", vin[-5:])
+
+    @wake_up
+    async def api(
+        self,
+        name: str,
+        path_vars=None,
+        wake_if_asleep: bool = False,  # pylint: disable=W0613
+        **kwargs,
+    ):
+        """Perform api request for given endpoint name, with keyword arguments as parameters.
+
+        Code from https://github.com/tdorssers/TeslaPy/blob/master/teslapy/__init__.py#L242-L277 under MIT
+
+        Args
+            name (str): Endpoint name, e.g., STATUS
+            path_vars (dict, optional): Path variables to be replaced. Defaults to None.
+            wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update state. Defaults to False.
+
+        Raises
+            ValueError: If endpoint name is not found
+            NotImplementedError: Endpoint method not implemented
+            ValueError: Path variables missing
+
+        Returns
+            dict: Json dictionary response from api.
+
+        """
+        path_vars = path_vars or {}
+        # Load API endpoints once
+        if not self.endpoints:
+            try:
+                data = pkgutil.get_data(__name__, "endpoints.json")
+                self.endpoints = json.loads(data.decode())
+                _LOGGER.debug("%d endpoints loaded", len(self.endpoints))
+            except (IOError, ValueError):
+                _LOGGER.error("No endpoints loaded")
+        # Lookup endpoint name
+        try:
+            endpoint = self.endpoints[name]
+        except KeyError as ex:
+            raise ValueError("Unknown endpoint name " + name) from ex
+        # Only JSON is supported
+        if endpoint.get("CONTENT", "JSON") != "JSON" or name == "STATUS":
+            raise NotImplementedError(f"Endpoint {name} not implemented")
+        # Substitute path variables in URI
+        try:
+            uri = endpoint["URI"].format(**path_vars)
+        except KeyError as ex:
+            raise ValueError(f"{name} requires path variable {ex}") from ex
+        # Perform request using given keyword arguments as parameters
+        if endpoint["TYPE"] == "GET":
+            return await self.__connection.post("", method="get", data=kwargs, url=uri)
+        return await self.__connection.post(
+            "", method=endpoint["TYPE"].lower(), data=kwargs, url=uri
+        )

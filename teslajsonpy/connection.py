@@ -90,7 +90,7 @@ class Connection:
         """Get data from API."""
         return await self.post(command, "get", None)
 
-    async def post(self, command, method="post", data=None):
+    async def post(self, command, method="post", data=None, url=""):
         """Post data to API."""
         now = calendar.timegm(datetime.datetime.now().timetuple())
         _LOGGER.debug(
@@ -162,8 +162,10 @@ class Connection:
                 )
             self.token_refreshed = True
             _LOGGER.debug("Successfully refreshed oauth")
+        if not url:
+            url = f"{self.api}{command}"
         return await self.__open(
-            f"{self.api}{command}", method=method, headers=self.head, data=data
+            url, method=method, headers=self.head, data=data
         )
 
     def __sethead(self, access_token: Text, expires_in: int = 30, expiration: int = 0):
@@ -193,7 +195,7 @@ class Connection:
         cookies = cookies or {}
         if not baseurl:
             baseurl = self.baseurl
-        url: URL = URL(baseurl + url)
+        url: URL = URL(baseurl).join(URL(url))
 
         _LOGGER.debug("%s: %s %s", method, url, data)
 

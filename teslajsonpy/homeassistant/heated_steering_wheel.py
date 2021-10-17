@@ -64,10 +64,10 @@ class HeatedSteeringWheelSwitch(VehicleDevice):
 
     async def set_steering_wheel_heat(self, value: bool):
         """Set heated steering wheel."""
-        data = await self._controller.command(
-            self._id,
-            "remote_steering_wheel_heater_request",
-            data={"on": value},
+        data = await self._controller.api(
+            "REMOTE_STEERING_WHEEL_HEATER_REQUEST",
+            path_vars={"vehicle_id": self._id},
+            on=value,
             wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
