@@ -55,6 +55,7 @@ class TeslaMock:
         self._vehicle_config = copy.deepcopy(VEHICLE_CONFIG)
         self._energysite_config = copy.deepcopy(ENERGYSITE_CONFIG)
         self._energysite_state = copy.deepcopy(ENERGYSITE_STATE)
+        self._energysite_config_no_name = copy.deepcopy(ENERGYSITE_CONFIG_NO_NAME)
 
         self._vehicle = copy.deepcopy(VEHICLE)
         self._vehicle["drive_state"] = self._drive_state
@@ -197,6 +198,10 @@ class TeslaMock:
     def data_request_energy_site(self):
         """ Similates the result of energy site data request"""
         return self._energysite_config
+
+    def data_request_energy_site_no_name(self):
+        """ Similates the result of energy site data request without a name"""
+        return self._energysite_config_no_name
 
 
     @staticmethod
@@ -450,6 +455,17 @@ ENERGYSITE_CONFIG = {
     "asset_site_id": 1234567890,
     "resource_type": "solar",
     "site_name": "Test Site",
+    "solar_type": "pv_panels",
+    "solar_power": None,
+    "sync_grid_alert_enabled": False,
+    "breaker_alert_enabled": False,
+}
+
+ENERGYSITE_CONFIG_NO_NAME = {
+    "id": 12345678901234567,
+    "energy_site_id": 1234567890,
+    "asset_site_id": 1234567890,
+    "resource_type": "solar",
     "solar_type": "pv_panels",
     "solar_power": None,
     "sync_grid_alert_enabled": False,
