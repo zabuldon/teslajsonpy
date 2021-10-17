@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.1.1 (2021-10-17)
+### Fix
+* Fix bug when energy site name is null ([#227](https://github.com/zabuldon/teslajsonpy/issues/227)) ([`348a42b`](https://github.com/zabuldon/teslajsonpy/commit/348a42bc40f3f01863530e0eddba1b6385ebfc7c))
+
 ## v1.1.0 (2021-10-17)
 ### Feature
 * Update to latest endpoints from 4.2.0 ([`074c35a`](https://github.com/zabuldon/teslajsonpy/commit/074c35a37cc97f27aac01181d72a13ddc3b478f1))
