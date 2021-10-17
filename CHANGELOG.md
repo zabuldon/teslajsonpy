@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.1.0 (2021-10-17)
+### Feature
+* Update to latest endpoints from 4.2.0 ([`074c35a`](https://github.com/zabuldon/teslajsonpy/commit/074c35a37cc97f27aac01181d72a13ddc3b478f1))
+
 ## v1.0.1 (2021-10-13)
 ### Fix
 * Change product_type to kwarg ([`41ea289`](https://github.com/zabuldon/teslajsonpy/commit/41ea289cea7f83d8bc778ef017ac529754936fa0))
