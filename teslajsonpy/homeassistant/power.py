@@ -9,6 +9,8 @@ from typing import Dict, Text
 
 _LOGGER = logging.getLogger(__name__)
 
+TESLA_DEFAULT_ENEREGY_SITE_NAME = "My Home"
+
 
 class EnergySiteDevice:
     """Home-assistant class of Tesla Energy Sites.
@@ -22,8 +24,8 @@ class EnergySiteDevice:
         Parameters
         ----------
         data : dict
-            The base state for a Tesla vehicle.
-            https://tesla-api.timdorr.com/vehicle/state/data
+            The base state for a Tesla Energy Site.
+            https://www.teslaapi.io/energy-sites/state-and-settings
         controller : teslajsonpy.Controller
             The controller that controls updates to the Tesla API.
 
@@ -34,7 +36,7 @@ class EnergySiteDevice:
         """
         self._id: int = data["id"]
         self._energy_site_id: int = data["energy_site_id"]
-        self._display_name: Text = data["site_name"]
+        self._site_name: Text = data.get("site_name", TESLA_DEFAULT_ENEREGY_SITE_NAME)
         self._solar_type: Text = data["solar_type"]
         self._controller = controller
         self.should_poll: bool = True
@@ -42,7 +44,7 @@ class EnergySiteDevice:
         self.attrs: Dict[Text, Text] = {}
 
     def _name(self) -> Text:
-        return f"{self._display_name} {self.type}"
+        return f"{self._site_name} {self.type}"
 
     def _uniq_name(self) -> Text:
         return self._name()
@@ -58,7 +60,7 @@ class EnergySiteDevice:
 
     def site_name(self) -> Text:
         """Return the car name of this Vehicle."""
-        return self._display_name
+        return self._site_name
 
     @property
     def solar_type(self) -> Text:
@@ -88,15 +90,13 @@ class EnergySiteDevice:
 
 
 class PowerSensor(EnergySiteDevice):
-    """Home-assistant class of temperature sensors for Tesla vehicles.
+    """Home-assistant class of power sensors for Tesla Energy Sites (Solar Panels).
 
     This is intended to be partially inherited by a Home-Assitant entity.
     """
 
     def __init__(self, data, controller):
-        """Initialize the temperature sensors and track in celsius.
-
-        Vehicles have both a driver and passenger.
+        """Initialize the power sensor and track in Watt for an Energy Site.
 
         Parameters
         ----------

@@ -3,7 +3,7 @@
 import pytest
 
 from teslajsonpy.controller import Controller
-from teslajsonpy.homeassistant.power import PowerSensor
+from teslajsonpy.homeassistant.power import PowerSensor, TESLA_DEFAULT_ENEREGY_SITE_NAME
 
 from tests.tesla_mock import TeslaMock
 
@@ -18,6 +18,17 @@ def test_device_class(monkeypatch):
     _sensor = PowerSensor(_data, _controller)
 
     assert _sensor.device_class == "power"
+
+def test_device_no_name(monkeypatch):
+    """Test device_class()."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_energy_site_no_name()
+    _sensor = PowerSensor(_data, _controller)
+
+    assert _sensor.site_name() == TESLA_DEFAULT_ENEREGY_SITE_NAME
 
 
 def test_get_power_on_init(monkeypatch):
