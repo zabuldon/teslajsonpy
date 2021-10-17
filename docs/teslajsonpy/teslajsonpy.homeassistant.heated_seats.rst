@@ -1,0 +1,10 @@
+==========================================
+``teslajsonpy.homeassistant.heated_seats``
+==========================================
+
+.. automodule:: teslajsonpy.homeassistant.heated_seats
+
+   .. contents::
+      :local:
+
+.. currentmodule:: teslajsonpy.homeassistant.heated_seats

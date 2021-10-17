@@ -198,7 +198,10 @@
 <li class="toctree-l3"><a class="reference internal" href="teslajsonpy.homeassistant.charger.html"><code class="docutils literal notranslate"><span class="pre">teslajsonpy.homeassistant.charger</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="teslajsonpy.homeassistant.climate.html"><code class="docutils literal notranslate"><span class="pre">teslajsonpy.homeassistant.climate</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="teslajsonpy.homeassistant.gps.html"><code class="docutils literal notranslate"><span class="pre">teslajsonpy.homeassistant.gps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="teslajsonpy.homeassistant.heated_seats.html"><code class="docutils literal notranslate"><span class="pre">teslajsonpy.homeassistant.heated_seats</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="teslajsonpy.homeassistant.heated_steering_wheel.html"><code class="docutils literal notranslate"><span class="pre">teslajsonpy.homeassistant.heated_steering_wheel</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="teslajsonpy.homeassistant.lock.html"><code class="docutils literal notranslate"><span class="pre">teslajsonpy.homeassistant.lock</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="teslajsonpy.homeassistant.power.html"><code class="docutils literal notranslate"><span class="pre">teslajsonpy.homeassistant.power</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="teslajsonpy.homeassistant.sentry_mode.html"><code class="docutils literal notranslate"><span class="pre">teslajsonpy.homeassistant.sentry_mode</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="teslajsonpy.homeassistant.trunk.html"><code class="docutils literal notranslate"><span class="pre">teslajsonpy.homeassistant.trunk</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="teslajsonpy.homeassistant.vehicle.html"><code class="docutils literal notranslate"><span class="pre">teslajsonpy.homeassistant.vehicle</span></code></a></li>
@@ -256,7 +259,7 @@ Home-Assistant front trunk (frunk) lock for a Tesla VehicleDevice.</p></li>
 </ul>
 <dl class="py class">
 <dt id="teslajsonpy.Connection">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">Connection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">websession</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">aiohttp.client.ClientSession</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">authorization_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Connection" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">Connection</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">websession</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">httpx.AsyncClient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">authorization_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Connection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connection to Tesla Motors API.</p>
 <p class="rubric">Inheritance</p>
 digraph inheritance087f428942 {
@@ -265,6 +268,12 @@ rankdir=LR;
 size=&quot;8.0, 12.0&quot;;
   &quot;Connection&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Connection to Tesla Motors API.&quot;];
 }
+<dl class="py method">
+<dt id="teslajsonpy.Connection.close">
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">close</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Connection.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close connection.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="teslajsonpy.Connection.get">
 <em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">get</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Connection.get" title="Permalink to this definition">¶</a></dt>
@@ -297,7 +306,7 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py method">
 <dt id="teslajsonpy.Connection.post">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">post</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'post'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Connection.post" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">post</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'post'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Connection.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post data to API.</p>
 </dd></dl>
 
@@ -329,7 +338,7 @@ process a json delivered in data</p></li>
 
 <dl class="py class">
 <dt id="teslajsonpy.Controller">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">Controller</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">websession</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_interval</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_websocket</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">Controller</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">websession</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">httpx.AsyncClient</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_interval</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_websocket</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller" title="Permalink to this definition">¶</a></dt>
 <dd><p>Controller for connections to Tesla Motors API.</p>
 <p class="rubric">Inheritance</p>
 digraph inheritancef1ba0f48d0 {
@@ -339,9 +348,29 @@ size=&quot;8.0, 12.0&quot;;
   &quot;Controller&quot; [fillcolor=white,fontname=&quot;Vera Sans, DejaVu Sans, Liberation Sans, Arial, Helvetica, sans&quot;,fontsize=10,height=0.25,shape=box,style=&quot;setlinewidth(0.5),filled&quot;,tooltip=&quot;Controller for connections to Tesla Motors API.&quot;];
 }
 <dl class="py method">
+<dt id="teslajsonpy.Controller.api">
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">api</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.api" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform api request for given endpoint name, with keyword arguments as parameters.</p>
+<p>Code from <a class="reference external" href="https://github.com/tdorssers/TeslaPy/blob/master/teslapy/__init__.py#L242-L277">https://github.com/tdorssers/TeslaPy/blob/master/teslapy/__init__.py#L242-L277</a> under MIT</p>
+<dl class="simple">
+<dt>Args</dt><dd><p>name (str): Endpoint name, e.g., STATUS
+path_vars (dict, optional): Path variables to be replaced. Defaults to None.
+wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update state. Defaults to False.</p>
+</dd>
+<dt>Raises</dt><dd><p>ValueError: If endpoint name is not found
+NotImplementedError: Endpoint method not implemented
+ValueError: Path variables missing</p>
+</dd>
+<dt>Returns</dt><dd><p>dict: Json dictionary response from api.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="teslajsonpy.Controller.command">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">command</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.command" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">command</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'vehicles'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.command" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post name command to the car_id.</p>
+<p>This will be deprecated. Use self.api instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -352,6 +381,7 @@ field for identifying the car across the owner-api endpoint.
 <li><p><strong>data</strong> (<em>dict</em>) – Optional parameters.</p></li>
 <li><p><strong>wake_if_asleep</strong> (<em>bool</em>) – Function for underlying api call for whether a failed response
 should wake up the vehicle or retry.</p></li>
+<li><p><strong>product_type</strong> (<em>string</em>) – Indicates whether this is a vehicle or a energy site. Defaults to TESLA_PRODUCT_TYPE_VEHICLES</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -373,40 +403,20 @@ wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update 
 filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.
 mfa_code (Text, optional): MFA code to use for connection</p>
 </dd>
-<dt>Returns</dt><dd><p>Dict[Text, Text]: Returns the refresh_token, access_token, and expires_in time</p>
+<dt>Returns</dt><dd><p>Dict[Text, Text]: Returns the refresh_token, access_token, id_token and expires_in time</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="teslajsonpy.Controller.data_request">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">data_request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.data_request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get requested data from car_id.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
-field for identifying the car across the owner-api endpoint.
-<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
-<li><p><strong>name</strong> (<em>string</em>) – Name of data to be requested from the data_request endpoint which
-rolls ups all data plus vehicle configuration.
-<a class="reference external" href="https://tesla-api.timdorr.com/vehicle/state/data">https://tesla-api.timdorr.com/vehicle/state/data</a></p></li>
-<li><p><strong>wake_if_asleep</strong> (<em>bool</em>) – Function for underlying api call for whether a failed response
-should wake up the vehicle or retry.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Tesla json object.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>dict</p>
-</dd>
-</dl>
+<dt id="teslajsonpy.Controller.disconnect">
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">disconnect</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.disconnect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnect from Tesla api.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="teslajsonpy.Controller.get">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">get</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">get</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'vehicles'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send get command to the car_id.</p>
 <p>This is a wrapped function by wake_up.</p>
 <dl class="field-list simple">
@@ -418,6 +428,7 @@ field for identifying the car across the owner-api endpoint.
 <li><p><strong>command</strong> (<em>string</em>) – Tesla API command. <a class="reference external" href="https://tesla-api.timdorr.com/vehicle/commands">https://tesla-api.timdorr.com/vehicle/commands</a></p></li>
 <li><p><strong>wake_if_asleep</strong> (<em>bool</em>) – Function for wake_up decorator indicating whether a failed response
 should wake up the vehicle or retry.</p></li>
+<li><p><strong>product_type</strong> (<em>string</em>) – Indicates whether this is a vehicle or a energy site. Defaults to TESLA_PRODUCT_TYPE_VEHICLES</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -451,6 +462,12 @@ should wake up the vehicle or retry.</p></li>
 <dt id="teslajsonpy.Controller.get_drive_params">
 <code class="sig-name descname"><span class="pre">get_drive_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_drive_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return cached copy of drive_params for car_id.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.get_energysites">
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">get_energysites</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_energysites" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get energy sites json from TeslaAPI.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -504,6 +521,12 @@ processed. Othewise, the entire updates dictionary.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="teslajsonpy.Controller.get_power_params">
+<code class="sig-name descname"><span class="pre">get_power_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_power_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return cached copy of charging_params for car_id.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="teslajsonpy.Controller.get_state_params">
 <code class="sig-name descname"><span class="pre">get_state_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_state_params" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return cached copy of state_params for car_id.</p>
@@ -515,7 +538,7 @@ processed. Othewise, the entire updates dictionary.</p>
 <dd><p>Return oauth data including refresh and access tokens, and expires time.</p>
 <p>This will set the the self.__connection token_refreshed to False.</p>
 <dl class="simple">
-<dt>Returns</dt><dd><p>Dict[Text, Text]: Returns the refresh_token, access_token, and expires time</p>
+<dt>Returns</dt><dd><p>Dict[Text, Text]: Returns the refresh_token, access_token, id_token and expires time</p>
 </dd>
 </dl>
 </dd></dl>
@@ -559,7 +582,7 @@ processed. Othewise, the entire updates dictionary.</p>
 
 <dl class="py method">
 <dt id="teslajsonpy.Controller.post">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">post</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.post" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">post</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">command</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'vehicles'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.post" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send post command to the car_id.</p>
 <p>This is a wrapped function by wake_up.</p>
 <dl class="field-list simple">
@@ -572,6 +595,7 @@ field for identifying the car across the owner-api endpoint.
 <li><p><strong>data</strong> (<em>dict</em>) – Optional parameters.</p></li>
 <li><p><strong>wake_if_asleep</strong> (<em>bool</em>) – Function for wake_up decorator indicating whether a failed response
 should wake up the vehicle or retry.</p></li>
+<li><p><strong>product_type</strong> (<em>string</em>) – Indicates whether this is a vehicle or a energy site. Defaults to TESLA_PRODUCT_TYPE_VEHICLES</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -660,6 +684,32 @@ force (bool, optional): force a vehicle update regardless of the update_interval
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt id="teslajsonpy.Controller.vehicle_data_request">
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">vehicle_data_request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.vehicle_data_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get requested data from car_id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+field for identifying the car across the owner-api endpoint.
+<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
+<li><p><strong>name</strong> (<em>string</em>) – Name of data to be requested from the data_request endpoint which
+rolls ups all data plus vehicle configuration.
+<a class="reference external" href="https://tesla-api.timdorr.com/vehicle/state/data">https://tesla-api.timdorr.com/vehicle/state/data</a></p></li>
+<li><p><strong>wake_if_asleep</strong> (<em>bool</em>) – Function for underlying api call for whether a failed response
+should wake up the vehicle or retry.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Tesla json object.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -679,6 +729,9 @@ size=&quot;8.0, 12.0&quot;;
 <dt id="teslajsonpy.TeslaProxy.modify_headers">
 <em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">modify_headers</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yarl.URL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">aiohttp.web_request.Request</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">multidict._multidict.MultiDict</span><a class="headerlink" href="#teslajsonpy.TeslaProxy.modify_headers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Modify headers.</p>
+<p>Return modified headers based on site and request. To disable auto header generation,
+pass in a key const.SKIP_AUTO_HEADERS with a list of keys to not generate.</p>
+<p>For example, to prevent User-Agent generation: {SKIP_AUTO_HEADERS : [“User-Agent”]}</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -688,45 +741,45 @@ size=&quot;8.0, 12.0&quot;;
 </dd>
 </dl>
 <dl class="simple">
-<dt>Returns</dt><dd><p>multidict.MultiDict: Headers after modifications</p>
+<dt>Returns</dt><dd><p>dict: Headers after modifications</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="teslajsonpy.TeslaProxy.prepend_i18n_path">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">prepend_i18n_path</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yarl.URL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#teslajsonpy.TeslaProxy.prepend_i18n_path" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">async</span> <span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">prepend_i18n_path</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yarl.URL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#teslajsonpy.TeslaProxy.prepend_i18n_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepend path for i18n loadPath so it’ll reach the proxy.</p>
 <p>This is intended to be used for to place the proxy_url path in front of relative urls for loadPath in i18next.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>base_url</strong> (<em>URL</em>) – Base URL to prepend</p></li>
-<li><p><strong>html</strong> (<em>Text</em>) – Text to replace</p></li>
+<li><p><strong>html</strong> (<em>str</em>) – text to replace</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="simple">
-<dt>Returns</dt><dd><p>Text: Replaced text</p>
+<dt>Returns</dt><dd><p>str: Replaced text</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="teslajsonpy.TeslaProxy.prepend_relative_urls">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">prepend_relative_urls</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yarl.URL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#teslajsonpy.TeslaProxy.prepend_relative_urls" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">async</span> <span class="pre">static</span> </em><code class="sig-name descname"><span class="pre">prepend_relative_urls</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_url</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">yarl.URL</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#teslajsonpy.TeslaProxy.prepend_relative_urls" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prepend relative urls with url host.</p>
 <p>This is intended to be used for to place the proxy_url in front of relative urls in src=”/</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>base_url</strong> (<em>URL</em>) – Base URL to prepend</p></li>
-<li><p><strong>html</strong> (<em>Text</em>) – Text to replace</p></li>
+<li><p><strong>html</strong> (<em>str</em>) – text to replace</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="simple">
-<dt>Returns</dt><dd><p>Text: Replaced text</p>
+<dt>Returns</dt><dd><p>str: Replaced text</p>
 </dd>
 </dl>
 </dd></dl>
@@ -740,20 +793,20 @@ size=&quot;8.0, 12.0&quot;;
 
 <dl class="py method">
 <dt id="teslajsonpy.TeslaProxy.test_url">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">test_url</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">aiohttp.client_reqrep.ClientResponse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.TeslaProxy.test_url" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">test_url</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">httpx.Response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.TeslaProxy.test_url" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test for a successful Tesla URL.</p>
 <p><a class="reference external" href="https://tesla-api.timdorr.com/api-basics/authentication#step-2-obtain-an-authorization-code">https://tesla-api.timdorr.com/api-basics/authentication#step-2-obtain-an-authorization-code</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>resp</strong> (<em>ClientResponse</em>) – The aiohttp response.</p></li>
-<li><p><strong>data</strong> (<em>Dict</em><em>[</em><em>Text</em><em>, </em><em>Any</em><em>]</em>) – Dictionary of all post data captured through proxy with overwrites for duplicate keys.</p></li>
-<li><p><strong>query</strong> (<em>Dict</em><em>[</em><em>Text</em><em>, </em><em>Any</em><em>]</em>) – Dictionary of all query data with overwrites for duplicate keys.</p></li>
+<li><p><strong>resp</strong> (<em>httpx.Response</em>) – The httpx response.</p></li>
+<li><p><strong>data</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Dictionary of all post data captured through proxy with overwrites for duplicate keys.</p></li>
+<li><p><strong>query</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>) – Dictionary of all query data with overwrites for duplicate keys.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="simple">
-<dt>Returns</dt><dd><p>Optional[Union[URL, Text]]: URL for a http 302 redirect or Text to display on success. None indicates test did not pass.</p>
+<dt>Returns</dt><dd><p>Optional[Union[URL, str]]: URL for a http 302 redirect or str to display on success. None indicates test did not pass.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -953,6 +1006,12 @@ size=&quot;8.0, 12.0&quot;;
 </dd></dl>
 
 <dl class="py method">
+<dt id="teslajsonpy.ChargingSensor.charger_power">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">charger_power</span></code><a class="headerlink" href="#teslajsonpy.ChargingSensor.charger_power" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the state of charger power.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="teslajsonpy.ChargingSensor.charger_voltage">
 <em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">charger_voltage</span></code><a class="headerlink" href="#teslajsonpy.ChargingSensor.charger_voltage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the voltage.</p>
@@ -981,6 +1040,12 @@ size=&quot;8.0, 12.0&quot;;
 <code class="sig-name descname"><span class="pre">refresh</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.ChargingSensor.refresh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Refresh data.</p>
 <p>This assumes the controller has already been updated</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.ChargingSensor.state_class">
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">state_class</span></code><a class="headerlink" href="#teslajsonpy.ChargingSensor.state_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the state class.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1744,7 +1809,7 @@ Otherwise, returns the result of object.__str__() (if defined)
 or repr(object).
 encoding defaults to sys.getdefaultencoding().
 errors defaults to ‘strict’.</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&#39;0.14.0&#39;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&#39;1.1.1&#39;
 </pre></div>
 </div>
 </dd></dl>
