@@ -25,10 +25,12 @@ jobs:
       - name: Make documentation
         run: |
           make docs
-      - name: Setup Git
+      - name: Setup Git and commit docs
         run: |
           git config --global user.name "semantic-release"
           git config --global user.email "semantic-release@GitHub"
+          git add docs
+          git commit -am "docs: update documentation"
       - name: Python Semantic Release
         uses: relekang/python-semantic-release@master
         with:
