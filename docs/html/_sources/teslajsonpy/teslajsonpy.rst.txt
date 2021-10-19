@@ -280,4 +280,4 @@ Variables
 
    .. code-block:: text
 
-      '1.1.1'
+      '1.1.2'
