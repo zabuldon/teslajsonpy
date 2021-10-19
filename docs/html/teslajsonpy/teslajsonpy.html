@@ -352,16 +352,28 @@ size=&quot;8.0, 12.0&quot;;
 <em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">api</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_vars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.api" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform api request for given endpoint name, with keyword arguments as parameters.</p>
 <p>Code from <a class="reference external" href="https://github.com/tdorssers/TeslaPy/blob/master/teslapy/__init__.py#L242-L277">https://github.com/tdorssers/TeslaPy/blob/master/teslapy/__init__.py#L242-L277</a> under MIT</p>
-<dl class="simple">
-<dt>Args</dt><dd><p>name (str): Endpoint name, e.g., STATUS
-path_vars (dict, optional): Path variables to be replaced. Defaults to None.
-wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update state. Defaults to False.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>string</em>) – Endpoint command, e.g., STATUS. See <a class="reference external" href="https://github.com/zabuldon/teslajsonpy/blob/dev/teslajsonpy/endpoints.json">https://github.com/zabuldon/teslajsonpy/blob/dev/teslajsonpy/endpoints.json</a></p></li>
+<li><p><strong>path_vars</strong> (<em>dict</em>) – Path variables to be replaced. Defaults to None. For vehicle_id reference see <a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
+<li><p><strong>wake_if_asleep</strong> (<em>bool</em>) – Function for underlying api call for whether a failed response
+should wake up the vehicle or retry.</p></li>
+<li><p><strong>**kwargs</strong> – Arguments to pass to underlying Tesla command. See <a class="reference external" href="https://tesla-api.timdorr.com/vehicle/commands">https://tesla-api.timdorr.com/vehicle/commands</a></p></li>
+</ul>
 </dd>
-<dt>Raises</dt><dd><p>ValueError: If endpoint name is not found
-NotImplementedError: Endpoint method not implemented
-ValueError: Path variables missing</p>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError:</strong> – If endpoint name is not found</p></li>
+<li><p><strong>NotImplementedError:</strong> – Endpoint method not implemented</p></li>
+<li><p><strong>ValueError:</strong> – Path variables missing</p></li>
+</ul>
 </dd>
-<dt>Returns</dt><dd><p>dict: Json dictionary response from api.</p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Tesla json response object.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -370,7 +382,7 @@ ValueError: Path variables missing</p>
 <dt id="teslajsonpy.Controller.command">
 <em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">command</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wake_if_asleep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">product_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'vehicles'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.command" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post name command to the car_id.</p>
-<p>This will be deprecated. Use self.api instead.</p>
+<p>This will be deprecated. Use <a class="reference internal" href="#teslajsonpy.Controller.api" title="teslajsonpy.Controller.api"><code class="xref py py-meth docutils literal notranslate"><span class="pre">teslajsonpy.Controller.api()</span></code></a> instead.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
