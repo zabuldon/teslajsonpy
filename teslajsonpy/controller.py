@@ -169,7 +169,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
                 "Exception: %s\n%s(%s %s)", str(ex), wrapped.__name__, args, kwargs
             )
             raise
-    if valid_result(result) or is_wake_command or is_energysite_command:
+    if valid_result(result) or is_wake_command or is_energysite_command or instance._id_to_vin(car_id) is None:
         return result
     _LOGGER.debug(
         "wake_up needed for %s -> %s \n"
