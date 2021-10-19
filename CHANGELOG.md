@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v1.1.2 (2021-10-19)
+### Fix
+* Exit wake_up attempt if car not identified ([`7336092`](https://github.com/zabuldon/teslajsonpy/commit/73360924d28274e7614f892da7802a7080935d17))
+* Remove extraneous kwarg product_type ([`8a986eb`](https://github.com/zabuldon/teslajsonpy/commit/8a986eb6568a1960368bcdb8d137747ae9282daf))
+
+### Documentation
+* Update documentation ([`8c67ba6`](https://github.com/zabuldon/teslajsonpy/commit/8c67ba66db086b4113ce6b30be7cb8a77abd1257))
+* Update documentation ([`006bc7a`](https://github.com/zabuldon/teslajsonpy/commit/006bc7a816721adfd6d4f116a2e8b7af57de240c))
+* Update controller.command deprecation link ([`f17ad26`](https://github.com/zabuldon/teslajsonpy/commit/f17ad260c0e654c563a9461c8c7997374cff746e))
+* Update formating of controller.api ([`186e1b1`](https://github.com/zabuldon/teslajsonpy/commit/186e1b18fdd7cb44625f1782091d4bcbe2b98010))
+* Update documentation ([`54acac5`](https://github.com/zabuldon/teslajsonpy/commit/54acac549ff3045d925a7fe1a07a70380d5812e2))
+
 ## v1.1.1 (2021-10-17)
 ### Fix
 * Fix bug when energy site name is null ([#227](https://github.com/zabuldon/teslajsonpy/issues/227)) ([`348a42b`](https://github.com/zabuldon/teslajsonpy/commit/348a42bc40f3f01863530e0eddba1b6385ebfc7c))
