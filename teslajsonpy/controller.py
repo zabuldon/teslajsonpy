@@ -182,9 +182,6 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         car_id if car_id else None,
         instance.car_online if instance.car_online else None,
     )
-    # if we got here and it's an energy site that doesn't go to sleep, there is a problem; raise an exception
-    if is_energysite_command:
-        raise TeslaException("could_not_read_energy_site")
     instance.car_online[instance._id_to_vin(car_id)] = False
     while (
         kwargs.get("wake_if_asleep")
