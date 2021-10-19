@@ -1134,18 +1134,31 @@ class Controller:
 
         Code from https://github.com/tdorssers/TeslaPy/blob/master/teslapy/__init__.py#L242-L277 under MIT
 
-        Args
-            name (str): Endpoint name, e.g., STATUS
-            path_vars (dict, optional): Path variables to be replaced. Defaults to None.
-            wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update state. Defaults to False.
+        Parameters
+        ----------
+        name : string
+            Endpoint command, e.g., STATUS. See https://github.com/zabuldon/teslajsonpy/blob/dev/teslajsonpy/endpoints.json
+        path_vars : dict
+            Path variables to be replaced. Defaults to None. For vehicle_id reference see https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
+        wake_if_asleep : bool
+            Function for underlying api call for whether a failed response
+            should wake up the vehicle or retry.
+        **kwargs :
+            Arguments to pass to underlying Tesla command. See https://tesla-api.timdorr.com/vehicle/commands
 
         Raises
-            ValueError: If endpoint name is not found
-            NotImplementedError: Endpoint method not implemented
-            ValueError: Path variables missing
+        ------
+        ValueError:
+            If endpoint name is not found
+        NotImplementedError:
+            Endpoint method not implemented
+        ValueError:
+            Path variables missing
 
         Returns
-            dict: Json dictionary response from api.
+        -------
+        dict
+            Tesla json response object.
 
         """
         path_vars = path_vars or {}
