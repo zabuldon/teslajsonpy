@@ -831,7 +831,6 @@ class Controller:
                         "SITE_DATA",
                         path_vars={"site_id": energysite_id},
                         wake_if_asleep=wake_if_asleep,
-                        product_type=TESLA_PRODUCT_TYPE_ENERGY_SITES,
                     )
                 except TeslaException:
                     data = None
