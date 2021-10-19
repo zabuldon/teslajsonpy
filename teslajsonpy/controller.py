@@ -597,7 +597,7 @@ class Controller:
     ):
         """Post name command to the car_id.
 
-        This will be deprecated. Use self.api instead.
+        This will be deprecated. Use :meth:`teslajsonpy.Controller.api` instead.
 
         Parameters
         ----------
