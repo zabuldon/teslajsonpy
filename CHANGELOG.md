@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.0 (2021-10-20)
+### Feature
+* Add vin, id, and vehicle_id to online sensor ([`7f49f8f`](https://github.com/zabuldon/teslajsonpy/commit/7f49f8fd9d8931c50ff732c0fe83600fee8a4da6))
+
+### Documentation
+* Update documentation ([`e56b134`](https://github.com/zabuldon/teslajsonpy/commit/e56b13490da733fcbb874c62d4bd807cea7f8041))
+
 ## v1.1.2 (2021-10-19)
 ### Fix
 * Exit wake_up attempt if car not identified ([`7336092`](https://github.com/zabuldon/teslajsonpy/commit/73360924d28274e7614f892da7802a7080935d17))
