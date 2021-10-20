@@ -71,6 +71,11 @@ class VehicleDevice:
         """Return the id of this Vehicle."""
         return self._id
 
+    def vin(self) -> str:
+        # pylint: disable=invalid-name
+        """Return the vin of this Vehicle."""
+        return self._vin
+
     def vehicle_id(self) -> int:
         """Return the vehicle_id of this Vehicle."""
         return self._vehicle_id
