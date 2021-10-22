@@ -169,6 +169,8 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
             _LOGGER.debug(
                 "Exception: %s\n%s(%s %s)", str(ex), wrapped.__name__, args, kwargs
             )
+            if ex.code == 408 and car_id and instance._id_to_vin(car_id):
+                instance.car_online[instance._id_to_vin(car_id)] = False
             raise
     if (
         valid_result(result)
