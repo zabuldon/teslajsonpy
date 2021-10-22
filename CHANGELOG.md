@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.2.1 (2021-10-22)
+### Fix
+* Reduce api calls to energysite ([`ddbe6eb`](https://github.com/zabuldon/teslajsonpy/commit/ddbe6ebd001bc0c514db5f67dbd368a0046e6ece))
+* Treat 408 exceptions as vehicle asleep ([`2f707d9`](https://github.com/zabuldon/teslajsonpy/commit/2f707d95e79e6f9635152baabd9d7ff4897833eb))
+* Fix extraction of car_id from api call ([`4629b6f`](https://github.com/zabuldon/teslajsonpy/commit/4629b6f593ab92027440f66a7d31adfd6a9381b1))
+
 ## v1.2.0 (2021-10-20)
 ### Feature
 * Add vin, id, and vehicle_id to online sensor ([`7f49f8f`](https://github.com/zabuldon/teslajsonpy/commit/7f49f8fd9d8931c50ff732c0fe83600fee8a4da6))
