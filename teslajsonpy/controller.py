@@ -28,6 +28,7 @@ from teslajsonpy.const import (
     SLEEP_INTERVAL,
     TESLA_PRODUCT_TYPE_ENERGY_SITES,
     TESLA_PRODUCT_TYPE_VEHICLES,
+    TESLA_DEFAULT_ENERGY_SITE_NAME,
 )
 from teslajsonpy.exceptions import should_giveup, RetryLimitError, TeslaException
 from teslajsonpy.homeassistant.battery_sensor import Battery, Range
@@ -50,7 +51,7 @@ from teslajsonpy.homeassistant.lock import ChargerLock, Lock
 from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
 from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
 from teslajsonpy.homeassistant.heated_steering_wheel import HeatedSteeringWheelSwitch
-from teslajsonpy.homeassistant.power import PowerSensor, TESLA_DEFAULT_ENEREGY_SITE_NAME
+from teslajsonpy.homeassistant.power import PowerSensor
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -169,7 +170,12 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
                 "Exception: %s\n%s(%s %s)", str(ex), wrapped.__name__, args, kwargs
             )
             raise
-    if valid_result(result) or is_wake_command or is_energysite_command or instance._id_to_vin(car_id) is None:
+    if (
+        valid_result(result)
+        or is_wake_command
+        or is_energysite_command
+        or instance._id_to_vin(car_id) is None
+    ):
         return result
     _LOGGER.debug(
         "wake_up needed for %s -> %s \n"
@@ -363,7 +369,9 @@ class Controller:
             energysite_id = energysite["energy_site_id"]
             self.__id_energysiteid_map[energysite["id"]] = energysite_id
             self.__energysiteid_id_map[energysite_id] = energysite["id"]
-            self.__energysite_name[energysite_id] = energysite.get("site_name", TESLA_DEFAULT_ENEREGY_SITE_NAME)
+            self.__energysite_name[energysite_id] = energysite.get(
+                "site_name", TESLA_DEFAULT_ENERGY_SITE_NAME
+            )
             self.__energysite_type[energysite_id] = energysite["solar_type"]
             self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
             self.__lock[energysite_id] = asyncio.Lock()
