@@ -337,7 +337,7 @@ class Controller:
         self._last_attempted_update_time = time.time()
         self.__update_lock = asyncio.Lock()
 
-        energysites = await self.get_energysites()
+        self.energysites = await self.get_energysites()
 
         for car in cars:
             vin = car["vin"]
@@ -367,7 +367,7 @@ class Controller:
 
             self._add_car_components(car)
 
-        for energysite in energysites:
+        for energysite in self.energysites:
             energysite_id = energysite["energy_site_id"]
             self.__id_energysiteid_map[energysite["id"]] = energysite_id
             self.__energysiteid_id_map[energysite_id] = energysite["id"]
@@ -380,12 +380,8 @@ class Controller:
             self._add_energysite_components(energysite)
 
         if not test_login:
-            tasks = [
-                self.update(car["id"], wake_if_asleep=wake_if_asleep) for car in cars
-            ]
-            _LOGGER.debug("tasks %s %s", tasks, wake_if_asleep)
             try:
-                await asyncio.gather(*tasks)
+                await self.update(wake_if_asleep=wake_if_asleep)
             except (TeslaException, RetryLimitError):
                 pass
         return {
@@ -472,7 +468,7 @@ class Controller:
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_energysites(self):
-        """Get energy sites json from TeslaAPI."""
+        """Get energy sites json from TeslaAPI and filter to solar."""
         return [
             p
             for p in (await self.api("PRODUCT_LIST"))["response"]
@@ -704,12 +700,14 @@ class Controller:
         force: bool = False,
     ) -> bool:
         #  pylint: disable=too-many-locals,too-many-statements
-        """Update all vehicle attributes in the cache.
+        """Update all vehicle and energy site attributes in the cache.
 
         This command will connect to the Tesla API and first update the list of
         online vehicles assuming no attempt for at least the [update_interval].
         It will then update all the cached values for cars that are awake
         assuming no update has occurred for at least the [update_interval].
+
+        For energy sites, they will only be updated if car_id is blank.
 
         Args
             car_id (Text, optional): The vehicle to update. If None, all cars are updated. Defaults to None.
@@ -832,7 +830,7 @@ class Controller:
 
         async def _get_and_process_energysite_data(energysite_id: Text) -> None:
             async with self.__lock[energysite_id]:
-                _LOGGER.debug("Updating %s", energysite_id)
+                _LOGGER.debug("Updating energysite %s", energysite_id)
                 try:
                     data = await self.api(
                         "SITE_DATA",
@@ -861,8 +859,6 @@ class Controller:
                     self.car_state[car["vin"]] = car
                 self._last_attempted_update_time = cur_time
 
-                self.energysites = {}
-                self.energysites = await self.get_energysites()
             # Only update online vehicles that haven't been updated recently
             # The throttling is per car's last succesful update
             # Note: This separate check is because there may be individual cars
@@ -900,10 +896,10 @@ class Controller:
                         _LOGGER.debug(
                             "Skipping update of %s with state %s", vin[-5:], car_state
                         )
-
-            for energysite in self.energysites:
-                energysite_id = energysite["energy_site_id"]
-                async with self.__lock[energysite_id]:
+            if not car_id:
+                # do not update energy sites if car_id was a parameter.
+                for energysite in self.energysites:
+                    energysite_id = energysite["energy_site_id"]
                     tasks.append(_get_and_process_energysite_data(energysite_id))
 
             return any(await asyncio.gather(*tasks))
