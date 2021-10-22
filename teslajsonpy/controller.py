@@ -149,7 +149,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
     is_wake_command = False
     is_energysite_command = False
     if wrapped.__name__ == "api":
-        car_id = kwargs.get("vehicle_id", "")
+        car_id = kwargs.get("path_vars", {}).get("vehicle_id", "")
     else:
         car_id = args[0] if not kwargs.get("vehicle_id") else kwargs.get("vehicle_id")
         is_wake_command = len(args) >= 2 and args[1] == "wake_up"
