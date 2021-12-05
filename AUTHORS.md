@@ -15,3 +15,4 @@
 -   hobbe [GitHub](https://github.com/hobbe)
 -   megabytemb [GitHub](https://github.com/megabytemb)
 -   giachello [Github](https://github.com/giachello)
+-   danielp370 [Github](https://github.com/danielp370)
