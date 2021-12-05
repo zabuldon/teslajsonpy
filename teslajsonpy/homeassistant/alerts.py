@@ -89,7 +89,7 @@ class FlashLights(VehicleDevice):
         """Return whether the device has a battery."""
         return False
 
-    async def flash_light(self) -> None:
+    async def flash_lights(self) -> None:
         """Flash Lights."""
         await self._controller.api(
             "FLASH_LIGHTS",
