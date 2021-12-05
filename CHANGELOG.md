@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.3.0 (2021-12-05)
+### Feature
+* Expose max charger variable ([#248](https://github.com/zabuldon/teslajsonpy/issues/248)) ([`9c3cce9`](https://github.com/zabuldon/teslajsonpy/commit/9c3cce90c07692e60869f18c2fd20cff043aca5d))
+
 ## v1.2.1 (2021-10-22)
 ### Fix
 * Reduce api calls to energysite ([`ddbe6eb`](https://github.com/zabuldon/teslajsonpy/commit/ddbe6ebd001bc0c514db5f67dbd368a0046e6ece))
