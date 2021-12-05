@@ -43,4 +43,4 @@ async def test_flash_light(monkeypatch):
     _data = _mock.data_request_vehicle()
     _button = FlashLights(_data, _controller)
 
-    await _button.flash_light()
+    await _button.flash_lights()
