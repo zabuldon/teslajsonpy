@@ -124,7 +124,9 @@ class RangeSwitch(VehicleDevice):
         """Set the charger to max range for trips."""
         if not self.__maxrange_state:
             data = await self._controller.api(
-                "CHANGE_CHARGE_MAX", path_vars={"vehicle_id": self._id}, wake_if_asleep=True
+                "CHANGE_CHARGE_MAX",
+                path_vars={"vehicle_id": self._id},
+                wake_if_asleep=True,
             )
             if data and data["response"]["result"]:
                 self.__maxrange_state = True
@@ -134,7 +136,9 @@ class RangeSwitch(VehicleDevice):
         """Set the charger to standard range for daily commute."""
         if self.__maxrange_state:
             data = await self._controller.api(
-                "CHANGE_CHARGE_STANDARD", path_vars={"vehicle_id": self._id}, wake_if_asleep=True
+                "CHANGE_CHARGE_STANDARD",
+                path_vars={"vehicle_id": self._id},
+                wake_if_asleep=True,
             )
             if data and data["response"]["result"]:
                 self.__maxrange_state = False

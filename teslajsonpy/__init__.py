@@ -26,7 +26,7 @@ from teslajsonpy.homeassistant.gps import GPS, Odometer
 from teslajsonpy.homeassistant.lock import Lock
 from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
 from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
-from teslajsonpy.homeassistant.alerts import HornSwitch, FlashLightSwitch
+from teslajsonpy.homeassistant.alerts import Horn, FlashLights
 from teslajsonpy.teslaproxy import TeslaProxy
 from .__version__ import __version__
 
@@ -52,8 +52,8 @@ __all__ = [
     "Odometer",
     "Lock",
     "SentryModeSwitch",
-    "HornSwitch",
-    "FlashLightSwitch",
+    "Horn",
+    "FlashLights",
     "TrunkLock",
     "FrunkLock",
     "__version__",
