@@ -66,6 +66,7 @@ def test_get_value_on_init(monkeypatch):
         assert _sensor.time_left is None
         assert _sensor.added_range is None
         assert _sensor.charge_current_request is None
+        assert _sensor.charge_current_request_max is None
         assert _sensor.charger_actual_current is None
         assert _sensor.charger_voltage is None
         assert _sensor.charger_power is None
@@ -90,6 +91,7 @@ async def test_get_value_after_update(monkeypatch):
     assert _sensor.time_left == 0
     assert _sensor.added_range == 40
     assert _sensor.charge_current_request == 48
+    assert _sensor.charge_current_request_max == 48
     assert _sensor.charger_actual_current == 0
     assert _sensor.charger_voltage == 0
     assert _sensor.charger_power == 0
@@ -104,6 +106,7 @@ async def test_get_value_after_update(monkeypatch):
     assert _sensor2.charging_rate == 0
     assert _sensor2.time_left == 0
     assert _sensor2.charge_current_request == 48
+    assert _sensor2.charge_current_request_max == 48
     assert _sensor2.charger_actual_current == 0
     assert _sensor2.charger_voltage == 0
     assert _sensor2.charger_power == 0
@@ -130,6 +133,7 @@ async def test_async_update(monkeypatch):
     assert _sensor.time_left == 0
     assert _sensor.added_range == 40
     assert _sensor.charge_current_request == 48
+    assert _sensor.charge_current_request_max == 48
     assert _sensor.charger_actual_current == 0
     assert _sensor.charger_voltage == 0
     assert _sensor.charge_energy_added == 12.41
