@@ -164,9 +164,7 @@ class Connection:
             _LOGGER.debug("Successfully refreshed oauth")
         if not url:
             url = f"{self.api}{command}"
-        return await self.__open(
-            url, method=method, headers=self.head, data=data
-        )
+        return await self.__open(url, method=method, headers=self.head, data=data)
 
     def __sethead(self, access_token: Text, expires_in: int = 30, expiration: int = 0):
         """Set HTTP header."""
