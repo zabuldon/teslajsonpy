@@ -176,6 +176,7 @@ class ChargingSensor(VehicleDevice):
         self.__charging_rate = None
         self.__time_to_full = None
         self.__charge_current_request = None
+        self.__charge_current_request_max = None
         self.__charger_actual_current = None
         self.__charger_voltage = None
         self.__charge_limit_soc = None
@@ -208,6 +209,7 @@ class ChargingSensor(VehicleDevice):
             self.__charging_rate = data["charge_rate"]
             self.__time_to_full = data["time_to_full_charge"]
             self.__charge_current_request = data["charge_current_request"]
+            self.__charge_current_request_max = data["charge_current_request_max"]
             self.__charger_actual_current = data["charger_actual_current"]
             self.__charger_voltage = data["charger_voltage"]
             self.__charge_limit_soc = data["charge_limit_soc"]
@@ -241,6 +243,11 @@ class ChargingSensor(VehicleDevice):
     def charge_current_request(self) -> float:
         """Return the requested current."""
         return self.__charge_current_request
+
+    @property
+    def charge_current_request_max(self) -> float:
+        """Return the requested current max."""
+        return self.__charge_current_request_max
 
     @property
     def charger_actual_current(self) -> float:
@@ -304,6 +311,7 @@ class ChargingEnergySensor(VehicleDevice):
         self.__charging_rate = None
         self.__time_to_full = None
         self.__charge_current_request = None
+        self.__charge_current_request_max = None
         self.__charger_actual_current = None
         self.__charger_voltage = None
         self.__charge_limit_soc = None
@@ -342,6 +350,7 @@ class ChargingEnergySensor(VehicleDevice):
             self.__charging_rate = data["charge_rate"]
             self.__time_to_full = data["time_to_full_charge"]
             self.__charge_current_request = data["charge_current_request"]
+            self.__charge_current_request_max = data["charge_current_request_max"]
             self.__charger_actual_current = data["charger_actual_current"]
             self.__charger_voltage = data["charger_voltage"]
             self.__charge_limit_soc = data["charge_limit_soc"]
@@ -376,6 +385,11 @@ class ChargingEnergySensor(VehicleDevice):
     def charge_current_request(self) -> float:
         """Return the requested current."""
         return self.__charge_current_request
+
+    @property
+    def charge_current_request_max(self) -> float:
+        """Return the requested current max."""
+        return self.__charge_current_request_max
 
     @property
     def charger_actual_current(self) -> float:
