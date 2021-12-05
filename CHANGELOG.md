@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.4.0 (2021-12-05)
+### Feature
+* Add Horn & FlashLight buttons ([#252](https://github.com/zabuldon/teslajsonpy/issues/252)) ([`38d644f`](https://github.com/zabuldon/teslajsonpy/commit/38d644f9d7cbc7ccfe94d5e7b2ce53ab917de073))
+
 ## v1.3.0 (2021-12-05)
 ### Feature
 * Expose max charger variable ([#248](https://github.com/zabuldon/teslajsonpy/issues/248)) ([`9c3cce9`](https://github.com/zabuldon/teslajsonpy/commit/9c3cce90c07692e60869f18c2fd20cff043aca5d))
