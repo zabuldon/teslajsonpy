@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.4.1 (2021-12-08)
+### Fix
+* Allow specification of auth_domain ([`85babc8`](https://github.com/zabuldon/teslajsonpy/commit/85babc817c19b1274fd95c36ce059c4179d53a8c))
+
 ## v1.4.0 (2021-12-05)
 ### Feature
 * Add Horn & FlashLight buttons ([#252](https://github.com/zabuldon/teslajsonpy/issues/252)) ([`38d644f`](https://github.com/zabuldon/teslajsonpy/commit/38d644f9d7cbc7ccfe94d5e7b2ce53ab917de073))
