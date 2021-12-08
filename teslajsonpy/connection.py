@@ -49,6 +49,7 @@ class Connection:
         refresh_token: Text = None,
         authorization_token: Text = None,
         expiration: int = 0,
+        auth_domain: str = AUTH_DOMAIN
     ) -> None:
         """Initialize connection object."""
         self.user_agent: Text = "Model S 2.1.79 (SM-G900V; Android REL 4.4.4; en_US"
@@ -84,7 +85,7 @@ class Connection:
             _LOGGER.debug("Connecting with existing access token")
         self.websocket = None
         self.mfa_code: Text = ""
-        self.auth_domain: URL = URL(AUTH_DOMAIN)
+        self.auth_domain: URL = URL(auth_domain)
 
     async def get(self, command):
         """Get data from API."""
