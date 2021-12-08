@@ -22,6 +22,7 @@ from yarl import URL
 
 from teslajsonpy.connection import Connection
 from teslajsonpy.const import (
+    AUTH_DOMAIN,
     DRIVING_INTERVAL,
     IDLE_INTERVAL,
     ONLINE_INTERVAL,
@@ -254,6 +255,7 @@ class Controller:
         expiration: int = 0,
         update_interval: int = 300,
         enable_websocket: bool = False,
+        auth_domain: str = AUTH_DOMAIN
     ) -> None:
         """Initialize controller.
 
@@ -267,6 +269,7 @@ class Controller:
             update_interval (int, optional): Seconds between allowed updates to the API.  This is to prevent
             being blocked by Tesla. Defaults to 300.
             enable_websocket (bool, optional): Whether to connect with websockets. Defaults to False.
+            auth_domain (str, optional): The authentication domain. Defaults to const.AUTH_DOMAIN
 
         """
         self.__connection = Connection(
@@ -278,6 +281,7 @@ class Controller:
             access_token=access_token,
             refresh_token=refresh_token,
             expiration=expiration,
+            auth_domain=auth_domain
         )
         self.__components = []
         self._update_interval: int = update_interval
