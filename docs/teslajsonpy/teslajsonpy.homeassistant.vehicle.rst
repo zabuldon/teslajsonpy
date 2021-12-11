@@ -1,0 +1,10 @@
+=====================================
+``teslajsonpy.homeassistant.vehicle``
+=====================================
+
+.. automodule:: teslajsonpy.homeassistant.vehicle
+
+   .. contents::
+      :local:
+
+.. currentmodule:: teslajsonpy.homeassistant.vehicle

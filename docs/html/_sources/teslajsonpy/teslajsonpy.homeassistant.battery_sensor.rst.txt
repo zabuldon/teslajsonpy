@@ -1,0 +1,10 @@
+============================================
+``teslajsonpy.homeassistant.battery_sensor``
+============================================
+
+.. automodule:: teslajsonpy.homeassistant.battery_sensor
+
+   .. contents::
+      :local:
+
+.. currentmodule:: teslajsonpy.homeassistant.battery_sensor

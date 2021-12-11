@@ -1,0 +1,10 @@
+===================================================
+``teslajsonpy.homeassistant.heated_steering_wheel``
+===================================================
+
+.. automodule:: teslajsonpy.homeassistant.heated_steering_wheel
+
+   .. contents::
+      :local:
+
+.. currentmodule:: teslajsonpy.homeassistant.heated_steering_wheel
