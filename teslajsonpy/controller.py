@@ -29,7 +29,6 @@ from teslajsonpy.const import (
     SLEEP_INTERVAL,
     TESLA_PRODUCT_TYPE_ENERGY_SITES,
     TESLA_PRODUCT_TYPE_VEHICLES,
-    TESLA_DEFAULT_ENERGY_SITE_NAME,
 )
 from teslajsonpy.exceptions import should_giveup, RetryLimitError, TeslaException
 from teslajsonpy.homeassistant.battery_sensor import Battery, Range
@@ -377,7 +376,7 @@ class Controller:
             self.__id_energysiteid_map[energysite["id"]] = energysite_id
             self.__energysiteid_id_map[energysite_id] = energysite["id"]
             self.__energysite_name[energysite_id] = energysite.get(
-                "site_name", TESLA_DEFAULT_ENERGY_SITE_NAME
+                "site_name", f"{energysite_id}"
             )
             self.__energysite_type[energysite_id] = energysite["solar_type"]
             self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
