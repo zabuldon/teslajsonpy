@@ -13,6 +13,7 @@ Submodules
 
 .. toctree::
 
+   teslajsonpy.homeassistant.alerts
    teslajsonpy.homeassistant.battery_sensor
    teslajsonpy.homeassistant.binary_sensor
    teslajsonpy.homeassistant.charger

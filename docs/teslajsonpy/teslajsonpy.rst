@@ -81,6 +81,12 @@ Classes
 - :py:class:`SentryModeSwitch`:
   Home-Assistant class for sentry mode of Tesla vehicles.
 
+- :py:class:`Horn`:
+  Home-Assistant class for horn of Tesla vehicles.
+
+- :py:class:`FlashLights`:
+  Home-Assistant class for flash lights of Tesla vehicles.
+
 - :py:class:`TrunkLock`:
   Home-Assistant rear trunk lock for a Tesla VehicleDevice.
 
@@ -214,6 +220,20 @@ Classes
    .. inheritance-diagram:: SentryModeSwitch
       :parts: 1
 
+.. autoclass:: Horn
+   :members:
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: Horn
+      :parts: 1
+
+.. autoclass:: FlashLights
+   :members:
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: FlashLights
+      :parts: 1
+
 .. autoclass:: TrunkLock
    :members:
 
@@ -280,4 +300,4 @@ Variables
 
    .. code-block:: text
 
-      '1.1.2'
+      '1.4.1'
