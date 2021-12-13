@@ -6,7 +6,6 @@ https://github.com/zabuldon/teslajsonpy
 """
 import logging
 from typing import Dict, Text
-from teslajsonpy.const import TESLA_DEFAULT_ENERGY_SITE_NAME
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ class EnergySiteDevice:
         """
         self._id: int = data["id"]
         self._energy_site_id: int = data["energy_site_id"]
-        self._site_name: Text = data.get("site_name", TESLA_DEFAULT_ENERGY_SITE_NAME)
+        self._site_name: Text = data.get("site_name", f"{self._energy_site_id}")
         self._solar_type: Text = data["solar_type"]
         self._controller = controller
         self.should_poll: bool = True
