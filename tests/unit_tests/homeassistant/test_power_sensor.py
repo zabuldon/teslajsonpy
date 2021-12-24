@@ -59,4 +59,24 @@ async def test_get_power_after_update(monkeypatch):
 
     assert _sensor is not None
     assert not _sensor.get_power() is None
-    assert _sensor.get_power() == 1800
+    assert _sensor.get_power() == 1900
+
+@pytest.mark.asyncio
+async def test_get_power_after_update_with_unknown_status(monkeypatch):
+    """Test get_power()  after an update with an unknown grid status."""
+
+    _mock = TeslaMock(monkeypatch)
+    monkeypatch.setattr(
+        Controller, "get_power_params", _mock.mock_get_power_unknown_grid_params
+    )
+    _controller = Controller(None)
+
+    _data = _mock.data_request_energy_site()
+    _data["solar_power"] = 1800
+    _sensor = PowerSensor(_data, _controller)
+
+    await _sensor.async_update()
+
+    assert _sensor is not None
+    assert not _sensor.get_power() is None
+    assert _sensor.get_power() == 1750
