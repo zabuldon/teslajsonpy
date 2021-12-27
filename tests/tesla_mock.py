@@ -55,6 +55,7 @@ class TeslaMock:
         self._vehicle_config = copy.deepcopy(VEHICLE_CONFIG)
         self._energysite_config = copy.deepcopy(ENERGYSITE_CONFIG)
         self._energysite_state = copy.deepcopy(ENERGYSITE_STATE)
+        self._energysite_state_unknown_grid = copy.deepcopy(ENERGYSITE_STATE_UNKNOWN_GRID)
         self._energysite_config_no_name = copy.deepcopy(ENERGYSITE_CONFIG_NO_NAME)
 
         self._vehicle = copy.deepcopy(VEHICLE)
@@ -94,6 +95,11 @@ class TeslaMock:
         # pylint: disable=unused-argument
         """ Mock controller's get_climate_params method."""
         return self.controller_get_power_params()
+
+    def mock_get_power_unknown_grid_params(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """ Mock controller's get_climate_params method."""
+        return self.controller_get_power_unknown_grid_params()
 
     def mock_get_drive_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -152,6 +158,10 @@ class TeslaMock:
         """ Monkeypatch for controller.get_climate_params()."""
         return self._energysite_state
 
+    def controller_get_power_unknown_grid_params(self):
+        """ Monkeypatch for controller.get_climate_params()."""
+        return self._energysite_state_unknown_grid
+
     def controller_get_drive_params(self):
         """ Monkeypatch for controller.get_drive_params()."""
         return self._drive_state
@@ -203,6 +213,13 @@ class TeslaMock:
         """ Similates the result of energy site data request without a name"""
         return self._energysite_config_no_name
 
+    def data_request_energy_state(self):
+        """ Similates the result of energy status data request"""
+        return self._energysite_state
+
+    def data_request_energy_state_unknown_grid(self):
+        """ Similates the result of energy status unknown grid data request"""
+        return self._energysite_state_unknown_grid
 
     @staticmethod
     def command_ok():
@@ -475,5 +492,13 @@ ENERGYSITE_CONFIG_NO_NAME = {
 ENERGYSITE_STATE = {
     "id": 12345678901234567,
     "timestamp": "2011-01-01",
-    "solar_power": 1800,
+    "solar_power": 1900,
+}
+
+ENERGYSITE_STATE_UNKNOWN_GRID = {
+    "id": 12345678901234567,
+    "timestamp": "2011-01-01",
+    "solar_power": 1750,
+    "grid_status": "Unknown",
+    "grid_services_active": False,
 }

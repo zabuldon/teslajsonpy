@@ -874,7 +874,7 @@ class Controller:
             tasks = []
             for vin, online in self.car_online.items():
                 # If specific car_id provided, only update match
-                if (car_vin and car_vin != vin) or (
+                if (car_vin and car_vin != vin) or vin not in self.__lock.keys() or (
                     vin and self.car_state[vin].get("in_service")
                 ):
                     continue
