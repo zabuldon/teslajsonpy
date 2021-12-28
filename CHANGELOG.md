@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v1.4.2 (2021-12-28)
+### Fix
+* **vins:** Ensure vin is in saved state ([`77e2414`](https://github.com/zabuldon/teslajsonpy/commit/77e2414489088d390de81ef3eb02314f6a5921b9))
+* **energysites:** Changing unknown grid status logic ([`5f92fc4`](https://github.com/zabuldon/teslajsonpy/commit/5f92fc4e466b78e78cf40bd1fb78d279bba1c09c))
+
+### Documentation
+* Update documentation ([`c5280e1`](https://github.com/zabuldon/teslajsonpy/commit/c5280e193ce4feb5148aa45efb6ac01818b5d87f))
+
 ## v1.4.1 (2021-12-08)
 ### Fix
 * Allow specification of auth_domain ([`85babc8`](https://github.com/zabuldon/teslajsonpy/commit/85babc817c19b1274fd95c36ce059c4179d53a8c))
