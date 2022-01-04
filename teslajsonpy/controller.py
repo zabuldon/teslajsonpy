@@ -893,7 +893,7 @@ class Controller:
                             or vin not in self._last_update_time
                             or (
                                 (cur_time - self._last_update_time[vin])
-                                > _calculate_next_interval(vin)
+                                >= _calculate_next_interval(vin)
                             )
                         )
                     ):  # Only update cars with update flag on
