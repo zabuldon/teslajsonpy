@@ -853,7 +853,7 @@ class Controller:
             cur_time = time.time()
             #  Update the online cars using get_vehicles()
             last_update = self._last_attempted_update_time
-            if force or cur_time - last_update > ONLINE_INTERVAL:
+            if force or cur_time - last_update >= ONLINE_INTERVAL:
                 cars = await self.get_vehicles()
                 self.car_online = {}
                 for car in cars:
