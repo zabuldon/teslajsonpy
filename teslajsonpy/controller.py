@@ -717,7 +717,7 @@ class Controller:
         #     self.__climate[vin].get("is_climate_on"),
         #     self.__charging[vin].get("charging_state") == "Charging",
         # )
-        if not vin in self.__update_state:
+        if vin not in self.__update_state:
             self.__update_state[vin] = "normal"
         if self.car_state[vin].get("state") == "asleep" or self.__driving[vin].get(
             "shift_state"
