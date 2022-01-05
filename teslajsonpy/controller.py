@@ -255,7 +255,7 @@ class Controller:
         update_interval: int = 300,
         enable_websocket: bool = False,
         polling_policy: Text = None,
-        auth_domain: str = AUTH_DOMAIN
+        auth_domain: str = AUTH_DOMAIN,
     ) -> None:
         """Initialize controller.
 
@@ -287,7 +287,7 @@ class Controller:
             access_token=access_token,
             refresh_token=refresh_token,
             expiration=expiration,
-            auth_domain=auth_domain
+            auth_domain=auth_domain,
         )
         self.__components = []
         self._update_interval: int = update_interval
@@ -591,9 +591,7 @@ class Controller:
         car_id = self._update_id(car_id)
         return (
             await self.get(
-                car_id,
-                f"vehicle_data/{name}",
-                wake_if_asleep=wake_if_asleep,
+                car_id, f"vehicle_data/{name}", wake_if_asleep=wake_if_asleep
             )
         )["response"]
 
@@ -707,7 +705,7 @@ class Controller:
                 )
             return self.car_online[car_vin]
 
-    def _calculate_next_interval(vin: Text) -> int:
+    def _calculate_next_interval(self, vin: Text) -> int:
         cur_time = time.time()
         # _LOGGER.debug(
         #     "%s: %s > %s; shift_state: %s sentry: %s climate: %s, charging: %s ",
@@ -719,6 +717,8 @@ class Controller:
         #     self.__climate[vin].get("is_climate_on"),
         #     self.__charging[vin].get("charging_state") == "Charging",
         # )
+        if not vin in self.__update_state:
+            self.__update_state[vin] = "normal"
         if self.car_state[vin].get("state") == "asleep" or self.__driving[vin].get(
             "shift_state"
         ):
@@ -780,10 +780,7 @@ class Controller:
                     "%s trying to sleep; scan throttled to %s seconds and will ignore updates for %s seconds",
                     vin[-5:],
                     sleep_interval,
-                    round(
-                        sleep_interval + self._last_update_time[vin] - cur_time,
-                        2,
-                    ),
+                    round(sleep_interval + self._last_update_time[vin] - cur_time, 2),
                 )
             return sleep_interval
         if self.__update_state[vin] != "normal":
@@ -913,8 +910,10 @@ class Controller:
             tasks = []
             for vin, online in self.car_online.items():
                 # If specific car_id provided, only update match
-                if (car_vin and car_vin != vin) or vin not in self.__lock.keys() or (
-                    vin and self.car_state[vin].get("in_service")
+                if (
+                    (car_vin and car_vin != vin)
+                    or vin not in self.__lock.keys()
+                    or (vin and self.car_state[vin].get("in_service"))
                 ):
                     continue
                 async with self.__lock[vin]:
@@ -956,12 +955,22 @@ class Controller:
             return self.__climate[vin]
         return {}
 
+    def set_climate_params(self, car_id: Text, params: Dict) -> None:
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self.__climate[vin] = params
+
     def get_charging_params(self, car_id):
         """Return cached copy of charging_params for car_id."""
         vin = self._id_to_vin(car_id)
         if vin:
             return self.__charging[vin]
         return {}
+
+    def set_charging_params(self, car_id: Text, params: Dict) -> None:
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self.__charging[vin] = params
 
     def get_power_params(self, site_id):
         """Return cached copy of charging_params for car_id."""
@@ -974,6 +983,11 @@ class Controller:
         if vin:
             return self.__state[vin]
         return {}
+
+    def set_state_params(self, car_id: Text, params: Dict) -> None:
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self.__state[vin] = params
 
     def get_config_params(self, car_id):
         """Return cached copy of state_params for car_id."""
@@ -988,6 +1002,11 @@ class Controller:
         if vin:
             return self.__driving[vin]
         return {}
+
+    def set_drive_params(self, car_id: Text, params: Dict) -> None:
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self.__driving[vin] = params
 
     def get_gui_params(self, car_id):
         """Return cached copy of gui_params for car_id."""
@@ -1063,6 +1082,20 @@ class Controller:
         if vin:
             return self._last_update_time[vin]
         return self._last_update_time
+
+    def set_last_update_time(self, car_id: Text, timestamp: float = 0) -> None:
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self._last_update_time[vin] = timestamp
+
+    def set_last_park_time(self, car_id: Text, timestamp: float = 0) -> None:
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self.__last_parked_timestamp[vin] = timestamp
+
+    def set_id_vin(self, car_id, vin) -> None:
+        self.__id_vin_map[car_id] = vin
+        self.__vin_id_map[vin] = car_id
 
     @property
     def update_interval(self) -> int:
