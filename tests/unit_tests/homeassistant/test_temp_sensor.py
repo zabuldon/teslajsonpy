@@ -41,7 +41,7 @@ def test_get_temp_on_init(monkeypatch):
     _data = _mock.data_request_vehicle()
     _sensor = TempSensor(_data, _controller)
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert _sensor.get_inside_temp() is None
     assert _sensor.get_outside_temp() is None
 
@@ -60,7 +60,7 @@ async def test_get_temp_after_update(monkeypatch):
 
     await _sensor.async_update()
 
-    assert not _sensor is None
+    assert _sensor is not None
     assert not _sensor.get_inside_temp() is None
     assert not _sensor.get_outside_temp() is None
     assert _sensor.get_inside_temp() == 18.8

@@ -10,9 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
         with:
           ref: master
+          fetch-depth: 0
       - name: Set up Python 3.7
         uses: actions/setup-python@v1
         with:
@@ -20,22 +21,24 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install python-semantic-release pipenv
+          pip install python-semantic-release poetry
           make init
+      - name: Python Semantic Release
+        uses: relekang/python-semantic-release@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pypi_token: ${{ secrets.TESLA_PYPY_TOKEN }}
       - name: Make documentation
         run: |
           make docs
-      - name: Setup Git
+      - name: Setup Git and commit docs
         run: |
           git config --global user.name "semantic-release"
           git config --global user.email "semantic-release@GitHub"
-      - name: Publish with semantic-release
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-          PYPI_PASSWORD: ${{ secrets.TESLA_PYPY_TOKEN }}
-          PYPI_USERNAME: __token__
-        run: |
-          DEBUG='*' semantic-release publish
+          git pull
+          git add docs
+          git commit -am "docs: update documentation"
+          git push
       - name: Push changes to dev
         uses: ad-m/github-push-action@master
         with:
