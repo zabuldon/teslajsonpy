@@ -956,6 +956,7 @@ class Controller:
         return {}
 
     def set_climate_params(self, car_id: Text, params: Dict) -> None:
+        """Set climate_params for car_id."""
         vin = self._id_to_vin(car_id)
         if vin:
             self.__climate[vin] = params
@@ -968,6 +969,7 @@ class Controller:
         return {}
 
     def set_charging_params(self, car_id: Text, params: Dict) -> None:
+        """Set charging_params for car_id."""
         vin = self._id_to_vin(car_id)
         if vin:
             self.__charging[vin] = params
@@ -985,12 +987,13 @@ class Controller:
         return {}
 
     def set_state_params(self, car_id: Text, params: Dict) -> None:
+        """Set state_params for car_id."""
         vin = self._id_to_vin(car_id)
         if vin:
             self.__state[vin] = params
 
     def get_config_params(self, car_id):
-        """Return cached copy of state_params for car_id."""
+        """Return cached copy of config_params for car_id."""
         vin = self._id_to_vin(car_id)
         if vin:
             return self.__config[vin]
@@ -1004,6 +1007,7 @@ class Controller:
         return {}
 
     def set_drive_params(self, car_id: Text, params: Dict) -> None:
+        """Set drive_params for car_id."""
         vin = self._id_to_vin(car_id)
         if vin:
             self.__driving[vin] = params
@@ -1084,16 +1088,19 @@ class Controller:
         return self._last_update_time
 
     def set_last_update_time(self, car_id: Text, timestamp: float = 0) -> None:
+        """Set updated_time for car_id."""
         vin = self._id_to_vin(car_id)
         if vin:
             self._last_update_time[vin] = timestamp
 
     def set_last_park_time(self, car_id: Text, timestamp: float = 0) -> None:
+        """Set park_time for car_id."""
         vin = self._id_to_vin(car_id)
         if vin:
             self.__last_parked_timestamp[vin] = timestamp
 
     def set_id_vin(self, car_id, vin) -> None:
+        """Update mappings of car_id <--> vin."""
         self.__id_vin_map[car_id] = vin
         self.__vin_id_map[vin] = car_id
 
