@@ -62,8 +62,10 @@ class Lock(VehicleDevice):
 
     async def lock(self):
         """Lock the doors."""
-        data = await self._controller.command(
-            self._id, "door_lock", wake_if_asleep=True
+        data = await self._controller.api(
+            "LOCK",
+            path_vars={"vehicle_id": self._id},
+            wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
             self.__lock_state = True
@@ -71,8 +73,10 @@ class Lock(VehicleDevice):
 
     async def unlock(self):
         """Unlock the doors and extend handles where applicable."""
-        data = await self._controller.command(
-            self._id, "door_unlock", wake_if_asleep=True
+        data = await self._controller.api(
+            "UNLOCK",
+            path_vars={"vehicle_id": self._id},
+            wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
             self.__lock_state = False
@@ -147,8 +151,10 @@ class ChargerLock(VehicleDevice):
 
     async def lock(self):
         """Close the charger door."""
-        data = await self._controller.command(
-            self._id, "charge_port_door_close", wake_if_asleep=True
+        data = await self._controller.api(
+            "CHARGE_PORT_DOOR_CLOSE",
+            path_vars={"vehicle_id": self._id},
+            wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
             self.__lock_state = True
@@ -156,8 +162,10 @@ class ChargerLock(VehicleDevice):
 
     async def unlock(self):
         """Open the charger door."""
-        data = await self._controller.command(
-            self._id, "charge_port_door_open", wake_if_asleep=True
+        data = await self._controller.api(
+            "CHARGE_PORT_DOOR_OPEN",
+            path_vars={"vehicle_id": self._id},
+            wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
             self.__lock_state = False

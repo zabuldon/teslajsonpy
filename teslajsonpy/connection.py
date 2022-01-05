@@ -21,6 +21,7 @@ from typing import Dict, Text
 
 import aiohttp
 from bs4 import BeautifulSoup
+import httpx
 import yarl
 from yarl import URL
 
@@ -41,13 +42,14 @@ class Connection:
 
     def __init__(
         self,
-        websession: aiohttp.ClientSession,
+        websession: httpx.AsyncClient,
         email: Text = None,
         password: Text = None,
         access_token: Text = None,
         refresh_token: Text = None,
         authorization_token: Text = None,
         expiration: int = 0,
+        auth_domain: str = AUTH_DOMAIN
     ) -> None:
         """Initialize connection object."""
         self.user_agent: Text = "Model S 2.1.79 (SM-G900V; Android REL 4.4.4; en_US"
@@ -62,6 +64,7 @@ class Connection:
         self.api: Text = "/api/1/"
         self.expiration: int = expiration
         self.access_token = access_token
+        self.id_token = None
         self.head = None
         self.refresh_token = refresh_token
         self.websession = websession
@@ -82,13 +85,13 @@ class Connection:
             _LOGGER.debug("Connecting with existing access token")
         self.websocket = None
         self.mfa_code: Text = ""
-        self.auth_domain: URL = URL(AUTH_DOMAIN)
+        self.auth_domain: URL = URL(auth_domain)
 
     async def get(self, command):
         """Get data from API."""
         return await self.post(command, "get", None)
 
-    async def post(self, command, method="post", data=None):
+    async def post(self, command, method="post", data=None, url=""):
         """Post data to API."""
         now = calendar.timegm(datetime.datetime.now().timetuple())
         _LOGGER.debug(
@@ -121,6 +124,8 @@ class Connection:
                 auth = await self.refresh_access_token(
                     refresh_token=self.sso_oauth.get("refresh_token")
                 )
+            elif self.refresh_token:
+                auth = await self.refresh_access_token(refresh_token=self.refresh_token)
             if auth and all(
                 (
                     auth.get(item)
@@ -132,6 +137,8 @@ class Connection:
                     "refresh_token": auth["refresh_token"],
                     "expires_in": auth["expires_in"] + now,
                 }
+                self.id_token = auth["id_token"]
+                self.refresh_token = auth["refresh_token"]
                 _LOGGER.debug("Saved new auth info %s", self.sso_oauth)
             else:
                 _LOGGER.debug("Unable to refresh sso oauth token")
@@ -154,12 +161,11 @@ class Connection:
                 self.__sethead(
                     access_token=auth["access_token"], expires_in=auth["expires_in"]
                 )
-            self.refresh_token = auth["refresh_token"]
             self.token_refreshed = True
             _LOGGER.debug("Successfully refreshed oauth")
-        return await self.__open(
-            f"{self.api}{command}", method=method, headers=self.head, data=data
-        )
+        if not url:
+            url = f"{self.api}{command}"
+        return await self.__open(url, method=method, headers=self.head, data=data)
 
     def __sethead(self, access_token: Text, expires_in: int = 30, expiration: int = 0):
         """Set HTTP header."""
@@ -188,23 +194,28 @@ class Connection:
         cookies = cookies or {}
         if not baseurl:
             baseurl = self.baseurl
-        url: URL = URL(baseurl + url)
+        url: URL = URL(baseurl).join(URL(url))
 
         _LOGGER.debug("%s: %s %s", method, url, data)
 
         try:
-            resp = await getattr(self.websession, method)(
-                url, data=data, headers=headers, cookies=cookies
-            )
-            data = await resp.json()
-            _LOGGER.debug("%s: %s", resp.status, json.dumps(data))
-            if resp.status > 299:
-                if resp.status == 401:
+            if data:
+                resp = await getattr(self.websession, method)(
+                    str(url), data=data, headers=headers, cookies=cookies
+                )
+            else:
+                resp = await getattr(self.websession, method)(
+                    str(url), headers=headers, cookies=cookies
+                )
+            _LOGGER.debug("%s: %s", resp.status_code, resp.text)
+            if resp.status_code > 299:
+                if resp.status_code == 401:
                     if data and data.get("error") == "invalid_token":
-                        raise TeslaException(resp.status, "invalid_token")
-                elif resp.status == 408:
-                    raise TeslaException(resp.status, "vehicle_unavailable")
-                raise TeslaException(resp.status)
+                        raise TeslaException(resp.status_code, "invalid_token")
+                elif resp.status_code == 408:
+                    raise TeslaException(resp.status_code, "vehicle_unavailable")
+                raise TeslaException(resp.status_code)
+            data = resp.json()
             if data.get("error"):
                 # known errors:
                 #     'vehicle unavailable: {:error=>"vehicle unavailable:"}',
@@ -216,8 +227,8 @@ class Connection:
                 raise TeslaException(
                     f'{data.get("error")}:{data.get("error_description")}'
                 )
-        except aiohttp.ClientResponseError as exception_:
-            raise TeslaException(exception_.status) from exception_
+        except httpx.HTTPStatusError as exception_:
+            raise TeslaException(exception_.request.status_code) from exception_
         return data
 
     async def websocket_connect(self, vin: int, vehicle_id: int, **kwargs):
@@ -375,6 +386,11 @@ class Connection:
     #         }
     #     )
 
+    async def close(self) -> None:
+        """Close connection."""
+        await self.websession.aclose()
+        _LOGGER.debug("Connection closed.")
+
     async def get_authorization_code(
         self,
         email: Text,
@@ -390,17 +406,17 @@ class Connection:
             _LOGGER.debug("No email or password for login; unable to login.")
             return
         url = self.get_authorization_code_link(new=True)
-        resp = await self.websession.get(url.update_query({"login_hint": email}))
-        html = await resp.text()
+        resp = await self.websession.get(str(url.update_query({"login_hint": email})))
+        html = resp.text
         if resp.history:
             for item in resp.history:
                 if (
-                    item.status in [301, 302, 303, 304, 305, 306, 307, 308]
+                    item.status_code in [301, 302, 303, 304, 305, 306, 307, 308]
                     and resp.url.host != self.auth_domain.host
                 ):
                     _LOGGER.debug(
                         "Detected %s redirect from %s to %s; changing proxy host",
-                        item.status,
+                        item.status_code,
                         item.url.host,
                         resp.url.host,
                     )
@@ -413,14 +429,18 @@ class Connection:
         transaction_id: Text = data.get("transaction_id")
         for attempt in range(retry_limit):
             _LOGGER.debug("Attempt #%s", attempt)
-            resp = await self.websession.post(url, data=data)
+            resp = await self.websession.post(str(url), data=data)
             _process_resp(resp)
             if not resp.history:
-                html = await resp.text()
+                html = resp.text
                 if "/mfa/verify" in html:
                     _LOGGER.debug("Detected MFA request")
                     mfa_resp = await self.websession.get(
-                        self.auth_domain.with_path("/oauth2/v3/authorize/mfa/factors"),
+                        str(
+                            self.auth_domain.with_path(
+                                "/oauth2/v3/authorize/mfa/factors"
+                            )
+                        ),
                         params={"transaction_id": transaction_id},
                     )
                     _process_resp(mfa_resp)
@@ -438,7 +458,7 @@ class Connection:
                     #         }
                     #     ]
                     # }
-                    mfa_json = await mfa_resp.json()
+                    mfa_json = mfa_resp.json()
                     if len(mfa_json.get("data", [])) >= 1:
                         factor_id = mfa_json["data"][mfa_device]["id"]
                     if not mfa_code:
@@ -448,7 +468,11 @@ class Connection:
                             "MFA Code missing", devices=mfa_json["data"]
                         )
                     mfa_resp = await self.websession.post(
-                        self.auth_domain.with_path("/oauth2/v3/authorize/mfa/verify"),
+                        str(
+                            self.auth_domain.with_path(
+                                "/oauth2/v3/authorize/mfa/verify"
+                            )
+                        ),
                         json={
                             "transaction_id": transaction_id,
                             "factor_id": factor_id,
@@ -456,7 +480,7 @@ class Connection:
                         },
                     )
                     _process_resp(mfa_resp)
-                    mfa_json = await mfa_resp.json()
+                    mfa_json = mfa_resp.json()
                     if not (
                         mfa_json["data"].get("approved")
                         and mfa_json["data"].get("valid")
@@ -465,13 +489,13 @@ class Connection:
                         raise IncompleteCredentials(
                             "MFA Code invalid", devices=mfa_json["data"]
                         )
-                    resp = await self.websession.post(url, data=data)
+                    resp = await self.websession.post(str(url), data=data)
                     _process_resp(resp)
             await asyncio.sleep(3)
-        if not resp.history or not URL(resp.history[-1].url).query.get("code"):
+        if not resp.history or not URL(str(resp.history[-1].url)).query.get("code"):
             _LOGGER.debug("Failed to authenticate")
             raise IncompleteCredentials("Unable to login with credentials")
-        code_url = URL(resp.history[-1].url)
+        code_url = URL(str(resp.history[-1].url))
         _LOGGER.debug("Found code %s", code_url.query.get("code"))
         return code_url.query.get("code")
 
@@ -515,10 +539,10 @@ class Connection:
             "redirect_uri": "https://auth.tesla.com/void/callback",
         }
         auth = await self.websession.post(
-            self.auth_domain.with_path("/oauth2/v3/token"),
+            str(self.auth_domain.with_path("/oauth2/v3/token")),
             data=oauth,
         )
-        return await auth.json()
+        return auth.json()
 
     async def refresh_access_token(self, refresh_token):
         """Refresh access token from sso."""
@@ -534,10 +558,10 @@ class Connection:
             "scope": "openid email offline_access",
         }
         auth = await self.websession.post(
-            self.auth_domain.with_path("/oauth2/v3/token"),
+            str(self.auth_domain.with_path("/oauth2/v3/token")),
             data=oauth,
         )
-        return await auth.json()
+        return auth.json()
 
     async def get_bearer_token(self, access_token):
         """Get bearer token. This is used by the owners API."""
@@ -556,7 +580,7 @@ class Connection:
         auth = await self.websession.post(
             "https://owner-api.teslamotors.com/oauth/token", headers=head, data=oauth
         )
-        return await auth.json()
+        return auth.json()
 
 
 def get_inputs(soup: BeautifulSoup, searchfield=None) -> Dict[str, str]:
@@ -580,12 +604,12 @@ def get_inputs(soup: BeautifulSoup, searchfield=None) -> Dict[str, str]:
 def _process_resp(resp) -> Text:
     if resp.history:
         for item in resp.history:
-            _LOGGER.debug("%s: redirected from\n%s", item.method, item.url)
-    url = str(resp.request_info.url)
-    method = resp.request_info.method
-    status = resp.status
-    reason = resp.reason
-    headers = resp.request_info.headers
+            _LOGGER.debug("%s: redirected from\n%s", item.request.method, item.url)
+    url = str(resp.request.url)
+    method = resp.request.method
+    status = resp.status_code
+    reason = resp.reason_phrase
+    headers = resp.request.headers
     _LOGGER.debug(
         "%s: \n%s with\n%s\n returned %s:%s with response %s",
         method,

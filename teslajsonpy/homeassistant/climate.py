@@ -115,10 +115,11 @@ class Climate(VehicleDevice):
         """Set both the driver and passenger temperature to temp."""
         temp = round(temp, 1)
         self.__manual_update_time = time.time()
-        data = await self._controller.command(
-            self._id,
-            "set_temps",
-            {"driver_temp": temp, "passenger_temp": temp},
+        data = await self._controller.api(
+            "CHANGE_CLIMATE_TEMPERATURE_SETTING",
+            path_vars={"vehicle_id": self._id},
+            driver_temp=temp,
+            passenger_temp=temp,
             wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
@@ -129,15 +130,15 @@ class Climate(VehicleDevice):
         """Enable or disable the HVAC."""
         self.__manual_update_time = time.time()
         if enabled:
-            data = await self._controller.command(
-                self._id, "auto_conditioning_start", wake_if_asleep=True
+            data = await self._controller.api(
+                "CLIMATE_ON", path_vars={"vehicle_id": self._id}, wake_if_asleep=True
             )
             if data and data["response"]["result"]:
                 self.__is_auto_conditioning_on = True
                 self.__is_climate_on = True
         else:
-            data = await self._controller.command(
-                self._id, "auto_conditioning_stop", wake_if_asleep=True
+            data = await self._controller.api(
+                "CLIMATE_OFF", path_vars={"vehicle_id": self._id}, wake_if_asleep=True
             )
             if data and data["response"]["result"]:
                 self.__is_auto_conditioning_on = False
@@ -151,10 +152,10 @@ class Climate(VehicleDevice):
                 f"Preset mode '{preset_mode}' is not valid. Use {self.preset_modes}"
             )
         self.__manual_update_time = time.time()
-        data = await self._controller.command(
-            self._id,
-            "set_preconditioning_max",
-            data={"on": preset_mode == "defrost"},
+        data = await self._controller.api(
+            "MAX_DEFROST",
+            path_vars={"vehicle_id": self._id},
+            on=preset_mode == "defrost",
             wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
