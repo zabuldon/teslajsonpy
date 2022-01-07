@@ -254,7 +254,8 @@ class Controller:
         expiration: int = 0,
         update_interval: int = 300,
         enable_websocket: bool = False,
-        auth_domain: str = AUTH_DOMAIN
+        polling_policy: Text = None,
+        auth_domain: str = AUTH_DOMAIN,
     ) -> None:
         """Initialize controller.
 
@@ -268,6 +269,12 @@ class Controller:
             update_interval (int, optional): Seconds between allowed updates to the API.  This is to prevent
             being blocked by Tesla. Defaults to 300.
             enable_websocket (bool, optional): Whether to connect with websockets. Defaults to False.
+            polling_policy (Text, optional): How aggressively will we poll the car. Possible values:
+            Not set - Only keep the car awake while it is actively charging or driving, and while sentry
+            mode is enabled (default).
+            'connected' - Also keep the car awake while it is connected to a charger, even if the charging
+            session is complete.
+            'always' - Keep polling the car at all times.  Will possibly never allow the car to sleep.
             auth_domain (str, optional): The authentication domain. Defaults to const.AUTH_DOMAIN
 
         """
@@ -280,7 +287,7 @@ class Controller:
             access_token=access_token,
             refresh_token=refresh_token,
             expiration=expiration,
-            auth_domain=auth_domain
+            auth_domain=auth_domain,
         )
         self.__components = []
         self._update_interval: int = update_interval
@@ -307,6 +314,7 @@ class Controller:
         self.__last_parked_timestamp = {}
         self.__update_state = {}
         self.enable_websocket = enable_websocket
+        self.polling_policy = polling_policy
         self.__energysite_name = {}
         self.__energysite_type = {}
         self.__power = {}
@@ -583,9 +591,7 @@ class Controller:
         car_id = self._update_id(car_id)
         return (
             await self.get(
-                car_id,
-                f"vehicle_data/{name}",
-                wake_if_asleep=wake_if_asleep,
+                car_id, f"vehicle_data/{name}", wake_if_asleep=wake_if_asleep
             )
         )["response"]
 
@@ -699,6 +705,91 @@ class Controller:
                 )
             return self.car_online[car_vin]
 
+    def _calculate_next_interval(self, vin: Text) -> int:
+        cur_time = time.time()
+        # _LOGGER.debug(
+        #     "%s: %s > %s; shift_state: %s sentry: %s climate: %s, charging: %s ",
+        #     vin[-5:],
+        #     cur_time - self.__last_parked_timestamp[vin],
+        #     IDLE_INTERVAL,
+        #     self.__driving[vin].get("shift_state"),
+        #     self.__state[vin].get("sentry_mode"),
+        #     self.__climate[vin].get("is_climate_on"),
+        #     self.__charging[vin].get("charging_state") == "Charging",
+        # )
+        if vin not in self.__update_state:
+            self.__update_state[vin] = "normal"
+        if self.car_state[vin].get("state") == "asleep" or self.__driving[vin].get(
+            "shift_state"
+        ):
+            _LOGGER.debug(
+                "%s resetting last_parked_timestamp: shift_state %s",
+                vin[-5:],
+                self.__driving[vin].get("shift_state"),
+            )
+            self.__last_parked_timestamp[vin] = cur_time
+        if self.__driving[vin].get("shift_state") in ["D", "R"]:
+            if self.__update_state[vin] != "driving":
+                self.__update_state[vin] = "driving"
+                _LOGGER.debug(
+                    "%s driving; increasing scan rate to every %s seconds",
+                    vin[-5:],
+                    DRIVING_INTERVAL,
+                )
+            return DRIVING_INTERVAL
+        if self.polling_policy == "always":
+            _LOGGER.debug(
+                "%s %s; Wake up policy set to 'always'. Scanning every %s seconds",
+                vin[-5:],
+                self.car_state[vin].get("state"),
+                self.update_interval,
+            )
+            self.__update_state[vin] = "normal"
+            return self.update_interval
+        if self.polling_policy == "connected" and (
+            self.__state[vin].get("sentry_mode")
+            or self.__climate[vin].get("is_climate_on")
+            or (
+                self.__charging[vin].get("charging_state")
+                and self.__charging[vin].get("charging_state") != "Disconnected"
+                and self.__charging[vin].get("charging_state") != ""
+            )
+        ):
+            _LOGGER.debug(
+                "%s %s; Wake up policy set to 'connected'. "
+                "Sentry mode: %s, Climate: %s, Charging State: %s. "
+                "Scanning every %s seconds",
+                vin[-5:],
+                self.car_state[vin].get("state"),
+                self.__state[vin].get("sentry_mode"),
+                self.__climate[vin].get("is_climate_on"),
+                self.__charging[vin].get("charging_state"),
+                self.update_interval,
+            )
+            self.__update_state[vin] = "normal"
+            return self.update_interval
+        if (cur_time - self.__last_parked_timestamp[vin] > IDLE_INTERVAL) and not (
+            self.__state[vin].get("sentry_mode")
+            or self.__climate[vin].get("is_climate_on")
+            or self.__charging[vin].get("charging_state") == "Charging"
+        ):
+            sleep_interval = max(SLEEP_INTERVAL, self.update_interval)
+            if self.__update_state[vin] != "trying_to_sleep":
+                self.__update_state[vin] = "trying_to_sleep"
+                _LOGGER.debug(
+                    "%s trying to sleep; scan throttled to %s seconds and will ignore updates for %s seconds",
+                    vin[-5:],
+                    sleep_interval,
+                    round(sleep_interval + self._last_update_time[vin] - cur_time, 2),
+                )
+            return sleep_interval
+        if self.__update_state[vin] != "normal":
+            self.__update_state[vin] = "normal"
+            _LOGGER.debug(
+                "%s scanning every %s seconds", vin[-5:], self.update_interval
+            )
+        return self.update_interval
+
     async def update(
         self,
         car_id: Optional[Text] = None,
@@ -727,61 +818,6 @@ class Controller:
             RetryLimitError
 
         """
-
-        def _calculate_next_interval(vin: Text) -> int:
-            cur_time = time.time()
-            # _LOGGER.debug(
-            #     "%s: %s > %s; shift_state: %s sentry: %s climate: %s, charging: %s ",
-            #     vin[-5:],
-            #     cur_time - self.__last_parked_timestamp[vin],
-            #     IDLE_INTERVAL,
-            #     self.__driving[vin].get("shift_state"),
-            #     self.__state[vin].get("sentry_mode"),
-            #     self.__climate[vin].get("is_climate_on"),
-            #     self.__charging[vin].get("charging_state") == "Charging",
-            # )
-            if self.car_state[vin].get("state") == "asleep" or self.__driving[vin].get(
-                "shift_state"
-            ):
-                _LOGGER.debug(
-                    "%s resetting last_parked_timestamp: shift_state %s",
-                    vin[-5:],
-                    self.__driving[vin].get("shift_state"),
-                )
-                self.__last_parked_timestamp[vin] = cur_time
-            if self.__driving[vin].get("shift_state") in ["D", "R"]:
-                if self.__update_state[vin] != "driving":
-                    self.__update_state[vin] = "driving"
-                    _LOGGER.debug(
-                        "%s driving; increasing scan rate to every %s seconds",
-                        vin[-5:],
-                        DRIVING_INTERVAL,
-                    )
-                return DRIVING_INTERVAL
-            if (cur_time - self.__last_parked_timestamp[vin] > IDLE_INTERVAL) and not (
-                self.__state[vin].get("sentry_mode")
-                or self.__climate[vin].get("is_climate_on")
-                or self.__charging[vin].get("charging_state") == "Charging"
-            ):
-                sleep_interval = max(SLEEP_INTERVAL, self.update_interval)
-                if self.__update_state[vin] != "trying_to_sleep":
-                    self.__update_state[vin] = "trying_to_sleep"
-                    _LOGGER.debug(
-                        "%s trying to sleep; scan throttled to %s seconds and will ignore updates for %s seconds",
-                        vin[-5:],
-                        sleep_interval,
-                        round(
-                            sleep_interval + self._last_update_time[vin] - cur_time,
-                            2,
-                        ),
-                    )
-                return sleep_interval
-            if self.__update_state[vin] != "normal":
-                self.__update_state[vin] = "normal"
-                _LOGGER.debug(
-                    "%s scanning every %s seconds", vin[-5:], self.update_interval
-                )
-            return self.update_interval
 
         async def _get_and_process_car_data(vin: Text) -> None:
             async with self.__lock[vin]:
@@ -874,8 +910,10 @@ class Controller:
             tasks = []
             for vin, online in self.car_online.items():
                 # If specific car_id provided, only update match
-                if (car_vin and car_vin != vin) or vin not in self.__lock.keys() or (
-                    vin and self.car_state[vin].get("in_service")
+                if (
+                    (car_vin and car_vin != vin)
+                    or vin not in self.__lock.keys()
+                    or (vin and self.car_state[vin].get("in_service"))
                 ):
                     continue
                 async with self.__lock[vin]:
@@ -893,7 +931,7 @@ class Controller:
                             or vin not in self._last_update_time
                             or (
                                 (cur_time - self._last_update_time[vin])
-                                > _calculate_next_interval(vin)
+                                > self._calculate_next_interval(vin)
                             )
                         )
                     ):  # Only update cars with update flag on
@@ -917,12 +955,24 @@ class Controller:
             return self.__climate[vin]
         return {}
 
+    def set_climate_params(self, car_id: Text, params: Dict) -> None:
+        """Set climate_params for car_id."""
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self.__climate[vin] = params
+
     def get_charging_params(self, car_id):
         """Return cached copy of charging_params for car_id."""
         vin = self._id_to_vin(car_id)
         if vin:
             return self.__charging[vin]
         return {}
+
+    def set_charging_params(self, car_id: Text, params: Dict) -> None:
+        """Set charging_params for car_id."""
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self.__charging[vin] = params
 
     def get_power_params(self, site_id):
         """Return cached copy of charging_params for car_id."""
@@ -936,8 +986,14 @@ class Controller:
             return self.__state[vin]
         return {}
 
+    def set_state_params(self, car_id: Text, params: Dict) -> None:
+        """Set state_params for car_id."""
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self.__state[vin] = params
+
     def get_config_params(self, car_id):
-        """Return cached copy of state_params for car_id."""
+        """Return cached copy of config_params for car_id."""
         vin = self._id_to_vin(car_id)
         if vin:
             return self.__config[vin]
@@ -949,6 +1005,12 @@ class Controller:
         if vin:
             return self.__driving[vin]
         return {}
+
+    def set_drive_params(self, car_id: Text, params: Dict) -> None:
+        """Set drive_params for car_id."""
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self.__driving[vin] = params
 
     def get_gui_params(self, car_id):
         """Return cached copy of gui_params for car_id."""
@@ -1024,6 +1086,23 @@ class Controller:
         if vin:
             return self._last_update_time[vin]
         return self._last_update_time
+
+    def set_last_update_time(self, car_id: Text, timestamp: float = 0) -> None:
+        """Set updated_time for car_id."""
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self._last_update_time[vin] = timestamp
+
+    def set_last_park_time(self, car_id: Text, timestamp: float = 0) -> None:
+        """Set park_time for car_id."""
+        vin = self._id_to_vin(car_id)
+        if vin:
+            self.__last_parked_timestamp[vin] = timestamp
+
+    def set_id_vin(self, car_id, vin) -> None:
+        """Update mappings of car_id <--> vin."""
+        self.__id_vin_map[car_id] = vin
+        self.__vin_id_map[vin] = car_id
 
     @property
     def update_interval(self) -> int:
