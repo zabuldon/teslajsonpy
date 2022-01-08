@@ -692,14 +692,14 @@ class Controller:
         async with self.__wakeup_conds[car_vin]:
             cur_time = int(time.time())
             if not self.car_online[car_vin] or (
-                cur_time - self._last_wake_up_time[car_vin] > self.update_interval
+                cur_time - self.get_last_wake_up_time(car_id) > self.update_interval
             ):
                 result = await self.post(
                     car_id, "wake_up", wake_if_asleep=False
                 )  # avoid wrapper loop
                 self.car_online[car_vin] = result["response"]["state"] == "online"
                 self.car_state[car_vin] = result["response"]
-                self._last_wake_up_time[car_vin] = cur_time
+                self.set_last_wake_up_time(car_id, timestamp=cur_time)
                 _LOGGER.debug(
                     "Wakeup %s: %s", car_vin[-5:], self.car_state[car_vin]["state"]
                 )
@@ -1126,11 +1126,44 @@ class Controller:
         vin = self._id_to_vin(car_id)
         if vin:
             _LOGGER.debug(
-                "%s resetting last_parked_timestamp: shift_state %s",
+                "%s resetting last_parked_timestamp to: %s shift_state %s",
                 vin[-5:],
+                timestamp,
                 shift_state,
             )
             self.__last_parked_timestamp[vin] = timestamp
+
+    def get_last_wake_up_time(self, car_id: Text = None):
+        """Get wakeup_time.
+
+        Parameters
+        ----------
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
+            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
+            If no car_id, returns the complete dictionary.
+
+        Returns
+        -------
+        int or dict of ints
+            If car_id exists, a int (time.time()) indicating when car was last
+            waken up. Othewise, the entire updates dictionary.
+
+        """
+        vin = self._id_to_vin(car_id)
+        if vin:
+            return self.__last_wakuep_timestamp[vin]
+        return self.__last_wake_up_timestamp
+
+    def set_last_wake_up_time(self, car_id: Text, timestamp: float = 0) -> None:
+        """Set wakeup_time for car_id."""
+        vin = self._id_to_vin(car_id)
+        if vin:
+            _LOGGER.debug(
+                "%s resetting last_wake_up_timestamp to: %s", vin[-5:], timestamp
+            )
+            self.__last_wake_up_timestamp[vin] = timestamp
 
     def set_id_vin(self, car_id, vin) -> None:
         """Update mappings of car_id <--> vin."""
