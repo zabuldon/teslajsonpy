@@ -722,12 +722,11 @@ class Controller:
         if self.car_state[vin].get("state") == "asleep" or self.__driving[vin].get(
             "shift_state"
         ):
-            _LOGGER.debug(
-                "%s resetting last_parked_timestamp: shift_state %s",
-                vin[-5:],
-                self.__driving[vin].get("shift_state"),
+            self.set_last_park_time(
+                self._vin_to_id(vin),
+                timestamp=cur_time,
+                shift_state=self.__driving[vin].get("shift_state"),
             )
-            self.__last_parked_timestamp[vin] = cur_time
         if self.__driving[vin].get("shift_state") in ["D", "R"]:
             if self.__update_state[vin] != "driving":
                 self.__update_state[vin] = "driving"
@@ -768,7 +767,9 @@ class Controller:
             )
             self.__update_state[vin] = "normal"
             return self.update_interval
-        if (cur_time - self.__last_parked_timestamp[vin] > IDLE_INTERVAL) and not (
+        if (
+            cur_time - self.get_last_park_time(self._vin_to_id(vin)) > IDLE_INTERVAL
+        ) and not (
             self.__state[vin].get("sentry_mode")
             or self.__climate[vin].get("is_climate_on")
             or self.__charging[vin].get("charging_state") == "Charging"
@@ -845,8 +846,10 @@ class Controller:
                             or response["drive_state"]["shift_state"] == "P"
                         )
                     ):
-                        self.__last_parked_timestamp[vin] = (
-                            response["drive_state"]["timestamp"] / 1000
+                        self.set_last_park_time(
+                            self._vin_to_id(vin),
+                            timestamp=response["drive_state"]["timestamp"] / 1000,
+                            shift_state=response["drive_state"]["shift_state"],
                         )
                     self.__driving[vin] = response["drive_state"]
                     self.__gui[vin] = response["gui_settings"]
@@ -1093,10 +1096,40 @@ class Controller:
         if vin:
             self._last_update_time[vin] = timestamp
 
-    def set_last_park_time(self, car_id: Text, timestamp: float = 0) -> None:
+    def get_last_park_time(self, car_id: Text = None):
+        """Get park_time.
+
+        Parameters
+        ----------
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
+            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
+            If no car_id, returns the complete dictionary.
+
+        Returns
+        -------
+        int or dict of ints
+            If car_id exists, a int (time.time()) indicating when car was last
+            parked. Othewise, the entire updates dictionary.
+
+        """
+        vin = self._id_to_vin(car_id)
+        if vin:
+            return self.__last_parked_timestamp[vin]
+        return self.__last_parked_timestamp
+
+    def set_last_park_time(
+        self, car_id: Text, timestamp: float = 0, shift_state: Text = None
+    ) -> None:
         """Set park_time for car_id."""
         vin = self._id_to_vin(car_id)
         if vin:
+            _LOGGER.debug(
+                "%s resetting last_parked_timestamp: shift_state %s",
+                vin[-5:],
+                shift_state,
+            )
             self.__last_parked_timestamp[vin] = timestamp
 
     def set_id_vin(self, car_id, vin) -> None:
@@ -1121,6 +1154,15 @@ class Controller:
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
         return self.__id_vin_map.get(car_id)
+
+    def _vin_to_id(self, vin: Text) -> Optional[Text]:
+        return self.__vin_id_map.get(vin)
+
+    def _vehicle_id_to_vin(self, vehicle_id: Text) -> Optional[Text]:
+        return self.__vehicle_id_vin_map.get(vehicle_id)
+
+    def _vehicle_id_to_id(self, vehicle_id: Text) -> Optional[Text]:
+        return self._vin_to_id(self._vehicle_id_to_vin(vehicle_id))
 
     def _id_to_energysiteid(self, site_id: Text) -> Optional[Text]:
         return self.__id_energysiteid_map.get(site_id)
@@ -1174,7 +1216,11 @@ class Controller:
                         or update_json["shift_state"] == "P"
                     )
                 ):
-                    self.__last_parked_timestamp[vin] = update_json["timestamp"] / 1000
+                    self.set_last_park_time(
+                        self._vehicle_id_to_id(vehicle_id),
+                        timestamp=update_json["timestamp"] / 1000,
+                        shift_state=update_json["shift_state"],
+                    )
                 self.__driving[vin]["shift_state"] = update_json["shift_state"]
                 self.__driving[vin]["speed"] = update_json["speed"]
                 self.__driving[vin]["power"] = update_json["power"]
