@@ -299,7 +299,7 @@ class Controller:
         self.__driving = {}
         self.__gui = {}
         self._last_update_time = {}  # succesful update attempts by car
-        self._last_wake_up_attempt = {}  # Attempts to wake_up car
+        self._last_wake_up_attempt = {}  # attempts to wake_up car
         self._last_wake_up_time = {}  # succesful wake_ups by car
         self._last_attempted_update_time = 0  # all attempts by controller
         self.__lock = {}
@@ -900,7 +900,7 @@ class Controller:
             car_id = self._update_id(car_id)
             car_vin = self._id_to_vin(car_id)
             tasks = []
-            for vin, online in self.get_car_online.items():
+            for vin, online in self.get_car_online().items():
                 # If specific car_id provided, only update match
                 if (
                     (car_vin and car_vin != vin)
