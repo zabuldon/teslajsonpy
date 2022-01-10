@@ -750,12 +750,12 @@ class Controller:
             self.__update_state[vin] = "normal"
             return self.update_interval
         if self.polling_policy == "connected" and (
-            self.__state[vin].get("sentry_mode")
-            or self.__climate[vin].get("is_climate_on")
+            self.is_sentry_mode_on(vin=vin)
+            or self.is_climate_on(vin=vin)
             or (
-                self.__charging[vin].get("charging_state")
-                and self.__charging[vin].get("charging_state") != "Disconnected"
-                and self.__charging[vin].get("charging_state") != ""
+                self.charging_state(vin=vin)
+                and self.charging_state(vin=vin) != "Disconnected"
+                and self.charging_state(vin=vin) != ""
             )
         ):
             _LOGGER.debug(
@@ -764,9 +764,9 @@ class Controller:
                 "Scanning every %s seconds",
                 vin[-5:],
                 self.car_state[vin].get("state"),
-                self.__state[vin].get("sentry_mode"),
-                self.__climate[vin].get("is_climate_on"),
-                self.__charging[vin].get("charging_state"),
+                self.is_sentry_mode_on(vin=vin),
+                self.is_climate_on(vin=vin),
+                self.charging_state(vin=vin),
                 self.update_interval,
             )
             self.__update_state[vin] = "normal"
@@ -774,9 +774,9 @@ class Controller:
         if (
             cur_time - self.get_last_park_time(self._vin_to_id(vin)) > IDLE_INTERVAL
         ) and not (
-            self.__state[vin].get("sentry_mode")
-            or self.__climate[vin].get("is_climate_on")
-            or self.__charging[vin].get("charging_state") == "Charging"
+            self.is_sentry_mode_on(vin=vin)
+            or self.is_climate_on(vin=vin)
+            or self.charging_state(vin=vin) == "Charging"
         ):
             sleep_interval = max(SLEEP_INTERVAL, self.update_interval)
             if self.__update_state[vin] != "trying_to_sleep":
@@ -837,10 +837,10 @@ class Controller:
                     data = None
                 if data and data["response"]:
                     response = data["response"]
-                    self.__climate[vin] = response["climate_state"]
-                    self.__charging[vin] = response["charge_state"]
-                    self.__state[vin] = response["vehicle_state"]
-                    self.__config[vin] = response["vehicle_config"]
+                    self.set_climate_params(vin=vin, params=response["climate_state"])
+                    self.set_charging_params(vin=vin, params=response["charge_state"])
+                    self.set_state_params(vin=vin, params=response["vehicle_state"])
+                    self.set_config_params(vin=vin, params=response["vehicle_config"])
                     if (
                         self.__driving[vin].get("shift_state")
                         and self.__driving[vin].get("shift_state")
@@ -958,7 +958,6 @@ class Controller:
     def get_climate_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of climate_params for car_id."""
         if car_id and not vin:
-            # print("No VIN")
             vin = self._id_to_vin(car_id)
         if vin and vin in self.__climate:
             return self.__climate[vin]
@@ -972,6 +971,14 @@ class Controller:
             vin = self._id_to_vin(car_id)
         if vin:
             self.__climate[vin] = params
+
+    def is_climate_on(self, car_id: Text = None, vin: Text = None) -> bool:
+        """Return true if climate is on."""
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__climate:
+            return self.get_climate_params(vin).get("is_climate_on")
+        return False
 
     def get_charging_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of charging_params for car_id."""
@@ -989,6 +996,14 @@ class Controller:
             vin = self._id_to_vin(car_id)
         if vin:
             self.__charging[vin] = params
+
+    def charging_state(self, car_id: Text = None, vin: Text = None) -> Text:
+        """Return charging state for a single vehicle."""
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__charging:
+            return (self.get_charging_params(vin).get("charging_state"),)
+        return None
 
     def get_power_params(self, site_id: Text) -> Dict:
         """Return cached copy of charging_params for car_id."""
@@ -1011,6 +1026,14 @@ class Controller:
             vin = self._id_to_vin(car_id)
         if vin:
             self.__state[vin] = params
+
+    def is_sentry_mode_on(self, car_id: Text = None, vin: Text = None) -> bool:
+        """Return true if sentry_mode is on."""
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__state:
+            return self.get_state_params(vin).get("sentry_mode")
+        return False
 
     def get_config_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of config_params for car_id."""
