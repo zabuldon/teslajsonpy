@@ -1,11 +1,14 @@
 """Test sentry mode switch."""
 
 import pytest
+import time
 
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
+
+LAST_UPDATE_TIME = time.time()
 
 
 def test_has_battery(monkeypatch):
@@ -25,10 +28,14 @@ def test_available_true(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = True
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     assert _switch.available()
 
@@ -38,10 +45,14 @@ def test_available_false(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = False
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     assert not _switch.available()
 
@@ -51,11 +62,15 @@ def test_is_on_false(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = True
     _data["vehicle_state"]["sentry_mode"] = False
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     assert not _switch.is_on()
 
@@ -65,11 +80,15 @@ def test_is_on_true(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = True
     _data["vehicle_state"]["sentry_mode"] = True
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     assert _switch.is_on()
 
@@ -79,11 +98,15 @@ def test_is_on_unavailable(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = False
     _data["vehicle_state"]["sentry_mode"] = True
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     assert not _switch.is_on()
 
@@ -94,11 +117,15 @@ async def test_enable_sentry_mode(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = True
     _data["vehicle_state"]["sentry_mode"] = False
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _switch.enable_sentry_mode()
     assert _switch.is_on()
@@ -110,11 +137,15 @@ async def test_enable_sentry_mode_already_enabled(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = True
     _data["vehicle_state"]["sentry_mode"] = True
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _switch.enable_sentry_mode()
     assert _switch.is_on()
@@ -126,11 +157,15 @@ async def test_enable_sentry_mode_not_available(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = False
     _data["vehicle_state"]["sentry_mode"] = False
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _switch.enable_sentry_mode()
     assert not _switch.is_on()
@@ -142,11 +177,15 @@ async def test_disable_sentry_mode(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = True
     _data["vehicle_state"]["sentry_mode"] = True
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _switch.disable_sentry_mode()
     assert not _switch.is_on()
@@ -158,11 +197,15 @@ async def test_disable_sentry_mode_already_disabled(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = True
     _data["vehicle_state"]["sentry_mode"] = False
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _switch.disable_sentry_mode()
     assert not _switch.is_on()
@@ -174,11 +217,15 @@ async def test_disable_sentry_mode_not_available(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = False
     _data["vehicle_state"]["sentry_mode"] = False
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _switch.enable_sentry_mode()
     assert not _switch.is_on()
@@ -190,11 +237,15 @@ async def test_async_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = True
     _data["vehicle_state"]["sentry_mode"] = False
     _switch = SentryModeSwitch(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _switch.async_update()
     assert not _switch.is_on()
@@ -206,6 +257,8 @@ async def test_async_update_with_change(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = True
@@ -214,6 +267,8 @@ async def test_async_update_with_change(monkeypatch):
 
     # Change state value
     _data["vehicle_state"]["sentry_mode"] = True
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _switch.async_update()
     assert _switch.is_on()
@@ -225,6 +280,8 @@ async def test_async_update_with_change_but_not_available(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = False
@@ -233,6 +290,8 @@ async def test_async_update_with_change_but_not_available(monkeypatch):
 
     # Change state value
     _data["vehicle_state"]["sentry_mode"] = True
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _switch.async_update()
     assert not _switch.is_on()
@@ -244,6 +303,8 @@ async def test_async_update_with_change_same_value(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["sentry_mode_available"] = True
@@ -252,6 +313,8 @@ async def test_async_update_with_change_same_value(monkeypatch):
 
     # Change state value
     _data["vehicle_state"]["sentry_mode"] = True
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _switch.async_update()
     assert _switch.is_on()

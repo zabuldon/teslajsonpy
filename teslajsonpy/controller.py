@@ -1069,6 +1069,18 @@ class Controller:
             return self.__gui[vin]
         return self.__gui
 
+    def set_gui_params(
+        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+    ) -> None:
+        """Set GUI params for car."""
+        print(car_id, vin)
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        print(car_id, vin)
+        if vin:
+            self.__gui[vin] = params
+        print(self.__gui)
+
     def get_updates(self, car_id: Text = None, vin: Text = None):
         """Get updates dictionary.
 

@@ -5,7 +5,7 @@ import pytest
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.gps import Odometer
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
 
 
 def test_has_battery(monkeypatch):
@@ -41,7 +41,7 @@ def test_get_value_on_init(monkeypatch):
     _data = _mock.data_request_vehicle()
     _odometer = Odometer(_data, _controller)
 
-    assert not _odometer is None
+    assert _odometer is not None
     assert _odometer.get_value() is None
 
 
@@ -51,13 +51,16 @@ async def test_get_value_after_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _odometer = Odometer(_data, _controller)
 
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
+
     await _odometer.async_update()
 
-    assert not _odometer is None
+    assert _odometer is not None
     assert _odometer.get_value() == 33561.4
 
 
@@ -67,15 +70,18 @@ async def test_async_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["odometer"] = 12345.6789
     _odometer = Odometer(_data, _controller)
 
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
+
     await _odometer.async_update()
 
-    assert not _odometer is None
-    assert not _odometer.get_value() is None
+    assert _odometer is not None
+    assert _odometer.get_value() is not None
     assert _odometer.get_value() == 12345.7
 
 
@@ -85,16 +91,20 @@ async def test_async_update_in_kmh(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["gui_settings"]["gui_distance_units"] = "km/hr"
     _data["vehicle_state"]["odometer"] = 12345.6789
     _odometer = Odometer(_data, _controller)
 
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
+    _controller.set_gui_params(vin=VIN, params=_data["gui_settings"])
+
     await _odometer.async_update()
 
-    assert not _odometer is None
-    assert not _odometer.get_value() is None
+    assert _odometer is not None
+    assert _odometer.get_value() is not None
     assert _odometer.get_value() == 12345.7
 
 
@@ -104,14 +114,18 @@ async def test_async_update_in_mph(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["gui_settings"]["gui_distance_units"] = "mi/hr"
     _data["vehicle_state"]["odometer"] = 12345.6789
     _odometer = Odometer(_data, _controller)
 
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
+    _controller.set_gui_params(vin=VIN, params=_data["gui_settings"])
+
     await _odometer.async_update()
 
-    assert not _odometer is None
-    assert not _odometer.get_value() is None
+    assert _odometer is not None
+    assert _odometer.get_value() is not None
     assert _odometer.get_value() == 12345.7

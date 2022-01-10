@@ -1,11 +1,14 @@
 """Test frunk lock."""
 
 import pytest
+import time
 
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.trunk import FrunkLock
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
+
+LAST_UPDATE_TIME = time.time()
 
 
 def test_has_battery(monkeypatch):
@@ -39,10 +42,14 @@ async def test_is_locked_after_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["ft"] = 0
     _lock = FrunkLock(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _lock.async_update()
 
@@ -56,10 +63,14 @@ async def test_unlock(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["ft"] = 0
     _lock = FrunkLock(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _lock.async_update()
     await _lock.unlock()
@@ -74,10 +85,14 @@ async def test_unlock_already_unlocked(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["ft"] = 123
     _lock = FrunkLock(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _lock.async_update()
     await _lock.unlock()
@@ -95,10 +110,14 @@ async def test_lock(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["ft"] = 123
     _lock = FrunkLock(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _lock.async_update()
     await _lock.lock()
@@ -116,10 +135,14 @@ async def test_lock_already_locked(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["vehicle_state"]["ft"] = 0
     _lock = FrunkLock(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _lock.async_update()
     await _lock.lock()

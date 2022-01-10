@@ -5,7 +5,7 @@ import pytest
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
 
 
 def test_is_armable(monkeypatch):
@@ -71,9 +71,12 @@ async def test_values_after_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _device = VehicleDevice(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
 
     await _device.async_update()
 
@@ -107,6 +110,7 @@ async def test_values_after_update_no_vehicle_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     monkeypatch.setitem(
@@ -122,6 +126,9 @@ async def test_values_after_update_no_vehicle_update(monkeypatch):
         },
     )
     _device = VehicleDevice(_data, _controller)
+
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
+
     await _device.async_update()
 
     assert not _device.update_available

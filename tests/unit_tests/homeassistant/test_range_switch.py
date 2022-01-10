@@ -1,11 +1,14 @@
 """Test range switch."""
 
 import pytest
+import time
 
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.charger import RangeSwitch
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
+
+LAST_UPDATE_TIME = time.time()
 
 
 def test_has_battery(monkeypatch):
@@ -38,10 +41,14 @@ async def test_is_maxrange_on(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charge_to_max_range"] = True
     _switch = RangeSwitch(_data, _controller)
+
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
 
     await _switch.async_update()
     assert _switch.is_maxrange()
@@ -53,10 +60,14 @@ async def test_is_maxrange_off(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charge_to_max_range"] = False
     _switch = RangeSwitch(_data, _controller)
+
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
 
     await _switch.async_update()
     assert not _switch.is_maxrange()
@@ -68,10 +79,15 @@ async def test_set_max(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charge_to_max_range"] = False
     _switch = RangeSwitch(_data, _controller)
+
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
+
     await _switch.async_update()
 
     await _switch.set_max()
@@ -84,10 +100,15 @@ async def test_set_standard(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charge_to_max_range"] = True
     _switch = RangeSwitch(_data, _controller)
+
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
+
     await _switch.async_update()
 
     await _switch.set_standard()
@@ -100,10 +121,14 @@ async def test_async_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charge_to_max_range"] = True
     _switch = RangeSwitch(_data, _controller)
+
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
 
     await _switch.async_update()
     assert _switch.is_maxrange()
@@ -115,11 +140,16 @@ async def test_async_update_with_change(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charge_to_max_range"] = True
     _switch = RangeSwitch(_data, _controller)
 
     _data["charge_state"]["charge_to_max_range"] = False
+
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
+
     await _switch.async_update()
     assert not _switch.is_maxrange()

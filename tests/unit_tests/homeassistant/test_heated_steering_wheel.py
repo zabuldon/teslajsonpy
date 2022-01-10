@@ -1,11 +1,14 @@
 """Test HeatedSteeringWheelSwitch."""
 
 import pytest
+import time
 
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.heated_steering_wheel import HeatedSteeringWheelSwitch
 
 from tests.tesla_mock import TeslaMock, CAR_ID, VIN, CLIMATE_STATE
+
+LAST_UPDATE_TIME = time.time()
 
 
 def test_has_battery(monkeypatch):
@@ -40,6 +43,7 @@ async def test_get_steering_wheel_heat_after_update(monkeypatch):
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     NEW_LEVEL = True
 
@@ -63,6 +67,7 @@ async def test_set_get_seat_heat_level(monkeypatch):
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     ORIG_LEVEL = True
     NEW_LEVEL = False
@@ -88,12 +93,16 @@ async def test_seat_same_level(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     ORIG_LEVEL = True
 
     _data = _mock.data_request_vehicle()
     _data["climate_state"]["steering_wheel_heater"] = ORIG_LEVEL
     _seat = HeatedSteeringWheelSwitch(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _seat.async_update()
 
