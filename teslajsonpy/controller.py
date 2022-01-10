@@ -691,21 +691,21 @@ class Controller:
         car_id = self._update_id(car_id)
         async with self.__wakeup_conds[car_vin]:
             cur_time = int(time.time())
-            if not self.get_car_online(car_id) or (
+            if not self.is_car_online(vin=car_vin) or (
                 self._last_wake_up_attempt[car_vin] < self._last_attempted_update_time
             ):
                 result = await self.post(
                     car_id, "wake_up", wake_if_asleep=False
                 )  # avoid wrapper loop
                 self.set_car_online(
-                    car_id, online_state=result["response"]["state"] == "online"
+                    car_id=car_id, online_state=result["response"]["state"] == "online"
                 )
                 self.car_state[car_vin] = result["response"]
                 self._last_wake_up_attempt[car_vin] = cur_time
                 _LOGGER.debug(
                     "Wakeup %s: %s", car_vin[-5:], self.car_state[car_vin]["state"]
                 )
-            return self.car_is_online(car_vin)
+            return self.is_car_online(vin=car_vin)
 
     def _calculate_next_interval(self, vin: Text) -> int:
         cur_time = time.time()
@@ -723,11 +723,9 @@ class Controller:
             self.__update_state[vin] = "normal"
         if self.car_state[vin].get("state") == "asleep" or self.shift_state(vin=vin):
             self.set_last_park_time(
-                self._vin_to_id(vin),
-                timestamp=cur_time,
-                shift_state=self.shift_state(vin=vin),
+                vin=vin, timestamp=cur_time, shift_state=self.shift_state(vin=vin)
             )
-        if self.shift_state(vin=vin) in ["D", "R"]:
+        if self.in_gear(vin=vin):
             if self.__update_state[vin] != "driving":
                 self.__update_state[vin] = "driving"
                 _LOGGER.debug(
@@ -767,9 +765,7 @@ class Controller:
             )
             self.__update_state[vin] = "normal"
             return self.update_interval
-        if (
-            cur_time - self.get_last_park_time(self._vin_to_id(vin)) > IDLE_INTERVAL
-        ) and not (
+        if (cur_time - self.get_last_park_time(vin=vin) > IDLE_INTERVAL) and not (
             self.is_sentry_mode_on(vin=vin)
             or self.is_climate_on(vin=vin)
             or self.charging_state(vin=vin) == "Charging"
@@ -847,18 +843,14 @@ class Controller:
                         )
                     ):
                         self.set_last_park_time(
-                            self._vin_to_id(vin),
+                            vin=vin,
                             timestamp=response["drive_state"]["timestamp"] / 1000,
                             shift_state=response["drive_state"]["shift_state"],
                         )
                     self.__driving[vin] = response["drive_state"]
                     self.__gui[vin] = response["gui_settings"]
                     self._last_update_time[vin] = time.time()
-                    if (
-                        self.enable_websocket
-                        and self.shift_state(vin=vin)
-                        and self.shift_state(vin=vin) != "P"
-                    ):
+                    if self.enable_websocket and self.in_gear(vin=vin):
                         asyncio.create_task(
                             self.__connection.websocket_connect(
                                 vin[-5:],
@@ -895,7 +887,9 @@ class Controller:
                     self.set_vehicle_id_vin(
                         vehicle_id=car["vehicle_id"], vin=car["vin"]
                     )
-                    self.set_car_online(car["vin"], car["state"] == "online")
+                    self.set_car_online(
+                        vin=car["vin"], online_state=car["state"] == "online"
+                    )
                     self.car_state[car["vin"]] = car
                 self._last_attempted_update_time = cur_time
 
@@ -1058,6 +1052,14 @@ class Controller:
         if vin and vin in self.__driving:
             return self.get_drive_params(vin=vin).get("shift_state")
         return None
+
+    def in_gear(self, car_id: Text = None, vin: Text = None) -> bool:
+        """Return true if car is in gear. False of car is parked or unknown."""
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__driving:
+            return self.shift_state(vin=vin) in ["D", "R"]
+        return False
 
     def get_gui_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of gui_params for car_id."""
@@ -1273,7 +1275,7 @@ class Controller:
             return self.car_online[vin]
         return self.car_online
 
-    def car_is_online(self, car_id: Text = None, vin: Text = None):
+    def is_car_online(self, car_id: Text = None, vin: Text = None):
         """Alias for get_car_online for better readability."""
         return self.get_car_online(car_id=car_id, vin=vin)
 
@@ -1371,16 +1373,15 @@ class Controller:
                 _LOGGER.debug("Updating %s with websocket: %s", vin[-5:], update_json)
                 self.__driving[vin]["timestamp"] = update_json["timestamp"]
                 if (
-                    self.__driving[vin].get("shift_state")
-                    and self.__driving[vin].get("shift_state")
-                    != update_json["shift_state"]
+                    self.shift_state(vin=vin)
+                    and self.shift_state(vin=vin) != update_json["shift_state"]
                     and (
                         update_json["shift_state"] is None
                         or update_json["shift_state"] == "P"
                     )
                 ):
                     self.set_last_park_time(
-                        self._vehicle_id_to_id(vehicle_id),
+                        vin=vin,
                         timestamp=update_json["timestamp"] / 1000,
                         shift_state=update_json["shift_state"],
                     )
