@@ -153,7 +153,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         car_id = kwargs.get("path_vars", {}).get("vehicle_id", "")
     else:
         car_id = args[0] if not kwargs.get("vehicle_id") else kwargs.get("vehicle_id")
-        is_wake_command = len(args) >= 2 and args[1] == "wake_up"
+        is_wake_command = len(args) >= 2 and args[1].lower() == "wake_up"
         is_energysite_command = (
             kwargs.get("product_type") == TESLA_PRODUCT_TYPE_ENERGY_SITES
         )
