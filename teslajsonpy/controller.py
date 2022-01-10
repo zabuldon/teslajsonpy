@@ -1028,6 +1028,15 @@ class Controller:
             return self.__config[vin]
         return self.__config
 
+    def set_config_params(
+        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+    ) -> None:
+        """Set config parameters for a car."""
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin:
+            self.__config[vin] = params
+
     def get_drive_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of drive_params for car_id."""
         if car_id and not vin:
