@@ -358,10 +358,8 @@ class Controller:
                 _LOGGER.debug("Skipping car with VIN: %s", vin)
                 continue
 
-            self.__id_vin_map[car["id"]] = vin
-            self.__vin_id_map[vin] = car["id"]
-            self.__vin_vehicle_id_map[vin] = car["vehicle_id"]
-            self.__vehicle_id_vin_map[car["vehicle_id"]] = vin
+            self.set_id_vin(car_id=car["id"], vin=vin)
+            self.set_vehicle_id_vin(vehicle_id=car["vehicle_id"], vin=vin)
             self.__lock[vin] = asyncio.Lock()
             self.__wakeup_conds[vin] = asyncio.Lock()
             self._last_update_time[vin] = 0
@@ -871,7 +869,7 @@ class Controller:
                         asyncio.create_task(
                             self.__connection.websocket_connect(
                                 vin[-5:],
-                                self.__vin_vehicle_id_map[vin],
+                                self.vin_to_vehicle_id(vin=vin),
                                 on_message=self._process_websocket_message,
                                 on_disconnect=self._process_websocket_disconnect,
                             )
@@ -900,10 +898,10 @@ class Controller:
                 cars = await self.get_vehicles()
                 self.car_online = {}
                 for car in cars:
-                    self.__id_vin_map[car["id"]] = car["vin"]
-                    self.__vin_id_map[car["vin"]] = car["id"]
-                    self.__vin_vehicle_id_map[car["vin"]] = car["vehicle_id"]
-                    self.__vehicle_id_vin_map[car["vehicle_id"]] = car["vin"]
+                    self.set_id_vin(car_id=car["id"], vin=car["vin"])
+                    self.set_vehicle_id_vin(
+                        vehicle_id=car["vehicle_id"], vin=car["vin"]
+                    )
                     self.set_car_online(car["vin"], car["state"] == "online")
                     self.car_state[car["vin"]] = car
                 self._last_attempted_update_time = cur_time
@@ -1002,7 +1000,7 @@ class Controller:
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin and vin in self.__charging:
-            return (self.get_charging_params(vin).get("charging_state"),)
+            return self.get_charging_params(vin).get("charging_state")
         return None
 
     def get_power_params(self, site_id: Text) -> Dict:
@@ -1278,11 +1276,17 @@ class Controller:
         """Alias for get_car_online for better readability."""
         return self.get_car_online(car_id=car_id, vin=vin)
 
-    def set_id_vin(self, car_id, vin) -> None:
+    def set_id_vin(self, car_id: Text, vin: Text) -> None:
         """Update mappings of car_id <--> vin."""
         car_id = str(car_id)
         self.__id_vin_map[car_id] = vin
         self.__vin_id_map[vin] = car_id
+
+    def set_vehicle_id_vin(self, vehicle_id: Text, vin: Text) -> None:
+        """Update mappings of vehicle_id <--> vin."""
+        vehicle_id = str(vehicle_id)
+        self.__vehicle_id_vin_map[vehicle_id] = vin
+        self.__vin_vehicle_id_map[vin] = vehicle_id
 
     @property
     def update_interval(self) -> int:
@@ -1296,25 +1300,36 @@ class Controller:
 
     @update_interval.setter
     def update_interval(self, value: int) -> None:
+        """Set update_interval."""
         if value:
             self._update_interval = int(value)
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
+        """Return vin for a car_id."""
         return self.__id_vin_map.get(str(car_id))
 
     def _vin_to_id(self, vin: Text) -> Optional[Text]:
+        """Return car_id for a vin."""
         return self.__vin_id_map.get(vin)
 
     def _vehicle_id_to_vin(self, vehicle_id: Text) -> Optional[Text]:
+        """Return vin for a vehicle_id."""
         return self.__vehicle_id_vin_map.get(vehicle_id)
 
     def _vehicle_id_to_id(self, vehicle_id: Text) -> Optional[Text]:
+        """Return car_id for a vehicle_id."""
         return self._vin_to_id(self._vehicle_id_to_vin(vehicle_id))
 
+    def vin_to_vehicle_id(self, vin: Text) -> Optional[Text]:
+        """Return vehicle_id for a vin."""
+        return self.__vin_vehicle_id_map.get(vin)
+
     def _id_to_energysiteid(self, site_id: Text) -> Optional[Text]:
+        """Return energysiteid for a site_id."""
         return self.__id_energysiteid_map.get(site_id)
 
     def _update_id(self, car_id: Text) -> Optional[Text]:
+        """Update the car_id for a vin."""
         new_car_id = self.__vin_id_map.get(self._id_to_vin(car_id))
         if new_car_id:
             car_id = new_car_id
