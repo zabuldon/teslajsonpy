@@ -698,7 +698,7 @@ class Controller:
                     car_id, "wake_up", wake_if_asleep=False
                 )  # avoid wrapper loop
                 self.set_car_online(
-                    car_id=car_id, online_state=result["response"]["state"] == "online"
+                    car_id=car_id, online_status=result["response"]["state"] == "online"
                 )
                 self.car_state[car_vin] = result["response"]
                 self._last_wake_up_attempt[car_vin] = cur_time
@@ -888,7 +888,7 @@ class Controller:
                         vehicle_id=car["vehicle_id"], vin=car["vin"]
                     )
                     self.set_car_online(
-                        vin=car["vin"], online_state=car["state"] == "online"
+                        vin=car["vin"], online_status=car["state"] == "online"
                     )
                     self.car_state[car["vin"]] = car
                 self._last_attempted_update_time = cur_time
