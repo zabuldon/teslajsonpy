@@ -881,7 +881,7 @@ class Controller:
             last_update = self._last_attempted_update_time
             if force or cur_time - last_update > ONLINE_INTERVAL:
                 cars = await self.get_vehicles()
-                self.car_online = {}
+                # self.car_online = {}
                 for car in cars:
                     self.set_id_vin(car_id=car["id"], vin=car["vin"])
                     self.set_vehicle_id_vin(
@@ -1282,8 +1282,13 @@ class Controller:
         """
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
-        if vin and self.car_online.get(vin) != online_status:
-            _LOGGER.debug("%s setting car_online to: %s", vin[-5:], online_status)
+        if vin and self.get_car_online(vin=vin) != online_status:
+            _LOGGER.debug(
+                "%s setting car_online from %s to %s",
+                vin[-5:],
+                self.get_car_online(vin=vin),
+                online_status,
+            )
             self.car_online[vin] = online_status
             if online_status:
                 self.set_last_wake_up_time(vin=vin, timestamp=time.time())
@@ -1296,7 +1301,7 @@ class Controller:
             return self.car_online[vin]
         return self.car_online
 
-    def is_car_online(self, car_id: Text = None, vin: Text = None):
+    def is_car_online(self, car_id: Text = None, vin: Text = None) -> bool:
         """Alias for get_car_online for better readability."""
         return self.get_car_online(car_id=car_id, vin=vin)
 
