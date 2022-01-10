@@ -299,6 +299,7 @@ class Controller:
         self.__driving = {}
         self.__gui = {}
         self._last_update_time = {}  # succesful update attempts by car
+        self._last_wake_up_attempt = {}  # Attempts to wake_up car
         self._last_wake_up_time = {}  # succesful wake_ups by car
         self._last_attempted_update_time = 0  # all attempts by controller
         self.__lock = {}
@@ -364,6 +365,7 @@ class Controller:
             self.__lock[vin] = asyncio.Lock()
             self.__wakeup_conds[vin] = asyncio.Lock()
             self._last_update_time[vin] = 0
+            self._last_wake_up_attempt[vin] = 0
             self._last_wake_up_time[vin] = 0
             self.__update[vin] = True
             self.__update_state[vin] = "normal"
@@ -691,15 +693,17 @@ class Controller:
         car_id = self._update_id(car_id)
         async with self.__wakeup_conds[car_vin]:
             cur_time = int(time.time())
-            if not self.car_online[car_vin] or (
-                cur_time - self.get_last_wake_up_time(car_id) > self.update_interval
+            if not self.get_car_online(car_id) or (
+                self._last_wake_up_attempt[car_vin] < self._last_attempted_update_time
             ):
                 result = await self.post(
                     car_id, "wake_up", wake_if_asleep=False
                 )  # avoid wrapper loop
-                self.car_online[car_vin] = result["response"]["state"] == "online"
+                self.set_car_online(
+                    car_id, online_state=result["response"]["state"] == "online"
+                )
                 self.car_state[car_vin] = result["response"]
-                self.set_last_wake_up_time(car_id, timestamp=cur_time)
+                self._last_wake_up_attempt[car_vin] = cur_time
                 _LOGGER.debug(
                     "Wakeup %s: %s", car_vin[-5:], self.car_state[car_vin]["state"]
                 )
@@ -951,78 +955,97 @@ class Controller:
 
             return any(await asyncio.gather(*tasks))
 
-    def get_climate_params(self, car_id):
+    def get_climate_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of climate_params for car_id."""
-        vin = self._id_to_vin(car_id)
-        if vin:
+        if car_id and not vin:
+            # print("No VIN")
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__climate:
             return self.__climate[vin]
-        return {}
+        return self.__climate
 
-    def set_climate_params(self, car_id: Text, params: Dict) -> None:
+    def set_climate_params(
+        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+    ) -> None:
         """Set climate_params for car_id."""
-        vin = self._id_to_vin(car_id)
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
         if vin:
             self.__climate[vin] = params
 
-    def get_charging_params(self, car_id):
+    def get_charging_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of charging_params for car_id."""
-        vin = self._id_to_vin(car_id)
-        if vin:
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__charging:
             return self.__charging[vin]
-        return {}
+        return self.__charging
 
-    def set_charging_params(self, car_id: Text, params: Dict) -> None:
+    def set_charging_params(
+        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+    ) -> None:
         """Set charging_params for car_id."""
-        vin = self._id_to_vin(car_id)
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
         if vin:
             self.__charging[vin] = params
 
-    def get_power_params(self, site_id):
+    def get_power_params(self, site_id: Text) -> Dict:
         """Return cached copy of charging_params for car_id."""
         energysite_id = self._id_to_energysiteid(site_id)
         return self.__power[energysite_id]
 
-    def get_state_params(self, car_id):
+    def get_state_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of state_params for car_id."""
-        vin = self._id_to_vin(car_id)
-        if vin:
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__state:
             return self.__state[vin]
-        return {}
+        return self.__state
 
-    def set_state_params(self, car_id: Text, params: Dict) -> None:
+    def set_state_params(
+        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+    ) -> None:
         """Set state_params for car_id."""
-        vin = self._id_to_vin(car_id)
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
         if vin:
             self.__state[vin] = params
 
-    def get_config_params(self, car_id):
+    def get_config_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of config_params for car_id."""
-        vin = self._id_to_vin(car_id)
-        if vin:
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__config:
             return self.__config[vin]
-        return {}
+        return self.__config
 
-    def get_drive_params(self, car_id):
+    def get_drive_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of drive_params for car_id."""
-        vin = self._id_to_vin(car_id)
-        if vin:
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__driving:
             return self.__driving[vin]
-        return {}
+        return self.__driving
 
-    def set_drive_params(self, car_id: Text, params: Dict) -> None:
+    def set_drive_params(
+        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+    ) -> None:
         """Set drive_params for car_id."""
-        vin = self._id_to_vin(car_id)
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
         if vin:
             self.__driving[vin] = params
 
-    def get_gui_params(self, car_id):
+    def get_gui_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of gui_params for car_id."""
-        vin = self._id_to_vin(car_id)
-        if vin:
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__gui:
             return self.__gui[vin]
-        return {}
+        return self.__gui
 
-    def get_updates(self, car_id: Text = None):
+    def get_updates(self, car_id: Text = None, vin: Text = None):
         """Get updates dictionary.
 
         Parameters
@@ -1032,6 +1055,8 @@ class Controller:
             field for identifying the car across the owner-api endpoint.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
             If no car_id, returns the complete dictionary.
+        vin : string
+            Vin number
 
         Returns
         -------
@@ -1040,12 +1065,15 @@ class Controller:
             processed. Othewise, the entire updates dictionary.
 
         """
-        vin = self._id_to_vin(car_id)
-        if vin:
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__update:
             return self.__update[vin]
         return self.__update
 
-    def set_updates(self, car_id: Text, value: bool) -> None:
+    def set_updates(
+        self, car_id: Text = None, vin: Text = None, value: bool = False
+    ) -> None:
         """Set updates dictionary.
 
         Parameters
@@ -1055,6 +1083,8 @@ class Controller:
             is not the vehicle_id field for identifying the car across
             different endpoints.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
+        vin : string
+            Vin number
         value : bool
             Whether the specific car_id should be updated.
 
@@ -1063,11 +1093,12 @@ class Controller:
         None
 
         """
-        vin = self._id_to_vin(car_id)
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
         if vin:
             self.__update[vin] = value
 
-    def get_last_update_time(self, car_id: Text = None):
+    def get_last_update_time(self, car_id: Text = None, vin: Text = None):
         """Get last_update time dictionary.
 
         Parameters
@@ -1077,6 +1108,8 @@ class Controller:
             field for identifying the car across the owner-api endpoint.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
             If no car_id, returns the complete dictionary.
+        vin : string
+            Vin number
 
         Returns
         -------
@@ -1085,18 +1118,22 @@ class Controller:
             processed. Othewise, the entire updates dictionary.
 
         """
-        vin = self._id_to_vin(car_id)
-        if vin:
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self._last_update_time:
             return self._last_update_time[vin]
         return self._last_update_time
 
-    def set_last_update_time(self, car_id: Text, timestamp: float = 0) -> None:
+    def set_last_update_time(
+        self, car_id: Text = None, vin: Text = None, timestamp: float = 0
+    ) -> None:
         """Set updated_time for car_id."""
-        vin = self._id_to_vin(car_id)
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
         if vin:
             self._last_update_time[vin] = timestamp
 
-    def get_last_park_time(self, car_id: Text = None):
+    def get_last_park_time(self, car_id: Text = None, vin: Text = None):
         """Get park_time.
 
         Parameters
@@ -1106,6 +1143,8 @@ class Controller:
             field for identifying the car across the owner-api endpoint.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
             If no car_id, returns the complete dictionary.
+        vin : string
+            Vin number
 
         Returns
         -------
@@ -1114,16 +1153,22 @@ class Controller:
             parked. Othewise, the entire updates dictionary.
 
         """
-        vin = self._id_to_vin(car_id)
-        if vin:
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__last_parked_timestamp:
             return self.__last_parked_timestamp[vin]
         return self.__last_parked_timestamp
 
     def set_last_park_time(
-        self, car_id: Text, timestamp: float = 0, shift_state: Text = None
+        self,
+        car_id: Text = None,
+        vin: Text = None,
+        timestamp: float = 0,
+        shift_state: Text = None,
     ) -> None:
         """Set park_time for car_id."""
-        vin = self._id_to_vin(car_id)
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
         if vin:
             _LOGGER.debug(
                 "%s resetting last_parked_timestamp to: %s shift_state %s",
@@ -1133,7 +1178,7 @@ class Controller:
             )
             self.__last_parked_timestamp[vin] = timestamp
 
-    def get_last_wake_up_time(self, car_id: Text = None):
+    def get_last_wake_up_time(self, car_id: Text = None, vin: Text = None):
         """Get wakeup_time.
 
         Parameters
@@ -1143,6 +1188,8 @@ class Controller:
             field for identifying the car across the owner-api endpoint.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
             If no car_id, returns the complete dictionary.
+        vin : string
+            VIN number
 
         Returns
         -------
@@ -1151,22 +1198,66 @@ class Controller:
             waken up. Othewise, the entire updates dictionary.
 
         """
-        vin = self._id_to_vin(car_id)
-        if vin:
-            return self.__last_wakuep_timestamp[vin]
-        return self.__last_wake_up_timestamp
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self._last_wake_up_time:
+            return self._last_wake_up_time[vin]
+        return self._last_wake_up_time
 
-    def set_last_wake_up_time(self, car_id: Text, timestamp: float = 0) -> None:
+    def set_last_wake_up_time(
+        self, car_id: Text = None, vin: Text = None, timestamp: float = 0
+    ) -> None:
         """Set wakeup_time for car_id."""
-        vin = self._id_to_vin(car_id)
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
         if vin:
-            _LOGGER.debug(
-                "%s resetting last_wake_up_timestamp to: %s", vin[-5:], timestamp
-            )
-            self.__last_wake_up_timestamp[vin] = timestamp
+            _LOGGER.debug("%s resetting last_wake_up_time to: %s", vin[-5:], timestamp)
+            self._last_wake_up_time[vin] = timestamp
+
+    def set_car_online(
+        self, car_id: Text = None, vin: Text = None, online_status: bool = True
+    ) -> None:
+        """Set online status for car_id.
+
+        Will also update "last_wake_up_time" if the car changes from offline
+        to online
+
+        Parameters
+        ----------
+        car_id : string
+            Identifier for the car on the owner-api endpoint.
+        vin : string
+            VIN number
+
+        online_status : boolean
+            True if the car is online (awake)
+            False if the car is offline (out of reach or sleeping)
+
+
+        """
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and self.car_online.get(vin) != online_status:
+            _LOGGER.debug("%s setting car_online to: %s", vin[-5:], online_status)
+            self.car_online[vin] = online_status
+            if online_status:
+                self.set_last_wake_up_time(vin=vin, timestamp=time.time())
+
+    def get_car_online(self, car_id: Text = None, vin: Text = None):
+        """Get online status for car_id or all cars."""
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.car_online:
+            return self.car_online[vin]
+        return self.car_online
+
+    def car_is_online(self, car_id: Text = None, vin: Text = None):
+        """Alias for get_car_online for better readability."""
+        return self.get_car_online(car_id=car_id, vin=vin)
 
     def set_id_vin(self, car_id, vin) -> None:
         """Update mappings of car_id <--> vin."""
+        car_id = str(car_id)
         self.__id_vin_map[car_id] = vin
         self.__vin_id_map[vin] = car_id
 
@@ -1186,7 +1277,7 @@ class Controller:
             self._update_interval = int(value)
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
-        return self.__id_vin_map.get(car_id)
+        return self.__id_vin_map.get(str(car_id))
 
     def _vin_to_id(self, vin: Text) -> Optional[Text]:
         return self.__vin_id_map.get(vin)

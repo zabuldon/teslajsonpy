@@ -1,17 +1,12 @@
-"""
-Tesla mock.
-"""
+"""Tesla mock."""
 
 import copy
 
-from teslajsonpy.connection import Connection
 from teslajsonpy.controller import Controller
 
 
 class TeslaMock:
-    """
-    Tesla mock.
-    """
+    """Tesla mock."""
 
     def __init__(self, monkeypatch) -> None:
         """
@@ -19,7 +14,9 @@ class TeslaMock:
 
         Args:
             monkeypatch (pytest.Monkeypatch): Monkeypatch.
+
         """
+
         self._monkeypatch = monkeypatch
         self._monkeypatch.setattr(Controller, "connect", self.mock_connect)
         self._monkeypatch.setattr(Controller, "command", self.mock_command)
@@ -27,9 +24,9 @@ class TeslaMock:
         self._monkeypatch.setattr(
             Controller, "get_charging_params", self.mock_get_charging_params
         )
-        self._monkeypatch.setattr(
-            Controller, "get_climate_params", self.mock_get_climate_params
-        )
+        # self._monkeypatch.setattr(
+        #     Controller, "get_climate_params", self.mock_get_climate_params
+        # )
         self._monkeypatch.setattr(
             Controller, "get_drive_params", self.mock_get_drive_params
         )
@@ -55,7 +52,9 @@ class TeslaMock:
         self._vehicle_config = copy.deepcopy(VEHICLE_CONFIG)
         self._energysite_config = copy.deepcopy(ENERGYSITE_CONFIG)
         self._energysite_state = copy.deepcopy(ENERGYSITE_STATE)
-        self._energysite_state_unknown_grid = copy.deepcopy(ENERGYSITE_STATE_UNKNOWN_GRID)
+        self._energysite_state_unknown_grid = copy.deepcopy(
+            ENERGYSITE_STATE_UNKNOWN_GRID
+        )
         self._energysite_config_no_name = copy.deepcopy(ENERGYSITE_CONFIG_NO_NAME)
 
         self._vehicle = copy.deepcopy(VEHICLE)
@@ -68,162 +67,162 @@ class TeslaMock:
 
     def mock_api(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's api method."""
+        """Mock controller's api method."""
         return self.controller_api()
 
     def mock_connect(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's connect method."""
+        """Mock controller's connect method."""
         return self.controller_connect()
 
     def mock_command(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's command method."""
+        """Mock controller's command method."""
         return self.controller_command()
 
     def mock_get_charging_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's get_charging_params method."""
+        """Mock controller's get_charging_params method."""
         return self.controller_get_charging_params()
 
     def mock_get_climate_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's get_climate_params method."""
+        """Mock controller's get_climate_params method."""
         return self.controller_get_climate_params()
 
     def mock_get_power_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's get_climate_params method."""
+        """Mock controller's get_power_params method."""
         return self.controller_get_power_params()
 
     def mock_get_power_unknown_grid_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's get_climate_params method."""
+        """Mock controller's get_power_unknown_grid_params method."""
         return self.controller_get_power_unknown_grid_params()
 
     def mock_get_drive_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's get_drive_params method."""
+        """Mock controller's get_drive_params method."""
         return self.controller_get_drive_params()
 
     def mock_get_gui_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's get_gui_params method."""
+        """Mock controller's get_gui_params method."""
         return self.controller_get_gui_params()
 
     def mock_get_state_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's get_state_params method."""
+        """Mock controller's get_state_params method."""
         return self.controller_get_state_params()
 
     def mock_get_vehicles(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's get_vehicles method."""
+        """Mock controller's get_vehicles method."""
         return self.controller_get_vehicles()
 
     def mock_get_last_update_time(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's get_last_update_time method."""
+        """Mock controller's get_last_update_time method."""
         return 123
 
     def mock_update(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """ Mock controller's update method."""
+        """Mock controller's update method."""
         return self.controller_update()
 
     @staticmethod
     def controller_connect():
-        """ Monkeypatch for controller.connect()."""
+        """Monkeypatch for controller.connect()."""
         return ("abc123", "cba321")
 
     @staticmethod
     async def controller_api():
-        """ Monkeypatch for controller.command()."""
+        """Monkeypatch for controller.command()."""
         return RESULT_OK
 
     @staticmethod
     async def controller_command():
-        """ Monkeypatch for controller.command()."""
+        """Monkeypatch for controller.command()."""
         return RESULT_OK
 
     def controller_get_charging_params(self):
-        """ Monkeypatch for controller.get_charging_params()."""
+        """Monkeypatch for controller.get_charging_params()."""
         return self._charge_state
 
     def controller_get_climate_params(self):
-        """ Monkeypatch for controller.get_climate_params()."""
+        """Monkeypatch for controller.get_climate_params()."""
         return self._climate_state
 
     def controller_get_power_params(self):
-        """ Monkeypatch for controller.get_climate_params()."""
+        """Monkeypatch for controller.get_climate_params()."""
         return self._energysite_state
 
     def controller_get_power_unknown_grid_params(self):
-        """ Monkeypatch for controller.get_climate_params()."""
+        """Monkeypatch for controller.get_climate_params()."""
         return self._energysite_state_unknown_grid
 
     def controller_get_drive_params(self):
-        """ Monkeypatch for controller.get_drive_params()."""
+        """Monkeypatch for controller.get_drive_params()."""
         return self._drive_state
 
     def controller_get_gui_params(self):
-        """ Monkeypatch for controller.get_gui_params()."""
+        """Monkeypatch for controller.get_gui_params()."""
         return self._gui_settings
 
     def controller_get_state_params(self):
-        """ Monkeypatch for controller.get_state_params()."""
+        """Monkeypatch for controller.get_state_params()."""
         return self._vehicle_state
 
     @staticmethod
     def controller_get_vehicles():
-        """ Monkeypatch for controller.get_vehicles()."""
+        """Monkeypatch for controller.get_vehicles()."""
         return {SAMPLE_VEHICLE}
 
     @staticmethod
     async def controller_update():
-        """ Monkeypatch for controller.update()."""
+        """Monkeypatch for controller.update()."""
         return 123
 
     @staticmethod
     def connection_generate_oauth():
-        """ Monkeypatch for connection.generate_oauth()."""
+        """Monkeypatch for connection.generate_oauth()."""
         return
 
     def data_request_vehicle(self):
-        """ Simulates the result of vehicle data request. """
+        """Simulate the result of vehicle data request."""
         return self._vehicle
 
     def data_request_charge_state(self):
-        """ Simulates the result of charge state data request. """
+        """Simulate the result of charge state data request."""
         return self._charge_state
 
     def data_request_climate_state(self):
-        """ Simulates the result of climate state data request. """
+        """Simulate the result of climate state data request."""
         return self._climate_state
 
     def data_request_vehicle_state(self):
-        """ Simulates the result of vehicle state data request. """
+        """Simulate the result of vehicle state data request."""
         return self._vehicle_state
 
     def data_request_energy_site(self):
-        """ Similates the result of energy site data request"""
+        """Similate the result of energy site data request."""
         return self._energysite_config
 
     def data_request_energy_site_no_name(self):
-        """ Similates the result of energy site data request without a name"""
+        """Similate the result of energy site data request without a name."""
         return self._energysite_config_no_name
 
     def data_request_energy_state(self):
-        """ Similates the result of energy status data request"""
+        """Similate the result of energy status data request."""
         return self._energysite_state
 
     def data_request_energy_state_unknown_grid(self):
-        """ Similates the result of energy status unknown grid data request"""
+        """Similate the result of energy status unknown grid data request."""
         return self._energysite_state_unknown_grid
 
     @staticmethod
     def command_ok():
-        """ Simulates an OK result for a command. """
+        """Simulate an OK result for a command."""
         return RESULT_OK
 
 
@@ -236,6 +235,11 @@ RESULT_VEHICLE_UNAVAILABLE = {
     "error": 'vehicle unavailable: {:error=>"vehicle unavailable:"}',
     "error_description": "",
 }
+
+
+VIN = "5YJSA11111111111"
+CAR_ID = 12345678901234567
+
 
 SAMPLE_VEHICLE = {
     "id": 12345678901234567,
