@@ -721,15 +721,13 @@ class Controller:
         # )
         if vin not in self.__update_state:
             self.__update_state[vin] = "normal"
-        if self.car_state[vin].get("state") == "asleep" or self.__driving[vin].get(
-            "shift_state"
-        ):
+        if self.car_state[vin].get("state") == "asleep" or self.shift_state(vin=vin):
             self.set_last_park_time(
                 self._vin_to_id(vin),
                 timestamp=cur_time,
-                shift_state=self.__driving[vin].get("shift_state"),
+                shift_state=self.shift_state(vin=vin),
             )
-        if self.__driving[vin].get("shift_state") in ["D", "R"]:
+        if self.shift_state(vin=vin) in ["D", "R"]:
             if self.__update_state[vin] != "driving":
                 self.__update_state[vin] = "driving"
                 _LOGGER.debug(
@@ -840,8 +838,8 @@ class Controller:
                     self.set_state_params(vin=vin, params=response["vehicle_state"])
                     self.set_config_params(vin=vin, params=response["vehicle_config"])
                     if (
-                        self.__driving[vin].get("shift_state")
-                        and self.__driving[vin].get("shift_state")
+                        self.shift_state(vin=vin)
+                        and self.shift_state(vin=vin)
                         != response["drive_state"]["shift_state"]
                         and (
                             response["drive_state"]["shift_state"] is None
@@ -858,13 +856,8 @@ class Controller:
                     self._last_update_time[vin] = time.time()
                     if (
                         self.enable_websocket
-                        and self.get_drive_params(self.__vin_id_map[vin]).get(
-                            "shift_state"
-                        )
-                        and self.get_drive_params(self.__vin_id_map[vin]).get(
-                            "shift_state"
-                        )
-                        != "P"
+                        and self.shift_state(vin=vin)
+                        and self.shift_state(vin=vin) != "P"
                     ):
                         asyncio.create_task(
                             self.__connection.websocket_connect(
@@ -975,7 +968,7 @@ class Controller:
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin and vin in self.__climate:
-            return self.get_climate_params(vin).get("is_climate_on")
+            return self.get_climate_params(vin=vin).get("is_climate_on")
         return False
 
     def get_charging_params(self, car_id: Text = None, vin: Text = None) -> Dict:
@@ -1000,7 +993,7 @@ class Controller:
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin and vin in self.__charging:
-            return self.get_charging_params(vin).get("charging_state")
+            return self.get_charging_params(vin=vin).get("charging_state")
         return None
 
     def get_power_params(self, site_id: Text) -> Dict:
@@ -1030,7 +1023,7 @@ class Controller:
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin and vin in self.__state:
-            return self.get_state_params(vin).get("sentry_mode")
+            return self.get_state_params(vin=vin).get("sentry_mode")
         return False
 
     def get_config_params(self, car_id: Text = None, vin: Text = None) -> Dict:
@@ -1057,6 +1050,14 @@ class Controller:
             vin = self._id_to_vin(car_id)
         if vin:
             self.__driving[vin] = params
+
+    def shift_state(self, car_id: Text = None, vin: Text = None) -> Text:
+        """Return shift state for a single vehicle."""
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin and vin in self.__driving:
+            return self.get_drive_params(vin=vin).get("shift_state")
+        return None
 
     def get_gui_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of gui_params for car_id."""
