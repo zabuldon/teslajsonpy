@@ -171,7 +171,8 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
                 "Exception: %s\n%s(%s %s)", str(ex), wrapped.__name__, args, kwargs
             )
             if ex.code == 408 and car_id and instance._id_to_vin(car_id):
-                instance.car_online[instance._id_to_vin(car_id)] = False
+                instance.set_car_online(car_id=car_id, online_status=False)
+                # instance.car_online[instance._id_to_vin(car_id)] = False
             raise
     if (
         valid_result(result)
@@ -191,7 +192,8 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         car_id if car_id else None,
         instance.car_online if instance.car_online else None,
     )
-    instance.car_online[instance._id_to_vin(car_id)] = False
+    # instance.car_online[instance._id_to_vin(car_id)] = False
+    instance.set_car_online(car_id=car_id, online_status=False)
     while (
         kwargs.get("wake_if_asleep")
         and
@@ -218,10 +220,12 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
                 await asyncio.sleep(15 + sleep_delay ** (retries + 2))
                 retries += 1
                 continue
-            instance.car_online[instance._id_to_vin(car_id)] = False
+            instance.set_car_online(car_id=car_id, online_status=False)
+            # instance.car_online[instance._id_to_vin(car_id)] = False
             raise RetryLimitError("Reached retry limit; aborting wake up")
         break
-    instance.car_online[instance._id_to_vin(car_id)] = True
+    instance.set_car_online(car_id=car_id, online_status=True)
+    # instance.car_online[instance._id_to_vin(car_id)] = True
     # retry function
     _LOGGER.debug("Retrying %s(%s %s)", wrapped.__name__, args, kwargs)
     try:
