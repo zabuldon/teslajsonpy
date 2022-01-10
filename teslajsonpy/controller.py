@@ -707,7 +707,7 @@ class Controller:
                 _LOGGER.debug(
                     "Wakeup %s: %s", car_vin[-5:], self.car_state[car_vin]["state"]
                 )
-            return self.car_online[car_vin]
+            return self.car_is_online(car_vin)
 
     def _calculate_next_interval(self, vin: Text) -> int:
         cur_time = time.time()
@@ -904,7 +904,7 @@ class Controller:
                     self.__vin_id_map[car["vin"]] = car["id"]
                     self.__vin_vehicle_id_map[car["vin"]] = car["vehicle_id"]
                     self.__vehicle_id_vin_map[car["vehicle_id"]] = car["vin"]
-                    self.car_online[car["vin"]] = car["state"] == "online"
+                    self.set_car_online(car["vin"], car["state"] == "online")
                     self.car_state[car["vin"]] = car
                 self._last_attempted_update_time = cur_time
 
@@ -915,7 +915,7 @@ class Controller:
             car_id = self._update_id(car_id)
             car_vin = self._id_to_vin(car_id)
             tasks = []
-            for vin, online in self.car_online.items():
+            for vin, online in self.get_car_online.items():
                 # If specific car_id provided, only update match
                 if (
                     (car_vin and car_vin != vin)
