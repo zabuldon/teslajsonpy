@@ -27,9 +27,9 @@ class TeslaMock:
         # self._monkeypatch.setattr(
         #     Controller, "get_climate_params", self.mock_get_climate_params
         # )
-        self._monkeypatch.setattr(
-            Controller, "get_drive_params", self.mock_get_drive_params
-        )
+        # self._monkeypatch.setattr(
+        #     Controller, "get_drive_params", self.mock_get_drive_params
+        # )
         self._monkeypatch.setattr(
             Controller, "get_gui_params", self.mock_get_gui_params
         )
