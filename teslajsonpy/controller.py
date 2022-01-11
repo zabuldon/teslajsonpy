@@ -410,8 +410,8 @@ class Controller:
             self.__update[vin] = True
             self.__update_state[vin] = "normal"
             self.car_state[vin] = car
-            self.car_online[vin] = car["state"] == "online"
-            self.__last_parked_timestamp[vin] = self._last_attempted_update_time
+            self.set_car_online(vin=vin, online_status=car["state"] == "online")
+            self.set_last_park_time(vin=vin, timestamp=self._last_attempted_update_time)
             self.__climate[vin] = {}
             self.__charging[vin] = {}
             self.__state[vin] = {}
