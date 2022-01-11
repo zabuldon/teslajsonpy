@@ -24,14 +24,16 @@ def test_interval_driving(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     monkeypatch.setitem(_controller.car_online, VIN, True)
     monkeypatch.setitem(_controller.car_state, VIN, _mock.data_request_vehicle())
-    _controller.set_id_vin(CAR_ID, VIN)
 
     DRIVE_STATE["shift_state"] = "D"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=NOW)
+    _controller.set_last_park_time(car_id=CAR_ID, timestamp=CAR_PARKED)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -53,6 +55,7 @@ def test_interval_policy_default_charging(monkeypatch):
     CHARGE_STATE["charging_state"] = "Charging"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=NOW)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -76,6 +79,7 @@ def test_interval_policy_default_charging_idle(monkeypatch):
     CHARGE_STATE["charging_state"] = "Charging"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=NOW)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -100,6 +104,7 @@ def test_interval_policy_default_completed(monkeypatch):
     CHARGE_STATE["charging_state"] = "Complete"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=NOW)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -124,6 +129,7 @@ def test_interval_policy_default_completed_idle(monkeypatch):
     CHARGE_STATE["charging_state"] = "Complete"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=NOW)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -148,6 +154,7 @@ def test_interval_policy_default_disconnected_idle(monkeypatch):
     CHARGE_STATE["charging_state"] = "Disconnected"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=CAR_PARKED)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -173,6 +180,7 @@ def test_interval_policy_always(monkeypatch):
     CHARGE_STATE["charging_state"] = "Disconnected"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=NOW)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -198,6 +206,7 @@ def test_interval_policy_always_disconnected_idle(monkeypatch):
     CHARGE_STATE["charging_state"] = "Disconnected"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=CAR_PARKED)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -223,6 +232,7 @@ def test_interval_policy_connected_charging(monkeypatch):
     CHARGE_STATE["charging_state"] = "Disconnected"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=NOW)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -248,6 +258,7 @@ def test_interval_policy_connected_completed(monkeypatch):
     CHARGE_STATE["charging_state"] = "Completed"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=NOW)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -273,6 +284,7 @@ def test_interval_policy_connected_completed_idle(monkeypatch):
     _controller.set_id_vin(CAR_ID, VIN)
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=NOW)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -298,6 +310,7 @@ def test_interval_policy_connected_disconnected(monkeypatch):
     CHARGE_STATE["charging_state"] = "Disconnected"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=NOW)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
@@ -323,6 +336,7 @@ def test_interval_policy_connected_disconnected_idle(monkeypatch):
     CHARGE_STATE["charging_state"] = "Disconnected"
 
     _controller.set_last_update_time(car_id=CAR_ID, timestamp=NOW)
+    _controller.set_last_wake_up_time(car_id=CAR_ID, timestamp=CAR_PARKED)
     _controller.set_state_params(car_id=CAR_ID, params=VEHICLE_STATE)
     _controller.set_climate_params(car_id=CAR_ID, params=CLIMATE_STATE)
     _controller.set_drive_params(car_id=CAR_ID, params=DRIVE_STATE)
