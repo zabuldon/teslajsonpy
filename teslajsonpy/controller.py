@@ -389,7 +389,7 @@ class Controller:
         if mfa_code:
             self.__connection.mfa_code = mfa_code
         cars = await self.get_vehicles()
-        self._last_attempted_update_time = time.time()
+        self._last_attempted_update_time = round(time.time())
         self.__update_lock = asyncio.Lock()
 
         self.energysites = await self.get_energysites()
@@ -732,7 +732,7 @@ class Controller:
         car_vin = self._id_to_vin(car_id)
         car_id = self._update_id(car_id)
         async with self.__wakeup_conds[car_vin]:
-            cur_time = int(time.time())
+            cur_time = round(time.time())
             if not self.is_car_online(vin=car_vin) or (
                 self._last_wake_up_attempt[car_vin] < self._last_attempted_update_time
             ):
@@ -750,7 +750,7 @@ class Controller:
             return self.is_car_online(vin=car_vin)
 
     def _calculate_next_interval(self, vin: Text) -> int:
-        cur_time = time.time()
+        cur_time = round(time.time())
         _LOGGER.debug(
             "%s: %s. Polling policy: %s. Update state: %s. Since last park: %s. Since last wake_up: %s. Idle interval: %s. shift_state: %s sentry: %s climate: %s, charging: %s ",
             vin[-5:],
@@ -825,7 +825,7 @@ class Controller:
                 self.car_state[vin].get("state"),
                 self.polling_policy,
                 sleep_interval,
-                round(sleep_interval + self._last_update_time[vin] - cur_time, 2),
+                sleep_interval + self._last_update_time[vin] - cur_time,
             )
             return sleep_interval
         if self.__update_state[vin] != "normal":
@@ -901,7 +901,7 @@ class Controller:
                         )
                     self.__driving[vin] = response["drive_state"]
                     self.__gui[vin] = response["gui_settings"]
-                    self._last_update_time[vin] = time.time()
+                    self._last_update_time[vin] = round(time.time())
                     if self.enable_websocket and self.in_gear(vin=vin):
                         asyncio.create_task(
                             self.__connection.websocket_connect(
@@ -928,7 +928,7 @@ class Controller:
                     self.__power[energysite_id] = response
 
         async with self.__update_lock:
-            cur_time = time.time()
+            cur_time = round(time.time())
             #  Update the online cars using get_vehicles()
             last_update = self._last_attempted_update_time
             _LOGGER.debug(
@@ -937,7 +937,7 @@ class Controller:
                 cur_time - last_update,
                 ONLINE_INTERVAL,
             )
-            if force or round(cur_time - last_update) >= ONLINE_INTERVAL:
+            if force or cur_time - last_update >= ONLINE_INTERVAL:
                 cars = await self.get_vehicles()
                 # self.car_online = {}
                 for car in cars:
@@ -980,7 +980,7 @@ class Controller:
                             force
                             or vin not in self._last_update_time
                             or (
-                                round(cur_time - self._last_update_time[vin])
+                                cur_time - self._last_update_time[vin]
                                 >= self._calculate_next_interval(vin)
                             )
                         )
@@ -991,9 +991,9 @@ class Controller:
                             "%s: Skipping update with state %s. Last update: %s ago. Last parked: %s ago. Last wake_up %s ago",
                             vin[-5:],
                             car_state,
-                            round(cur_time - self._last_update_time[vin]),
-                            round(cur_time - self.get_last_park_time(vin=vin)),
-                            round(cur_time - self.get_last_wake_up_time(vin=vin)),
+                            cur_time - self._last_update_time[vin],
+                            cur_time - self.get_last_park_time(vin=vin),
+                            cur_time - self.get_last_wake_up_time(vin=vin),
                         )
             if not car_id:
                 # do not update energy sites if car_id was a parameter.
@@ -1354,7 +1354,7 @@ class Controller:
             )
             self.car_online[vin] = online_status
             if online_status:
-                self.set_last_wake_up_time(vin=vin, timestamp=time.time())
+                self.set_last_wake_up_time(vin=vin, timestamp=round(time.time()))
 
     def get_car_online(self, car_id: Text = None, vin: Text = None):
         """Get online status for car_id or all cars."""
