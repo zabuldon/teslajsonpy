@@ -729,16 +729,18 @@ class Controller:
 
     def _calculate_next_interval(self, vin: Text) -> int:
         cur_time = time.time()
-        # _LOGGER.debug(
-        #     "%s: %s > %s; shift_state: %s sentry: %s climate: %s, charging: %s ",
-        #     vin[-5:],
-        #     cur_time - self.__last_parked_timestamp[vin],
-        #     IDLE_INTERVAL,
-        #     self.__driving[vin].get("shift_state"),
-        #     self.__state[vin].get("sentry_mode"),
-        #     self.__climate[vin].get("is_climate_on"),
-        #     self.__charging[vin].get("charging_state") == "Charging",
-        # )
+        _LOGGER.debug(
+            "%s: %s. Polling policy: %s. Since last park: %s > %s; shift_state: %s sentry: %s climate: %s, charging: %s ",
+            vin[-5:],
+            self.car_state[vin].get("state"),
+            self.polling_policy,
+            cur_time - self.__last_parked_timestamp[vin],
+            IDLE_INTERVAL,
+            self.shift_state(vin=vin),
+            self.is_sentry_mode_on(vin=vin),
+            self.is_climate_on(vin=vin),
+            self.charging_state(vin=vin),
+        )
         if vin not in self.__update_state:
             self.__update_state[vin] = "normal"
         if self.car_state[vin].get("state") == "asleep" or self.shift_state(vin=vin):
@@ -838,7 +840,7 @@ class Controller:
 
         async def _get_and_process_car_data(vin: Text) -> None:
             async with self.__lock[vin]:
-                _LOGGER.debug("Updating %s", vin[-5:])
+                _LOGGER.debug("%s Updating VEHICLE_DATA", vin[-5:])
                 try:
                     data = await self.api(
                         "VEHICLE_DATA",
