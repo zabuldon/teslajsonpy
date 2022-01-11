@@ -948,15 +948,18 @@ class Controller:
                             force
                             or vin not in self._last_update_time
                             or (
-                                (cur_time - self._last_update_time[vin])
-                                > self._calculate_next_interval(vin)
+                                round(cur_time - self._last_update_time[vin])
+                                >= self._calculate_next_interval(vin)
                             )
                         )
                     ):  # Only update cars with update flag on
                         tasks.append(_get_and_process_car_data(vin))
                     else:
                         _LOGGER.debug(
-                            "Skipping update of %s with state %s", vin[-5:], car_state
+                            "Skipping update of %s with state %s. Last: %s",
+                            vin[-5:],
+                            car_state,
+                            cur_time - self._last_update_time[vin],
                         )
             if not car_id:
                 # do not update energy sites if car_id was a parameter.
