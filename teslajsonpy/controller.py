@@ -82,7 +82,7 @@ def min_expo(base=2, factor=1, max_value=None, min_value=0):
 
 @wrapt.decorator
 async def wake_up(wrapped, instance, args, kwargs) -> Callable:
-    # pylint: disable=protected-access
+    # pylint: disable=protected-access disable=too-many-statements
     """Wrap a API func so it will attempt to wake the vehicle if asleep.
 
     The command wrapped is run once if the car_id was last reported
@@ -266,7 +266,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         _LOGGER.debug("Result: %s", result)
         if (
             "state" in result.get("response")
-            and is_wake_command
+            and (is_wake_command or is_wake_api)
             and result.get("response").get("state") != "online"
         ):
             _LOGGER.debug(
