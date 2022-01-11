@@ -82,7 +82,7 @@ def min_expo(base=2, factor=1, max_value=None, min_value=0):
 
 @wrapt.decorator
 async def wake_up(wrapped, instance, args, kwargs) -> Callable:
-    # pylint: disable=protected-access disable=too-many-statements
+    # pylint: disable=protected-access,too-many-statements
     """Wrap a API func so it will attempt to wake the vehicle if asleep.
 
     The command wrapped is run once if the car_id was last reported
@@ -961,7 +961,7 @@ class Controller:
                 # If specific car_id provided, only update match
                 if (
                     (car_vin and car_vin != vin)
-                    or vin not in self.__lock.keys()
+                    or vin not in self.__lock
                     or (vin and self.car_state[vin].get("in_service"))
                 ):
                     continue
