@@ -148,10 +148,11 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
     sleep_delay = 2
     car_id = ""
     is_wake_command = False
+    is_wake_api = False
     is_energysite_command = False
     if wrapped.__name__ == "api":
         car_id = kwargs.get("path_vars", {}).get("vehicle_id", "")
-        # wake_up needed for api -> None Info: args:(), kwargs:{'name': 'WAKE_UP', 'path_vars':
+        is_wake_api = kwargs.get("name", "").lower() == "wake_up"
     else:
         car_id = args[0] if not kwargs.get("vehicle_id") else kwargs.get("vehicle_id")
         is_wake_command = len(args) >= 2 and args[1].lower() == "wake_up"
@@ -187,7 +188,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         "wake_up needed for %s -> %s "
         "Info: args:%s, kwargs:%s, "
         "ID:%s, car_online:%s "
-        "is_wake_command: %s wake_if_asleep:%s",
+        "is_wake_command:%s, is_wake_api:%s wake_if_asleep:%s",
         instance._id_to_vin(car_id)[-5:],
         wrapped.__name__,
         result,
@@ -196,6 +197,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         car_id if car_id else None,
         instance.car_online if instance.car_online else None,
         is_wake_command,
+        is_wake_api,
         kwargs.get("wake_if_asleep"),
     )
     # instance.car_online[instance._id_to_vin(car_id)] = False
@@ -232,6 +234,14 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         break
     # instance.car_online[instance._id_to_vin(car_id)] = True
     # retry function
+    if is_wake_api and instance.is_car_online(car_id=car_id):
+        _LOGGER.debug(
+            "%s: Api-command was WAKE_UP and car is awake: %s",
+            instance._id_to_vin(car_id)[-5:],
+            instance.is_car_online(car_id=car_id),
+        )
+        return result
+
     _LOGGER.debug(
         "%s: Retrying %s(%s %s)",
         instance._id_to_vin(car_id)[-5:],
