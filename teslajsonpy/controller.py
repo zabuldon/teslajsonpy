@@ -183,10 +183,12 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
     ):
         return result
     _LOGGER.debug(
+        "%s: "
         "wake_up needed for %s -> %s "
         "Info: args:%s, kwargs:%s, "
         "ID:%s, car_online:%s "
         "is_wake_command: %s wake_if_asleep:%s",
+        instance._id_to_vin(car_id)[-5:],
         wrapped.__name__,
         result,
         args,
@@ -213,9 +215,9 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         _LOGGER.debug("Attempting to wake up")
         result = await instance._wake_up(car_id)
         _LOGGER.debug(
-            "%s(%s): Wake Attempt(%s): %s",
-            wrapped.__name__,
+            "%s: %s: Wake Attempt(%s): %s",
             instance._id_to_vin(car_id)[-5:],
+            wrapped.__name__,
             retries,
             result,
         )
@@ -230,11 +232,18 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         break
     # instance.car_online[instance._id_to_vin(car_id)] = True
     # retry function
-    _LOGGER.debug("Retrying %s(%s %s)", wrapped.__name__, args, kwargs)
+    _LOGGER.debug(
+        "%s: Retrying %s(%s %s)",
+        instance._id_to_vin(car_id)[-5:],
+        wrapped.__name__,
+        args,
+        kwargs,
+    )
     try:
         result = await wrapped(*args, **kwargs)
         _LOGGER.debug(
-            "Retry after wake up succeeded: %s",
+            "%s: Retry after wake up succeeded: %s",
+            instance._id_to_vin(car_id)[-5:],
             "True" if valid_result(result) else result,
         )
     except TeslaException as ex:
@@ -250,7 +259,9 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
             and result.get("response").get("state") != "online"
         ):
             _LOGGER.debug(
-                "Was wake_up command. State: %s", result.get("response").get("state")
+                "%s: Was wake_up command. State: %s",
+                instance._id_to_vin(car_id)[-5:],
+                result.get("response").get("state"),
             )
             instance.set_car_online(
                 car_id=car_id,
@@ -723,17 +734,18 @@ class Controller:
                 self.car_state[car_vin] = result["response"]
                 self._last_wake_up_attempt[car_vin] = cur_time
                 _LOGGER.debug(
-                    "Wakeup %s: %s", car_vin[-5:], self.car_state[car_vin]["state"]
+                    "%s: Wakeup: %s", car_vin[-5:], self.car_state[car_vin]["state"]
                 )
             return self.is_car_online(vin=car_vin)
 
     def _calculate_next_interval(self, vin: Text) -> int:
         cur_time = time.time()
         _LOGGER.debug(
-            "%s: %s. Polling policy: %s. Since last park: %s > %s; shift_state: %s sentry: %s climate: %s, charging: %s ",
+            "%s: %s. Polling policy: %s. Update state: %s. Since last park: %s > %s; shift_state: %s sentry: %s climate: %s, charging: %s ",
             vin[-5:],
             self.car_state[vin].get("state"),
             self.polling_policy,
+            self.__update_state.get(vin),
             cur_time - self.__last_parked_timestamp[vin],
             IDLE_INTERVAL,
             self.shift_state(vin=vin),
@@ -758,7 +770,7 @@ class Controller:
             return DRIVING_INTERVAL
         if self.polling_policy == "always":
             _LOGGER.debug(
-                "%s %s; Wake up policy set to 'always'. Scanning every %s seconds",
+                "%s: %s; Wake up policy set to 'always'. Scanning every %s seconds",
                 vin[-5:],
                 self.car_state[vin].get("state"),
                 self.update_interval,
@@ -775,7 +787,7 @@ class Controller:
             )
         ):
             _LOGGER.debug(
-                "%s %s; Wake up policy set to 'connected'. "
+                "%s: %s; Wake up policy set to 'connected'. "
                 "Sentry mode: %s, Climate: %s, Charging State: %s. "
                 "Scanning every %s seconds",
                 vin[-5:],
@@ -796,7 +808,7 @@ class Controller:
             if self.__update_state[vin] != "trying_to_sleep":
                 self.__update_state[vin] = "trying_to_sleep"
                 _LOGGER.debug(
-                    "%s trying to sleep; scan throttled to %s seconds and will ignore updates for %s seconds",
+                    "%s: trying to sleep; scan throttled to %s seconds and will ignore updates for %s seconds",
                     vin[-5:],
                     sleep_interval,
                     round(sleep_interval + self._last_update_time[vin] - cur_time, 2),
@@ -805,7 +817,7 @@ class Controller:
         if self.__update_state[vin] != "normal":
             self.__update_state[vin] = "normal"
             _LOGGER.debug(
-                "%s scanning every %s seconds", vin[-5:], self.update_interval
+                "%s: scanning every %s seconds", vin[-5:], self.update_interval
             )
         return self.update_interval
 
@@ -840,7 +852,7 @@ class Controller:
 
         async def _get_and_process_car_data(vin: Text) -> None:
             async with self.__lock[vin]:
-                _LOGGER.debug("%s Updating VEHICLE_DATA", vin[-5:])
+                _LOGGER.debug("%s: Updating VEHICLE_DATA", vin[-5:])
                 try:
                     data = await self.api(
                         "VEHICLE_DATA",
@@ -958,7 +970,7 @@ class Controller:
                         tasks.append(_get_and_process_car_data(vin))
                     else:
                         _LOGGER.debug(
-                            "Skipping update of %s with state %s. Last: %s",
+                            "%s: Skipping update with state %s. Last: %s",
                             vin[-5:],
                             car_state,
                             cur_time - self._last_update_time[vin],
@@ -1247,7 +1259,7 @@ class Controller:
             vin = self._id_to_vin(car_id)
         if vin:
             _LOGGER.debug(
-                "%s resetting last_parked_timestamp to: %s shift_state %s",
+                "%s: Resetting last_parked_timestamp to: %s shift_state %s",
                 vin[-5:],
                 timestamp,
                 shift_state,
@@ -1287,7 +1299,7 @@ class Controller:
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin:
-            _LOGGER.debug("%s resetting last_wake_up_time to: %s", vin[-5:], timestamp)
+            _LOGGER.debug("%s: Resetting last_wake_up_time to: %s", vin[-5:], timestamp)
             self._last_wake_up_time[vin] = timestamp
 
     def set_car_online(
@@ -1315,7 +1327,7 @@ class Controller:
             vin = self._id_to_vin(car_id)
         if vin and self.get_car_online(vin=vin) != online_status:
             _LOGGER.debug(
-                "%s setting car_online from %s to %s",
+                "%s: Changing car_online from %s to %s",
                 vin[-5:],
                 self.get_car_online(vin=vin),
                 online_status,
