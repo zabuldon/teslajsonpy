@@ -939,7 +939,6 @@ class Controller:
             )
             if force or cur_time - last_update >= ONLINE_INTERVAL:
                 cars = await self.get_vehicles()
-                # self.car_online = {}
                 for car in cars:
                     self.set_id_vin(car_id=car["id"], vin=car["vin"])
                     self.set_vehicle_id_vin(
@@ -1012,7 +1011,7 @@ class Controller:
         return self.__climate
 
     def set_climate_params(
-        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+        self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set climate_params for car_id."""
         if car_id and not vin:
@@ -1037,7 +1036,7 @@ class Controller:
         return self.__charging
 
     def set_charging_params(
-        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+        self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set charging_params for car_id."""
         if car_id and not vin:
@@ -1067,7 +1066,7 @@ class Controller:
         return self.__state
 
     def set_state_params(
-        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+        self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set state_params for car_id."""
         if car_id and not vin:
@@ -1092,7 +1091,7 @@ class Controller:
         return self.__config
 
     def set_config_params(
-        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+        self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set config parameters for a car."""
         if car_id and not vin:
@@ -1109,7 +1108,7 @@ class Controller:
         return self.__driving
 
     def set_drive_params(
-        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+        self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set drive_params for car_id."""
         if car_id and not vin:
@@ -1142,7 +1141,7 @@ class Controller:
         return self.__gui
 
     def set_gui_params(
-        self, car_id: Text = None, vin: Text = None, params: Dict = {}
+        self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set GUI params for car."""
         print(car_id, vin)
