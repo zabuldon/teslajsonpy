@@ -217,11 +217,12 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         _LOGGER.debug("Attempting to wake up")
         result = await instance._wake_up(car_id)
         _LOGGER.debug(
-            "%s: %s: Wake Attempt(%s): %s",
+            "%s: %s: Wake Attempt(%s): %s. Next attempt in %s",
             instance._id_to_vin(car_id)[-5:],
             wrapped.__name__,
             retries,
             result,
+            15 + sleep_delay ** (retries + 2),
         )
         if not result:
             if retries < 5:
@@ -751,12 +752,14 @@ class Controller:
     def _calculate_next_interval(self, vin: Text) -> int:
         cur_time = time.time()
         _LOGGER.debug(
-            "%s: %s. Polling policy: %s. Update state: %s. Since last park: %s > %s; shift_state: %s sentry: %s climate: %s, charging: %s ",
+            "%s: %s. Polling policy: %s. Update state: %s. Since last park: %s > %s; Since last wake_up: %s > %s. shift_state: %s sentry: %s climate: %s, charging: %s ",
             vin[-5:],
             self.car_state[vin].get("state"),
             self.polling_policy,
             self.__update_state.get(vin),
-            cur_time - self.__last_parked_timestamp[vin],
+            cur_time - self.get_last_park_time(vin=vin),
+            IDLE_INTERVAL,
+            cur_time - self.get_last_wake_up_time(vin=vin),
             IDLE_INTERVAL,
             self.shift_state(vin=vin),
             self.is_sentry_mode_on(vin=vin),
