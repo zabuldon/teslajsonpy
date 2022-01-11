@@ -752,13 +752,12 @@ class Controller:
     def _calculate_next_interval(self, vin: Text) -> int:
         cur_time = time.time()
         _LOGGER.debug(
-            "%s: %s. Polling policy: %s. Update state: %s. Since last park: %s > %s; Since last wake_up: %s > %s. shift_state: %s sentry: %s climate: %s, charging: %s ",
+            "%s: %s. Polling policy: %s. Update state: %s. Since last park: %s. Since last wake_up: %s. Idle interval: %s. shift_state: %s sentry: %s climate: %s, charging: %s ",
             vin[-5:],
             self.car_state[vin].get("state"),
             self.polling_policy,
             self.__update_state.get(vin),
             cur_time - self.get_last_park_time(vin=vin),
-            IDLE_INTERVAL,
             cur_time - self.get_last_wake_up_time(vin=vin),
             IDLE_INTERVAL,
             self.shift_state(vin=vin),
@@ -783,9 +782,10 @@ class Controller:
             return DRIVING_INTERVAL
         if self.polling_policy == "always":
             _LOGGER.debug(
-                "%s: %s; Wake up policy set to 'always'. Scanning every %s seconds",
+                "%s: %s; Polling policy set to '%s'. Scanning every %s seconds",
                 vin[-5:],
                 self.car_state[vin].get("state"),
+                self.polling_policy,
                 self.update_interval,
             )
             self.__update_state[vin] = "normal"
@@ -798,16 +798,15 @@ class Controller:
                 and self.charging_state(vin=vin) != "Disconnected"
                 and self.charging_state(vin=vin) != ""
             )
+            or cur_time - self.get_last_wake_up_time(vin=vin) <= IDLE_INTERVAL
         ):
             _LOGGER.debug(
-                "%s: %s; Wake up policy set to 'connected'. "
-                "Sentry mode: %s, Climate: %s, Charging State: %s. "
-                "Scanning every %s seconds",
+                "%s: %s; Polling policy set to '%s' and car is connected. "
+                "or last_wake_up_time < IDLE_INTERVAL "
+                "Polling every %s seconds",
                 vin[-5:],
                 self.car_state[vin].get("state"),
-                self.is_sentry_mode_on(vin=vin),
-                self.is_climate_on(vin=vin),
-                self.charging_state(vin=vin),
+                self.polling_policy,
                 self.update_interval,
             )
             self.__update_state[vin] = "normal"
@@ -820,17 +819,23 @@ class Controller:
             sleep_interval = max(SLEEP_INTERVAL, self.update_interval)
             if self.__update_state[vin] != "trying_to_sleep":
                 self.__update_state[vin] = "trying_to_sleep"
-                _LOGGER.debug(
-                    "%s: trying to sleep; scan throttled to %s seconds and will ignore updates for %s seconds",
-                    vin[-5:],
-                    sleep_interval,
-                    round(sleep_interval + self._last_update_time[vin] - cur_time, 2),
-                )
+            _LOGGER.debug(
+                "%s: %s; Polling policy set to '%s', trying to sleep; scan throttled to %s seconds and will ignore updates for %s seconds",
+                vin[-5:],
+                self.car_state[vin].get("state"),
+                self.polling_policy,
+                sleep_interval,
+                round(sleep_interval + self._last_update_time[vin] - cur_time, 2),
+            )
             return sleep_interval
         if self.__update_state[vin] != "normal":
             self.__update_state[vin] = "normal"
             _LOGGER.debug(
-                "%s: scanning every %s seconds", vin[-5:], self.update_interval
+                "%s: %s; Polling policy set to '%s', scanning every %s seconds",
+                vin[-5:],
+                self.car_state[vin].get("state"),
+                self.polling_policy,
+                self.update_interval,
             )
         return self.update_interval
 
