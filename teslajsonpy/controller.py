@@ -151,6 +151,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
     is_energysite_command = False
     if wrapped.__name__ == "api":
         car_id = kwargs.get("path_vars", {}).get("vehicle_id", "")
+        # wake_up needed for api -> None Info: args:(), kwargs:{'name': 'WAKE_UP', 'path_vars':
     else:
         car_id = args[0] if not kwargs.get("vehicle_id") else kwargs.get("vehicle_id")
         is_wake_command = len(args) >= 2 and args[1].lower() == "wake_up"
@@ -185,13 +186,14 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         "wake_up needed for %s -> %s "
         "Info: args:%s, kwargs:%s, "
         "ID:%s, car_online:%s "
-        "wake_if_asleep:%s",
+        "is_wake_command: %s wake_if_asleep:%s",
         wrapped.__name__,
         result,
         args,
         kwargs,
         car_id if car_id else None,
         instance.car_online if instance.car_online else None,
+        is_wake_command,
         kwargs.get("wake_if_asleep"),
     )
     # instance.car_online[instance._id_to_vin(car_id)] = False
@@ -242,8 +244,14 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         raise
     if valid_result(result):
         _LOGGER.debug("Result: %s", result)
-        if "state" in result.get("response"):
-            _LOGGER.debug("State: %s", result.get("response").get("state"))
+        if (
+            "state" in result.get("response")
+            and is_wake_command
+            and result.get("response").get("state") != "online"
+        ):
+            _LOGGER.debug(
+                "Was wake_up command. State: %s", result.get("response").get("state")
+            )
             instance.set_car_online(
                 car_id=car_id,
                 online_status=result.get("response").get("state") == "online",
@@ -891,6 +899,12 @@ class Controller:
             cur_time = time.time()
             #  Update the online cars using get_vehicles()
             last_update = self._last_attempted_update_time
+            _LOGGER.debug(
+                "Get vehicles. Force: %s Time: %s Interval %s",
+                force,
+                cur_time - last_update,
+                ONLINE_INTERVAL,
+            )
             if force or cur_time - last_update > ONLINE_INTERVAL:
                 cars = await self.get_vehicles()
                 # self.car_online = {}
