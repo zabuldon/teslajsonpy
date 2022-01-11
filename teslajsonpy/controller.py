@@ -242,6 +242,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         raise
     if valid_result(result):
         _LOGGER.debug("Result: %s", result)
+        _LOGGER.debug("State: %s", result.get("response").get("state"))
         instance.set_car_online(car_id=car_id, online_status=True)
         return result
     raise TeslaException("could_not_wake_buses")
