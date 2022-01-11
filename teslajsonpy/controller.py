@@ -1014,6 +1014,7 @@ class Controller:
         self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set climate_params for car_id."""
+        params = params or {}
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin:
@@ -1039,6 +1040,7 @@ class Controller:
         self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set charging_params for car_id."""
+        params = params or {}
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin:
@@ -1069,6 +1071,7 @@ class Controller:
         self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set state_params for car_id."""
+        params = params or {}
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin:
@@ -1094,6 +1097,7 @@ class Controller:
         self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set config parameters for a car."""
+        params = params or {}
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin:
@@ -1111,6 +1115,7 @@ class Controller:
         self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set drive_params for car_id."""
+        params = params or {}
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin:
@@ -1144,6 +1149,7 @@ class Controller:
         self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set GUI params for car."""
+        params = params or {}
         print(car_id, vin)
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
