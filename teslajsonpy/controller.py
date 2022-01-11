@@ -160,7 +160,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
     result = None
     if (
         instance._id_to_vin(car_id) is None
-        or (car_id and instance.car_online.get(instance._id_to_vin(car_id)))
+        or (car_id and instance.is_car_online(car_id=car_id))
         or is_wake_command
         or is_energysite_command
     ):
@@ -182,15 +182,17 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
     ):
         return result
     _LOGGER.debug(
-        "wake_up needed for %s -> %s \n"
+        "wake_up needed for %s -> %s "
         "Info: args:%s, kwargs:%s, "
-        "ID:%s, car_online:%s",
+        "ID:%s, car_online:%s "
+        "wake_if_asleep:%s",
         wrapped.__name__,
         result,
         args,
         kwargs,
         car_id if car_id else None,
         instance.car_online if instance.car_online else None,
+        kwargs.get("wake_if_asleep"),
     )
     # instance.car_online[instance._id_to_vin(car_id)] = False
     instance.set_car_online(car_id=car_id, online_status=False)
@@ -202,7 +204,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
             car_id is None
             or (
                 not instance._id_to_vin(car_id)
-                or not instance.car_online.get(instance._id_to_vin(car_id))
+                or not instance.is_car_online(car_id=car_id)
             )
         )
     ):
@@ -224,7 +226,6 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
             # instance.car_online[instance._id_to_vin(car_id)] = False
             raise RetryLimitError("Reached retry limit; aborting wake up")
         break
-    instance.set_car_online(car_id=car_id, online_status=True)
     # instance.car_online[instance._id_to_vin(car_id)] = True
     # retry function
     _LOGGER.debug("Retrying %s(%s %s)", wrapped.__name__, args, kwargs)
@@ -240,6 +241,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         )
         raise
     if valid_result(result):
+        instance.set_car_online(car_id=car_id, online_status=True)
         return result
     raise TeslaException("could_not_wake_buses")
 
