@@ -988,10 +988,12 @@ class Controller:
                         tasks.append(_get_and_process_car_data(vin))
                     else:
                         _LOGGER.debug(
-                            "%s: Skipping update with state %s. Last: %s",
+                            "%s: Skipping update with state %s. Last update: %s ago. Last parked: %s ago. Last wake_up %s ago",
                             vin[-5:],
                             car_state,
-                            cur_time - self._last_update_time[vin],
+                            round(cur_time - self._last_update_time[vin]),
+                            round(cur_time - self.get_last_park_time(vin=vin)),
+                            round(cur_time - self.get_last_wake_up_time(vin=vin)),
                         )
             if not car_id:
                 # do not update energy sites if car_id was a parameter.
