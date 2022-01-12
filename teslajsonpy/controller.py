@@ -1049,7 +1049,27 @@ class Controller:
         return False
 
     def get_charging_params(self, car_id: Text = None, vin: Text = None) -> Dict:
-        """Return cached copy of charging_params for car_id."""
+        """Return cached copy of charging_params for car_id or all cars.
+
+        Parameters
+        ----------
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
+            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
+        vin : string
+            VIN number.
+
+        If both car_id and vin is provided. VIN overrides car_id.
+
+        Returns
+        -------
+        dict
+            If car_id or vin exists, a dict with the charging parameters for a
+            single car.
+            Othewise, the entire dictionary with all cars.
+
+        """
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin and vin in self.__charging:
@@ -1080,7 +1100,27 @@ class Controller:
         return self.__power[energysite_id]
 
     def get_state_params(self, car_id: Text = None, vin: Text = None) -> Dict:
-        """Return cached copy of state_params for car_id."""
+        """Return cached copy of state_params for car_id. or all cars.
+
+        Parameters
+        ----------
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
+            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
+        vin : string
+            VIN number.
+
+        If both car_id and vin is provided. VIN overrides car_id.
+
+        Returns
+        -------
+        dict
+            If car_id or vin exists, a dict with the state parameters for a
+            single car.
+            Othewise, the entire dictionary with all cars.
+
+        """
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin and vin in self.__state:
@@ -1106,7 +1146,27 @@ class Controller:
         return False
 
     def get_config_params(self, car_id: Text = None, vin: Text = None) -> Dict:
-        """Return cached copy of config_params for car_id."""
+        """Return cached copy of config_params for car_id or all cars.
+
+        Parameters
+        ----------
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
+            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
+        vin : string
+            VIN number.
+
+        If both car_id and vin is provided. VIN overrides car_id.
+
+        Returns
+        -------
+        dict
+            If car_id or vin exists, a dict with the config parameters for a
+            single car.
+            Othewise, the entire dictionary with all cars.
+
+        """
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin and vin in self.__config:
@@ -1124,7 +1184,27 @@ class Controller:
             self.__config[vin] = params
 
     def get_drive_params(self, car_id: Text = None, vin: Text = None) -> Dict:
-        """Return cached copy of drive_params for car_id."""
+        """Return cached copy of drive_params for car_id or all cars.
+
+        Parameters
+        ----------
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
+            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
+        vin : string
+            VIN number.
+
+        If both car_id and vin is provided. VIN overrides car_id.
+
+        Returns
+        -------
+        dict
+            If car_id or vin exists, a dict with the drive parameters for a
+            single car.
+            Othewise, the entire dictionary with all cars.
+
+        """
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin and vin in self.__driving:
@@ -1158,7 +1238,27 @@ class Controller:
         return False
 
     def get_gui_params(self, car_id: Text = None, vin: Text = None) -> Dict:
-        """Return cached copy of gui_params for car_id."""
+        """Return cached copy of gui_params for car_id or all cars.
+
+        Parameters
+        ----------
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
+            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
+        vin : string
+            VIN number.
+
+        If both car_id and vin is provided. VIN overrides car_id.
+
+        Returns
+        -------
+        dict
+            If car_id or vin exists, a dict with the gui parameters for a
+            single car.
+            Othewise, the entire dictionary with all cars.
+
+        """
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin and vin in self.__gui:
@@ -1383,7 +1483,27 @@ class Controller:
                 self.set_last_wake_up_time(vin=vin, timestamp=round(time.time()))
 
     def get_car_online(self, car_id: Text = None, vin: Text = None):
-        """Get online status for car_id or all cars."""
+        """Get online status for car_id or all cars.
+
+        Parameters
+        ----------
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
+            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
+        vin : string
+            VIN number.
+
+        If both car_id and vin is provided. VIN overrides car_id.
+
+        Returns
+        -------
+        dict or boolean
+            If car_id or vin exists, a boolean with the online status for a
+            single car.
+            Othewise, the entire dictionary with all cars.
+
+        """
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin and vin in self.car_online:
