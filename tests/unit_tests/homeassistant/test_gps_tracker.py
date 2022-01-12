@@ -5,7 +5,7 @@ import pytest
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.gps import GPS
 
-from tests.tesla_mock import TeslaMock, VIN, CAR_ID, DRIVE_STATE
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
 
 
 def test_has_battery(monkeypatch):
@@ -48,7 +48,7 @@ async def test_get_location_after_update(monkeypatch):
     _data = _mock.data_request_vehicle()
     _gps = GPS(_data, _controller)
 
-    _controller.set_drive_params(vin=VIN, params=DRIVE_STATE)
+    _controller.set_drive_params(vin=VIN, params=_data["drive_state"])
 
     await _gps.async_update()
     _location = _gps.get_location()

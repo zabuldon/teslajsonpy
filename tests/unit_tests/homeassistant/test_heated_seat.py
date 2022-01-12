@@ -1,12 +1,12 @@
 """Test door HeatedSeatSwitch."""
 
-import pytest
 import time
+import pytest
 
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.heated_seats import HeatedSeatSelect
 
-from tests.tesla_mock import TeslaMock, CAR_ID, VIN, CLIMATE_STATE
+from tests.tesla_mock import TeslaMock, CAR_ID, VIN
 
 LAST_UPDATE_TIME = time.time()
 
@@ -45,18 +45,18 @@ async def test_get_seat_heat_level_after_update(monkeypatch):
     _controller.set_id_vin(CAR_ID, VIN)
     _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
-    NEW_LEVEL = 1
+    new_level = 1
 
     _data = _mock.data_request_vehicle()
-    # _data["climate_state"]['seat_heater_left'] = NEW_LEVEL
+    # _data["climate_state"]['seat_heater_left'] = new_level
     _seat = HeatedSeatSelect(_data, _controller, "left")
-    CLIMATE_STATE["seat_heater_left"] = NEW_LEVEL
-    _controller.set_climate_params(vin=VIN, params=CLIMATE_STATE)
+    _data["climate_state"]["seat_heater_left"] = new_level
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _seat.async_update()
 
     assert _seat is not None
-    assert _seat.get_seat_heat_level() == NEW_LEVEL
+    assert _seat.get_seat_heat_level() == new_level
 
 
 @pytest.mark.asyncio
@@ -68,22 +68,22 @@ async def test_set_get_seat_heat_level(monkeypatch):
     _controller.set_id_vin(CAR_ID, VIN)
     _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
-    ORIG_LEVEL = 1
-    NEW_LEVEL = 2
+    orig_level = 1
+    new_level = 2
 
     _data = _mock.data_request_vehicle()
-    # _data["climate_state"]["seat_heater_left"] = ORIG_LEVEL
+    # _data["climate_state"]["seat_heater_left"] = orig_level
     _seat = HeatedSeatSelect(_data, _controller, "left")
 
-    CLIMATE_STATE["seat_heater_left"] = ORIG_LEVEL
-    _controller.set_climate_params(vin=VIN, params=CLIMATE_STATE)
+    _data["climate_state"]["seat_heater_left"] = orig_level
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _seat.async_update()
 
-    await _seat.set_seat_heat_level(NEW_LEVEL)
+    await _seat.set_seat_heat_level(new_level)
 
     assert _seat is not None
-    assert _seat.get_seat_heat_level() == NEW_LEVEL
+    assert _seat.get_seat_heat_level() == new_level
 
 
 @pytest.mark.asyncio
@@ -95,17 +95,17 @@ async def test_seat_same_level(monkeypatch):
     _controller.set_id_vin(CAR_ID, VIN)
     _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
-    ORIG_LEVEL = 1
+    orig_level = 1
 
     _data = _mock.data_request_vehicle()
-    # _data["climate_state"]["seat_heater_left"] = ORIG_LEVEL
+    # _data["climate_state"]["seat_heater_left"] = orig_level
     _seat = HeatedSeatSelect(_data, _controller, "left")
-    CLIMATE_STATE["seat_heater_left"] = ORIG_LEVEL
-    _controller.set_climate_params(vin=VIN, params=CLIMATE_STATE)
+    _data["climate_state"]["seat_heater_left"] = orig_level
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _seat.async_update()
 
-    await _seat.set_seat_heat_level(ORIG_LEVEL)
+    await _seat.set_seat_heat_level(orig_level)
 
     assert _seat is not None
-    assert _seat.get_seat_heat_level() == ORIG_LEVEL
+    assert _seat.get_seat_heat_level() == orig_level

@@ -5,7 +5,7 @@ import pytest
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.binary_sensor import ParkingSensor
 
-from tests.tesla_mock import TeslaMock, VIN, CAR_ID, DRIVE_STATE
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
 
 
 def test_has_battery(monkeypatch):
@@ -44,7 +44,7 @@ async def test_get_value_after_update(monkeypatch):
     _data = _mock.data_request_vehicle()
     _sensor = ParkingSensor(_data, _controller)
 
-    _controller.set_drive_params(vin=VIN, params=DRIVE_STATE)
+    _controller.set_drive_params(vin=VIN, params=_data["drive_state"])
 
     await _sensor.async_update()
 
@@ -64,8 +64,8 @@ async def test_get_value_on(monkeypatch):
     _data = _mock.data_request_vehicle()
     _sensor = ParkingSensor(_data, _controller)
 
-    DRIVE_STATE["shift_state"] = "P"
-    _controller.set_drive_params(vin=VIN, params=DRIVE_STATE)
+    _data["drive_state"]["shift_state"] = "P"
+    _controller.set_drive_params(vin=VIN, params=_data["drive_state"])
 
     await _sensor.async_update()
 
@@ -85,8 +85,8 @@ async def test_get_value_off(monkeypatch):
     _data = _mock.data_request_vehicle()
     _sensor = ParkingSensor(_data, _controller)
 
-    DRIVE_STATE["shift_state"] = "N"
-    _controller.set_drive_params(vin=VIN, params=DRIVE_STATE)
+    _data["drive_state"]["shift_state"] = "N"
+    _controller.set_drive_params(vin=VIN, params=_data["drive_state"])
 
     await _sensor.async_update()
 
