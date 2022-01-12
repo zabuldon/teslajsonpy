@@ -771,7 +771,7 @@ class Controller:
             self.set_last_park_time(
                 vin=vin, timestamp=cur_time, shift_state=self.shift_state(vin=vin)
             )
-        if self.in_gear(vin=vin):
+        if self.is_in_gear(vin=vin):
             if self.__update_state[vin] != "driving":
                 self.__update_state[vin] = "driving"
                 _LOGGER.debug(
@@ -902,7 +902,7 @@ class Controller:
                     self.__driving[vin] = response["drive_state"]
                     self.__gui[vin] = response["gui_settings"]
                     self._last_update_time[vin] = round(time.time())
-                    if self.enable_websocket and self.in_gear(vin=vin):
+                    if self.enable_websocket and self.is_in_gear(vin=vin):
                         asyncio.create_task(
                             self.__connection.websocket_connect(
                                 vin[-5:],
@@ -1129,7 +1129,7 @@ class Controller:
             return self.get_drive_params(vin=vin).get("shift_state")
         return None
 
-    def in_gear(self, car_id: Text = None, vin: Text = None) -> bool:
+    def is_in_gear(self, car_id: Text = None, vin: Text = None) -> bool:
         """Return true if car is in gear. False of car is parked or unknown."""
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
