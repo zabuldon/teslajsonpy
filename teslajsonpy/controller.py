@@ -1003,7 +1003,27 @@ class Controller:
             return any(await asyncio.gather(*tasks))
 
     def get_climate_params(self, car_id: Text = None, vin: Text = None) -> Dict:
-        """Return cached copy of climate_params for car_id."""
+        """Return cached copy of climate_params for car_id or all cars.
+
+        Parameters
+        ----------
+        car_id : string
+            Identifier for the car on the owner-api endpoint. It is the id
+            field for identifying the car across the owner-api endpoint.
+            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
+        vin : string
+            VIN number.
+
+        If both car_id and vin is provided. VIN overrides car_id.
+
+        Returns
+        -------
+        dict
+            If car_id or vin exists, a dict with the climate parameters for a
+            single car.
+            Othewise, the entire dictionary with all cars.
+
+        """
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin and vin in self.__climate:
@@ -1167,14 +1187,15 @@ class Controller:
             Identifier for the car on the owner-api endpoint. It is the id
             field for identifying the car across the owner-api endpoint.
             https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
-            If no car_id, returns the complete dictionary.
         vin : string
-            Vin number
+            VIN number.
+
+        If both car_id and vin is provided. VIN overrides car_id.
 
         Returns
         -------
         bool or dict of booleans
-            If car_id exists, a bool indicating whether updates should be
+            If car_id or vin exists, a bool indicating whether updates should be
             processed. Othewise, the entire updates dictionary.
 
         """
