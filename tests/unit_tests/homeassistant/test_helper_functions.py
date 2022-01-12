@@ -175,7 +175,7 @@ def test_set_car_online():
     assert _controller.is_car_online(vin=VIN) is True
     last_wake_up = _controller.get_last_wake_up_time(vin=VIN)
 
-    assert int(last_wake_up) == int(NOW) or int(last_wake_up) == int(NOW) + 1
+    assert int(last_wake_up) >= int(NOW)
 
     _controller.set_car_online(vin=VIN, online_status=False)
     assert _controller.is_car_online(vin=VIN) is False
