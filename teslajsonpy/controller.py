@@ -772,14 +772,15 @@ class Controller:
                 vin=vin, timestamp=cur_time, shift_state=self.shift_state(vin=vin)
             )
         if self.is_in_gear(vin=vin):
+            driving_interval = min(DRIVING_INTERVAL, self.update_interval)
             if self.__update_state[vin] != "driving":
                 self.__update_state[vin] = "driving"
                 _LOGGER.debug(
                     "%s driving; increasing scan rate to every %s seconds",
                     vin[-5:],
-                    DRIVING_INTERVAL,
+                    driving_interval,
                 )
-            return DRIVING_INTERVAL
+            return driving_interval
         if self.polling_policy == "always":
             _LOGGER.debug(
                 "%s: %s; Polling policy set to '%s'. Scanning every %s seconds",
