@@ -5,7 +5,7 @@ import pytest
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.charger import ChargingSensor, ChargingEnergySensor
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
 
 
 def test_has_battery(monkeypatch):
@@ -80,10 +80,14 @@ async def test_get_value_after_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _sensor = ChargingSensor(_data, _controller)
     _sensor2 = ChargingEnergySensor(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
+
     await _sensor.async_update()
 
     assert _sensor is not None
@@ -116,15 +120,19 @@ async def test_get_value_after_update(monkeypatch):
     assert _sensor2.state_class == "total_increasing"
     assert _sensor2.device_class == "energy"
 
+
 @pytest.mark.asyncio
 async def test_async_update(monkeypatch):
     """Test async_update()."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _sensor = ChargingSensor(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
 
     await _sensor.async_update()
 
@@ -146,6 +154,7 @@ async def test_async_update_in_kmh(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["gui_settings"]["gui_distance_units"] = "km/hr"
@@ -153,6 +162,9 @@ async def test_async_update_in_kmh(monkeypatch):
     _data["charge_state"]["charge_rate"] = 22
     _data["charge_state"]["charge_miles_added_rated"] = 44
     _sensor = ChargingSensor(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
+    _controller.set_gui_params(vin=VIN, params=_data["gui_settings"])
 
     await _sensor.async_update()
 
@@ -167,6 +179,7 @@ async def test_async_update_in_mph(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["gui_settings"]["gui_distance_units"] = "mi/hr"
@@ -175,6 +188,9 @@ async def test_async_update_in_mph(monkeypatch):
     _data["charge_state"]["charge_miles_added_rated"] = 44
     _data["charge_state"]["charger_power"] = 100.2
     _sensor = ChargingSensor(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
+    _controller.set_gui_params(vin=VIN, params=_data["gui_settings"])
 
     await _sensor.async_update()
 
@@ -190,10 +206,13 @@ async def test_async_update_charger_power(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charger_power"] = 100.2
     _sensor = ChargingSensor(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
 
     await _sensor.async_update()
 

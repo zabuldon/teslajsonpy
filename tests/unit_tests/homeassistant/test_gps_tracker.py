@@ -5,7 +5,7 @@ import pytest
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.gps import GPS
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
 
 
 def test_has_battery(monkeypatch):
@@ -30,11 +30,11 @@ def test_get_location_on_init(monkeypatch):
     _gps = GPS(_data, _controller)
 
     _location = _gps.get_location()
-    assert not _location is None
-    assert not "longitude" in _location
-    assert not "latitude" in _location
-    assert not "heading" in _location
-    assert not "speed" in _location
+    assert _location is not None
+    assert "longitude" not in _location
+    assert "latitude" not in _location
+    assert "heading" not in _location
+    assert "speed" not in _location
 
 
 @pytest.mark.asyncio
@@ -43,14 +43,17 @@ async def test_get_location_after_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _gps = GPS(_data, _controller)
 
+    _controller.set_drive_params(vin=VIN, params=_data["drive_state"])
+
     await _gps.async_update()
     _location = _gps.get_location()
 
-    assert not _location is None
+    assert _location is not None
     assert _location["longitude"] == -88.111111
     assert _location["latitude"] == 33.111111
     assert _location["heading"] == 5
@@ -63,6 +66,7 @@ async def test_get_location_native_location(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["drive_state"]["native_location_supported"] = True
@@ -75,11 +79,12 @@ async def test_get_location_native_location(monkeypatch):
     _data["drive_state"]["speed"] = 23.4
 
     _gps = GPS(_data, _controller)
+    _controller.set_drive_params(vin=VIN, params=_data["drive_state"])
 
     await _gps.async_update()
     _location = _gps.get_location()
 
-    assert not _location is None
+    assert _location is not None
     assert _location["longitude"] == 23.456
     assert _location["latitude"] == 45.678
     assert _location["heading"] == 23
@@ -92,6 +97,7 @@ async def test_get_location_no_native_location(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["drive_state"]["native_location_supported"] = False
@@ -105,10 +111,12 @@ async def test_get_location_no_native_location(monkeypatch):
 
     _gps = GPS(_data, _controller)
 
+    _controller.set_drive_params(vin=VIN, params=_data["drive_state"])
+
     await _gps.async_update()
     _location = _gps.get_location()
 
-    assert not _location is None
+    assert _location is not None
     assert _location["longitude"] == 12.345
     assert _location["latitude"] == 34.567
     assert _location["heading"] == 12
@@ -121,6 +129,7 @@ async def test_async_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["drive_state"]["longitude"] = 12.345
@@ -132,10 +141,14 @@ async def test_async_update(monkeypatch):
     _data["drive_state"]["speed"] = 23.4
     _gps = GPS(_data, _controller)
 
+    _controller.set_drive_params(vin=VIN, params=_data["drive_state"])
+
     await _gps.async_update()
     _location = _gps.get_location()
 
-    assert not _location is None
+    print(_location)
+
+    assert _location is not None
     assert _location["longitude"] == 12.345
     assert _location["latitude"] == 34.567
     assert _location["heading"] == 12

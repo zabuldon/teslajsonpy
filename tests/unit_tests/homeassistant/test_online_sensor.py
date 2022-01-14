@@ -77,6 +77,7 @@ async def test_get_value_on(monkeypatch):
         "vin": VIN,
         "id": 12345678901234567,
         "vehicle_id": 1234567890,
+        "update_interval": 300,
     }
 
 
@@ -103,4 +104,5 @@ async def test_get_value_off(monkeypatch):
         "vin": VIN,
         "id": 12345678901234567,
         "vehicle_id": 1234567890,
+        "update_interval": 300,
     }

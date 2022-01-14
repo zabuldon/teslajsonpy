@@ -5,7 +5,7 @@ import pytest
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.battery_sensor import Range
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
 
 
 def test_has_battery(monkeypatch):
@@ -41,7 +41,7 @@ def test_get_value_on_init(monkeypatch):
     _data = _mock.data_request_vehicle()
     _range = Range(_data, _controller)
 
-    assert not _range is None
+    assert _range is not None
     assert _range.get_value() is None
 
 
@@ -51,14 +51,17 @@ async def test_get_value_after_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _range = Range(_data, _controller)
 
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
+
     await _range.async_update()
 
-    assert not _range is None
-    assert not _range.get_value() is None
+    assert _range is not None
+    assert _range.get_value() is not None
     assert _range.get_value() == 167.96
 
 
@@ -68,6 +71,7 @@ async def test_get_value_rated_on(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _range = Range(_data, _controller)
@@ -75,10 +79,14 @@ async def test_get_value_rated_on(monkeypatch):
     _data["charge_state"]["battery_range"] = 123.45
     _data["charge_state"]["est_battery_range"] = 234.56
     _data["charge_state"]["ideal_battery_range"] = 345.67
+
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
+    _controller.set_gui_params(car_id=CAR_ID, params=_data["gui_settings"])
+
     await _range.async_update()
 
-    assert not _range is None
-    assert not _range.get_value() is None
+    assert _range is not None
+    assert _range.get_value() is not None
     assert _range.get_value() == 123.45
 
 
@@ -88,6 +96,7 @@ async def test_get_value_rated_off(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _range = Range(_data, _controller)
@@ -95,10 +104,14 @@ async def test_get_value_rated_off(monkeypatch):
     _data["charge_state"]["battery_range"] = 123.45
     _data["charge_state"]["est_battery_range"] = 234.56
     _data["charge_state"]["ideal_battery_range"] = 345.67
+
+    _controller.set_gui_params(car_id=CAR_ID, params=_data["gui_settings"])
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
+
     await _range.async_update()
 
-    assert not _range is None
-    assert not _range.get_value() is None
+    assert _range is not None
+    assert _range.get_value() is not None
     assert _range.get_value() == 345.67
 
 
@@ -108,6 +121,7 @@ async def test_get_value_in_kmh(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _range = Range(_data, _controller)
@@ -116,10 +130,14 @@ async def test_get_value_in_kmh(monkeypatch):
     _data["charge_state"]["battery_range"] = 123.45
     _data["charge_state"]["est_battery_range"] = 234.56
     _data["charge_state"]["ideal_battery_range"] = 345.67
+
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
+    _controller.set_gui_params(car_id=CAR_ID, params=_data["gui_settings"])
+
     await _range.async_update()
 
-    assert not _range is None
-    assert not _range.get_value() is None
+    assert _range is not None
+    assert _range.get_value() is not None
     assert _range.get_value() == 123.45
 
 
@@ -129,6 +147,7 @@ async def test_get_value_in_mph(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _range = Range(_data, _controller)
@@ -137,10 +156,14 @@ async def test_get_value_in_mph(monkeypatch):
     _data["charge_state"]["battery_range"] = 123.45
     _data["charge_state"]["est_battery_range"] = 234.56
     _data["charge_state"]["ideal_battery_range"] = 345.67
+
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
+    _controller.set_gui_params(car_id=CAR_ID, params=_data["gui_settings"])
+
     await _range.async_update()
 
-    assert not _range is None
-    assert not _range.get_value() is None
+    assert _range is not None
+    assert _range.get_value() is not None
     assert _range.get_value() == 123.45
 
 
@@ -150,6 +173,7 @@ async def test_async_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["gui_settings"]["gui_range_display"] = "Rated"
@@ -158,8 +182,11 @@ async def test_async_update(monkeypatch):
     _data["charge_state"]["ideal_battery_range"] = 345.67
     _range = Range(_data, _controller)
 
+    _controller.set_charging_params(car_id=CAR_ID, params=_data["charge_state"])
+    _controller.set_gui_params(car_id=CAR_ID, params=_data["gui_settings"])
+
     await _range.async_update()
 
-    assert not _range is None
-    assert not _range.get_value() is None
+    assert _range is not None
+    assert _range.get_value() is not None
     assert _range.get_value() == 123.45

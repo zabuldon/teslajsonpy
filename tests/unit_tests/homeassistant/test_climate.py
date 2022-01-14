@@ -1,12 +1,15 @@
 """Test climate."""
 
 import pytest
+import time
 
 from teslajsonpy.controller import Controller
 from teslajsonpy.exceptions import UnknownPresetMode
 from teslajsonpy.homeassistant.climate import Climate
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
+
+LAST_UPDATE_TIME = time.time()
 
 
 def test_has_battery(monkeypatch):
@@ -44,10 +47,13 @@ async def test_get_values_after_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _climate = Climate(_data, _controller)
 
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
     await _climate.async_update()
 
     assert _climate is not None
@@ -69,10 +75,14 @@ async def test_get_current_temp(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["climate_state"]["inside_temp"] = 18.8
     _climate = Climate(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _climate.async_update()
 
@@ -86,10 +96,14 @@ async def test_get_fan_status(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["climate_state"]["fan_status"] = 1
     _climate = Climate(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _climate.async_update()
 
@@ -103,10 +117,14 @@ async def test_get_goal_temp(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["climate_state"]["driver_temp_setting"] = 23.4
     _climate = Climate(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _climate.async_update()
 
@@ -120,10 +138,14 @@ async def test_is_hvac_enabled_on(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["climate_state"]["is_climate_on"] = True
     _climate = Climate(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _climate.async_update()
 
@@ -137,10 +159,14 @@ async def test_is_hvac_enabled_off(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["climate_state"]["is_climate_on"] = False
     _climate = Climate(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _climate.async_update()
 
@@ -154,9 +180,13 @@ async def test_set_status_on(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _climate = Climate(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _climate.async_update()
     await _climate.set_status(True)
@@ -171,9 +201,13 @@ async def test_set_status_off(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _climate = Climate(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _climate.async_update()
     await _climate.set_status(False)
@@ -188,9 +222,13 @@ async def test_set_temperature(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _climate = Climate(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _climate.async_update()
 
@@ -206,9 +244,13 @@ async def test_set_preset_mode_success(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _climate = Climate(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _climate.async_update()
 
@@ -225,9 +267,13 @@ async def test_set_preset_mode_invalid_modes(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _climate = Climate(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _climate.async_update()
 

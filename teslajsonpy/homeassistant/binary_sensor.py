@@ -213,6 +213,7 @@ class OnlineSensor(BinarySensor):
         self.attrs["vehicle_id"] = self.vehicle_id()
         self.attrs["vin"] = self.vin()
         self.attrs["id"] = self.id()
+        self.attrs["update_interval"] = self._controller.update_interval
 
     def get_value(self) -> Optional[bool]:
         """Return the car is online."""

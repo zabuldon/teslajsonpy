@@ -5,7 +5,7 @@ import pytest
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.battery_sensor import Battery
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
 
 
 def test_has_battery(monkeypatch):
@@ -51,9 +51,12 @@ async def test_get_value_after_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _sensor = Battery(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
 
     await _sensor.async_update()
 
@@ -68,9 +71,12 @@ async def test_battery_level(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _sensor = Battery(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
 
     await _sensor.async_update()
 
@@ -85,10 +91,13 @@ async def test_battery_charging_off(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charging_state"] = "Disconnected"
     _sensor = Battery(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
 
     await _sensor.async_update()
 
@@ -102,10 +111,13 @@ async def test_battery_charging_on(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charging_state"] = "Charging"
     _sensor = Battery(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
 
     await _sensor.async_update()
 
@@ -119,10 +131,13 @@ async def test_async_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["battery_level"] = 12.3
     _sensor = Battery(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
 
     await _sensor.async_update()
 
