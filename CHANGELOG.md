@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v1.5.0 (2022-01-14)
+### Feature
+* Sync endpoints.json with teslapy ([`faa4761`](https://github.com/zabuldon/teslajsonpy/commit/faa476179b6d198caaffc9dbec53a835cb496109))
+* Add update_interval as an attribute ([#267](https://github.com/zabuldon/teslajsonpy/issues/267)) ([`9c622bb`](https://github.com/zabuldon/teslajsonpy/commit/9c622bba9b519cc4c4985f980dae7c5acdf9e587))
+* Add polling policy flag ([#167](https://github.com/zabuldon/teslajsonpy/issues/167)) ([`43c74b0`](https://github.com/zabuldon/teslajsonpy/commit/43c74b069c288ce6eca19a832f1e2b24bab0dc8a))
+
 ## v1.4.2 (2021-12-28)
 ### Fix
 * **vins:** Ensure vin is in saved state ([`77e2414`](https://github.com/zabuldon/teslajsonpy/commit/77e2414489088d390de81ef3eb02314f6a5921b9))
