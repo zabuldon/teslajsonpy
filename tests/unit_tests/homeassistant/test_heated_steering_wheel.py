@@ -1,11 +1,14 @@
 """Test HeatedSteeringWheelSwitch."""
 
+import time
 import pytest
 
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.heated_steering_wheel import HeatedSteeringWheelSwitch
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, CAR_ID, VIN
+
+LAST_UPDATE_TIME = time.time()
 
 
 def test_has_battery(monkeypatch):
@@ -29,7 +32,7 @@ def test_get_steering_wheel_heat_on_init(monkeypatch):
     _data = _mock.data_request_vehicle()
     _wheel = HeatedSteeringWheelSwitch(_data, _controller)
 
-    assert not _wheel is None
+    assert _wheel is not None
     assert not _wheel.get_steering_wheel_heat()
 
 
@@ -39,17 +42,22 @@ async def test_get_steering_wheel_heat_after_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
-    NEW_LEVEL = True
+    new_level = True
 
     _data = _mock.data_request_vehicle()
-    _data["climate_state"]['steering_wheel_heater'] = NEW_LEVEL
+    # _data["climate_state"]['steering_wheel_heater'] = new_level
     _seat = HeatedSteeringWheelSwitch(_data, _controller)
+
+    _data["climate_state"]["steering_wheel_heater"] = new_level
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _seat.async_update()
 
-    assert not _seat is None
-    assert _seat.get_steering_wheel_heat() == NEW_LEVEL
+    assert _seat is not None
+    assert _seat.get_steering_wheel_heat() == new_level
 
 
 @pytest.mark.asyncio
@@ -58,20 +66,25 @@ async def test_set_get_seat_heat_level(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
-    ORIG_LEVEL = True
-    NEW_LEVEL = False
+    orig_level = True
+    new_level = False
 
     _data = _mock.data_request_vehicle()
-    _data["climate_state"]["steering_wheel_heater"] = ORIG_LEVEL
+    # _data["climate_state"]["steering_wheel_heater"] = orig_level
     _seat = HeatedSteeringWheelSwitch(_data, _controller)
+
+    _data["climate_state"]["steering_wheel_heater"] = orig_level
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _seat.async_update()
 
-    await _seat.set_steering_wheel_heat(NEW_LEVEL)
+    await _seat.set_steering_wheel_heat(new_level)
 
-    assert not _seat is None
-    assert _seat.get_steering_wheel_heat() == NEW_LEVEL
+    assert _seat is not None
+    assert _seat.get_steering_wheel_heat() == new_level
 
 
 @pytest.mark.asyncio
@@ -80,16 +93,20 @@ async def test_seat_same_level(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
-    ORIG_LEVEL = True
+    orig_level = True
 
     _data = _mock.data_request_vehicle()
-    _data["climate_state"]["steering_wheel_heater"] = ORIG_LEVEL
+    _data["climate_state"]["steering_wheel_heater"] = orig_level
     _seat = HeatedSteeringWheelSwitch(_data, _controller)
+
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _seat.async_update()
 
-    await _seat.set_steering_wheel_heat(ORIG_LEVEL)
+    await _seat.set_steering_wheel_heat(orig_level)
 
-    assert not _seat is None
-    assert _seat.get_steering_wheel_heat() == ORIG_LEVEL
+    assert _seat is not None
+    assert _seat.get_steering_wheel_heat() == orig_level

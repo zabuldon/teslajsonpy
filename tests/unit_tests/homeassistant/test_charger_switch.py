@@ -1,11 +1,14 @@
 """Test charger switch."""
 
 import pytest
+import time
 
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.charger import ChargerSwitch
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
+
+LAST_UPDATE_TIME = time.time()
 
 
 def test_has_battery(monkeypatch):
@@ -38,10 +41,14 @@ async def test_is_charging_on(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charging_state"] = "Charging"
     _switch = ChargerSwitch(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
 
     await _switch.async_update()
     assert _switch.is_charging()
@@ -53,10 +60,14 @@ async def test_is_charging_off(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charging_state"] = "Disconnected"
     _switch = ChargerSwitch(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
 
     await _switch.async_update()
     assert not _switch.is_charging()
@@ -68,10 +79,14 @@ async def test_start_charge(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charging_state"] = "Disconnected"
     _switch = ChargerSwitch(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
     await _switch.async_update()
 
     await _switch.start_charge()
@@ -84,10 +99,14 @@ async def test_stop_charge(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charging_state"] = "Charging"
     _switch = ChargerSwitch(_data, _controller)
+
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
     await _switch.async_update()
 
     await _switch.stop_charge()
@@ -100,6 +119,8 @@ async def test_async_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charging_state"] = "Charging"
@@ -115,11 +136,15 @@ async def test_async_update_with_change(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_last_update_time(vin=VIN, timestamp=LAST_UPDATE_TIME)
 
     _data = _mock.data_request_vehicle()
     _data["charge_state"]["charging_state"] = "Charging"
     _switch = ChargerSwitch(_data, _controller)
 
     _data["charge_state"]["charging_state"] = "Disconnected"
+    _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
+
     await _switch.async_update()
     assert not _switch.is_charging()

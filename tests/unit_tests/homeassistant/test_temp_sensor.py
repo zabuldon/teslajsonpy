@@ -5,7 +5,7 @@ import pytest
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.climate import TempSensor
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN, CAR_ID
 
 
 def test_has_battery(monkeypatch):
@@ -52,11 +52,14 @@ async def test_get_temp_after_update(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
 
     _data = _mock.data_request_vehicle()
+    _sensor = TempSensor(_data, _controller)
+
     _data["climate_state"]["inside_temp"] = 18.8
     _data["climate_state"]["outside_temp"] = 22.2
-    _sensor = TempSensor(_data, _controller)
+    _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
 
     await _sensor.async_update()
 
