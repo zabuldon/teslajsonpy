@@ -260,10 +260,11 @@ class UpdateSensor(BinarySensor):
     @property
     def device_state_attributes(self) -> Optional[dict]:
         """Return the optional state attributes."""
-        if not self.update_available:
+        if not self.car_version:
             return None
         data = {}
-        data["release_notes"] = f"{RELEASE_NOTES_URL}{self.update_version}"
-        data["update_version"] = self.update_version
         data["installed_version"] = self.car_version
+        if self.update_available:
+            data["release_notes"] = f"{RELEASE_NOTES_URL}{self.update_version}"
+            data["update_version"] = self.update_version
         return data
