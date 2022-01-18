@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.6.0 (2022-01-18)
+### Feature
+* Report installed_version in update_sensor ([#274](https://github.com/zabuldon/teslajsonpy/issues/274)) ([`cf0c17d`](https://github.com/zabuldon/teslajsonpy/commit/cf0c17d287ec419b20d9812de6969e7d37cdbcb7))
+
+### Fix
+* Fix get_location() so it updates if car facing north ([#277](https://github.com/zabuldon/teslajsonpy/issues/277)) ([`784a4ed`](https://github.com/zabuldon/teslajsonpy/commit/784a4edd5e89a9035341309708c8e5ab9506e1b2))
+
 ## v1.5.0 (2022-01-14)
 ### Feature
 * Sync endpoints.json with teslapy ([`faa4761`](https://github.com/zabuldon/teslajsonpy/commit/faa476179b6d198caaffc9dbec53a835cb496109))
