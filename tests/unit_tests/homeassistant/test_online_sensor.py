@@ -5,9 +5,9 @@ import pytest
 from teslajsonpy.controller import Controller
 from teslajsonpy.homeassistant.binary_sensor import OnlineSensor
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, VIN
 
-VIN = "5YJSA11111111111"
+# VIN = "5YJSA11111111111"
 
 
 def test_has_battery(monkeypatch):
@@ -78,14 +78,9 @@ async def test_get_value_on(monkeypatch):
         "id": 12345678901234567,
         "vehicle_id": 1234567890,
         "update_interval": 300,
-        "vehicle_data": {
-            "climate_state": {},
-            "charge_state": {},
-            "vehicle_state": {},
-            "vehicle_config": {},
-            "drive_state": {},
-            "gui_settings": {},
-        }
+        'vehicle_data': '{"climate_state": {}, "charge_state": {}, "vehicle_state": '
+                        '{}, "vehicle_config": {}, "drive_state": {}, "gui_settings": '
+                        '{}}'
     }
 
 
