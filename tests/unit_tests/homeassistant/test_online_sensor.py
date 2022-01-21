@@ -113,12 +113,7 @@ async def test_get_value_off(monkeypatch):
         "id": 12345678901234567,
         "vehicle_id": 1234567890,
         "update_interval": 300,
-        "vehicle_data": {
-            "climate_state": {},
-            "charge_state": {},
-            "vehicle_state": {},
-            "vehicle_config": {},
-            "drive_state": {},
-            "gui_settings": {},
-        }
-    }
+        "vehicle_data": '{"climate_state": {}, "charge_state": {}, "vehicle_state": '
+                        '{}, "vehicle_config": {}, "drive_state": {}, "gui_settings": '
+                        '{}}'
+                        
