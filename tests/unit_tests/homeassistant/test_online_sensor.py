@@ -125,12 +125,12 @@ async def test_get_vehicle_data_attribute(monkeypatch):
 
     _data = _mock.data_request_vehicle()
     _sensor = OnlineSensor(_data, _controller)
-    _data["climate_state"]["inside_temp"] = 18.8
-    _data["charge_state"]["charge_rate"] = 22
-    _data["vehicle_state"]["rt"] = 0
-    _data["vehicle_config"]["car_type"] = "model3"
-    _data["drive_state"]["shift_state"] = "P"
-    _data["gui_settings"]["gui_range_display"] = "Rated"
+    _data["climate_state"] = {"inside_temp": 18.8}
+    _data["charge_state"] = {"charge_rate": 22}
+    _data["vehicle_state"] = {"rt": 0}
+    _data["vehicle_config"] = {"car_type": "model3"}
+    _data["drive_state"] = {"shift_state": "P"}
+    _data["gui_settings"] = {"gui_range_display": "Rated"}
 
     _controller.set_climate_params(vin=VIN, params=_data["climate_state"])
     _controller.set_charging_params(vin=VIN, params=_data["charge_state"])
