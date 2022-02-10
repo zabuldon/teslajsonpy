@@ -149,5 +149,5 @@ async def test_get_vehicle_data_attribute(monkeypatch):
                                             ' "vehicle_state": {"rt": 0},'\
                                             ' "vehicle_config": {"car_type": "model3"},'\
                                             ' "drive_state": {"shift_state": "P"},'\
-                                            ' "gui_settings": {"gui_range_display": "Rated"}'
+                                            ' "gui_settings": {"gui_range_display": "Rated"}}'
     
