@@ -143,12 +143,11 @@ async def test_get_vehicle_data_attribute(monkeypatch):
     await _sensor.async_update()
 
     assert _sensor is not None
-    assert _sensor.attrs.vehicle_data is not None
-    assert _sensor.attrs.vehicle_data == {
-        "vehicle_data": '{"climate_state": {"inside_temp": 18.8},'
-                        ' "charge_state": {"charge_rate": 22},'
-                        ' "vehicle_state": {"rt": 0},'
-                        ' "vehicle_config": {"car_type": "model3"},'
-                        ' "drive_state": {"shift_state": "P"},'
-                        ' "gui_settings": {"gui_range_display": "Rated"}'
-    }
+    assert _sensor.attrs.get("vehicle_data") is not None
+    assert _sensor.attrs["vehicle_data"] == '{"climate_state": {"inside_temp": 18.8},'\
+                                            ' "charge_state": {"charge_rate": 22},'\
+                                            ' "vehicle_state": {"rt": 0},'\
+                                            ' "vehicle_config": {"car_type": "model3"},'\
+                                            ' "drive_state": {"shift_state": "P"},'\
+                                            ' "gui_settings": {"gui_range_display": "Rated"}'
+    
