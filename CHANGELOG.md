@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.7.0 (2022-02-11)
+### Feature
+* Provide all data in home assistant sensor as json string ([#279](https://github.com/zabuldon/teslajsonpy/issues/279)) ([`8c2a1f3`](https://github.com/zabuldon/teslajsonpy/commit/8c2a1f38aea8e1c74e80abd9c2282bd8d0263c86))
+
 ## v1.6.0 (2022-01-18)
 ### Feature
 * Report installed_version in update_sensor ([#274](https://github.com/zabuldon/teslajsonpy/issues/274)) ([`cf0c17d`](https://github.com/zabuldon/teslajsonpy/commit/cf0c17d287ec419b20d9812de6969e7d37cdbcb7))
