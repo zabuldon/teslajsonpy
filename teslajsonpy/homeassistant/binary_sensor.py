@@ -214,7 +214,7 @@ class OnlineSensor(BinarySensor):
         self.attrs["vehicle_id"] = self.vehicle_id()
         self.attrs["vin"] = self.vin()
         self.attrs["id"] = self.id()
-        self.attrs["update_interval"] = self._controller.update_interval
+        self.attrs["update_interval"] = self._controller.get_update_interval_vin(vin=self._vin)
         vehicle_data = {
             "climate_state": self._controller.get_climate_params(self._id),
             "charge_state": self._controller.get_charging_params(self._id),

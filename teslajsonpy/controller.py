@@ -333,6 +333,7 @@ class Controller:
         )
         self.__components = []
         self._update_interval: int = update_interval
+        self._update_interval_vin = {}
         self.__update = {}
         self.__climate = {}
         self.__charging = {}
@@ -772,7 +773,7 @@ class Controller:
                 vin=vin, timestamp=cur_time, shift_state=self.shift_state(vin=vin)
             )
         if self.is_in_gear(vin=vin):
-            driving_interval = min(DRIVING_INTERVAL, self.update_interval)
+            driving_interval = min(DRIVING_INTERVAL, self.get_update_interval_vin(vin=vin))
             if self.__update_state[vin] != "driving":
                 self.__update_state[vin] = "driving"
                 _LOGGER.debug(
@@ -787,10 +788,10 @@ class Controller:
                 vin[-5:],
                 self.car_state[vin].get("state"),
                 self.polling_policy,
-                self.update_interval,
+                self.get_update_interval_vin(vin=vin),
             )
             self.__update_state[vin] = "normal"
-            return self.update_interval
+            return self.get_update_interval_vin(vin=vin)
         if self.polling_policy == "connected" and (
             self.is_sentry_mode_on(vin=vin)
             or self.is_climate_on(vin=vin)
@@ -808,16 +809,16 @@ class Controller:
                 vin[-5:],
                 self.car_state[vin].get("state"),
                 self.polling_policy,
-                self.update_interval,
+                self.get_update_interval_vin(vin=vin),
             )
             self.__update_state[vin] = "normal"
-            return self.update_interval
+            return self.get_update_interval_vin(vin=vin)
         if (cur_time - self.get_last_park_time(vin=vin) > IDLE_INTERVAL) and not (
             self.is_sentry_mode_on(vin=vin)
             or self.is_climate_on(vin=vin)
             or self.charging_state(vin=vin) == "Charging"
         ):
-            sleep_interval = max(SLEEP_INTERVAL, self.update_interval)
+            sleep_interval = max(SLEEP_INTERVAL, self.get_update_interval_vin(vin=vin))
             if self.__update_state[vin] != "trying_to_sleep":
                 self.__update_state[vin] = "trying_to_sleep"
             _LOGGER.debug(
@@ -836,9 +837,9 @@ class Controller:
                 vin[-5:],
                 self.car_state[vin].get("state"),
                 self.polling_policy,
-                self.update_interval,
+                self.get_update_interval_vin(vin=vin),
             )
-        return self.update_interval
+        return self.get_update_interval_vin(vin=vin)
 
     async def update(
         self,
@@ -1540,8 +1541,35 @@ class Controller:
     @update_interval.setter
     def update_interval(self, value: int) -> None:
         """Set update_interval."""
+        if value < 0:
+            value = 300
         if value:
+            _LOGGER.debug("Update interval set to %s.", value)
             self._update_interval = int(value)
+
+    def set_update_interval_vin(self, car_id: Text = None, vin: Text = None, value: int = None) -> None:
+        """Set update interval for specific vin."""
+
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin is None:
+            return
+        if value is None or value < 0:
+            _LOGGER.debug("%s: Update interval reset to default.", vin[-5:])
+            self._update_interval_vin.pop(vin, None)
+        else:
+            _LOGGER.debug("%s: Update interval set to %s.", vin[-5:], value)
+            self._update_interval_vin.update({vin:value})
+    
+    def get_update_interval_vin(self, car_id: Text = None, vin: Text = None) -> int:
+        """Get update interval for specific vin or default if no vin specific."""
+
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin is None or vin == "":
+            return self.update_interval
+
+        return self._update_interval_vin.get(vin, self.update_interval)
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
         """Return vin for a car_id."""
