@@ -1559,8 +1559,8 @@ class Controller:
             self._update_interval_vin.pop(vin, None)
         else:
             _LOGGER.debug("%s: Update interval set to %s.", vin[-5:], value)
-            self._update_interval_vin.update({vin:value})
-    
+            self._update_interval_vin.update({vin: value})
+
     def get_update_interval_vin(self, car_id: Text = None, vin: Text = None) -> int:
         """Get update interval for specific vin or default if no vin specific."""
 
