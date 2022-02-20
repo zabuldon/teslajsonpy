@@ -6,6 +6,9 @@ from tests.tesla_mock import TeslaMock, VIN, CAR_ID
 DEFAULT_INTERVAL = 300
 VIN_INTERVAL = 5
 
+VIN2 = "5YJSA11111111112"
+CAR_ID2 = 86543210987654321
+
 
 def test_update_interval(monkeypatch):
     """Test update_interval property"""
@@ -33,20 +36,25 @@ def test_set_update_interval_vin(monkeypatch):
     monkeypatch.setitem(_controller.car_online, VIN, True)
     monkeypatch.setitem(_controller.car_state, VIN, _mock.data_request_vehicle())
     _controller.set_id_vin(CAR_ID, VIN)
+    _controller.set_id_vin(CAR_ID2, VIN2)
     _controller.update_interval = DEFAULT_INTERVAL
 
-    # Test setting interval for specific VIN.
+    # Test setting interval for VIN1.
     _controller.set_update_interval_vin(car_id=CAR_ID, value=VIN_INTERVAL)
     assert _controller._update_interval_vin[VIN] == VIN_INTERVAL
 
-    # Test setting interval for specific VIN back to default
+    # Test setting interval for  VIN2.
+    _controller.set_update_interval_vin(car_id=CAR_ID2, value=VIN_INTERVAL)
+    assert _controller._update_interval_vin[VIN2] == VIN_INTERVAL
+
+    # Test setting interval for VIN1 back to default
     _controller.set_update_interval_vin(car_id=CAR_ID)
     assert _controller._update_interval_vin.get(VIN) is None
+    assert _controller._update_interval_vin[VIN2] == VIN_INTERVAL
 
-    # Test setting interval for specific VIN back to default with negative
-    _controller.set_update_interval_vin(car_id=CAR_ID, value=VIN_INTERVAL)
-    _controller.set_update_interval_vin(car_id=CAR_ID, value=-1)
-    assert _controller._update_interval_vin.get(VIN) is None
+    # Test setting interval for VIN2 back to default with negative value
+    _controller.set_update_interval_vin(car_id=CAR_ID2, value=-1)
+    assert _controller._update_interval_vin.get(VIN2) is None
 
 
 def test_get_update_interval_vin(monkeypatch):
@@ -60,12 +68,13 @@ def test_get_update_interval_vin(monkeypatch):
     _controller.set_id_vin(CAR_ID, VIN)
     _controller.update_interval = DEFAULT_INTERVAL
 
-    # Test getting interval for specific VIN with it not set
+    # Test getting interval for VIN1 with it not set
     assert _controller.get_update_interval_vin(car_id=CAR_ID) == DEFAULT_INTERVAL
 
-    # Test getting interval for specific VIN with it set
+    # Test getting interval for VIN1 with it set and VIN2 not set
     _controller.set_update_interval_vin(car_id=CAR_ID, value=VIN_INTERVAL)
     assert _controller.get_update_interval_vin(car_id=CAR_ID) == VIN_INTERVAL
+    assert _controller.get_update_interval_vin(car_id=CAR_ID2) == DEFAULT_INTERVAL
 
     # Test getting interval when no VIN provided
     assert _controller.get_update_interval_vin() == DEFAULT_INTERVAL
