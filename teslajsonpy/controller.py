@@ -26,6 +26,7 @@ from teslajsonpy.const import (
     DRIVING_INTERVAL,
     IDLE_INTERVAL,
     ONLINE_INTERVAL,
+    UPDATE_INTERVAL,
     SLEEP_INTERVAL,
     TESLA_PRODUCT_TYPE_ENERGY_SITES,
     TESLA_PRODUCT_TYPE_VEHICLES,
@@ -294,7 +295,7 @@ class Controller:
         access_token: Text = None,
         refresh_token: Text = None,
         expiration: int = 0,
-        update_interval: int = 300,
+        update_interval: int = UPDATE_INTERVAL,
         enable_websocket: bool = False,
         polling_policy: Text = None,
         auth_domain: str = AUTH_DOMAIN,
@@ -309,7 +310,7 @@ class Controller:
             refresh_token (Text, optional): Refresh token. Defaults to None.
             expiration (int, optional): Timestamp when access_token expires. Defaults to 0
             update_interval (int, optional): Seconds between allowed updates to the API.  This is to prevent
-            being blocked by Tesla. Defaults to 300.
+            being blocked by Tesla. Defaults to UPDATE_INTERVAL.
             enable_websocket (bool, optional): Whether to connect with websockets. Defaults to False.
             polling_policy (Text, optional): How aggressively will we poll the car. Possible values:
             Not set - Only keep the car awake while it is actively charging or driving, and while sentry
@@ -1542,7 +1543,7 @@ class Controller:
     def update_interval(self, value: int) -> None:
         """Set update_interval."""
         if value < 0:
-            value = 300
+            value = UPDATE_INTERVAL
         if value:
             _LOGGER.debug("Update interval set to %s.", value)
             self._update_interval = int(value)
