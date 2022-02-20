@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v1.8.0 (2022-02-20)
+### Feature
+* Add per vehicle polling interval ([#281](https://github.com/zabuldon/teslajsonpy/issues/281)) ([`3e66dc1`](https://github.com/zabuldon/teslajsonpy/commit/3e66dc1a5a66b00e5a289271be729e4eb76779b5))
+
 ## v1.7.0 (2022-02-11)
 ### Feature
 * Provide all data in home assistant sensor as json string ([#279](https://github.com/zabuldon/teslajsonpy/issues/279)) ([`8c2a1f3`](https://github.com/zabuldon/teslajsonpy/commit/8c2a1f38aea8e1c74e80abd9c2282bd8d0263c86))
