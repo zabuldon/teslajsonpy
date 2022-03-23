@@ -48,7 +48,11 @@ class GPS(VehicleDevice):
 
     def get_location(self):
         """Return the current location."""
-        if self.__longitude is not None and self.__latitude is not None and self.__heading is not None:
+        if (
+            self.__longitude is not None
+            and self.__latitude is not None
+            and self.__heading is not None
+        ):
             self.__location = {
                 "longitude": self.__longitude,
                 "latitude": self.__latitude,

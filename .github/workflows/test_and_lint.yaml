@@ -29,6 +29,9 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install poetry
         poetry install
+    - name: Black
+      run: |
+        make black
     - name: Lint
       run: |
         make lint
