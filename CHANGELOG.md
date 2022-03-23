@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v1.9.0 (2022-03-23)
+### Feature
+* Update endpoints.json for version 4.5 ([#286](https://github.com/zabuldon/teslajsonpy/issues/286)) ([`c9bc30b`](https://github.com/zabuldon/teslajsonpy/commit/c9bc30ba1d5182a16c1e62946df33c6f54de3929))
+
+### Fix
+* Remove get_bearer_token step ([`e22ebf3`](https://github.com/zabuldon/teslajsonpy/commit/e22ebf377f2e7d0639cd00a9ffd1d9fb36ff904b))
+* Remove get_bearer_token step ([`48dcae5`](https://github.com/zabuldon/teslajsonpy/commit/48dcae548c8653e66a94d831ad2c5f3889b5967e))
+
 ## v1.8.0 (2022-02-20)
 ### Feature
 * Add per vehicle polling interval ([#281](https://github.com/zabuldon/teslajsonpy/issues/281)) ([`3e66dc1`](https://github.com/zabuldon/teslajsonpy/commit/3e66dc1a5a66b00e5a289271be729e4eb76779b5))
