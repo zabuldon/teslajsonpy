@@ -49,7 +49,7 @@ class Connection:
         refresh_token: Text = None,
         authorization_token: Text = None,
         expiration: int = 0,
-        auth_domain: str = AUTH_DOMAIN,
+        auth_domain: str = AUTH_DOMAIN
     ) -> None:
         """Initialize connection object."""
         self.user_agent: Text = "Model S 2.1.79 (SM-G900V; Android REL 4.4.4; en_US"
@@ -147,6 +147,10 @@ class Connection:
                 self.code = None
                 self.sso_oauth = {}
                 raise IncompleteCredentials("Need oauth credentials")
+            auth = await self.get_bearer_token(
+                access_token=self.sso_oauth.get("access_token")
+            )
+            _LOGGER.debug("Received bearer token %s", auth)
             if auth.get("created_at"):
                 # use server time if available
                 self.__sethead(
@@ -561,7 +565,6 @@ class Connection:
 
     async def get_bearer_token(self, access_token):
         """Get bearer token. This is used by the owners API."""
-        # This appears deprecated as of March 21, 2022: https://github.com/timdorr/tesla-api/issues/548
         # https://tesla-api.timdorr.com/api-basics/authentication#step-4-exchange-bearer-token-for-access-token
         if not access_token:
             _LOGGER.debug("Missing access token")
