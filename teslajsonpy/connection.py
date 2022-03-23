@@ -49,7 +49,7 @@ class Connection:
         refresh_token: Text = None,
         authorization_token: Text = None,
         expiration: int = 0,
-        auth_domain: str = AUTH_DOMAIN
+        auth_domain: str = AUTH_DOMAIN,
     ) -> None:
         """Initialize connection object."""
         self.user_agent: Text = "Model S 2.1.79 (SM-G900V; Android REL 4.4.4; en_US"
