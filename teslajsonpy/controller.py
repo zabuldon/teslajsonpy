@@ -774,7 +774,9 @@ class Controller:
                 vin=vin, timestamp=cur_time, shift_state=self.shift_state(vin=vin)
             )
         if self.is_in_gear(vin=vin):
-            driving_interval = min(DRIVING_INTERVAL, self.get_update_interval_vin(vin=vin))
+            driving_interval = min(
+                DRIVING_INTERVAL, self.get_update_interval_vin(vin=vin)
+            )
             if self.__update_state[vin] != "driving":
                 self.__update_state[vin] = "driving"
                 _LOGGER.debug(
@@ -1548,7 +1550,9 @@ class Controller:
             _LOGGER.debug("Update interval set to %s.", value)
             self._update_interval = int(value)
 
-    def set_update_interval_vin(self, car_id: Text = None, vin: Text = None, value: int = None) -> None:
+    def set_update_interval_vin(
+        self, car_id: Text = None, vin: Text = None, value: int = None
+    ) -> None:
         """Set update interval for specific vin."""
 
         if car_id and not vin:
