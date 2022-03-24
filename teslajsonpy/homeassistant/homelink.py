@@ -40,35 +40,19 @@ class TriggerHomelink(VehicleDevice):
         self._homelink_nearby = None
         self._homelink_available = False
 
-    async def async_update(self, wake_if_asleep=False, force=False):
-        """Update the trigger homelink of the vehicle."""
-        await super().async_update(wake_if_asleep=wake_if_asleep)
-        self.refresh()
-
     @staticmethod
     def has_battery() -> bool:
         """Return whether the device has a battery."""
         return False
 
-    async def trigger_homelink(self) -> None:
-        """Trigger Homelink."""
-        if self._latitude is not None and self._longitude is not None:
-            if not self._homelink_device_count:
-                raise HomelinkError(f"No homelink devices added to {self.car_name()}.")
-            if not self._homelink_nearby:
-                raise HomelinkError(f"No homelink devices near {self.car_name()}.")
-            data = await self._controller.api(
-                "TRIGGER_HOMELINK",
-                path_vars={"vehicle_id": self._id},
-                lat=self._latitude,
-                lon=self._longitude,
-                wake_if_asleep=True,
-            )
-            if data and data.get("response"):
-                result = data["response"].get("result")
-                reason = data["response"].get("reason")
-                if result is False:
-                    raise HomelinkError(f"Error calling trigger_homelink: {reason}")
+    def available(self) -> bool:
+        """Return whether homelink is available."""
+        return self._homelink_available
+
+    async def async_update(self, wake_if_asleep=False, force=False):
+        """Update the trigger homelink of the vehicle."""
+        await super().async_update(wake_if_asleep=wake_if_asleep)
+        self.refresh()
 
     def refresh(self) -> None:
         """Refresh data.
@@ -90,6 +74,22 @@ class TriggerHomelink(VehicleDevice):
             self._homelink_nearby = data.get("homelink_nearby")
         self._homelink_available = bool(self._homelink_device_count)
 
-    def available(self) -> bool:
-        """Return whether homelink is available."""
-        return self._homelink_available
+    async def trigger_homelink(self) -> None:
+        """Trigger Homelink."""
+        if self._latitude is not None and self._longitude is not None:
+            if not self._homelink_device_count:
+                raise HomelinkError(f"No homelink devices added to {self.car_name()}.")
+            if not self._homelink_nearby:
+                raise HomelinkError(f"No homelink devices near {self.car_name()}.")
+            data = await self._controller.api(
+                "TRIGGER_HOMELINK",
+                path_vars={"vehicle_id": self._id},
+                lat=self._latitude,
+                lon=self._longitude,
+                wake_if_asleep=True,
+            )
+            if data and data.get("response"):
+                result = data["response"].get("result")
+                reason = data["response"].get("reason")
+                if result is False:
+                    raise HomelinkError(f"Error calling trigger_homelink: {reason}")
