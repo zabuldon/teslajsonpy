@@ -83,9 +83,7 @@ class TriggerHomelink(VehicleDevice):
         if data:
             self.__homelink_device_count = data["homelink_device_count"]
             self.__homelink_nearby = data["homelink_nearby"]
-        self.__homelink_available = (
-            self.__homelink_device_count and self.__homelink_nearby
-        )
+        self.__homelink_available = bool(self.__homelink_device_count)
 
     def available(self) -> bool:
         """Return whether homelink is available."""

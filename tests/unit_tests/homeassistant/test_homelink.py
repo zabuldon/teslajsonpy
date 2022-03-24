@@ -59,14 +59,13 @@ async def test_available(monkeypatch):
 
     assert not _button.available()
 
-    test_set = [(0, False), (1, False), (0, True), (1, True), (2, True)]
+    _test_set = [None, 0, 1, 2]
 
-    for count, near in test_set:
-        _data["vehicle_state"]["homelink_device_count"] = count
-        _data["vehicle_state"]["homelink_nearby"] = near
+    for _count in _test_set:
+        _data["vehicle_state"]["homelink_device_count"] = _count
         _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
         await _button.async_update()
-        assert _button.available() == (count and near)
+        assert _button.available() == bool(_count)
 
 
 @pytest.mark.asyncio
