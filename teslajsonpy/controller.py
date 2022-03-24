@@ -54,6 +54,7 @@ from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
 from teslajsonpy.homeassistant.heated_steering_wheel import HeatedSteeringWheelSwitch
 from teslajsonpy.homeassistant.power import PowerSensor
 from teslajsonpy.homeassistant.alerts import Horn, FlashLights
+from teslajsonpy.homeassistant.homelink import TriggerHomelink
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -724,6 +725,7 @@ class Controller:
         self.__components.append(HeatedSteeringWheelSwitch(car, self))
         self.__components.append(Horn(car, self))
         self.__components.append(FlashLights(car, self))
+        self.__components.append(TriggerHomelink(car, self))
         for seat in ["left", "right", "rear_left", "rear_center", "rear_right"]:
             try:
                 self.__components.append(HeatedSeatSelect(car, self, seat))
