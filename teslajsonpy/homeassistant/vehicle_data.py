@@ -66,7 +66,7 @@ class VehicleDataSensor(VehicleDevice):
         return self.__state
 
     @property
-    def device_class(self) -> Text:
+    def device_class(self) -> Optional[Text]:
         """Return the HA device class."""
         return self._device_class
 
@@ -110,6 +110,8 @@ class ClimateStateDataSensor(VehicleDataSensor):
         super().__init__(data, controller)
 
         self.type: Text = "climate state data sensor"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     def refresh(self) -> None:
         """Refresh data.
@@ -136,6 +138,8 @@ class ChargeStateDataSensor(VehicleDataSensor):
         super().__init__(data, controller)
 
         self.type: Text = "charging state data sensor"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     def refresh(self) -> None:
         """Refresh data.
@@ -161,6 +165,8 @@ class VehicleStateDataSensor(VehicleDataSensor):
         super().__init__(data, controller)
 
         self.type: Text = "vehicle state data sensor"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     def refresh(self) -> None:
         """Refresh data.
@@ -189,6 +195,8 @@ class SoftwareDataSensor(VehicleDataSensor):
         super().__init__(data, controller)
 
         self.type: Text = "software data sensor"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     def refresh(self) -> None:
         """Refresh data.
@@ -216,6 +224,8 @@ class SpeedLimitDataSensor(VehicleDataSensor):
         super().__init__(data, controller)
 
         self.type: Text = "speed limit data sensor"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     def refresh(self) -> None:
         """Refresh data.
@@ -243,6 +253,8 @@ class VehicleConfigDataSensor(VehicleDataSensor):
         super().__init__(data, controller)
 
         self.type: Text = "vehicle config data sensor"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     def refresh(self) -> None:
         """Refresh data.
@@ -268,6 +280,8 @@ class DriveStateDataSensor(VehicleDataSensor):
         super().__init__(data, controller)
 
         self.type: Text = "drive state data sensor"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     def refresh(self) -> None:
         """Refresh data.
@@ -293,6 +307,8 @@ class GuiSettingsDataSensor(VehicleDataSensor):
         super().__init__(data, controller)
 
         self.type: Text = "gui settings data sensor"
+        self.name: Text = self._name()
+        self.uniq_name: Text = self._uniq_name()
 
     def refresh(self) -> None:
         """Refresh data.
