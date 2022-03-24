@@ -51,7 +51,7 @@ class TriggerHomelink(VehicleDevice):
 
     async def async_update(self, wake_if_asleep=False, force=False):
         """Update the trigger homelink of the vehicle."""
-        await super().async_update(wake_if_asleep=wake_if_asleep)
+        await super().async_update(wake_if_asleep=wake_if_asleep, force=force)
         self.refresh()
 
     def refresh(self) -> None:
@@ -76,6 +76,7 @@ class TriggerHomelink(VehicleDevice):
 
     async def trigger_homelink(self) -> None:
         """Trigger Homelink."""
+        await self.async_update(wake_if_asleep=True, force=True)
         if self._latitude is not None and self._longitude is not None:
             if not self._homelink_device_count:
                 raise HomelinkError(f"No homelink devices added to {self.car_name()}.")
