@@ -78,16 +78,16 @@ class TriggerHomelink(VehicleDevice):
         super().refresh()
         data = self._controller.get_drive_params(self._id)
         if data:
-            if data["native_location_supported"]:
-                self.__longitude = data["native_longitude"]
-                self.__latitude = data["native_latitude"]
+            if data.get("native_location_supported"):
+                self.__longitude = data.get("native_longitude")
+                self.__latitude = data.get("native_latitude")
             else:
-                self.__longitude = data["longitude"]
-                self.__latitude = data["latitude"]
+                self.__longitude = data.get("longitude")
+                self.__latitude = data.get("latitude")
         data = self._controller.get_state_params(self._id)
         if data:
-            self.__homelink_device_count = data["homelink_device_count"]
-            self.__homelink_nearby = data["homelink_nearby"]
+            self.__homelink_device_count = data.get("homelink_device_count")
+            self.__homelink_nearby = data.get("homelink_nearby")
         self.__homelink_available = bool(self.__homelink_device_count)
 
     def available(self) -> bool:
