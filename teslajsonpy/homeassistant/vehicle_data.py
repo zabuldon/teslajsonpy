@@ -42,6 +42,7 @@ class VehicleDataSensor(VehicleDevice):
         self._sensor_type: Optional[Text] = None
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
+        self._device_class: Optional[Text] = None
         self.enabled_by_default = False
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
@@ -62,6 +63,11 @@ class VehicleDataSensor(VehicleDevice):
     def get_value(self) -> Optional[str]:
         """Return the state."""
         return self.__state
+
+    @property
+    def device_class(self) -> Text:
+        """Return the HA device class."""
+        return self._device_class
 
     @classmethod
     def _dict_to_attr(
