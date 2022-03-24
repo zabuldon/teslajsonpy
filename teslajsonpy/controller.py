@@ -54,6 +54,17 @@ from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
 from teslajsonpy.homeassistant.heated_steering_wheel import HeatedSteeringWheelSwitch
 from teslajsonpy.homeassistant.power import PowerSensor
 from teslajsonpy.homeassistant.alerts import Horn, FlashLights
+from teslajsonpy.homeassistant.vehicle_data import (
+    ChargeStateDataSensor,
+    ClimateStateDataSensor,
+    DriveStateDataSensor,
+    GuiSettingsDataSensor,
+    SoftwareDataSensor,
+    SpeedLimitDataSensor,
+    VehicleConfigDataSensor,
+    VehicleDataSensor,
+    VehicleStateDataSensor,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -73,7 +84,7 @@ def min_expo(base=2, factor=1, max_value=None, min_value=0):
     """
     n = 0
     while True:
-        a = min_value + factor * base ** n
+        a = min_value + factor * base**n
         if max_value is None or a < max_value:
             yield a
             n += 1
@@ -724,6 +735,17 @@ class Controller:
         self.__components.append(HeatedSteeringWheelSwitch(car, self))
         self.__components.append(Horn(car, self))
         self.__components.append(FlashLights(car, self))
+        self.__components.append(ChargeStateDataSensor(car, self))
+        self.__components.append(ClimateStateDataSensor(car, self))
+        self.__components.append(DriveStateDataSensor(car, self))
+        self.__components.append(GuiSettingsDataSensor(car, self))
+        self.__components.append(SoftwareDataSensor(car, self))
+        self.__components.append(SpeedLimitDataSensor(car, self))
+        self.__components.append(VehicleConfigDataSensor(car, self))
+        self.__components.append(VehicleDataSensor(car, self))
+        self.__components.append(VehicleStateDataSensor(car, self))
+        self.__components.append(ChargeStateDataSensor(car, self))
+
         for seat in ["left", "right", "rear_left", "rear_center", "rear_right"]:
             try:
                 self.__components.append(HeatedSeatSelect(car, self, seat))
