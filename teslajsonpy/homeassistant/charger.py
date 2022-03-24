@@ -347,7 +347,7 @@ class ChargingEnergySensor(VehicleDevice):
             )
             if (
                 self.__charge_energy_added
-                and self.__charge_energy_added >= data["charge_energy_added"]
+                and self.__charge_energy_added > data["charge_energy_added"]
             ):
                 self.__last_reset = datetime.datetime.utcnow()
             self.__charge_energy_added = data["charge_energy_added"]
