@@ -57,13 +57,18 @@ class TriggerHomelink(VehicleDevice):
                 raise HomelinkError(f"No homelink devices added to {self.car_name()}.")
             if not self.__homelink_nearby:
                 raise HomelinkError(f"No homelink devices near {self.car_name()}.")
-            await self._controller.api(
+            data = await self._controller.api(
                 "TRIGGER_HOMELINK",
                 path_vars={"vehicle_id": self._id},
                 lat=self.__latitude,
                 lon=self.__longitude,
                 wake_if_asleep=True,
             )
+            if data and data.get("response"):
+                result = data["response"].get("result")
+                reason = data["response"].get("reason")
+                if result is False:
+                    raise HomelinkError(f"Error calling trigger_homelink: {reason}")
 
     def refresh(self) -> None:
         """Refresh data.
