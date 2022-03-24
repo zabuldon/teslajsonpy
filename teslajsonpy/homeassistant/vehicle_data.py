@@ -49,7 +49,6 @@ class VehicleDataSensor(VehicleDevice):
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the vehicle data."""
         await super().async_update(wake_if_asleep=wake_if_asleep)
-        print("Update")
         self.refresh()
 
     def refresh(self) -> None:
@@ -58,7 +57,6 @@ class VehicleDataSensor(VehicleDevice):
         This assumes the controller has already been updated
         """
         super().refresh()
-        print("Refresh")
         self.__state = self.vin()
 
     def get_value(self) -> Optional[str]:
