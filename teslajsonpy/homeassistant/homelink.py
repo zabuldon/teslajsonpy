@@ -34,11 +34,11 @@ class TriggerHomelink(VehicleDevice):
         self.hass_type = "button"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
-        self.__longitude = None
-        self.__latitude = None
-        self.__homelink_device_count = None
-        self.__homelink_nearby = None
-        self.__homelink_available = False
+        self._longitude = None
+        self._latitude = None
+        self._homelink_device_count = None
+        self._homelink_nearby = None
+        self._homelink_available = False
 
     async def async_update(self, wake_if_asleep=False, force=False):
         """Update the trigger homelink of the vehicle."""
@@ -52,16 +52,16 @@ class TriggerHomelink(VehicleDevice):
 
     async def trigger_homelink(self) -> None:
         """Trigger Homelink."""
-        if self.__latitude is not None and self.__longitude is not None:
-            if not self.__homelink_device_count:
+        if self._latitude is not None and self._longitude is not None:
+            if not self._homelink_device_count:
                 raise HomelinkError(f"No homelink devices added to {self.car_name()}.")
-            if not self.__homelink_nearby:
+            if not self._homelink_nearby:
                 raise HomelinkError(f"No homelink devices near {self.car_name()}.")
             data = await self._controller.api(
                 "TRIGGER_HOMELINK",
                 path_vars={"vehicle_id": self._id},
-                lat=self.__latitude,
-                lon=self.__longitude,
+                lat=self._latitude,
+                lon=self._longitude,
                 wake_if_asleep=True,
             )
             if data and data.get("response"):
@@ -79,17 +79,17 @@ class TriggerHomelink(VehicleDevice):
         data = self._controller.get_drive_params(self._id)
         if data:
             if data.get("native_location_supported"):
-                self.__longitude = data.get("native_longitude")
-                self.__latitude = data.get("native_latitude")
+                self._longitude = data.get("native_longitude")
+                self._latitude = data.get("native_latitude")
             else:
-                self.__longitude = data.get("longitude")
-                self.__latitude = data.get("latitude")
+                self._longitude = data.get("longitude")
+                self._latitude = data.get("latitude")
         data = self._controller.get_state_params(self._id)
         if data:
-            self.__homelink_device_count = data.get("homelink_device_count")
-            self.__homelink_nearby = data.get("homelink_nearby")
-        self.__homelink_available = bool(self.__homelink_device_count)
+            self._homelink_device_count = data.get("homelink_device_count")
+            self._homelink_nearby = data.get("homelink_nearby")
+        self._homelink_available = bool(self._homelink_device_count)
 
     def available(self) -> bool:
         """Return whether homelink is available."""
-        return self.__homelink_available
+        return self._homelink_available

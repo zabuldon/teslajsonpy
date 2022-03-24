@@ -122,3 +122,51 @@ async def test_homelink_error_device_nearby(monkeypatch):
     with pytest.raises(HomelinkError) as excinfo:
         await _button.trigger_homelink()
     assert excinfo.value.message == f"No homelink devices near {_button.car_name()}."
+
+
+@pytest.mark.asyncio
+async def test_native_location(monkeypatch):
+    """Test native location values are set correctly."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+
+    _data = _mock.data_request_vehicle()
+    _data["drive_state"]["native_location_supported"] = 1
+    _data["drive_state"]["longitude"] = 12.345
+    _data["drive_state"]["native_longitude"] = 23.456
+    _data["drive_state"]["latitude"] = 34.567
+    _data["drive_state"]["native_latitude"] = 45.678
+    _button = TriggerHomelink(_data, _controller)
+
+    _controller.set_drive_params(vin=VIN, params=_data["drive_state"])
+
+    await _button.async_update()
+
+    assert _button._longitude == 23.456
+    assert _button._latitude == 45.678
+
+
+@pytest.mark.asyncio
+async def test_location(monkeypatch):
+    """Test non-native location values are set correctly."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+
+    _data = _mock.data_request_vehicle()
+    _data["drive_state"]["native_location_supported"] = 0
+    _data["drive_state"]["longitude"] = 12.345
+    _data["drive_state"]["native_longitude"] = 23.456
+    _data["drive_state"]["latitude"] = 34.567
+    _data["drive_state"]["native_latitude"] = 45.678
+    _button = TriggerHomelink(_data, _controller)
+
+    _controller.set_drive_params(vin=VIN, params=_data["drive_state"])
+
+    await _button.async_update()
+
+    assert _button._longitude == 12.345
+    assert _button._latitude == 34.567
