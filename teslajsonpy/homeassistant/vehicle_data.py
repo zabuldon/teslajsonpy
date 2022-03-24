@@ -43,6 +43,7 @@ class VehicleDataSensor(VehicleDevice):
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
         self._device_class: Optional[Text] = None
+        self.measurement: Optional[Text] = None
         self.enabled_by_default = False
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
