@@ -320,7 +320,7 @@ class ChargingEnergySensor(VehicleDevice):
         self.__charger_voltage = None
         self.__charge_limit_soc = None
         self.__charger_power = None
-        self.__last_reset: datetime.datetime = datetime.time.min
+        self.__last_reset: Optional[datetime.datetime] = None
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the battery state."""
@@ -360,7 +360,7 @@ class ChargingEnergySensor(VehicleDevice):
             self.__charge_limit_soc = data["charge_limit_soc"]
             self.__charger_power = data["charger_power"]
             self.attrs["charge_limit_soc"] = self.charge_limit_soc
-            self.attrs["last_reset"] = str(self.last_reset)
+            self.attrs["last_reset"] = self.last_reset
             if self.__miles:
                 self.__added_range = round(self.__added_range / 0.621371, 2)
                 self.__charging_rate = round(self.__charging_rate / 0.621371, 2)
@@ -426,7 +426,7 @@ class ChargingEnergySensor(VehicleDevice):
         return self._device_class
 
     @property
-    def last_reset(self) -> datetime.datetime:
+    def last_reset(self) -> Optional[datetime.datetime]:
         """Return the last reset time."""
         return self.__last_reset
 
