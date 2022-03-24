@@ -1,4 +1,4 @@
-"""Test sentry mode switch."""
+"""Test homelink button."""
 
 import pytest
 
