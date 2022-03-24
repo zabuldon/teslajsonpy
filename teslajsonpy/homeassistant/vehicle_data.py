@@ -70,7 +70,7 @@ class VehicleDataSensor(VehicleDevice):
         exclude_dicts: Optional[list[str]] = None,
         prepend: Optional[str] = None,
     ) -> dict:
-        """Convert Tesla returned dict into dict for attributes"""
+        """Convert Tesla returned dict into dict for attributes."""
         prepend = prepend or ""
         exclude_dicts = exclude_dicts or []
 
