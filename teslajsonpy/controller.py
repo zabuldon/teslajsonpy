@@ -73,7 +73,7 @@ def min_expo(base=2, factor=1, max_value=None, min_value=0):
     """
     n = 0
     while True:
-        a = min_value + factor * base ** n
+        a = min_value + factor * base**n
         if max_value is None or a < max_value:
             yield a
             n += 1
