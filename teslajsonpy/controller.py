@@ -979,7 +979,7 @@ class Controller:
                         )
                         and (  # pylint: disable=too-many-boolean-expressions
                             self.__update.get(vin)
-                        )
+                        )  # Only update cars with update flag on
                         and (
                             force
                             or vin not in self._last_update_time
@@ -988,7 +988,7 @@ class Controller:
                                 >= self._calculate_next_interval(vin)
                             )
                         )
-                    ):  # Only update cars with update flag on
+                    ):
                         tasks.append(_get_and_process_car_data(vin))
                     else:
                         _LOGGER.debug(
