@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v1.10.0 (2022-03-25)
+### Feature
+* Force update on next poll on enable update ([`2b6bd5d`](https://github.com/zabuldon/teslajsonpy/commit/2b6bd5d3c411e3ecd39f7ec9bb61d0de85ebdd4c))
+
+### Fix
+* Fix last_reset calculation to reset only if new value is lower ([#297](https://github.com/zabuldon/teslajsonpy/issues/297)) ([`6103eb4`](https://github.com/zabuldon/teslajsonpy/commit/6103eb4a35459abd1461da64c0ff05655c18aaa2))
+
 ## v1.9.0 (2022-03-23)
 ### Feature
 * Update endpoints.json for version 4.5 ([#286](https://github.com/zabuldon/teslajsonpy/issues/286)) ([`c9bc30b`](https://github.com/zabuldon/teslajsonpy/commit/c9bc30ba1d5182a16c1e62946df33c6f54de3929))
