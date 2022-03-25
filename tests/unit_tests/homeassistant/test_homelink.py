@@ -69,6 +69,25 @@ async def test_available(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_available_no_keys(monkeypatch):
+    """Test available() when there are no homelink keys."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    _controller.set_id_vin(CAR_ID, VIN)
+
+    _data = _mock.data_request_vehicle()
+    _button = TriggerHomelink(_data, _controller)
+
+    del _data["vehicle_state"]["homelink_device_count"]
+    del _data["vehicle_state"]["homelink_nearby"]
+    _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
+
+    await _button.async_update()
+    assert not _button.available()
+
+
+@pytest.mark.asyncio
 async def test_homelink_error_device_count(monkeypatch):
     """Test HomelinkError for no device count."""
 
