@@ -73,7 +73,7 @@ def min_expo(base=2, factor=1, max_value=None, min_value=0):
     """
     n = 0
     while True:
-        a = min_value + factor * base ** n
+        a = min_value + factor * base**n
         if max_value is None or a < max_value:
             yield a
             n += 1
@@ -979,7 +979,7 @@ class Controller:
                         )
                         and (  # pylint: disable=too-many-boolean-expressions
                             self.__update.get(vin)
-                        )
+                        )  # Only update cars with update flag on
                         and (
                             force
                             or vin not in self._last_update_time
@@ -988,13 +988,18 @@ class Controller:
                                 >= self._calculate_next_interval(vin)
                             )
                         )
-                    ):  # Only update cars with update flag on
+                    ):
                         tasks.append(_get_and_process_car_data(vin))
                     else:
                         _LOGGER.debug(
-                            "%s: Skipping update with state %s. Last update: %s ago. Last parked: %s ago. Last wake_up %s ago",
+                            (
+                                "%s: Skipping update with state %s. Polling: %s. "
+                                "Last update: %s ago. Last parked: %s ago. "
+                                "Last wake_up %s ago. "
+                            ),
                             vin[-5:],
                             car_state,
+                            self.__update.get(vin),
                             cur_time - self._last_update_time[vin],
                             cur_time - self.get_last_park_time(vin=vin),
                             cur_time - self.get_last_wake_up_time(vin=vin),
@@ -1315,6 +1320,8 @@ class Controller:
     ) -> None:
         """Set updates dictionary.
 
+        If a vehicle is enabled, the vehicle will force an update on next poll.
+
         Parameters
         ----------
         car_id : string
@@ -1336,6 +1343,12 @@ class Controller:
             vin = self._id_to_vin(car_id)
         if vin:
             self.__update[vin] = value
+            if self.__update[vin]:
+                self.set_last_update_time(vin=vin)
+                _LOGGER.debug(
+                    "%s: Set Updates enabled; forcing update on next poll by resetting last_update_time",
+                    vin[-5:],
+                )
 
     def get_last_update_time(self, car_id: Text = None, vin: Text = None):
         """Get last_update time dictionary.

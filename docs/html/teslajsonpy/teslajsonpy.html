@@ -252,7 +252,7 @@ process a json delivered in data</p></li>
 
 <dl class="py class">
 <dt id="teslajsonpy.Controller">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">Controller</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">websession</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">httpx.AsyncClient</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_interval</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_websocket</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_domain</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'https://auth.tesla.com'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">teslajsonpy.</span></code><code class="sig-name descname"><span class="pre">Controller</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">websession</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">httpx.AsyncClient</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">email</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">access_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">refresh_token</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expiration</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">update_interval</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_websocket</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polling_policy</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auth_domain</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'https://auth.tesla.com'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller" title="Permalink to this definition"></a></dt>
 <dd><p>Controller for connections to Tesla Motors API.</p>
 <p class="rubric">Inheritance</p>
 digraph inheritancef1ba0f48d0 {
@@ -290,6 +290,12 @@ should wake up the vehicle or retry.</p></li>
 <dd class="field-even"><p>dict</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.charging_state">
+<code class="sig-name descname"><span class="pre">charging_state</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#teslajsonpy.Controller.charging_state" title="Permalink to this definition"></a></dt>
+<dd><p>Return charging state for a single vehicle.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -367,27 +373,128 @@ should wake up the vehicle or retry.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="teslajsonpy.Controller.get_car_online">
+<code class="sig-name descname"><span class="pre">get_car_online</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_car_online" title="Permalink to this definition"></a></dt>
+<dd><p>Get online status for car_id or all cars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+field for identifying the car across the owner-api endpoint.
+<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – VIN number.</p></li>
+<li><p><strong>both car_id and vin is provided. VIN overrides car_id.</strong> (<em>If</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If car_id or vin exists, a boolean with the online status for a
+single car.
+Othewise, the entire dictionary with all cars.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict or boolean</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="teslajsonpy.Controller.get_charging_params">
-<code class="sig-name descname"><span class="pre">get_charging_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_charging_params" title="Permalink to this definition"></a></dt>
-<dd><p>Return cached copy of charging_params for car_id.</p>
+<code class="sig-name descname"><span class="pre">get_charging_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="headerlink" href="#teslajsonpy.Controller.get_charging_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return cached copy of charging_params for car_id or all cars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+field for identifying the car across the owner-api endpoint.
+<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – VIN number.</p></li>
+<li><p><strong>both car_id and vin is provided. VIN overrides car_id.</strong> (<em>If</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If car_id or vin exists, a dict with the charging parameters for a
+single car.
+Othewise, the entire dictionary with all cars.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="teslajsonpy.Controller.get_climate_params">
-<code class="sig-name descname"><span class="pre">get_climate_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_climate_params" title="Permalink to this definition"></a></dt>
-<dd><p>Return cached copy of climate_params for car_id.</p>
+<code class="sig-name descname"><span class="pre">get_climate_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="headerlink" href="#teslajsonpy.Controller.get_climate_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return cached copy of climate_params for car_id or all cars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+field for identifying the car across the owner-api endpoint.
+<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – VIN number.</p></li>
+<li><p><strong>both car_id and vin is provided. VIN overrides car_id.</strong> (<em>If</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If car_id or vin exists, a dict with the climate parameters for a
+single car.
+Othewise, the entire dictionary with all cars.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="teslajsonpy.Controller.get_config_params">
-<code class="sig-name descname"><span class="pre">get_config_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_config_params" title="Permalink to this definition"></a></dt>
-<dd><p>Return cached copy of state_params for car_id.</p>
+<code class="sig-name descname"><span class="pre">get_config_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="headerlink" href="#teslajsonpy.Controller.get_config_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return cached copy of config_params for car_id or all cars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+field for identifying the car across the owner-api endpoint.
+<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – VIN number.</p></li>
+<li><p><strong>both car_id and vin is provided. VIN overrides car_id.</strong> (<em>If</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If car_id or vin exists, a dict with the config parameters for a
+single car.
+Othewise, the entire dictionary with all cars.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="teslajsonpy.Controller.get_drive_params">
-<code class="sig-name descname"><span class="pre">get_drive_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_drive_params" title="Permalink to this definition"></a></dt>
-<dd><p>Return cached copy of drive_params for car_id.</p>
+<code class="sig-name descname"><span class="pre">get_drive_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="headerlink" href="#teslajsonpy.Controller.get_drive_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return cached copy of drive_params for car_id or all cars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+field for identifying the car across the owner-api endpoint.
+<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – VIN number.</p></li>
+<li><p><strong>both car_id and vin is provided. VIN overrides car_id.</strong> (<em>If</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If car_id or vin exists, a dict with the drive parameters for a
+single car.
+Othewise, the entire dictionary with all cars.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -408,8 +515,27 @@ should wake up the vehicle or retry.</p></li>
 
 <dl class="py method">
 <dt id="teslajsonpy.Controller.get_gui_params">
-<code class="sig-name descname"><span class="pre">get_gui_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_gui_params" title="Permalink to this definition"></a></dt>
-<dd><p>Return cached copy of gui_params for car_id.</p>
+<code class="sig-name descname"><span class="pre">get_gui_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="headerlink" href="#teslajsonpy.Controller.get_gui_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return cached copy of gui_params for car_id or all cars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+field for identifying the car across the owner-api endpoint.
+<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – VIN number.</p></li>
+<li><p><strong>both car_id and vin is provided. VIN overrides car_id.</strong> (<em>If</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If car_id or vin exists, a dict with the gui parameters for a
+single car.
+Othewise, the entire dictionary with all cars.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -420,19 +546,70 @@ should wake up the vehicle or retry.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="teslajsonpy.Controller.get_last_park_time">
+<code class="sig-name descname"><span class="pre">get_last_park_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_last_park_time" title="Permalink to this definition"></a></dt>
+<dd><p>Get park_time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+field for identifying the car across the owner-api endpoint.
+<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a>
+If no car_id, returns the complete dictionary.</p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – Vin number</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If car_id exists, a int (time.time()) indicating when car was last
+parked. Othewise, the entire updates dictionary.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int or dict of ints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="teslajsonpy.Controller.get_last_update_time">
-<code class="sig-name descname"><span class="pre">get_last_update_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_last_update_time" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname"><span class="pre">get_last_update_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_last_update_time" title="Permalink to this definition"></a></dt>
 <dd><p>Get last_update time dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
 field for identifying the car across the owner-api endpoint.
 <a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a>
-If no car_id, returns the complete dictionary.</p>
+If no car_id, returns the complete dictionary.</p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – Vin number</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>If car_id exists, a int (time.time()) indicating when updates last
 processed. Othewise, the entire updates dictionary.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int or dict of ints</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.get_last_wake_up_time">
+<code class="sig-name descname"><span class="pre">get_last_wake_up_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_last_wake_up_time" title="Permalink to this definition"></a></dt>
+<dd><p>Get wakeup_time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+field for identifying the car across the owner-api endpoint.
+<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a>
+If no car_id, returns the complete dictionary.</p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – VIN number</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If car_id exists, a int (time.time()) indicating when car was last
+waken up. Othewise, the entire updates dictionary.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>int or dict of ints</p>
@@ -448,14 +625,33 @@ processed. Othewise, the entire updates dictionary.</p>
 
 <dl class="py method">
 <dt id="teslajsonpy.Controller.get_power_params">
-<code class="sig-name descname"><span class="pre">get_power_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_power_params" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname"><span class="pre">get_power_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">site_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="headerlink" href="#teslajsonpy.Controller.get_power_params" title="Permalink to this definition"></a></dt>
 <dd><p>Return cached copy of charging_params for car_id.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="teslajsonpy.Controller.get_state_params">
-<code class="sig-name descname"><span class="pre">get_state_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_state_params" title="Permalink to this definition"></a></dt>
-<dd><p>Return cached copy of state_params for car_id.</p>
+<code class="sig-name descname"><span class="pre">get_state_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><a class="headerlink" href="#teslajsonpy.Controller.get_state_params" title="Permalink to this definition"></a></dt>
+<dd><p>Return cached copy of state_params for car_id. or all cars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+field for identifying the car across the owner-api endpoint.
+<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – VIN number.</p></li>
+<li><p><strong>both car_id and vin is provided. VIN overrides car_id.</strong> (<em>If</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If car_id or vin exists, a dict with the state parameters for a
+single car.
+Othewise, the entire dictionary with all cars.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -470,18 +666,27 @@ processed. Othewise, the entire updates dictionary.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="teslajsonpy.Controller.get_update_interval_vin">
+<code class="sig-name descname"><span class="pre">get_update_interval_vin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">int</span><a class="headerlink" href="#teslajsonpy.Controller.get_update_interval_vin" title="Permalink to this definition"></a></dt>
+<dd><p>Get update interval for specific vin or default if no vin specific.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="teslajsonpy.Controller.get_updates">
-<code class="sig-name descname"><span class="pre">get_updates</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_updates" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname"><span class="pre">get_updates</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_updates" title="Permalink to this definition"></a></dt>
 <dd><p>Get updates dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint. It is the id
 field for identifying the car across the owner-api endpoint.
-<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a>
-If no car_id, returns the complete dictionary.</p>
+<a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – VIN number.</p></li>
+<li><p><strong>both car_id and vin is provided. VIN overrides car_id.</strong> (<em>If</em>) – </p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>If car_id exists, a bool indicating whether updates should be
+<dd class="field-even"><p>If car_id or vin exists, a bool indicating whether updates should be
 processed. Othewise, the entire updates dictionary.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
@@ -494,6 +699,30 @@ processed. Othewise, the entire updates dictionary.</p>
 <dt id="teslajsonpy.Controller.get_vehicles">
 <em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">get_vehicles</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#teslajsonpy.Controller.get_vehicles" title="Permalink to this definition"></a></dt>
 <dd><p>Get vehicles json from TeslaAPI.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.is_car_online">
+<code class="sig-name descname"><span class="pre">is_car_online</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#teslajsonpy.Controller.is_car_online" title="Permalink to this definition"></a></dt>
+<dd><p>Alias for get_car_online for better readability.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.is_climate_on">
+<code class="sig-name descname"><span class="pre">is_climate_on</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#teslajsonpy.Controller.is_climate_on" title="Permalink to this definition"></a></dt>
+<dd><p>Return true if climate is on.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.is_in_gear">
+<code class="sig-name descname"><span class="pre">is_in_gear</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#teslajsonpy.Controller.is_in_gear" title="Permalink to this definition"></a></dt>
+<dd><p>Return true if car is in gear. False of car is parked or unknown.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.is_sentry_mode_on">
+<code class="sig-name descname"><span class="pre">is_sentry_mode_on</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#teslajsonpy.Controller.is_sentry_mode_on" title="Permalink to this definition"></a></dt>
+<dd><p>Return true if sentry_mode is on.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -558,8 +787,92 @@ should wake up the vehicle or retry.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt id="teslajsonpy.Controller.set_car_online">
+<code class="sig-name descname"><span class="pre">set_car_online</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">online_status</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_car_online" title="Permalink to this definition"></a></dt>
+<dd><p>Set online status for car_id.</p>
+<p>Will also update “last_wake_up_time” if the car changes from offline
+to online</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>car_id</strong> (<em>string</em>) – Identifier for the car on the owner-api endpoint.</p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – VIN number</p></li>
+<li><p><strong>online_status</strong> (<em>boolean</em>) – True if the car is online (awake)
+False if the car is offline (out of reach or sleeping)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_charging_params">
+<code class="sig-name descname"><span class="pre">set_charging_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_charging_params" title="Permalink to this definition"></a></dt>
+<dd><p>Set charging_params for car_id.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_climate_params">
+<code class="sig-name descname"><span class="pre">set_climate_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_climate_params" title="Permalink to this definition"></a></dt>
+<dd><p>Set climate_params for car_id.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_config_params">
+<code class="sig-name descname"><span class="pre">set_config_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_config_params" title="Permalink to this definition"></a></dt>
+<dd><p>Set config parameters for a car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_drive_params">
+<code class="sig-name descname"><span class="pre">set_drive_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_drive_params" title="Permalink to this definition"></a></dt>
+<dd><p>Set drive_params for car_id.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_gui_params">
+<code class="sig-name descname"><span class="pre">set_gui_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_gui_params" title="Permalink to this definition"></a></dt>
+<dd><p>Set GUI params for car.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_id_vin">
+<code class="sig-name descname"><span class="pre">set_id_vin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_id_vin" title="Permalink to this definition"></a></dt>
+<dd><p>Update mappings of car_id &lt;–&gt; vin.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_last_park_time">
+<code class="sig-name descname"><span class="pre">set_last_park_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_last_park_time" title="Permalink to this definition"></a></dt>
+<dd><p>Set park_time for car_id.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_last_update_time">
+<code class="sig-name descname"><span class="pre">set_last_update_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_last_update_time" title="Permalink to this definition"></a></dt>
+<dd><p>Set updated_time for car_id.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_last_wake_up_time">
+<code class="sig-name descname"><span class="pre">set_last_wake_up_time</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_last_wake_up_time" title="Permalink to this definition"></a></dt>
+<dd><p>Set wakeup_time for car_id.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_state_params">
+<code class="sig-name descname"><span class="pre">set_state_params</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_state_params" title="Permalink to this definition"></a></dt>
+<dd><p>Set state_params for car_id.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_update_interval_vin">
+<code class="sig-name descname"><span class="pre">set_update_interval_vin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_update_interval_vin" title="Permalink to this definition"></a></dt>
+<dd><p>Set update interval for specific vin.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="teslajsonpy.Controller.set_updates">
-<code class="sig-name descname"><span class="pre">set_updates</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_updates" title="Permalink to this definition"></a></dt>
+<code class="sig-name descname"><span class="pre">set_updates</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_updates" title="Permalink to this definition"></a></dt>
 <dd><p>Set updates dictionary.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -568,6 +881,7 @@ should wake up the vehicle or retry.</p></li>
 is not the vehicle_id field for identifying the car across
 different endpoints.
 <a class="reference external" href="https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id">https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id</a></p></li>
+<li><p><strong>vin</strong> (<em>string</em>) – Vin number</p></li>
 <li><p><strong>value</strong> (<em>bool</em>) – Whether the specific car_id should be updated.</p></li>
 </ul>
 </dd>
@@ -578,6 +892,18 @@ different endpoints.
 <dd class="field-odd"><p>None</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.set_vehicle_id_vin">
+<code class="sig-name descname"><span class="pre">set_vehicle_id_vin</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vehicle_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#teslajsonpy.Controller.set_vehicle_id_vin" title="Permalink to this definition"></a></dt>
+<dd><p>Update mappings of vehicle_id &lt;–&gt; vin.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.shift_state">
+<code class="sig-name descname"><span class="pre">shift_state</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">car_id</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#teslajsonpy.Controller.shift_state" title="Permalink to this definition"></a></dt>
+<dd><p>Return shift state for a single vehicle.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -635,6 +961,12 @@ should wake up the vehicle or retry.</p></li>
 <dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="teslajsonpy.Controller.vin_to_vehicle_id">
+<code class="sig-name descname"><span class="pre">vin_to_vehicle_id</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">vin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#teslajsonpy.Controller.vin_to_vehicle_id" title="Permalink to this definition"></a></dt>
+<dd><p>Return vehicle_id for a vin.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1808,7 +2140,7 @@ Otherwise, returns the result of object.__str__() (if defined)
 or repr(object).
 encoding defaults to sys.getdefaultencoding().
 errors defaults to ‘strict’.</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&#39;1.4.1&#39;
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>&#39;1.9.0&#39;
 </pre></div>
 </div>
 </dd></dl>
