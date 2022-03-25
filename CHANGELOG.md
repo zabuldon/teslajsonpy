@@ -2,21 +2,11 @@
 
 <!--next-version-placeholder-->
 
-## v1.11.0 (2022-03-25)
+## v1.10.0 (2022-03-25)
 
 ### Breaking
 
 - All vehicle data in home assistant sensor has been removed and new sensors created containing respective data as attributes.
-
-### v1.10.0 (2022-03-25)
-
-### Feature
-
-- Force update on next poll on enable update ([`2b6bd5d`](https://github.com/zabuldon/teslajsonpy/commit/2b6bd5d3c411e3ecd39f7ec9bb61d0de85ebdd4c))
-
-### Fix
-
-- Fix last_reset calculation to reset only if new value is lower ([#297](https://github.com/zabuldon/teslajsonpy/issues/297)) ([`6103eb4`](https://github.com/zabuldon/teslajsonpy/commit/6103eb4a35459abd1461da64c0ff05655c18aaa2))
 
 ## v1.9.0 (2022-03-23)
 
