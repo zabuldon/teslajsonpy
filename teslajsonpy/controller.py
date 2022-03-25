@@ -1320,6 +1320,8 @@ class Controller:
     ) -> None:
         """Set updates dictionary.
 
+        If a vehicle is enabled, the vehicle will force an update on next poll.
+
         Parameters
         ----------
         car_id : string
@@ -1341,6 +1343,12 @@ class Controller:
             vin = self._id_to_vin(car_id)
         if vin:
             self.__update[vin] = value
+            if self.__update[vin]:
+                self.set_last_update_time(vin=vin)
+                _LOGGER.debug(
+                    "%s: Set Updates enabled; forcing update on next poll by resetting last_update_time",
+                    vin[-5:],
+                )
 
     def get_last_update_time(self, car_id: Text = None, vin: Text = None):
         """Get last_update time dictionary.
