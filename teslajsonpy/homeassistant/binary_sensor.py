@@ -5,7 +5,6 @@ Python Package for controlling Tesla API.
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
-from json import dumps
 from typing import Dict, Optional, Text
 
 from teslajsonpy.const import RELEASE_NOTES_URL
@@ -217,15 +216,6 @@ class OnlineSensor(BinarySensor):
         self.attrs["update_interval"] = self._controller.get_update_interval_vin(
             vin=self._vin
         )
-        vehicle_data = {
-            "climate_state": self._controller.get_climate_params(self._id),
-            "charge_state": self._controller.get_charging_params(self._id),
-            "vehicle_state": self._controller.get_state_params(self._id),
-            "vehicle_config": self._controller.get_config_params(self._id),
-            "drive_state": self._controller.get_drive_params(self._id),
-            "gui_settings": self._controller.get_gui_params(self._id),
-        }
-        self.attrs["vehicle_data"] = dumps(vehicle_data)
 
     def get_value(self) -> Optional[bool]:
         """Return the car is online."""
