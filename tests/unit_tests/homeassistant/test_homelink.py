@@ -38,9 +38,10 @@ async def test_trigger_homelink(monkeypatch):
     _data["vehicle_state"]["homelink_nearby"] = True
     _button = TriggerHomelink(_data, _controller)
 
+    assert _button.enabled_by_default is False
+
     _controller.set_drive_params(vin=VIN, params=_data["drive_state"])
     _controller.set_state_params(vin=VIN, params=_data["vehicle_state"])
-
     await _button.async_update()
 
     await _button.trigger_homelink()

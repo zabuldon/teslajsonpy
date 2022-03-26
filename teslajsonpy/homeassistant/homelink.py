@@ -34,6 +34,8 @@ class TriggerHomelink(VehicleDevice):
         self.hass_type = "button"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
+        self.enabled_by_default = False
+
         self._longitude = None
         self._latitude = None
         self._homelink_device_count = None
