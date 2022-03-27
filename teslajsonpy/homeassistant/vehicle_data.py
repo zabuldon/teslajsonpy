@@ -7,7 +7,7 @@ https://github.com/zabuldon/teslajsonpy
 """
 import logging
 
-from typing import Optional, Text
+from typing import Optional, Text, List
 from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
 _LOGGER = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ class VehicleDataSensor(VehicleDevice):
     def _dict_to_attr(
         cls,
         data: dict,
-        exclude_dicts: Optional[list[str]] = None,
+        exclude_dicts: Optional[List[str]] = None,
         prepend: Optional[str] = None,
     ) -> dict:
         """Convert Tesla returned dict into dict for attributes."""
