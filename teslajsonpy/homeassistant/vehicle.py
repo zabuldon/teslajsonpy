@@ -55,6 +55,7 @@ class VehicleDevice:
         self._update_version: Optional[Text] = data.get("software_update", {}).get(
             "version"
         )
+        self.enabled_by_default: bool = True
 
     def _name(self) -> Text:
         return (

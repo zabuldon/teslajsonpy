@@ -65,6 +65,12 @@ class UnknownPresetMode(TeslaException):
     pass
 
 
+class HomelinkError(TeslaException):
+    """Class of exceptions for Homelink Error."""
+
+    pass
+
+
 def should_giveup(ex: TeslaException) -> bool:
     """Test whether the exception should result in a retry.
 
