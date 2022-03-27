@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v2.0.0 (2022-03-27)
+### Feature
+* Add homelink support for HA ([`242eb35`](https://github.com/zabuldon/teslajsonpy/commit/242eb35603dc1872d7b3806fb59f340423ad055e))
+
+### Fix
+* Create json sensors for vehicle data ([#299](https://github.com/zabuldon/teslajsonpy/issues/299)) ([`d692a15`](https://github.com/zabuldon/teslajsonpy/commit/d692a154dd4165b3f24ba29abd6f76a78858e0b7))
+
+### Breaking
+* Online sensor will no longer have json vehicle data. Any scripts that relied on that json data will need to use the newer sensors. They will need to be enabled. ([`d692a15`](https://github.com/zabuldon/teslajsonpy/commit/d692a154dd4165b3f24ba29abd6f76a78858e0b7))
+
 ## v1.10.0 (2022-03-25)
 ### Feature
 * Force update on next poll on enable update ([`2b6bd5d`](https://github.com/zabuldon/teslajsonpy/commit/2b6bd5d3c411e3ecd39f7ec9bb61d0de85ebdd4c))
