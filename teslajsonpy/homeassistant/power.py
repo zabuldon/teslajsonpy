@@ -40,6 +40,7 @@ class EnergySiteDevice:
         self.should_poll: bool = True
         self.type: Text = "device"
         self.attrs: Dict[Text, Text] = {}
+        self.enabled_by_default: bool = True
 
     def _name(self) -> Text:
         return f"{self._site_name} {self.type}"
