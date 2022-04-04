@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v2.0.1 (2022-04-04)
+### Fix
+* Add enabled_by_default to EnergySiteDevice ([`4a098a0`](https://github.com/zabuldon/teslajsonpy/commit/4a098a04a69043111afe27faff79b8ec2ecffdc0))
+
 ## v2.0.0 (2022-03-27)
 ### Feature
 * Add homelink support for HA ([`242eb35`](https://github.com/zabuldon/teslajsonpy/commit/242eb35603dc1872d7b3806fb59f340423ad055e))
