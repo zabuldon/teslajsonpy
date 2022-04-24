@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v2.0.3 (2022-04-24)
+### Fix
+* Fix error for cars without heated steering wheels and seats ([`b5cf9bb`](https://github.com/zabuldon/teslajsonpy/commit/b5cf9bb2b1416364d921fcd533a55f52f8e92282))
+
 ## v2.0.2 (2022-04-24)
 ### Fix
 * Remove duplicate ChargeStateDataSensor ([#306](https://github.com/zabuldon/teslajsonpy/issues/306)) ([`965bd9e`](https://github.com/zabuldon/teslajsonpy/commit/965bd9e831aa2cf77b49da2d3411c57b1f7a4638))

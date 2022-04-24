@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "teslajsonpy"
-version = "2.0.2"
+version = "2.0.3"
 description = "A library to work with Tesla API."
 authors = ["Sergey Isachenko <sergey.isachenkol@bool.by>"]
 license = "Apache-2.0"
