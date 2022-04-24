@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v2.0.2 (2022-04-24)
+### Fix
+* Remove duplicate ChargeStateDataSensor ([#306](https://github.com/zabuldon/teslajsonpy/issues/306)) ([`965bd9e`](https://github.com/zabuldon/teslajsonpy/commit/965bd9e831aa2cf77b49da2d3411c57b1f7a4638))
+
 ## v2.0.1 (2022-04-04)
 ### Fix
 * Add enabled_by_default to EnergySiteDevice ([`4a098a0`](https://github.com/zabuldon/teslajsonpy/commit/4a098a04a69043111afe27faff79b8ec2ecffdc0))
