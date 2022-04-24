@@ -59,7 +59,7 @@ class HeatedSteeringWheelSwitch(VehicleDevice):
         if last_update >= self.__manual_update_time:
             data = self._controller.get_climate_params(self._id)
             self.__steering_wheel_heated = (
-                data["steering_wheel_heater"] if data else None
+                data.get("steering_wheel_heater") if data else None
             )
 
     async def set_steering_wheel_heat(self, value: bool):
