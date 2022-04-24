@@ -70,7 +70,7 @@ class HeatedSeatSelect(VehicleDevice):
         if last_update >= self.__manual_update_time:
             data = self._controller.get_climate_params(self._id)
             self.__seat_heat_level = (
-                data[f"seat_heater_{self.__seat_name}"] if data else None
+                data.get(f"seat_heater_{self.__seat_name}") if data else None
             )
 
     async def set_seat_heat_level(self, level):
