@@ -746,7 +746,6 @@ class Controller:
         self.__components.append(VehicleConfigDataSensor(car, self))
         self.__components.append(VehicleDataSensor(car, self))
         self.__components.append(VehicleStateDataSensor(car, self))
-        self.__components.append(ChargeStateDataSensor(car, self))
 
         for seat in ["left", "right", "rear_left", "rear_center", "rear_right"]:
             try:
