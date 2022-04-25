@@ -747,7 +747,15 @@ class Controller:
         self.__components.append(VehicleDataSensor(car, self))
         self.__components.append(VehicleStateDataSensor(car, self))
 
-        for seat in ["left", "right", "rear_left", "rear_center", "rear_right"]:
+        for seat in [
+            "left",
+            "right",
+            "rear_left",
+            "rear_center",
+            "rear_right",
+            "third_row_left",
+            "third_row_right",
+        ]:
             try:
                 self.__components.append(HeatedSeatSelect(car, self, seat))
             except KeyError:

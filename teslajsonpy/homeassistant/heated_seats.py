@@ -15,6 +15,8 @@ seat_id_map = {
     "rear_left": 2,
     "rear_center": 4,
     "rear_right": 5,
+    "third_row_left": 6,
+    "third_row_right": 7,
 }
 
 
@@ -36,7 +38,7 @@ class HeatedSeatSelect(VehicleDevice):
             The controller that controls updates to the Tesla API.
         seat_name : string
             The name of the seat to control.
-            One of "left", "right", "rear_left", "rear_center", "rear_right."
+            One of "left", "right", "rear_left", "rear_center", "rear_right", "third_row_left", "third_row_right"
         Returns
         -------
         None
