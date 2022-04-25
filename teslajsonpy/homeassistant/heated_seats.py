@@ -55,6 +55,10 @@ class HeatedSeatSelect(VehicleDevice):
         self.name = self._name()
 
         self.uniq_name = self._uniq_name()
+        # For 3rd row disable by default
+        if self.__seat_name in ["third_row_left", "third_row_right"]:
+            self.enabled_by_default = False
+
         self.bin_type = 0x7
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
