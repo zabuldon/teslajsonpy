@@ -15,6 +15,8 @@ seat_id_map = {
     "rear_left": 2,
     "rear_center": 4,
     "rear_right": 5,
+    "third_row_left": 6,
+    "third_row_right": 7,
 }
 
 
@@ -36,7 +38,7 @@ class HeatedSeatSelect(VehicleDevice):
             The controller that controls updates to the Tesla API.
         seat_name : string
             The name of the seat to control.
-            One of "left", "right", "rear_left", "rear_center", "rear_right."
+            One of "left", "right", "rear_left", "rear_center", "rear_right", "third_row_left", "third_row_right"
         Returns
         -------
         None
@@ -53,6 +55,10 @@ class HeatedSeatSelect(VehicleDevice):
         self.name = self._name()
 
         self.uniq_name = self._uniq_name()
+        # For 3rd row disable by default
+        if self.__seat_name in ["third_row_left", "third_row_right"]:
+            self.enabled_by_default = False
+
         self.bin_type = 0x7
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
