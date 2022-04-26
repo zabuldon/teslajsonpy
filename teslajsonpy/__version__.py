@@ -8,4 +8,4 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 
-__version__ = "2.0.3"
+__version__ = "2.1.0"

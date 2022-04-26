@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v2.1.0 (2022-04-26)
+### Feature
+* Add 3rd row heated seats ([#310](https://github.com/zabuldon/teslajsonpy/issues/310)) ([`3f65d02`](https://github.com/zabuldon/teslajsonpy/commit/3f65d0225d58d02bd54469fb234462ee1e24b3b9))
+
 ## v2.0.3 (2022-04-24)
 ### Fix
 * Fix error for cars without heated steering wheels and seats ([`b5cf9bb`](https://github.com/zabuldon/teslajsonpy/commit/b5cf9bb2b1416364d921fcd533a55f52f8e92282))
