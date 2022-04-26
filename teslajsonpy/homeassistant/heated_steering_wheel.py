@@ -42,6 +42,9 @@ class HeatedSteeringWheelSwitch(VehicleDevice):
         self.name = self._name()
 
         self.uniq_name = self._uniq_name()
+        # Disable by default, integration will enable if supported by vehicle
+        self.enabled_by_default = False
+
         self.bin_type = 0x7
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
