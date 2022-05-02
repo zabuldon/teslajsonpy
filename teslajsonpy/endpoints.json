@@ -938,6 +938,16 @@
     "URI": "bff/v2/mobile-app/referrals/contact-list",
     "AUTH": true
   },
+  "REMOTE_AUTO_SEAT_CLIMATE_REQUEST": {
+    "TYPE": "POST",
+    "URI": "api/1/vehicles/{vehicle_id}/command/remote_auto_seat_climate_request",
+    "AUTH": true
+  },
+  "REMOTE_SEAT_COOLING_REQUEST": {
+    "TYPE": "POST",
+    "URI": "api/1/vehicles/{vehicle_id}/command/remote_seat_cooler_request",
+    "AUTH": true
+  },
   "REMOTE_SEAT_HEATER_REQUEST": {
     "TYPE": "POST",
     "URI": "api/1/vehicles/{vehicle_id}/command/remote_seat_heater_request",
@@ -1369,6 +1379,11 @@
     "URI": "api/1/vehicles/{vehicle_id}/command/set_cabin_overheat_protection",
     "AUTH": true
   },
+  "SET_CLIMATE_KEEPER_MODE": {
+    "TYPE": "POST",
+    "URI": "api/1/vehicles/{vehicle_id}/command/set_climate_keeper_mode",
+    "AUTH": true
+  },
   "SET_SENTRY_MODE": {
     "TYPE": "POST",
     "URI": "api/1/vehicles/{vehicle_id}/command/set_sentry_mode",
@@ -1377,6 +1392,11 @@
   "SET_VALET_MODE": {
     "TYPE": "POST",
     "URI": "api/1/vehicles/{vehicle_id}/command/set_valet_mode",
+    "AUTH": true
+  },
+  "SET_VEHICLE_NAME": {
+    "TYPE": "POST",
+    "URI": "api/1/vehicles/{vehicle_id}/command/set_vehicle_name",
     "AUTH": true
   },
   "SITE_CONFIG": {
