@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v2.2.0 (2022-05-02)
+### Feature
+* Update endpoints.json to app version 4.7.0 ([#314](https://github.com/zabuldon/teslajsonpy/issues/314)) ([`4296ec2`](https://github.com/zabuldon/teslajsonpy/commit/4296ec2148e678a27b439e0e4d9c0e52e8577fc2))
+
 ## v2.1.0 (2022-04-26)
 ### Feature
 * Add 3rd row heated seats ([#310](https://github.com/zabuldon/teslajsonpy/issues/310)) ([`3f65d02`](https://github.com/zabuldon/teslajsonpy/commit/3f65d0225d58d02bd54469fb234462ee1e24b3b9))
