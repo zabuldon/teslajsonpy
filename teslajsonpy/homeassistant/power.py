@@ -136,7 +136,11 @@ class PowerSensor(EnergySiteDevice):
         data = self._controller.get_power_params(self._id)
         if data:
             # Note: Some systems that pre-date Tesla aquisition of SolarCity will have `grid_status: Unknown`,
-            # but will have solar power values
+            # but will have solar power values. At the same time, newer systems will report spurious reads of 0 Watts
+            # and grid status unknown. If solar power is 0 return null.
+            if "grid_status" in data and data["grid_status"] == "Unknown" and data["solar_power"] == 0:
+                return
+
             self.__power = data["solar_power"]
             if data["solar_power"] is not None:
                 self.__generating_status = (
