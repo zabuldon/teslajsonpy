@@ -134,6 +134,8 @@ class PowerSensor(EnergySiteDevice):
         """
         super().refresh()
         data = self._controller.get_power_params(self._id)
+        _LOGGER.debug("energy site power refresh")
+
         if data:
             # Note: Some systems that pre-date Tesla aquisition of SolarCity will have `grid_status: Unknown`,
             # but will have solar power values. At the same time, newer systems will report spurious reads of 0 Watts
