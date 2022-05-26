@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v2.2.1 (2022-05-26)
+### Fix
+* Improve handling on 0 Watts spurious power reads ([#317](https://github.com/zabuldon/teslajsonpy/issues/317)) ([`213a8e2`](https://github.com/zabuldon/teslajsonpy/commit/213a8e2c212e0abe55098099f3114e99c2a98761))
+
 ## v2.2.0 (2022-05-02)
 ### Feature
 * Update endpoints.json to app version 4.7.0 ([#314](https://github.com/zabuldon/teslajsonpy/issues/314)) ([`4296ec2`](https://github.com/zabuldon/teslajsonpy/commit/4296ec2148e678a27b439e0e4d9c0e52e8577fc2))
