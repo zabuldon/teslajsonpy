@@ -197,7 +197,7 @@ class Connection:
         try:
             if data:
                 resp = await getattr(self.websession, method)(
-                    str(url), data=data, headers=headers, cookies=cookies
+                    str(url), json=data, headers=headers, cookies=cookies
                 )
             else:
                 resp = await getattr(self.websession, method)(
