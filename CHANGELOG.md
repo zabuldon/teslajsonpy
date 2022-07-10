@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v2.3.0 (2022-07-10)
+### Feature
+* Update endpoints and agent to v4.10 ([`ba11467`](https://github.com/zabuldon/teslajsonpy/commit/ba114674c80c1f1a7dfe004684c5c59ae0e44c2b))
+
+### Fix
+* Switch to json request ([#321](https://github.com/zabuldon/teslajsonpy/issues/321)) ([`5bf943d`](https://github.com/zabuldon/teslajsonpy/commit/5bf943d18ffebd3c50702098990a8266f68eab6a))
+
 ## v2.2.1 (2022-05-26)
 ### Fix
 * Improve handling on 0 Watts spurious power reads ([#317](https://github.com/zabuldon/teslajsonpy/issues/317)) ([`213a8e2`](https://github.com/zabuldon/teslajsonpy/commit/213a8e2c212e0abe55098099f3114e99c2a98761))
