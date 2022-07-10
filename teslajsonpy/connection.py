@@ -52,7 +52,7 @@ class Connection:
         auth_domain: str = AUTH_DOMAIN,
     ) -> None:
         """Initialize connection object."""
-        self.user_agent: Text = "Model S 2.1.79 (SM-G900V; Android REL 4.4.4; en_US"
+        self.user_agent: Text = "TeslaApp/4.10.0"
         self.client_id: Text = (
             "81527cff06843c8634fdc09e8ac0abef" "b46ac849f38fe1e431c2ef2106796384"
         )

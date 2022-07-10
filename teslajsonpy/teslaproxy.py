@@ -43,7 +43,7 @@ class TeslaProxy(AuthCaptureProxy):
         self.tests: Dict[str, str] = {"test_url": self.test_url}
 
         self.headers = {
-            "x-tesla-user-agent": "TeslaApp/3.10.9-433/adff2e065/android/10",
+            "x-tesla-user-agent": "TeslaApp/4.10.0",
             "X-Requested-With": "com.teslamotors.tesla",
         }
 
