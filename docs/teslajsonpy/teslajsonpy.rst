@@ -87,6 +87,9 @@ Classes
 - :py:class:`FlashLights`:
   Home-Assistant class for flash lights of Tesla vehicles.
 
+- :py:class:`TriggerHomelink`:
+  Home-Assistant class for trigger homelink of Tesla vehicles.
+
 - :py:class:`TrunkLock`:
   Home-Assistant rear trunk lock for a Tesla VehicleDevice.
 
@@ -234,6 +237,13 @@ Classes
    .. inheritance-diagram:: FlashLights
       :parts: 1
 
+.. autoclass:: TriggerHomelink
+   :members:
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: TriggerHomelink
+      :parts: 1
+
 .. autoclass:: TrunkLock
    :members:
 
@@ -258,6 +268,9 @@ Exceptions
 - :py:exc:`UnknownPresetMode`:
   Class of exceptions for Unknown Preset.
 
+- :py:exc:`HomelinkError`:
+  Class of exceptions for Homelink Error.
+
 - :py:exc:`RetryLimitError`:
   Class of exceptions for hitting retry limits.
 
@@ -275,6 +288,12 @@ Exceptions
 
    .. rubric:: Inheritance
    .. inheritance-diagram:: UnknownPresetMode
+      :parts: 1
+
+.. autoexception:: HomelinkError
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: HomelinkError
       :parts: 1
 
 .. autoexception:: RetryLimitError
@@ -300,4 +319,4 @@ Variables
 
    .. code-block:: text
 
-      '1.9.0'
+      '2.3.0'
