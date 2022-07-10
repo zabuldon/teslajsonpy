@@ -69,6 +69,12 @@
     "TYPE": "GET",
     "URI": "bff/v2/mobile-app/billing-address/feature-flag/tao-8202-ownership-mobile-app-billing-address"
   },
+  "CACHED_PROTO_VEHICLE_DATA": {
+    "AUTH": true,
+    "NOTE": "This is cached data, pushed by the vehicle on sleep, wake and around OTAs.",
+    "TYPE": "GET",
+    "URI": "api/1/vehicles/{vehicle_id}/latest_vehicle_data"
+  },
   "CALENDAR_HISTORY_DATA": {
     "AUTH": true,
     "TYPE": "GET",
@@ -259,6 +265,11 @@
     "TYPE": "GET",
     "URI": "commerce-api/content/v2?file={fileName}"
   },
+  "COMMERCE_CREATE_ENERGY_ORDER": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "commerce-api/energy/orders/v1{locale}"
+  },
   "COMMERCE_FEATURE_FLAG": {
     "AUTH": true,
     "TYPE": "GET",
@@ -322,7 +333,7 @@
   "COMMERCE_POST_INSTALLER_VENDOR": {
     "AUTH": true,
     "TYPE": "POST",
-    "URI": "commerce-api/checkout/auditrecords/v1/{locale}"
+    "URI": "commerce-api/checkout/auditrecords/v1{locale}"
   },
   "COMMERCE_POST_INVOICE": {
     "AUTH": true,
@@ -363,6 +374,16 @@
     "AUTH": true,
     "TYPE": "POST",
     "URI": "commerce-api/recommendations/categories/v1{locale}"
+  },
+  "COMMERCE_SEARCH_PRODUCTS": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "commerce-api/searches/v1{locale}"
+  },
+  "COMMERCE_STOCK_NOTIFICATION": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "commerce-api/stocknotifications/v1{locale}"
   },
   "COMMERCE_TOKEN": {
     "AUTH": true,
@@ -432,12 +453,17 @@
   "ENERGY_GET_TROUBLESHOOTING_GUIDE": {
     "AUTH": true,
     "TYPE": "GET",
-    "URI": "bff/v2/mobile-app/energy-service/troubleshooting/{troubleshootingFlow}?version=2"
+    "URI": "bff/v2/mobile-app/energy-service/troubleshooting/{troubleshootingFlow}?version=3"
   },
   "ENERGY_OWNERSHIP_GET_TOGGLES": {
     "AUTH": true,
     "TYPE": "GET",
     "URI": "bff/v2/mobile-app/energy/feature-flags"
+  },
+  "ENERGY_REGISTER_PRODUCT": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "api/1/users/register_product"
   },
   "ENERGY_SERVICE_CANCEL_APPOINTMENT": {
     "AUTH": true,
@@ -453,6 +479,11 @@
     "AUTH": true,
     "TYPE": "GET",
     "URI": "bff/v2/mobile-app/energy-service/appointment-suggestions"
+  },
+  "ENERGY_SERVICE_GET_POWERWALL_WARRANTY_DETAILS": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/energy-service/warranty-details"
   },
   "ENERGY_SERVICE_GET_SERVICE_CASES": {
     "AUTH": true,
@@ -484,6 +515,11 @@
     "TYPE": "POST",
     "URI": "api/1/energy_sites/{site_id}/program"
   },
+  "ENERGY_SITE_IMPORT_EXPORT_CONFIG": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "api/1/energy_sites/{site_id}/grid_import_export"
+  },
   "ENERGY_SITE_OPT_EVENT": {
     "AUTH": true,
     "TYPE": "POST",
@@ -494,6 +530,11 @@
     "TYPE": "POST",
     "URI": "api/1/energy_sites/{site_id}/preference"
   },
+  "ENERGY_SITE_PROGRAM_DETAILS": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "api/1/energy_sites/{site_id}/program"
+  },
   "ENERGY_SITE_PROGRAMS": {
     "AUTH": true,
     "TYPE": "GET",
@@ -503,6 +544,11 @@
     "AUTH": true,
     "TYPE": "GET",
     "URI": "api/1/energy_sites/{site_id}/telemetry_history"
+  },
+  "ENERGY_WALL_CONNECTOR_FIRMWARE_DOWNLOAD_URL": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "api/1/wall_connectors/firmware"
   },
   "FEATURE_CONFIG": {
     "AUTH": true,
@@ -519,6 +565,11 @@
     "TYPE": "GET",
     "URI": "api/1/vehicles/{vehicle_id}/drivers"
   },
+  "FINANCING_CANCEL_APPOINTMENT": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/v2/mobile-app/financing/appointment/cancel"
+  },
   "FINANCING_DOWNLOAD_DOCUMENT": {
     "AUTH": true,
     "TYPE": "GET",
@@ -534,20 +585,120 @@
     "TYPE": "GET",
     "URI": "bff/v2/mobile-app/financing/document-list"
   },
+  "FINANCING_GENERATE_BUYOUT_QUOTE": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/buyout-quote"
+  },
+  "FINANCING_GENERATE_QUOTE": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/quote"
+  },
+  "FINANCING_GET_ACQUISITION_DETAILS": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/acquisition/details"
+  },
+  "FINANCING_GET_ACQUISITION_FILE": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/acquisition/file"
+  },
+  "FINANCING_GET_ACQUISITION_FILE_LIST": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/acquisition/files"
+  },
+  "FINANCING_GET_APPOINTMENT_DETAILS": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/appointment/details"
+  },
+  "FINANCING_GET_APPOINTMENT_LOCATION": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/appointment/location"
+  },
   "FINANCING_GET_BILLING_ADDRESS": {
     "AUTH": true,
     "TYPE": "GET",
     "URI": "bff/v2/mobile-app/financing/billing-address"
+  },
+  "FINANCING_GET_CAR_DETAILS": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/car-details"
+  },
+  "FINANCING_GET_COMMERCIAL_SIGNED_TOKEN": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/commercial-signed-token"
+  },
+  "FINANCING_GET_E_SIGN_DOCUMENT": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/esign-document"
+  },
+  "FINANCING_GET_E_SIGN_DOCUMENTS_STATUS": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/documents-status"
+  },
+  "FINANCING_GET_E_SIGN_SUMMARY": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/esign-summary"
+  },
+  "FINANCING_GET_EXTENSION_QUOTE": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/extension-quote"
   },
   "FINANCING_GET_FEATURE_FLAGS": {
     "AUTH": true,
     "TYPE": "GET",
     "URI": "bff/v2/mobile-app/financing/feature-flags"
   },
+  "FINANCING_GET_NEAREST_LOCATIONS": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/v2/mobile-app/financing/appointment/nearest-locations"
+  },
+  "FINANCING_GET_ODOMETER_INFO": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/odometer-info"
+  },
+  "FINANCING_GET_OPEN_SLOTS": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/v2/mobile-app/financing/appointment/open-slots"
+  },
+  "FINANCING_GET_OPTION_CODES": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/option-codes"
+  },
+  "FINANCING_GET_REGISTRATION_ADDRESS": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/registration-address"
+  },
+  "FINANCING_GET_SETTLEMENT_QUOTE": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/settlement-quote"
+  },
   "FINANCING_GET_SIGNED_TOKEN": {
     "AUTH": true,
     "TYPE": "GET",
     "URI": "bff/v2/mobile-app/financing/signed-token"
+  },
+  "FINANCING_GET_WIRE_TRANSFER_INFO": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/financing/wire-transfer-info"
   },
   "FINANCING_IS_ENABLED": {
     "AUTH": true,
@@ -564,6 +715,36 @@
     "TYPE": "POST",
     "URI": "bff/v2/mobile-app/financing/one-time-payment-signed-token"
   },
+  "FINANCING_REMOVE_ACQUISITION_FILE": {
+    "AUTH": true,
+    "TYPE": "PUT",
+    "URI": "bff/v2/mobile-app/financing/acquisition/file"
+  },
+  "FINANCING_REQUEST_INSPECTION_APPOINTMENT": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/v2/mobile-app/financing/appointment/inspection-request"
+  },
+  "FINANCING_STATUS_UPDATE_ACQUISITION": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/v2/mobile-app/financing/acquisition/status-update"
+  },
+  "FINANCING_SUBMIT_ACQUISITION": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/v2/mobile-app/financing/acquisition/submit"
+  },
+  "FINANCING_SUBMIT_APPOINTMENT": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/v2/mobile-app/financing/appointment/save"
+  },
+  "FINANCING_SUBMIT_FINANCING_ACTION": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/v2/mobile-app/financing/manage-financing-action"
+  },
   "FINANCING_UPDATE_BILLING_ADDRESS": {
     "AUTH": true,
     "TYPE": "POST",
@@ -578,6 +759,16 @@
     "AUTH": true,
     "TYPE": "POST",
     "URI": "bff/v2/mobile-app/financing/update-one-time-payment-status"
+  },
+  "FINANCING_UPLOAD_ACQUISITION_FILE": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/v2/mobile-app/financing/acquisition/file"
+  },
+  "FINANCING_VALIDATE_E_SIGN_DETAILS": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/v2/mobile-app/financing/esign-validate-details"
   },
   "FLASH_LIGHTS": {
     "AUTH": true,
@@ -677,7 +868,7 @@
   "MANAGE_PATCH_AUTO_RENEW_SUBSCRIPTIONS": {
     "AUTH": true,
     "TYPE": "PATCH",
-    "URI": "bff/v2/mobile-app/subscriptions"
+    "URI": "bff/v2/mobile-app/subscriptions/v2"
   },
   "MANAGE_POST_BILL_ME_LATER_TOGGLE": {
     "AUTH": true,
@@ -795,6 +986,61 @@
     "AUTH": true,
     "TYPE": "POST",
     "URI": "api/1/energy_sites/{site_id}/operation"
+  },
+  "OWNERSHIP_RESERVATION_DETAILS_REQUEST": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/ownership/reservation-details/{rn}"
+  },
+  "OWNERSHIP_TRANSFER_TOOL_ADD_INITIATE": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/mobile-app/transfer/add-initiate"
+  },
+  "OWNERSHIP_TRANSFER_TOOL_ADD_PROCESS": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/mobile-app/transfer/add-process"
+  },
+  "OWNERSHIP_TRANSFER_TOOL_ASSETS_REQUEST": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/mobile-app/transfer/assets"
+  },
+  "OWNERSHIP_TRANSFER_TOOL_REMOVAL_ELIGIBILITY": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/mobile-app/transfer/remove-car-eligibility"
+  },
+  "OWNERSHIP_TRANSFER_TOOL_REMOVE_INITIATE": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/mobile-app/transfer/remove-car"
+  },
+  "OWNERSHIP_TRANSFER_TOOL_SECURITY_CODE": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/mobile-app/transfer/security-code"
+  },
+  "OWNERSHIP_TRANSFER_TOOL_SIGNED_TOKEN": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/mobile-app/transfer/signed-token"
+  },
+  "OWNERSHIP_TRANSFER_TOOL_UPLOAD_DOCUMENT": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/mobile-app/transfer/upload-document"
+  },
+  "OWNERSHIP_TRANSFER_TOOL_USER_SIGNED_TOKEN": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/mobile-app/transfer/user-signed-token"
+  },
+  "OWNERSHIP_TRANSFER_TOOL_VALIDATE_CAR_NAME": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/mobile-app/transfer/validate-car-name"
   },
   "OWNERSHIP_TRANSLATIONS": {
     "AUTH": true,
@@ -1129,6 +1375,11 @@
     "TYPE": "GET",
     "URI": "bff/v2/mobile-app/service/center/{appointmentId}"
   },
+  "SERVICE_CENTER_FETCH_PREFERRED_CENTER": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/service/locations/preferred-service-center"
+  },
   "SERVICE_CENTER_IS_BODY_SHOP": {
     "AUTH": true,
     "TYPE": "GET",
@@ -1136,8 +1387,13 @@
   },
   "SERVICE_CENTER_OPEN_SLOTS": {
     "AUTH": true,
-    "TYPE": "GET",
+    "TYPE": "POST",
     "URI": "bff/v2/mobile-app/service/locations/center/slots"
+  },
+  "SERVICE_CENTER_UPDATE_PREFERRED_CENTER": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "bff/v2/mobile-app/service/locations/preferred-service-center"
   },
   "SERVICE_COMPLETE_OFFLINE_ORDER": {
     "AUTH": true,
@@ -1148,6 +1404,11 @@
     "AUTH": true,
     "TYPE": "POST",
     "URI": "bff/v2/mobile-app/service/activities/{serviceVisitId}"
+  },
+  "SERVICE_CREATE_INVOICE": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "mobile-app/service/estimate/{serviceVisitId}"
   },
   "SERVICE_CREATE_MOBILE_APPOINTMENT": {
     "AUTH": true,
@@ -1174,6 +1435,16 @@
     "TYPE": "PUT",
     "URI": "bff/v2/mobile-app/files/{uuid}"
   },
+  "SERVICE_ESTIMATE_DETAILS": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "mobile-app/service/estimate/{serviceVisitID}"
+  },
+  "SERVICE_EXTERNAL_COLLISION_CENTER_LIST": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/service/locations/external-collision-center-list"
+  },
   "SERVICE_FEATURE_FLAG_ALLOW_FILE_UPLOAD": {
     "AUTH": true,
     "TYPE": "GET",
@@ -1198,6 +1469,16 @@
     "AUTH": true,
     "TYPE": "GET",
     "URI": "bff/v2/mobile-app/feature-flag/mobile-app-service-tracker"
+  },
+  "SERVICE_FETCH_ENTITY_CODE": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/service/appointments/get-trt/{trtId}"
+  },
+  "SERVICE_FETCH_RECALLS": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/campaign/recall-detail"
   },
   "SERVICE_GET_APPOINTMENT_INVOICES": {
     "AUTH": true,
@@ -1259,6 +1540,16 @@
     "TYPE": "GET",
     "URI": "bff/v2/mobile-app/macgyver/alerts"
   },
+  "SERVICE_MACGYVER_CLASSIFY_COLLISION_IMAGES": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "mobile-app/macgyver/classify-collision-images"
+  },
+  "SERVICE_MACGYVER_DIAGNOSTIC_RESULT": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "mobile-app/macgyver/urgent-autodiag-result"
+  },
   "SERVICE_MACGYVER_DISMISS_CUSTOMER_ANSWERS": {
     "AUTH": true,
     "TYPE": "PUT",
@@ -1289,6 +1580,11 @@
     "TYPE": "PATCH",
     "URI": "bff/v2/mobile-app/service/messages/{serviceVisitID}"
   },
+  "SERVICE_MESSAGES_USER_LIST": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/service/messages/users"
+  },
   "SERVICE_MOBILE_APPOINTMENT_DETAILS": {
     "AUTH": true,
     "TYPE": "GET",
@@ -1306,7 +1602,7 @@
   },
   "SERVICE_MOBILE_OPEN_SLOTS": {
     "AUTH": true,
-    "TYPE": "GET",
+    "TYPE": "POST",
     "URI": "bff/v2/mobile-app/service/locations/mobile/slots"
   },
   "SERVICE_SAVE_CENTER_APPOINTMENT": {
@@ -1517,7 +1813,7 @@
   "SUBSCRIPTIONS_GET_PURCHASED_SUBSCRIPTIONS": {
     "AUTH": true,
     "TYPE": "GET",
-    "URI": "bff/v2/mobile-app/subscriptions/purchased"
+    "URI": "bff/v2/mobile-app/subscriptions/purchased/v2"
   },
   "SUBSCRIPTIONS_POST_CREATE_OFFLINE_ORDER": {
     "AUTH": true,
@@ -1528,6 +1824,11 @@
     "AUTH": true,
     "TYPE": "POST",
     "URI": "bff/v2/mobile-app/subscriptions"
+  },
+  "TAKE_DRIVENOTE": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "api/1/vehicles/{vehicle_id}/command/take_drivenote"
   },
   "TIME_OF_USE_SETTINGS": {
     "AUTH": true,
@@ -1557,7 +1858,7 @@
   "UPGRADES_COMPLETE_OFFLINE_ORDER": {
     "AUTH": true,
     "TYPE": "POST",
-    "URI": "bff/v2/mobile-app/upgrades/payment/offline-purchase-complete"
+    "URI": "bff/v2/mobile-app/upgrades/payment/offline-purchase-complete/v2"
   },
   "UPGRADES_CREATE_OFFLINE_ORDER": {
     "AUTH": true,
@@ -1567,12 +1868,17 @@
   "UPGRADES_GET_ELIGIBLE_UPGRADES": {
     "AUTH": true,
     "TYPE": "GET",
-    "URI": "bff/v2/mobile-app/upgrades/eligible"
+    "URI": "bff/v2/mobile-app/upgrades/eligible/v2"
   },
   "UPGRADES_GET_PURCHASED_UPGRADES": {
     "AUTH": true,
     "TYPE": "GET",
     "URI": "bff/v2/mobile-app/upgrades/purchased"
+  },
+  "UPGRADES_GET_PURCHASED_UPGRADES_V2": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "bff/v2/mobile-app/upgrades/purchased/v2"
   },
   "UPGRADES_PAGE": {
     "AUTH": true,
@@ -1580,15 +1886,10 @@
     "TYPE": "GET",
     "URI": "upgrades_page"
   },
-  "UPGRADES_POST_PAYMENT": {
-    "AUTH": true,
-    "TYPE": "POST",
-    "URI": "bff/v2/mobile-app/upgrades/payment"
-  },
   "UPGRADES_SUBMIT_REFUND": {
     "AUTH": true,
     "TYPE": "POST",
-    "URI": "bff/v2/mobile-app/upgrades/refunds"
+    "URI": "bff/v2/mobile-app/upgrades/refunds/v2"
   },
   "UPGRADES_SUBSCRIPTIONS_SHARED_BILLING_ADDRESS_FEATURE_FLAG": {
     "AUTH": true,
@@ -1618,11 +1919,16 @@
   "USER_ACCOUNT_UPLOAD_PROFILE_PICTURE": {
     "AUTH": true,
     "TYPE": "POST",
-    "URI": "bff/v2/mobile-app/account/profile-pic"
+    "URI": "images/upload"
+  },
+  "USER_INFO": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "api/1/users/me"
   },
   "VEHICLE_CHARGE_HISTORY": {
     "AUTH": true,
-    "TYPE": "GET",
+    "TYPE": "POST",
     "URI": "api/1/vehicles/{vehicle_id}/charge_history"
   },
   "VEHICLE_COMPLETE_PSEUDONYM_DIRECTIVE": {
@@ -1639,6 +1945,11 @@
     "AUTH": true,
     "TYPE": "GET",
     "URI": "api/1/vehicles/{vehicle_id}/data"
+  },
+  "VEHICLE_DOWNLOAD_VAULT": {
+    "AUTH": true,
+    "TYPE": "GET",
+    "URI": "api/1/users/vault_profile"
   },
   "VEHICLE_LIST": {
     "AUTH": true,
@@ -1669,6 +1980,11 @@
     "AUTH": true,
     "TYPE": "POST",
     "URI": "api/1/directives/discover"
+  },
+  "VEHICLE_UPLOAD_VAULT": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "api/1/users/vault_profile"
   },
   "VIDEO_GUIDES_GET_VIDEO_LIST": {
     "AUTH": true,
