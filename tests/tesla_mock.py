@@ -470,17 +470,41 @@ VEHICLE = {
     "vehicle_config": None,
 }
 
+# Example config for solar only (no powerall) and Neurio
+# Combination of PRODUCT_LIST and SITE_DATA from Controller
 ENERGYSITE_CONFIG = {
-    "id": 12345678901234567,
-    "energy_site_id": 1234567890,
-    "asset_site_id": 1234567890,
-    "resource_type": "solar",
-    "site_name": "Test Site",
-    "solar_type": "pv_panels",
-    "solar_power": None,
-    "sync_grid_alert_enabled": False,
-    "breaker_alert_enabled": False,
-}
+    'energy_site_id': 1234567890,
+    'resource_type': 'solar',
+    'id': 'c31d46d3-d3f3-4319-a2cb-34719c30243d',
+    'asset_site_id': '3f345132-3c13-2cda-351a-341fq3a2dab2', 
+    'solar_power': 4230, 
+    'solar_type': 'pv_panel', 
+    'storm_mode_enabled': None, 
+    'powerwall_onboarding_settings_set': None, 
+    'sync_grid_alert_enabled': False, 
+    'breaker_alert_enabled': False, 
+    'components': {
+        'battery': False, 
+        'solar': True, 
+        'solar_type': 'pv_panel', 
+        'grid': True, 
+        'load_meter': True, 
+        'market_type': 'residential'
+        }, 
+    'energy_left': 0, 
+    'total_pack_energy': 1, 
+    'percentage_charged': 0, 
+    'battery_power': 0, 
+    'load_power': 3245.4599609375, 
+    'grid_status': 'Unknown', 
+    'grid_services_active': False, 
+    'grid_power': -984.5400390625, 
+    'grid_services_power': 0, 
+    'generator_power': 0, 
+    'island_status': 'island_status_unknown', 
+    'storm_mode_active': False, 
+    'timestamp': '2022-07-29T23:02:14Z', 
+    'wall_connectors': None}
 
 ENERGYSITE_CONFIG_NO_NAME = {
     "id": 12345678901234567,
@@ -494,10 +518,22 @@ ENERGYSITE_CONFIG_NO_NAME = {
 }
 
 ENERGYSITE_STATE = {
-    "id": 12345678901234567,
-    "timestamp": "2011-01-01",
-    "solar_power": 1900,
-}
+    "solar_power": 7720,
+    "energy_left": 0,
+    "total_pack_energy": 1,
+    "percentage_charged": 0,
+    "battery_power": 0,
+    "load_power": 4517.14990234375,
+    "grid_status": "Unknown",
+    "grid_services_active": False,
+    "grid_power": -3202.85009765625,
+    "grid_services_power": 0,
+    "generator_power": 0,
+    "island_status": "island_status_unknown",
+    "storm_mode_active": False,
+    "timestamp": "2022-07-28T17:11:27Z",
+    "wall_connectors": None
+  }
 
 ENERGYSITE_STATE_UNKNOWN_GRID = {
     "id": 12345678901234567,
