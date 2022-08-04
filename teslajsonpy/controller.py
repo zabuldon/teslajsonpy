@@ -448,8 +448,10 @@ class Controller:
             )
             self.__energysite_type[energysite_id] = energysite["solar_type"]
             self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
-            # Update energysite dict with site data to get home and grid power
-            energysite.update(await self.get_site_data(energysite_id))
+            # Set initial values to setup GridPowerSensor & LoadPowerSensor
+            # Actual values update immediately after setup when refresh is called
+            energysite["grid_power"] = 0
+            energysite["load_power"] = 0
 
             self.__lock[energysite_id] = asyncio.Lock()
             self._add_energysite_components(energysite)
@@ -549,11 +551,6 @@ class Controller:
             for p in (await self.api("PRODUCT_LIST"))["response"]
             if p.get("resource_type") == "solar"
         ]
-
-    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
-    async def get_site_data(self, energysite_id: Text) -> None:
-        """Get site data for energy sites."""
-        return (await self.api("SITE_DATA", path_vars={"site_id": energysite_id}))["response"]
 
     @wake_up
     async def post(
