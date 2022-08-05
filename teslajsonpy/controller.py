@@ -52,7 +52,11 @@ from teslajsonpy.homeassistant.lock import ChargerLock, Lock
 from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
 from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
 from teslajsonpy.homeassistant.heated_steering_wheel import HeatedSteeringWheelSwitch
-from teslajsonpy.homeassistant.power import PowerSensor
+from teslajsonpy.homeassistant.power import (
+    SolarPowerSensor,
+    GridPowerSensor,
+    LoadPowerSensor,
+)
 from teslajsonpy.homeassistant.alerts import Horn, FlashLights
 from teslajsonpy.homeassistant.homelink import TriggerHomelink
 from teslajsonpy.homeassistant.vehicle_data import (
@@ -444,6 +448,11 @@ class Controller:
             )
             self.__energysite_type[energysite_id] = energysite["solar_type"]
             self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
+            # Set initial values to setup GridPowerSensor & LoadPowerSensor
+            # Actual values update immediately after setup when refresh is called
+            energysite["grid_power"] = 0
+            energysite["load_power"] = 0
+
             self.__lock[energysite_id] = asyncio.Lock()
             self._add_energysite_components(energysite)
 
@@ -711,7 +720,9 @@ class Controller:
         return self.__components
 
     def _add_energysite_components(self, energysite):
-        self.__components.append(PowerSensor(energysite, self))
+        self.__components.append(SolarPowerSensor(energysite, self))
+        self.__components.append(LoadPowerSensor(energysite, self))
+        self.__components.append(GridPowerSensor(energysite, self))
 
     def _add_car_components(self, car):
         self.__components.append(Climate(car, self))
@@ -1136,7 +1147,7 @@ class Controller:
         return None
 
     def get_power_params(self, site_id: Text) -> Dict:
-        """Return cached copy of charging_params for car_id."""
+        """Return cached copy of power_params for site_id."""
         energysite_id = self._id_to_energysiteid(site_id)
         return self.__power[energysite_id]
 
