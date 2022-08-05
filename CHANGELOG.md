@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.0 (2022-08-05)
+### Feature
+* Add grid and load sensors ([#333](https://github.com/zabuldon/teslajsonpy/issues/333)) ([`697ff64`](https://github.com/zabuldon/teslajsonpy/commit/697ff64cbe884591bf94ca5fc88323049014f943))
+
 ## v2.3.0 (2022-07-10)
 ### Feature
 * Update endpoints and agent to v4.10 ([`ba11467`](https://github.com/zabuldon/teslajsonpy/commit/ba114674c80c1f1a7dfe004684c5c59ae0e44c2b))
