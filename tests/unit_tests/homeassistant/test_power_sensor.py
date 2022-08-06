@@ -21,7 +21,7 @@ def test_device_class(monkeypatch):
 
     _sensor = SolarPowerSensor(_data, _controller)
 
-    assert _sensor.type == "solar power"
+    assert _sensor.type == "solar panel"
 
     _sensor = LoadPowerSensor(_data, _controller)
 
