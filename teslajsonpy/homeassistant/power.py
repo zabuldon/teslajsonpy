@@ -134,12 +134,12 @@ class SolarPowerSensor(PowerSensor):
     """
 
     def __init__(self, data, controller):
-        """Initialize the solar power sensor."""
+        """Initialize the solar panel sensor."""
         super().__init__(data, controller)
         self._solar_type: Text = data["solar_type"]
         self.__solar_power: float = data["solar_power"]
         self.__generating_status: bool = None
-        self.type = "solar power"
+        self.type = "solar panel"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
 
