@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.1 (2022-08-13)
+### Fix
+* Revert solar power name to prevent breaking change ([#336](https://github.com/zabuldon/teslajsonpy/issues/336)) ([`bf02629`](https://github.com/zabuldon/teslajsonpy/commit/bf02629fc7e7359339890089f4c240cfa3f17636))
+
+### Documentation
+* Update documentation ([`150f0bd`](https://github.com/zabuldon/teslajsonpy/commit/150f0bd5ae280fa109ea13441ee2eb5aee70d4ff))
+
 ## v2.4.0 (2022-08-05)
 ### Feature
 * Add grid and load sensors ([#333](https://github.com/zabuldon/teslajsonpy/issues/333)) ([`697ff64`](https://github.com/zabuldon/teslajsonpy/commit/697ff64cbe884591bf94ca5fc88323049014f943))
