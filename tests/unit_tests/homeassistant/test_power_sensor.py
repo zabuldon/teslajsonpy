@@ -54,7 +54,7 @@ def test_site_without_name(monkeypatch):
     _data = _mock.data_request_energy_site_no_name()
     _sensor = PowerSensor(_data, _controller)
 
-    assert _sensor.site_name() == "1234567890"
+    assert _sensor.site_name() == "My Home"
 
 def test_get_solar_power_on_init(monkeypatch):
     """Test get_power() after initialization."""
