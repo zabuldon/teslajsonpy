@@ -45,7 +45,7 @@ class EnergySiteDevice:
         return f"{self._site_name} {self.type}"
 
     def _uniq_name(self) -> Text:
-        return self._name()
+        return f"{self._energy_site_id} {self.type}"
 
     def id(self) -> int:
         # pylint: disable=invalid-name

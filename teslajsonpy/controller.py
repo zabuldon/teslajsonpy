@@ -448,6 +448,9 @@ class Controller:
             )
             self.__energysite_type[energysite_id] = energysite["solar_type"]
             self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
+            # Get site_config data for site name and update energysite dict
+            site_config = await self.get_site_config(energysite_id)
+            energysite.update(site_config)
             # Set initial values to setup GridPowerSensor & LoadPowerSensor
             # Actual values update immediately after setup when refresh is called
             energysite["grid_power"] = 0
@@ -551,6 +554,12 @@ class Controller:
             for p in (await self.api("PRODUCT_LIST"))["response"]
             if p.get("resource_type") == "solar"
         ]
+
+    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
+    async def get_site_config(self, energysite_id):
+        """Get site config json from TeslaAPI."""
+        return (await self.api("SITE_CONFIG",
+                               path_vars={"site_id": energysite_id}))["response"]
 
     @wake_up
     async def post(

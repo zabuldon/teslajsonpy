@@ -22,17 +22,31 @@ def test_device_class(monkeypatch):
     _sensor = SolarPowerSensor(_data, _controller)
 
     assert _sensor.type == "solar panel"
+    assert _sensor.name == "My Home solar panel"
 
     _sensor = LoadPowerSensor(_data, _controller)
 
     assert _sensor.type == "load power"
+    assert _sensor.name == "My Home load power"
 
     _sensor = GridPowerSensor(_data, _controller)
 
     assert _sensor.type == "grid power"
+    assert _sensor.name == "My Home grid power"
 
-def test_device_no_name(monkeypatch):
-    """Test device_class()."""
+def test_site_with_name(monkeypatch):
+    """Test site with no site_name in json data."""
+
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+
+    _data = _mock.data_request_energy_site()
+    _sensor = PowerSensor(_data, _controller)
+
+    assert _sensor.site_name() == "My Home"
+
+def test_site_without_name(monkeypatch):
+    """Test site with no site_name in json data."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
@@ -41,7 +55,6 @@ def test_device_no_name(monkeypatch):
     _sensor = PowerSensor(_data, _controller)
 
     assert _sensor.site_name() == "1234567890"
-
 
 def test_get_solar_power_on_init(monkeypatch):
     """Test get_power() after initialization."""
