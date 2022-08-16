@@ -7,11 +7,7 @@ https://github.com/zabuldon/teslajsonpy
 import logging
 from typing import Dict, Text
 
-from teslajsonpy.const import (
-    TESLA_DEFAULT_ENERGY_SITE_NAME,
-    TESLA_RESOURCE_TYPE_SOLAR,
-    TESLA_RESOURCE_TYPE_BATTERY,
-)
+from teslajsonpy.const import TESLA_DEFAULT_ENERGY_SITE_NAME
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -143,10 +139,7 @@ class SolarPowerSensor(PowerSensor):
         """Initialize the solar panel sensor."""
         super().__init__(data, controller)
         self._solar_type: Text = data["components"]["solar_type"]
-        if data["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
-            self.__solar_power: float = data["solar_power"]
-        if data["resource_type"] == TESLA_RESOURCE_TYPE_BATTERY:
-            self.__solar_power: float = data["power_reading"][0]["solar_power"]
+        self.__solar_power: float = data["solar_power"]
         self.__generating_status: bool = None
         self.type = "solar panel"
         self.name = self._name()
@@ -205,10 +198,7 @@ class LoadPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the load power sensor."""
         super().__init__(data, controller)
-        if data["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
-            self.__load_power: float = data["load_power"]
-        if data["resource_type"] == TESLA_RESOURCE_TYPE_BATTERY:
-            self.__load_power: float = data["power_reading"][0]["load_power"]
+        self.__load_power: float = data["load_power"]
         self.type = "load power"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
@@ -242,10 +232,7 @@ class GridPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the grid power sensor."""
         super().__init__(data, controller)
-        if data["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
-            self.__grid_power: float = data["grid_power"]
-        if data["resource_type"] == TESLA_RESOURCE_TYPE_BATTERY:
-            self.__grid_power: float = data["power_reading"][0]["grid_power"]
+        self.__grid_power: float = data["grid_power"]
         self.type = "grid power"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
@@ -271,7 +258,7 @@ class GridPowerSensor(PowerSensor):
 
 
 class BatteryPowerSensor(PowerSensor):
-    """Home-assistant class for grid power sensors for Tesla Energy Sites (Solar Panels).
+    """Home-assistant class for battery power sensors for Tesla Energy Sites (Solar Panels).
 
     This is intended to be partially inherited by a Home-Assitant entity.
     """
@@ -279,17 +266,17 @@ class BatteryPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the battery power sensor."""
         super().__init__(data, controller)
-        self.__battery_power: float = data["power_reading"][0]["battery_power"]
+        self.__battery_power: float = data["battery_power"]
         self.type = "battery power"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
 
     def get_value(self) -> float:
-        """Return grid power."""
+        """Return battery power."""
         return self.__battery_power
 
-    def get_grid_power(self):
-        """Get grid power (grid import/export)."""
+    def get_battery_power(self):
+        """Get battery power (battery charge/discharge)."""
         return self.__battery_power
 
     def refresh(self) -> None:
@@ -301,4 +288,4 @@ class BatteryPowerSensor(PowerSensor):
         data = self._controller.get_power_params(self._id)
 
         if data:
-            self.__battery_power = data["grid_power"]
+            self.__battery_power = data["battery_power"]

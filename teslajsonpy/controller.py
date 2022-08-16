@@ -447,29 +447,18 @@ class Controller:
 
         for energysite in self.energysites:
             energysite_id = energysite["energy_site_id"]
+            # Set initial values to initialize power sensors
+            # Actual values update immediately after setup when refresh is called
+            energysite["solar_power"] = 0
+            energysite["load_power"] = 0
+            energysite["grid_power"] = 0
+            energysite["battery_power"] = 0
+
             if energysite["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
-                # Set initial values to setup GridPowerSensor & LoadPowerSensor
-                # Actual values update immediately after setup when refresh is called
-                energysite["grid_power"] = 0
-                energysite["load_power"] = 0
                 # Non-powerwall sites do not include "site_name" in "PRODUCT_LIST" endpoint
                 # Get "site_config" data for "site_name" and update energysite dict
                 site_config = await self.get_site_config(energysite_id)
                 energysite.update(site_config)
-
-                self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
-
-            if energysite["resource_type"] == TESLA_RESOURCE_TYPE_BATTERY:
-                # Set initial values to setup Solar, Grid, Load and Battery PowerSensors
-                # Actual values update immediately after setup when refresh is called
-                energysite["power_reading"] = [
-                    {
-                        "solar_power": 0,
-                        "load_power": 0,
-                        "grid_power": 0,
-                        "battery_power": 0,
-                    }
-                ]
 
             self.__id_energysiteid_map[energysite["id"]] = energysite_id
             self.__energysiteid_id_map[energysite_id] = energysite["id"]
@@ -1021,7 +1010,7 @@ class Controller:
                 except TeslaException:
                     data = None
                 if data and data["response"]:
-                    response = data["response"]
+                    response = data["response"]["power_reading"][0]
                     self.__power[id] = response
 
         async with self.__update_lock:
