@@ -443,6 +443,8 @@ class Controller:
 
             self._add_car_components(car)
 
+        _LOGGER.info("Running custom version of teslajsonpy with Powerwall support.") # TEMPORARY
+
         for energysite in self.energysites:
             energysite_id = energysite["energy_site_id"]
             if energysite["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
