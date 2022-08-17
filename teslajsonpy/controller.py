@@ -30,6 +30,7 @@ from teslajsonpy.const import (
     SLEEP_INTERVAL,
     TESLA_PRODUCT_TYPE_ENERGY_SITES,
     TESLA_PRODUCT_TYPE_VEHICLES,
+    TESLA_DEFAULT_ENERGY_SITE_NAME
 )
 from teslajsonpy.exceptions import should_giveup, RetryLimitError, TeslaException
 from teslajsonpy.homeassistant.battery_sensor import Battery, Range
@@ -441,17 +442,21 @@ class Controller:
 
         for energysite in self.energysites:
             energysite_id = energysite["energy_site_id"]
-            self.__id_energysiteid_map[energysite["id"]] = energysite_id
-            self.__energysiteid_id_map[energysite_id] = energysite["id"]
-            self.__energysite_name[energysite_id] = energysite.get(
-                "site_name", f"{energysite_id}"
-            )
-            self.__energysite_type[energysite_id] = energysite["solar_type"]
-            self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
+            # Get site_config data for site name and update energysite dict
+            site_config = await self.get_site_config(energysite_id)
+            energysite.update(site_config)
             # Set initial values to setup GridPowerSensor & LoadPowerSensor
             # Actual values update immediately after setup when refresh is called
             energysite["grid_power"] = 0
             energysite["load_power"] = 0
+
+            self.__id_energysiteid_map[energysite["id"]] = energysite_id
+            self.__energysiteid_id_map[energysite_id] = energysite["id"]
+            self.__energysite_name[energysite_id] = energysite.get(
+                "site_name", TESLA_DEFAULT_ENERGY_SITE_NAME
+            )
+            self.__energysite_type[energysite_id] = energysite["solar_type"]
+            self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
 
             self.__lock[energysite_id] = asyncio.Lock()
             self._add_energysite_components(energysite)
@@ -551,6 +556,12 @@ class Controller:
             for p in (await self.api("PRODUCT_LIST"))["response"]
             if p.get("resource_type") == "solar"
         ]
+
+    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
+    async def get_site_config(self, energysite_id):
+        """Get site config json from TeslaAPI."""
+        return (await self.api("SITE_CONFIG",
+                               path_vars={"site_id": energysite_id}))["response"]
 
     @wake_up
     async def post(
