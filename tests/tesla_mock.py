@@ -471,50 +471,118 @@ VEHICLE = {
 }
 
 # Example config for solar only (no powerall) and Neurio
-# Combination of PRODUCT_LIST and SITE_DATA from Controller
+# Combination of PRODUCT_LIST, SITE_DATA & SITE_CONFIG from Controller
 ENERGYSITE_CONFIG = {
-    'energy_site_id': 1234567890,
-    'resource_type': 'solar',
-    'id': 'c31d46d3-d3f3-4319-a2cb-34719c30243d',
-    'asset_site_id': '3f345132-3c13-2cda-351a-341fq3a2dab2', 
-    'solar_power': 4230, 
-    'solar_type': 'pv_panel', 
-    'storm_mode_enabled': None, 
-    'powerwall_onboarding_settings_set': None, 
-    'sync_grid_alert_enabled': False, 
-    'breaker_alert_enabled': False, 
-    'components': {
-        'battery': False, 
-        'solar': True, 
-        'solar_type': 'pv_panel', 
-        'grid': True, 
-        'load_meter': True, 
-        'market_type': 'residential'
-        }, 
-    'energy_left': 0, 
-    'total_pack_energy': 1, 
-    'percentage_charged': 0, 
-    'battery_power': 0, 
-    'load_power': 3245.4599609375, 
-    'grid_status': 'Unknown', 
-    'grid_services_active': False, 
-    'grid_power': -984.5400390625, 
-    'grid_services_power': 0, 
-    'generator_power': 0, 
-    'island_status': 'island_status_unknown', 
-    'storm_mode_active': False, 
-    'timestamp': '2022-07-29T23:02:14Z', 
-    'wall_connectors': None}
-
-ENERGYSITE_CONFIG_NO_NAME = {
-    "id": 12345678901234567,
     "energy_site_id": 1234567890,
-    "asset_site_id": 1234567890,
     "resource_type": "solar",
-    "solar_type": "pv_panels",
-    "solar_power": None,
+    "id": "c31d46d3-d3f3-4319-a2cb-34719c30243d",
+    "asset_site_id": "3f345132-3c13-2cda-351a-341fq3a2dab2",
+    "solar_power": 4230,
+    "solar_type": "pv_panel",
+    "storm_mode_enabled": None,
+    "powerwall_onboarding_settings_set": None,
     "sync_grid_alert_enabled": False,
     "breaker_alert_enabled": False,
+    "components": {
+        "solar": True,
+        "solar_type": "pv_panel",
+        "battery": False,
+        "grid": True,
+        "backup": False,
+        "gateway": "gateway_type_none",
+        "load_meter": True,
+        "tou_capable": False,
+        "storm_mode_capable": False,
+        "flex_energy_request_capable": False,
+        "car_charging_data_supported": False,
+        "off_grid_vehicle_charging_reserve_supported": False,
+        "vehicle_charging_performance_view_enabled": False,
+        "vehicle_charging_solar_offset_view_enabled": False,
+        "battery_solar_offset_view_enabled": False,
+        "energy_service_self_scheduling_enabled": True,
+        "configurable": False,
+        "grid_services_enabled": False
+    },
+    "grid_power": -984.5400390625,
+    "load_power": 3245.4599609375,
+    "site_name": "My Home",
+    "site_number": "STE32474374-31631",
+    "installation_date": "2021-03-01T12:58:33-07:00",
+    "user_settings": {
+        "storm_mode_enabled": None,
+        "powerwall_onboarding_settings_set": None,
+        "sync_grid_alert_enabled": False,
+        "breaker_alert_enabled": False
+    },
+    "installation_time_zone": "America/Los_Angeles",
+    "time_zone_offset": -420,
+    "geolocation": {
+        "latitude": 31.32463100000001,
+        "longitude": -103.1425259
+    },
+    "address": {
+        "address_line1": "1234 Tesla Solar Ave",
+        "city": "Austin",
+        "state": "TX",
+        "zip": "123456",
+        "country": "US"
+    }
+}
+
+ENERGYSITE_CONFIG_NO_NAME = {
+    "energy_site_id": 1234567890,
+    "resource_type": "solar",
+    "id": "c31d46d3-d3f3-4319-a2cb-34719c30243d",
+    "asset_site_id": "3f345132-3c13-2cda-351a-341fq3a2dab2",
+    "solar_power": 4230,
+    "solar_type": "pv_panel",
+    "storm_mode_enabled": None,
+    "powerwall_onboarding_settings_set": None,
+    "sync_grid_alert_enabled": False,
+    "breaker_alert_enabled": False,
+    "components": {
+        "solar": True,
+        "solar_type": "pv_panel",
+        "battery": False,
+        "grid": True,
+        "backup": False,
+        "gateway": "gateway_type_none",
+        "load_meter": True,
+        "tou_capable": False,
+        "storm_mode_capable": False,
+        "flex_energy_request_capable": False,
+        "car_charging_data_supported": False,
+        "off_grid_vehicle_charging_reserve_supported": False,
+        "vehicle_charging_performance_view_enabled": False,
+        "vehicle_charging_solar_offset_view_enabled": False,
+        "battery_solar_offset_view_enabled": False,
+        "energy_service_self_scheduling_enabled": True,
+        "configurable": False,
+        "grid_services_enabled": False
+    },
+    "grid_power": -984.5400390625,
+    "load_power": 3245.4599609375,
+    "site_number": "STE32474374-31631",
+    "installation_date": "2021-03-01T12:58:33-07:00",
+    "user_settings": {
+        "storm_mode_enabled": None,
+        "powerwall_onboarding_settings_set": None,
+        "sync_grid_alert_enabled": False,
+        "breaker_alert_enabled": False
+    },
+    "installation_time_zone": "America/Los_Angeles",
+    "time_zone_offset": -420,
+    "geolocation": {
+        "latitude": 31.32463100000001,
+        "longitude": -103.1425259
+    },
+    "address": {
+        "address_line1": "1234 Tesla Solar Ave",
+        "city": "Austin",
+        "state": "TX",
+        "zip": "123456",
+        "country": "US"
+    }
 }
 
 ENERGYSITE_STATE = {
