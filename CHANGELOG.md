@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.2 (2022-08-17)
+### Fix
+* Use solar name from app ([#339](https://github.com/zabuldon/teslajsonpy/issues/339)) ([`a1c3a41`](https://github.com/zabuldon/teslajsonpy/commit/a1c3a41f14b24bdeeb5206c7ad2afbaf81529fc6))
+
 ## v2.4.1 (2022-08-13)
 ### Fix
 * Revert solar power name to prevent breaking change ([#336](https://github.com/zabuldon/teslajsonpy/issues/336)) ([`bf02629`](https://github.com/zabuldon/teslajsonpy/commit/bf02629fc7e7359339890089f4c240cfa3f17636))
