@@ -3,162 +3,150 @@
 import pytest
 
 from teslajsonpy.controller import Controller
-from teslajsonpy.homeassistant.power import PowerSensor, SolarPowerSensor, LoadPowerSensor, GridPowerSensor
+from teslajsonpy.homeassistant.power import (
+    SolarPowerSensor,
+    LoadPowerSensor,
+    GridPowerSensor,
+    BatteryPowerSensor,
+)
 
 from tests.tesla_mock import TeslaMock
 
 
-def test_device_class(monkeypatch):
-    """Test device_class()."""
+@pytest.mark.asyncio
+async def test_energysite_setup(monkeypatch):
+    """Test setup of energysites in Controller.connect()."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
 
+    assert _controller.energysites is not None
+    assert _controller.energysites[0]["energy_site_id"] == 12345
+    assert _controller.energysites[1]["energy_site_id"] == 67890
+
+
+@pytest.mark.asyncio
+async def test_solar_power_sensor(monkeypatch):
+    """Test SolarPowerSensor class."""
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
-
-    _data = _mock.data_request_energy_site()
-    _sensor = PowerSensor(_data, _controller)
-
-    assert _sensor.device_class == "power"
-
+    # Test a solar only site (no Powerwall)
+    _data = _mock.data_request_solar_combined_data()
     _sensor = SolarPowerSensor(_data, _controller)
 
-    assert _sensor.type == "solar panel"
-    assert _sensor.name == "My Home solar panel"
+    assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
+    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
+    assert _sensor.get_power() == 0
+    # Test a battery site (Powerwall)
+    _data = _mock.data_request_battery_combined_data()
+    _sensor = SolarPowerSensor(_data, _controller)
 
-    _sensor = LoadPowerSensor(_data, _controller)
+    assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
+    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
+    assert _sensor.get_power() == 0
 
-    assert _sensor.type == "load power"
-    assert _sensor.name == "My Home load power"
 
-    _sensor = GridPowerSensor(_data, _controller)
-
-    assert _sensor.type == "grid power"
-    assert _sensor.name == "My Home grid power"
-
-def test_site_with_name(monkeypatch):
-    """Test site with no site_name in json data."""
-
+@pytest.mark.asyncio
+async def test_load_power_sensor(monkeypatch):
+    """Test LoadPowerSensor class."""
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    # Test a solar only site (no Powerwall)
+    _data = _mock.data_request_solar_combined_data()
+    _sensor = LoadPowerSensor(_data, _controller)
 
-    _data = _mock.data_request_energy_site()
-    _sensor = PowerSensor(_data, _controller)
+    assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
+    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
+    assert _sensor.get_power() == 0
+    # Test a battery site (Powerwall)
+    _data = _mock.data_request_battery_combined_data()
+    _sensor = LoadPowerSensor(_data, _controller)
 
-    assert _sensor.site_name() == "My Home"
+    assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
+    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
+    assert _sensor.get_power() == 0
+
+
+@pytest.mark.asyncio
+async def test_grid_power_sensor(monkeypatch):
+    """Test GridPowerSensor class."""
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    # Test a solar only site (no Powerwall)
+    _data = _mock.data_request_solar_combined_data()
+    _sensor = GridPowerSensor(_data, _controller)
+
+    assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
+    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
+    assert _sensor.get_power() == 0
+    # Test a battery site (Powerwall)
+    _data = _mock.data_request_battery_combined_data()
+    _sensor = GridPowerSensor(_data, _controller)
+
+    assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
+    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
+    assert _sensor.get_power() == 0
+
+
+@pytest.mark.asyncio
+async def test_battery_power_sensor(monkeypatch):
+    """Test BatteryPowerSensor class."""
+    _mock = TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    _data = _mock.data_request_battery_combined_data()
+    _sensor = BatteryPowerSensor(_data, _controller)
+
+    assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
+    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
+    assert _sensor.get_power() == 0
+
 
 def test_site_without_name(monkeypatch):
     """Test site with no site_name in json data."""
-
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
-
-    _data = _mock.data_request_energy_site_no_name()
-    _sensor = PowerSensor(_data, _controller)
+    _data = _mock.data_request_solar_combined_data_no_name()
+    _sensor = LoadPowerSensor(_data, _controller)
 
     assert _sensor.site_name() == "My Home"
 
-def test_get_solar_power_on_init(monkeypatch):
-    """Test get_power() after initialization."""
-
-    _mock = TeslaMock(monkeypatch)
-    _controller = Controller(None)
-
-    _data = _mock.data_request_energy_site()
-    _sensor = SolarPowerSensor(_data, _controller)
-
-    assert _sensor is not None
-    assert _sensor.get_power() == 4230
-
-def test_get_load_power_on_init(monkeypatch):
-    """Test get_load_power() after initialization."""
-
-    _mock = TeslaMock(monkeypatch)
-    _controller = Controller(None)
-
-    _data = _mock.data_request_energy_site()
-    _sensor = LoadPowerSensor(_data, _controller)
-
-    assert _sensor is not None
-    assert _sensor.get_load_power() == 3245.4599609375
-
-def test_get_grid_power_on_init(monkeypatch):
-    """Test get_grid_power() after initialization."""
-
-    _mock = TeslaMock(monkeypatch)
-    _controller = Controller(None)
-
-    _data = _mock.data_request_energy_site()
-    _sensor = GridPowerSensor(_data, _controller)
-
-    assert _sensor is not None
-    assert _sensor.get_grid_power() == -984.5400390625
 
 @pytest.mark.asyncio
 async def test_get_power_after_update(monkeypatch):
     """Test get_power() after an update."""
-
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
-
-    _data = _mock.data_request_energy_site()
+    _data = _mock.data_request_solar_combined_data()
     _data["solar_power"] = 1800
+    _data["load_power"] = 1800
+    _data["grid_power"] = 1800
+
     _sensor = SolarPowerSensor(_data, _controller)
 
     await _sensor.async_update()
-
-    assert _sensor is not None
-    assert not _sensor.get_power() is None
     assert _sensor.get_power() == 7720
 
-@pytest.mark.asyncio
-async def test_get_load_power_after_update(monkeypatch):
-    """Test get_load_power() after an update."""
-
-    _mock = TeslaMock(monkeypatch)
-    _controller = Controller(None)
-
-    _data = _mock.data_request_energy_site()
-    _data["load_power"] = 1800
     _sensor = LoadPowerSensor(_data, _controller)
 
     await _sensor.async_update()
+    assert _sensor.get_power() == 4517.14990234375
 
-    assert _sensor is not None
-    assert not _sensor.get_load_power() is None
-    assert _sensor.get_load_power() == 4517.14990234375
-
-@pytest.mark.asyncio
-async def test_get_grid_power_after_update(monkeypatch):
-    """Test get_grid_power() after an update."""
-
-    _mock = TeslaMock(monkeypatch)
-    _controller = Controller(None)
-
-    _data = _mock.data_request_energy_site()
-    _data["grid_power"] = 1800
     _sensor = GridPowerSensor(_data, _controller)
 
     await _sensor.async_update()
+    assert _sensor.get_power() == -3202.85009765625
 
-    assert _sensor is not None
-    assert not _sensor.get_grid_power() is None
-    assert _sensor.get_grid_power() == -3202.85009765625
 
 @pytest.mark.asyncio
 async def test_get_power_after_update_with_unknown_status(monkeypatch):
-    """Test get_power()  after an update with an unknown grid status."""
-
+    """Test get_power() after an update with unknown grid status."""
     _mock = TeslaMock(monkeypatch)
     monkeypatch.setattr(
         Controller, "get_power_params", _mock.mock_get_power_unknown_grid_params
     )
     _controller = Controller(None)
-
-    _data = _mock.data_request_energy_site()
-    _data["solar_power"] = 1800
+    _data = _mock.data_request_solar_combined_data()
     _sensor = SolarPowerSensor(_data, _controller)
 
     await _sensor.async_update()
-
-    assert _sensor is not None
-    assert not _sensor.get_power() is None
     assert _sensor.get_power() == 1750

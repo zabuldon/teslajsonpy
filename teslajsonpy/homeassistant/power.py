@@ -207,7 +207,7 @@ class LoadPowerSensor(PowerSensor):
         """Return load power."""
         return self.__load_power
 
-    def get_load_power(self):
+    def get_power(self):
         """Get load power (home consumption)."""
         return self.__load_power
 
@@ -241,7 +241,7 @@ class GridPowerSensor(PowerSensor):
         """Return grid power."""
         return self.__grid_power
 
-    def get_grid_power(self):
+    def get_power(self):
         """Get grid power (grid import/export)."""
         return self.__grid_power
 
@@ -275,7 +275,7 @@ class BatteryPowerSensor(PowerSensor):
         """Return battery power."""
         return self.__battery_power
 
-    def get_battery_power(self):
+    def get_power(self):
         """Get battery power (battery charge/discharge)."""
         return self.__battery_power
 

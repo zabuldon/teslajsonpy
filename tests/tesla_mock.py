@@ -18,7 +18,7 @@ class TeslaMock:
         """
 
         self._monkeypatch = monkeypatch
-        self._monkeypatch.setattr(Controller, "connect", self.mock_connect)
+        # self._monkeypatch.setattr(Controller, "connect", self.mock_connect)
         self._monkeypatch.setattr(Controller, "command", self.mock_command)
         self._monkeypatch.setattr(Controller, "api", self.mock_api)
         # self._monkeypatch.setattr(
@@ -37,6 +37,8 @@ class TeslaMock:
         #     Controller, "get_state_params", self.mock_get_state_params
         # )
         self._monkeypatch.setattr(Controller, "get_vehicles", self.mock_get_vehicles)
+        self._monkeypatch.setattr(Controller, "get_energysites", self.mock_get_energysites)
+        self._monkeypatch.setattr(Controller, "get_site_config", self.mock_get_site_config)
         # self._monkeypatch.setattr(
         #     Controller, "get_last_update_time", self.mock_get_last_update_time
         # )
@@ -44,19 +46,23 @@ class TeslaMock:
         self._monkeypatch.setattr(
             Controller, "get_power_params", self.mock_get_power_params
         )
+        self._vehicle_product_list = copy.deepcopy(VEHICLE_PRODUCT_LIST)
+        self._site_product_list = copy.deepcopy(ENERGYSITE_PRODUCT_LIST)
+        self._site_config = copy.deepcopy(SITE_CONFIG)
         self._drive_state = copy.deepcopy(DRIVE_STATE)
         self._climate_state = copy.deepcopy(CLIMATE_STATE)
         self._charge_state = copy.deepcopy(CHARGE_STATE)
         self._gui_settings = copy.deepcopy(GUI_SETTINGS)
         self._vehicle_state = copy.deepcopy(VEHICLE_STATE)
         self._vehicle_config = copy.deepcopy(VEHICLE_CONFIG)
-        self._energysite_config = copy.deepcopy(ENERGYSITE_CONFIG)
-        self._energysite_state = copy.deepcopy(ENERGYSITE_STATE)
-        self._energysite_state_unknown_grid = copy.deepcopy(
-            ENERGYSITE_STATE_UNKNOWN_GRID
+        self._solar_combined_data = copy.deepcopy(SOLAR_COMBINED_DATA)
+        self._solar_combined_data_no_name = copy.deepcopy(SOLAR_COMBINED_DATA_NO_NAME)
+        self._battery_combined_data = copy.deepcopy(BATTERY_COMBINED_DATA)
+        self._site_config = copy.deepcopy(SITE_CONFIG)
+        self._site_state = copy.deepcopy(SITE_STATE)
+        self._site_state_unknown_grid = copy.deepcopy(
+            SITE_STATE_UNKNOWN_GRID
         )
-        self._energysite_config_no_name = copy.deepcopy(ENERGYSITE_CONFIG_NO_NAME)
-
         self._vehicle = copy.deepcopy(VEHICLE)
         self._vehicle["drive_state"] = self._drive_state
         self._vehicle["climate_state"] = self._climate_state
@@ -120,6 +126,16 @@ class TeslaMock:
         """Mock controller's get_vehicles method."""
         return self.controller_get_vehicles()
 
+    def mock_get_energysites(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's get_energysites method."""
+        return self.controller_get_energysites()
+
+    def mock_get_site_config(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's get_site_config method."""
+        return self.controller_get_site_config()
+
     def mock_get_last_update_time(self, *args, **kwargs):
         # pylint: disable=unused-argument
         """Mock controller's get_last_update_time method."""
@@ -155,11 +171,11 @@ class TeslaMock:
 
     def controller_get_power_params(self):
         """Monkeypatch for controller.get_climate_params()."""
-        return self._energysite_state
+        return self._site_state
 
     def controller_get_power_unknown_grid_params(self):
         """Monkeypatch for controller.get_climate_params()."""
-        return self._energysite_state_unknown_grid
+        return self._site_state_unknown_grid
 
     def controller_get_drive_params(self):
         """Monkeypatch for controller.get_drive_params()."""
@@ -173,10 +189,17 @@ class TeslaMock:
         """Monkeypatch for controller.get_state_params()."""
         return self._vehicle_state
 
-    @staticmethod
-    def controller_get_vehicles():
+    async def controller_get_vehicles(self):
         """Monkeypatch for controller.get_vehicles()."""
-        return {SAMPLE_VEHICLE}
+        return self._vehicle_product_list
+
+    async def controller_get_energysites(self):
+        """Monkeypatch for controller.get_energysites()."""
+        return self._site_product_list
+
+    async def controller_get_site_config(self):
+        """Monkeypatch for controller.get_site_config()."""
+        return self._site_config
 
     @staticmethod
     async def controller_update():
@@ -204,21 +227,25 @@ class TeslaMock:
         """Simulate the result of vehicle state data request."""
         return self._vehicle_state
 
-    def data_request_energy_site(self):
-        """Similate the result of energy site data request."""
-        return self._energysite_config
+    def data_request_solar_combined_data(self):
+        """Similate the result of combined product list & site config request."""
+        return self._solar_combined_data
 
-    def data_request_energy_site_no_name(self):
-        """Similate the result of energy site data request without a name."""
-        return self._energysite_config_no_name
+    def data_request_solar_combined_data_no_name(self):
+        """Similate the result of combined product list & site config without name."""
+        return self._solar_combined_data_no_name
 
-    def data_request_energy_state(self):
-        """Similate the result of energy status data request."""
-        return self._energysite_state
+    def data_request_battery_combined_data(self):
+        """Similate the result of a battery site from product_list."""
+        return self._battery_combined_data
 
-    def data_request_energy_state_unknown_grid(self):
-        """Similate the result of energy status unknown grid data request."""
-        return self._energysite_state_unknown_grid
+    def data_request_site_state(self):
+        """Similate the result of site state request."""
+        return self._site_state
+
+    def data_request_site_state_unknown_grid(self):
+        """Similate the result of site state with unknown grid data request."""
+        return self._site_state_unknown_grid
 
     @staticmethod
     def command_ok():
@@ -236,27 +263,28 @@ RESULT_VEHICLE_UNAVAILABLE = {
     "error_description": "",
 }
 
-
 VIN = "5YJSA11111111111"
 CAR_ID = 12345678901234567
 
-
-SAMPLE_VEHICLE = {
-    "id": 12345678901234567,
-    "vehicle_id": 1234567890,
-    "vin": "5YJSA11111111111",
-    "display_name": "Nikola 2.0",
-    "option_codes": "MDLS,RENA,AF02,APF1,APH2,APPB,AU01,BC0R,BP00,BR00,BS00,CDM0,CH05,PBCW,CW00,DCF0,DRLH,DSH7,DV4W,FG02,FR04,HP00,IDBA,IX01,LP01,ME02,MI01,PF01,PI01,PK00,PS01,PX00,PX4D,QTVB,RFP2,SC01,SP00,SR01,SU01,TM00,TP03,TR00,UTAB,WTAS,X001,X003,X007,X011,X013,X021,X024,X027,X028,X031,X037,X040,X044,YFFC,COUS",
-    "color": None,
-    "tokens": ["abcdef1234567890", "1234567890abcdef"],
-    "state": "online",
-    "in_service": False,
-    "id_s": "12345678901234567",
-    "calendar_enabled": True,
-    "api_version": 7,
-    "backseat_token": None,
-    "backseat_token_updated_at": None,
-}
+VEHICLE_PRODUCT_LIST = [
+    {
+        "id": 12345678901234567,
+        "vehicle_id": 1234567890,
+        "vin": "5YJSA11111111111",
+        "display_name": "Nikola 2.0",
+        "option_codes": "AD15,MDL3,PBSB,RENA,BT37,ID3W,RF3G,S3PB,DRLH,DV2W,W39B,APF0,COUS,BC3B,CH07,PC30,FC3P,FG31,GLFR,HL31,HM31,IL31,LTPB,MR31,FM3B,RS3H,SA3P,STCP,SC04,SU3C,T3CA,TW00,TM00,UT3P,WR00,AU3P,APH3,AF00,ZCST,MI00,CDM0",
+        "color": None,
+        "access_type": "OWNER",
+        "tokens": ["abcdef1234567890", "1234567890abcdef"],
+        "state": "online",
+        "in_service": False,
+        "id_s": "12345678901234567",
+        "calendar_enabled": True,
+        "api_version": 36,
+        "backseat_token": None,
+        "backseat_token_updated_at": None,
+    }
+]
 
 DRIVE_STATE = {
     "gps_as_of": 1538363883,
@@ -470,14 +498,111 @@ VEHICLE = {
     "vehicle_config": None,
 }
 
-# Example config for solar only (no powerall) and Neurio
-# Combination of PRODUCT_LIST, SITE_DATA & SITE_CONFIG from Controller
-ENERGYSITE_CONFIG = {
-    "energy_site_id": 1234567890,
+# Likely a rare setup simulating a home with two energy sites,one solar system with and
+# another without Powerwall. However, this enables testing multiple scenarios.
+ENERGYSITE_PRODUCT_LIST = [
+    {
+        "energy_site_id": 12345,
+        "resource_type": "solar",
+        "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
+        "asset_site_id": "12345",
+        "solar_power": 2260,
+        "solar_type": "pv_panel",
+        "storm_mode_enabled": None,
+        "powerwall_onboarding_settings_set": None,
+        "sync_grid_alert_enabled": False,
+        "breaker_alert_enabled": False,
+        "components": {
+            "battery": False,
+            "solar": True,
+            "solar_type": "pv_panel",
+            "grid": True,
+            "load_meter": True,
+            "market_type": "residential",
+        },
+    },
+    {
+        "energy_site_id": 67890,
+        "resource_type": "battery",
+        "site_name": "My Battery Home",
+        "id": "212dbc27-333c-45b1-81bb-31e2zd2fs2cm",
+        "gateway_id": "67890",
+        "asset_site_id": "67890",
+        "energy_left": 2864.7368421052633,
+        "total_pack_energy": 14070,
+        "percentage_charged": 20.360603000037408,
+        "battery_type": "ac_powerwall",
+        "backup_capable": True,
+        "battery_power": 3080,
+        "storm_mode_enabled": True,
+        "powerwall_onboarding_settings_set": True,
+        "sync_grid_alert_enabled": True,
+        "breaker_alert_enabled": True,
+        "components": {
+            "battery": True,
+            "battery_type": "ac_powerwall",
+            "solar": True,
+            "solar_type": "pv_panel",
+            "grid": True,
+            "load_meter": True,
+            "market_type": "residential",
+        },
+    }
+]
+
+SITE_CONFIG = {
+    "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
+    "site_name": "My Solar Home",
+    "site_number": "STE16235182-31459",
+    "installation_date": "2022-02-07T13:51:26-07:00",
+    "user_settings": {
+        "storm_mode_enabled": None,
+        "powerwall_onboarding_settings_set": None,
+        "sync_grid_alert_enabled": False,
+        "breaker_alert_enabled": False
+    },
+    "components": {
+        "solar": True,
+        "solar_type": "pv_panel",
+        "battery": False,
+        "grid": True,
+        "backup": False,
+        "gateway": "gateway_type_none",
+        "load_meter": True,
+        "tou_capable": False,
+        "storm_mode_capable": False,
+        "flex_energy_request_capable": False,
+        "car_charging_data_supported": False,
+        "off_grid_vehicle_charging_reserve_supported": False,
+        "vehicle_charging_performance_view_enabled": False,
+        "vehicle_charging_solar_offset_view_enabled": False,
+        "battery_solar_offset_view_enabled": False,
+        "energy_service_self_scheduling_enabled": True,
+        "rate_plan_manager_supported": True,
+        "configurable": False,
+        "grid_services_enabled": False
+    },
+    "installation_time_zone": "America/Los_Angeles",
+    "time_zone_offset": -420,
+    "geolocation": {
+        "latitude": 31.12345600000001,
+        "longitude": -119.1234567
+    },
+    "address": {
+        "address_line1": "1234 Tesla Energy Ave",
+        "city": "Austin",
+        "state": "TX",
+        "zip": "12345",
+        "country": "US"
+    }
+}
+# Data combined from PRODUCT_LIST & SITE_CONFIG which occurs in Controller.connect()
+SOLAR_COMBINED_DATA = {
+    "energy_site_id": 12345,
     "resource_type": "solar",
-    "id": "c31d46d3-d3f3-4319-a2cb-34719c30243d",
-    "asset_site_id": "3f345132-3c13-2cda-351a-341fq3a2dab2",
-    "solar_power": 4230,
+    "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
+    "asset_site_id": "12345",
+    "solar_power": 0,
     "solar_type": "pv_panel",
     "storm_mode_enabled": None,
     "powerwall_onboarding_settings_set": None,
@@ -500,41 +625,40 @@ ENERGYSITE_CONFIG = {
         "vehicle_charging_solar_offset_view_enabled": False,
         "battery_solar_offset_view_enabled": False,
         "energy_service_self_scheduling_enabled": True,
+        "rate_plan_manager_supported": True,
         "configurable": False,
-        "grid_services_enabled": False
+        "grid_services_enabled": False,
     },
-    "grid_power": -984.5400390625,
-    "load_power": 3245.4599609375,
-    "site_name": "My Home",
-    "site_number": "STE32474374-31631",
-    "installation_date": "2021-03-01T12:58:33-07:00",
+    "load_power": 0,
+    "grid_power": 0,
+    "battery_power": 0,
+    "site_name": "My Solar Home",
+    "site_number": "STE16235182-31459",
+    "installation_date": "2022-02-07T13:51:26-07:00",
     "user_settings": {
         "storm_mode_enabled": None,
         "powerwall_onboarding_settings_set": None,
         "sync_grid_alert_enabled": False,
-        "breaker_alert_enabled": False
+        "breaker_alert_enabled": False,
     },
     "installation_time_zone": "America/Los_Angeles",
     "time_zone_offset": -420,
-    "geolocation": {
-        "latitude": 31.32463100000001,
-        "longitude": -103.1425259
-    },
+    "geolocation": {"latitude": 31.12345600000001, "longitude": -119.1234567},
     "address": {
-        "address_line1": "1234 Tesla Solar Ave",
+        "address_line1": "1234 Tesla Energy Ave",
         "city": "Austin",
         "state": "TX",
-        "zip": "123456",
-        "country": "US"
-    }
+        "zip": "12345",
+        "country": "US",
+    },
 }
 
-ENERGYSITE_CONFIG_NO_NAME = {
-    "energy_site_id": 1234567890,
+SOLAR_COMBINED_DATA_NO_NAME = {
+    "energy_site_id": 12345,
     "resource_type": "solar",
-    "id": "c31d46d3-d3f3-4319-a2cb-34719c30243d",
-    "asset_site_id": "3f345132-3c13-2cda-351a-341fq3a2dab2",
-    "solar_power": 4230,
+    "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
+    "asset_site_id": "12345",
+    "solar_power": 0,
     "solar_type": "pv_panel",
     "storm_mode_enabled": None,
     "powerwall_onboarding_settings_set": None,
@@ -557,35 +681,65 @@ ENERGYSITE_CONFIG_NO_NAME = {
         "vehicle_charging_solar_offset_view_enabled": False,
         "battery_solar_offset_view_enabled": False,
         "energy_service_self_scheduling_enabled": True,
+        "rate_plan_manager_supported": True,
         "configurable": False,
-        "grid_services_enabled": False
+        "grid_services_enabled": False,
     },
-    "grid_power": -984.5400390625,
-    "load_power": 3245.4599609375,
-    "site_number": "STE32474374-31631",
-    "installation_date": "2021-03-01T12:58:33-07:00",
+    "load_power": 0,
+    "grid_power": 0,
+    "battery_power": 0,
+    "site_number": "STE16235182-31459",
+    "installation_date": "2022-02-07T13:51:26-07:00",
     "user_settings": {
         "storm_mode_enabled": None,
         "powerwall_onboarding_settings_set": None,
         "sync_grid_alert_enabled": False,
-        "breaker_alert_enabled": False
+        "breaker_alert_enabled": False,
     },
     "installation_time_zone": "America/Los_Angeles",
     "time_zone_offset": -420,
-    "geolocation": {
-        "latitude": 31.32463100000001,
-        "longitude": -103.1425259
-    },
+    "geolocation": {"latitude": 31.12345600000001, "longitude": -119.1234567},
     "address": {
-        "address_line1": "1234 Tesla Solar Ave",
+        "address_line1": "1234 Tesla Energy Ave",
         "city": "Austin",
         "state": "TX",
-        "zip": "123456",
-        "country": "US"
-    }
+        "zip": "12345",
+        "country": "US",
+    },
+}
+# Data added from Controller.connect() initialization (solar_power, load_power, etc.)
+BATTERY_COMBINED_DATA = {
+    "energy_site_id": 67890,
+    "resource_type": "battery",
+    "site_name": "My Battery Home",
+    "id": "212dbc27-333c-45b1-81bb-31e2zd2fs2cm",
+    "gateway_id": "67890",
+    "asset_site_id": "67890",
+    "energy_left": 2864.7368421052633,
+    "total_pack_energy": 14070,
+    "percentage_charged": 20.360603000037408,
+    "battery_type": "ac_powerwall",
+    "backup_capable": True,
+    "battery_power": 0,
+    "storm_mode_enabled": True,
+    "powerwall_onboarding_settings_set": True,
+    "sync_grid_alert_enabled": True,
+    "breaker_alert_enabled": True,
+    "components": {
+        "battery": True,
+        "battery_type": "ac_powerwall",
+        "solar": True,
+        "solar_type": "pv_panel",
+        "grid": True,
+        "load_meter": True,
+        "market_type": "residential",
+    },
+    "solar_power": 0,
+    "load_power": 0,
+    "grid_power": 0,
 }
 
-ENERGYSITE_STATE = {
+SITE_STATE = {
     "solar_power": 7720,
     "energy_left": 0,
     "total_pack_energy": 1,
@@ -601,12 +755,223 @@ ENERGYSITE_STATE = {
     "storm_mode_active": False,
     "timestamp": "2022-07-28T17:11:27Z",
     "wall_connectors": None
-  }
+}
 
-ENERGYSITE_STATE_UNKNOWN_GRID = {
+SITE_STATE_UNKNOWN_GRID = {
     "id": 12345678901234567,
     "timestamp": "2011-01-01",
     "solar_power": 1750,
     "grid_status": "Unknown",
     "grid_services_active": False,
+}
+# Example of battery_data response for future tests
+BATTERY_DATA = {
+    "energy_site_id": 123456789,
+    "resource_type": "battery",
+    "site_name": "My Battery Home",
+    "id": "XXX",
+    "gateway_id": "XXX",
+    "asset_site_id": "XXX",
+    "energy_left": 12650.052631578948,
+    "total_pack_energy": 14069,
+    "percentage_charged": 20.360603000037408,
+    "battery_type": "ac_powerwall",
+    "backup_capable": True,
+    "battery_power": 3080,
+    "storm_mode_enabled": True,
+    "powerwall_onboarding_settings_set": True,
+    "sync_grid_alert_enabled": True,
+    "breaker_alert_enabled": True,
+    "components": {
+        "solar": True,
+        "solar_type": "pv_panel",
+        "battery": True,
+        "grid": True,
+        "backup": True,
+        "gateway": "teg",
+        "load_meter": True,
+        "tou_capable": True,
+        "storm_mode_capable": True,
+        "flex_energy_request_capable": False,
+        "car_charging_data_supported": False,
+        "off_grid_vehicle_charging_reserve_supported": False,
+        "vehicle_charging_performance_view_enabled": False,
+        "vehicle_charging_solar_offset_view_enabled": False,
+        "battery_solar_offset_view_enabled": True,
+        "solar_value_enabled": True,
+        "energy_value_header": "Energy Value",
+        "energy_value_subheader": "Estimated Value",
+        "show_grid_import_battery_source_cards": True,
+        "backup_time_remaining_enabled": True,
+        "rate_plan_manager_supported": True,
+        "battery_type": "ac_powerwall",
+        "configurable": False,
+        "grid_services_enabled": False,
+        "customer_preferred_export_rule": "battery_ok",
+        "net_meter_mode": "battery_ok"
+    },
+    "grid_status": "Active",
+    "backup": {
+        "backup_reserve_percent": 100,
+        "events": [
+            {
+                "timestamp": "2022-07-12T06:56:55+10:00",
+                "duration": 38773
+            },
+            {
+                "timestamp": "2022-07-11T20:46:25+10:00",
+                "duration": 66479
+            },
+            {
+                "timestamp": "2022-06-29T11:35:43+10:00",
+                "duration": 842030
+            },
+            {
+                "timestamp": "2022-06-18T15:28:35+10:00",
+                "duration": 1013486
+            },
+            {
+                "timestamp": "2022-06-15T15:43:20+10:00",
+                "duration": 210737
+            },
+            {
+                "timestamp": "2022-06-10T08:26:12+10:00",
+                "duration": 47649
+            },
+            {
+                "timestamp": "2022-06-03T13:58:52+10:00",
+                "duration": 443079
+            },
+            {
+                "timestamp": "2022-05-15T10:46:58+10:00",
+                "duration": 31389950
+            },
+            {
+                "timestamp": "2022-05-14T15:33:38+10:00",
+                "duration": 1279604
+            },
+            {
+                "timestamp": "2022-05-07T19:39:07+10:00",
+                "duration": 901817
+            },
+            {
+                "timestamp": "2022-04-23T08:26:14+10:00",
+                "duration": 437693
+            },
+            {
+                "timestamp": "2022-04-22T19:14:33+10:00",
+                "duration": 757615
+            },
+            {
+                "timestamp": "2022-04-14T11:54:35+10:00",
+                "duration": 581358
+            },
+            {
+                "timestamp": "2022-04-06T22:26:41+10:00",
+                "duration": 65188
+            },
+            {
+                "timestamp": "2022-04-03T22:12:07+10:00",
+                "duration": 654161
+            },
+            {
+                "timestamp": "2022-04-03T21:57:36+10:00",
+                "duration": 798912
+            },
+            {
+                "timestamp": "2022-04-03T18:51:05+10:00",
+                "duration": 67764
+            },
+            {
+                "timestamp": "2022-04-03T17:22:58+10:00",
+                "duration": 641782
+            },
+            {
+                "timestamp": "2022-04-03T17:21:19+10:00",
+                "duration": 69942
+            },
+            {
+                "timestamp": "2022-04-03T06:34:17+10:00",
+                "duration": 232350
+            },
+            {
+                "timestamp": "2022-04-02T19:05:41+10:00",
+                "duration": 47104
+            },
+            {
+                "timestamp": "2022-04-02T09:35:18+10:00",
+                "duration": 258895
+            },
+            {
+                "timestamp": "2022-04-02T05:21:14+10:00",
+                "duration": 63814
+            },
+            {
+                "timestamp": "2022-04-01T11:59:57+10:00",
+                "duration": 586849
+            },
+            {
+                "timestamp": "2022-04-01T11:50:56+10:00",
+                "duration": 457199
+            },
+            {
+                "timestamp": "2022-04-01T11:48:21+10:00",
+                "duration": 51065
+            },
+            {
+                "timestamp": "2022-04-01T11:47:23+10:00",
+                "duration": 41783
+            },
+            {
+                "timestamp": "2022-04-01T11:01:46+10:00",
+                "duration": 73278
+            },
+            {
+                "timestamp": "2022-03-31T17:12:00+10:00",
+                "duration": 45838
+            },
+            {
+                "timestamp": "2022-03-24T16:28:07+10:00",
+                "duration": 122233
+            },
+            {
+                "timestamp": "2022-03-24T06:15:44+10:00",
+                "duration": 5932791
+            },
+            {
+                "timestamp": "2022-03-23T17:01:37+10:00",
+                "duration": 210322
+            },
+            {
+                "timestamp": "2022-03-23T16:11:27+10:00",
+                "duration": 2608373
+            },
+            {
+                "timestamp": "2022-03-21T21:04:54+10:00",
+                "duration": 296080
+            }
+        ],
+        "events_count": 0,
+        "total_events": 0
+    },
+    "user_settings": {
+        "storm_mode_enabled": True,
+        "powerwall_onboarding_settings_set": True,
+        "sync_grid_alert_enabled": False,
+        "breaker_alert_enabled": False
+    },
+    "default_real_mode": "backup",
+    "operation": "backup",
+    "installation_date": "2022-03-21T17:15:23+10:00",
+    "power_reading": [
+        {
+            "timestamp": "2022-08-16T15:23:24+10:00",
+            "load_power": 329,
+            "solar_power": 709,
+            "grid_power": 2930,
+            "battery_power": -3310,
+            "generator_power": 0
+        }
+    ],
+    "battery_count": 1
 }
