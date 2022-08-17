@@ -443,8 +443,6 @@ class Controller:
 
             self._add_car_components(car)
 
-        _LOGGER.info("Running custom version of teslajsonpy with Powerwall support.") # TEMPORARY
-
         for energysite in self.energysites:
             energysite_id = energysite["energy_site_id"]
             # Set initial values to initialize power sensors
@@ -465,7 +463,7 @@ class Controller:
             self.__energysite_name[energysite_id] = energysite.get(
                 "site_name", TESLA_DEFAULT_ENERGY_SITE_NAME
             )
-            # Sites with powerwall only contain "solar_type" in "components"
+            # Sites with Powerwall only contain "solar_type" in "components"
             self.__energysite_type[energysite_id] = energysite["components"]["solar_type"]
 
             self.__lock[energysite_id] = asyncio.Lock()
@@ -560,7 +558,7 @@ class Controller:
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_energysites(self):
-        """Get energy sites json from TeslaAPI and filter to solar and battery."""
+        """Get energy sites json from TeslaAPI and filter to solar or battery."""
         return [
             p
             for p in (await self.api("PRODUCT_LIST"))["response"]
@@ -1000,7 +998,7 @@ class Controller:
 
         async def _get_and_process_battery_data(battery_id: Text) -> None:
             async with self.__lock[battery_id]:
-                _LOGGER.debug("Updating energysite battery_data %s", battery_id)
+                _LOGGER.debug("Updating energysite battery data %s", battery_id)
                 try:
                     data = await self.api(
                         "BATTERY_DATA",
@@ -1011,7 +1009,7 @@ class Controller:
                     data = None
                 if data and data["response"]:
                     response = data["response"]["power_reading"][0]
-                    self.__power[id] = response
+                    self.__power[battery_id] = response
 
         async with self.__update_lock:
             cur_time = round(time.time())
