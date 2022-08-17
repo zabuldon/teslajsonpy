@@ -996,7 +996,7 @@ class Controller:
                     response = data["response"]
                     self.__power[energysite_id] = response
 
-        async def _get_and_process_battery_data(battery_id: Text) -> None:
+        async def _get_and_process_battery_data(energysite_id: Text, battery_id: Text) -> None:
             async with self.__lock[battery_id]:
                 _LOGGER.debug("Updating energysite battery data %s", battery_id)
                 try:
@@ -1009,7 +1009,8 @@ class Controller:
                     data = None
                 if data and data["response"]:
                     response = data["response"]["power_reading"][0]
-                    self.__power[battery_id] = response
+                    # Store the response using energysite_id since that's how it's retrieved
+                    self.__power[energysite_id] = response
 
         async with self.__update_lock:
             cur_time = round(time.time())
@@ -1086,12 +1087,12 @@ class Controller:
             if not car_id:
                 # do not update energy sites if car_id was a parameter.
                 for energysite in self.energysites:
+                    energysite_id = energysite["energy_site_id"]
                     if energysite["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
-                        energysite_id = energysite["energy_site_id"]
                         tasks.append(_get_and_process_site_data(energysite_id))
                     if energysite["resource_type"] == TESLA_RESOURCE_TYPE_BATTERY:
                         battery_id = energysite["id"]
-                        tasks.append(_get_and_process_battery_data(battery_id))
+                        tasks.append(_get_and_process_battery_data(energysite_id, battery_id))
 
             return any(await asyncio.gather(*tasks))
 
