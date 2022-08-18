@@ -51,13 +51,13 @@ class TeslaMock:
             Controller, "get_power_params", self.mock_get_power_params
         )
         self._vehicle_product_list = copy.deepcopy(VEHICLE_PRODUCT_LIST)
-        self._site_config = copy.deepcopy(SITE_CONFIG)
         self._drive_state = copy.deepcopy(DRIVE_STATE)
         self._climate_state = copy.deepcopy(CLIMATE_STATE)
         self._charge_state = copy.deepcopy(CHARGE_STATE)
         self._gui_settings = copy.deepcopy(GUI_SETTINGS)
         self._vehicle_state = copy.deepcopy(VEHICLE_STATE)
         self._vehicle_config = copy.deepcopy(VEHICLE_CONFIG)
+        self._product_list = copy.deepcopy(ENERGYSITE_PRODUCT_LIST)
         self._solar_combined_data = copy.deepcopy(SOLAR_COMBINED_DATA)
         self._solar_combined_data_no_name = copy.deepcopy(SOLAR_COMBINED_DATA_NO_NAME)
         self._battery_combined_data = copy.deepcopy(BATTERY_COMBINED_DATA)
@@ -196,7 +196,7 @@ class TeslaMock:
 
     async def controller_get_energysites(self):
         """Monkeypatch for controller.get_energysites()."""
-        return self._solar_combined_data
+        return self._product_list
 
     async def controller_get_site_config(self):
         """Monkeypatch for controller.get_site_config()."""
