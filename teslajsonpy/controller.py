@@ -383,6 +383,7 @@ class Controller:
         self.__energysite_name = {}
         self.__energysite_type = {}
         self.__power = {}
+        self.cars = {}
         self.energysites = {}
         self.__id_energysiteid_map = {}
         self.__energysiteid_id_map = {}
@@ -394,6 +395,7 @@ class Controller:
         wake_if_asleep: bool = False,
         filtered_vins: Optional[List[Text]] = None,
         mfa_code: Text = "",
+        skip_add: bool = False,
     ) -> Dict[Text, Text]:
         """Connect controller to Tesla.
 
@@ -410,11 +412,11 @@ class Controller:
 
         if mfa_code:
             self.__connection.mfa_code = mfa_code
-        cars = await self.get_vehicles()
+        self.cars = await self.get_vehicles()
         self._last_attempted_update_time = round(time.time())
         self.__update_lock = asyncio.Lock()
 
-        for car in cars:
+        for car in self.cars:
             vin = car["vin"]
             if filtered_vins and vin not in filtered_vins:
                 _LOGGER.debug("Skipping car with VIN: %s", vin)
@@ -438,15 +440,36 @@ class Controller:
             self.__config[vin] = {}
             self.__driving[vin] = {}
             self.__gui[vin] = {}
-
-            self._add_car_components(car)
+            # This is temporary to provide backwards compatability with
+            # previous version of Home Assistant Tesla Custom Integration
+            if not skip_add:
+                self._add_car_components(car)
 
         self.energysites = await self.get_energysites()
 
         for energysite in self.energysites:
             energysite_id = energysite["energy_site_id"]
+            # Get site_config data for site name and update energysite dict
+            site_config = await self.get_site_config(energysite_id)
+            energysite.update(site_config)
+            # Set initial values to setup GridPowerSensor & LoadPowerSensor
+            # Actual values update immediately after setup when refresh is called
+            energysite["grid_power"] = 0
+            energysite["load_power"] = 0
+
+            self.__id_energysiteid_map[energysite["id"]] = energysite_id
+            self.__energysiteid_id_map[energysite_id] = energysite["id"]
+            self.__energysite_name[energysite_id] = energysite.get(
+                "site_name", TESLA_DEFAULT_ENERGY_SITE_NAME
+            )
+            self.__energysite_type[energysite_id] = energysite["solar_type"]
+            self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
+
             self.__lock[energysite_id] = asyncio.Lock()
-            self._add_energysite_components(energysite)
+            # This is temporary to provide backwards compatability with
+            # previous version of Home Assistant Tesla Custom Integration
+            if not skip_add:
+                self._add_energysite_components(energysite)
 
         if not test_login:
             try:
@@ -537,40 +560,12 @@ class Controller:
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_energysites(self):
-        """Get energy sites json from TeslaAPI and filter to solar or battery."""
-        energysites = [
+        """Get energy sites json from TeslaAPI and filter to solar."""
+        return [
             p
             for p in (await self.api("PRODUCT_LIST"))["response"]
-            if p.get("resource_type") == TESLA_RESOURCE_TYPE_SOLAR
-            or p.get("resource_type") == TESLA_RESOURCE_TYPE_BATTERY
+            if p.get("resource_type") == "solar"
         ]
-
-        for energysite in energysites:
-            energysite_id = energysite["energy_site_id"]
-            # Set initial values to initialize power sensors
-            # Actual values update immediately after setup when refresh is called
-            energysite["solar_power"] = 0
-            energysite["load_power"] = 0
-            energysite["grid_power"] = 0
-            energysite["battery_power"] = 0
-
-            if energysite["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
-                # Non-powerwall sites do not include "site_name" in "PRODUCT_LIST" endpoint
-                # Get "site_config" data for "site_name" and update energysite dict
-                site_config = await self.get_site_config(energysite_id)
-                energysite.update(site_config)
-
-            self.__id_energysiteid_map[energysite["id"]] = energysite_id
-            self.__energysiteid_id_map[energysite_id] = energysite["id"]
-            self.__energysite_name[energysite_id] = energysite.get(
-                "site_name", TESLA_DEFAULT_ENERGY_SITE_NAME
-            )
-            # Sites with Powerwall only contain "solar_type" in "components"
-            self.__energysite_type[energysite_id] = energysite["components"][
-                "solar_type"
-            ]
-
-        return energysites
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_site_config(self, energysite_id):
@@ -1674,7 +1669,6 @@ class Controller:
 
     def get_update_interval_vin(self, car_id: Text = None, vin: Text = None) -> int:
         """Get update interval for specific vin or default if no vin specific."""
-
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
         if vin is None or vin == "":
@@ -1682,15 +1676,8 @@ class Controller:
 
         return self._update_interval_vin.get(vin, self.update_interval)
 
-    def get_power(self, energysite_id: Text, power_type: Text) -> int:
-        """Return cached copy of power in Watts for specified power_type."""
-
-        return self.__power[energysite_id][power_type]
-
     def get_power_params(self, energysite_id: Text) -> Dict:
         """Return cached copy of power_params for energysite_id."""
-        energysite_id = self._id_to_energysiteid(energysite_id)
-
         data = self.__power[energysite_id]
 
         if data:
