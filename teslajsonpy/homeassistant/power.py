@@ -147,11 +147,11 @@ class SolarPowerSensor(PowerSensor):
 
     def get_value(self) -> float:
         """Return solar power."""
-        return round(self.__solar_power)
+        return self.__solar_power
 
     def get_power(self):
         """Get solar power."""
-        return round(self.__solar_power)
+        return self.__solar_power
 
     def get_generating_status(self):
         """Get generating status."""
@@ -205,11 +205,11 @@ class LoadPowerSensor(PowerSensor):
 
     def get_value(self) -> float:
         """Return load power."""
-        return round(self.__load_power)
+        return self.__load_power
 
     def get_power(self):
         """Get load power (home consumption)."""
-        return round(self.__load_power)
+        return self.__load_power
 
     def refresh(self) -> None:
         """Refresh data.
@@ -239,11 +239,11 @@ class GridPowerSensor(PowerSensor):
 
     def get_value(self) -> float:
         """Return grid power."""
-        return round(self.__grid_power)
+        return self.__grid_power
 
     def get_power(self):
         """Get grid power (grid import/export)."""
-        return round(self.__grid_power)
+        return self.__grid_power
 
     def refresh(self) -> None:
         """Refresh data.
@@ -273,11 +273,11 @@ class BatteryPowerSensor(PowerSensor):
 
     def get_value(self) -> float:
         """Return battery power."""
-        return round(self.__battery_power)
+        return self.__battery_power
 
     def get_power(self):
         """Get battery power (battery charge/discharge)."""
-        return round(self.__battery_power)
+        return self.__battery_power
 
     def refresh(self) -> None:
         """Refresh data.

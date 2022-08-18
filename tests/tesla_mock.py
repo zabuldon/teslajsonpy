@@ -37,8 +37,12 @@ class TeslaMock:
         #     Controller, "get_state_params", self.mock_get_state_params
         # )
         self._monkeypatch.setattr(Controller, "get_vehicles", self.mock_get_vehicles)
-        self._monkeypatch.setattr(Controller, "get_energysites", self.mock_get_energysites)
-        self._monkeypatch.setattr(Controller, "get_site_config", self.mock_get_site_config)
+        self._monkeypatch.setattr(
+            Controller, "get_energysites", self.mock_get_energysites
+        )
+        self._monkeypatch.setattr(
+            Controller, "get_site_config", self.mock_get_site_config
+        )
         # self._monkeypatch.setattr(
         #     Controller, "get_last_update_time", self.mock_get_last_update_time
         # )
@@ -47,7 +51,6 @@ class TeslaMock:
             Controller, "get_power_params", self.mock_get_power_params
         )
         self._vehicle_product_list = copy.deepcopy(VEHICLE_PRODUCT_LIST)
-        self._site_product_list = copy.deepcopy(ENERGYSITE_PRODUCT_LIST)
         self._site_config = copy.deepcopy(SITE_CONFIG)
         self._drive_state = copy.deepcopy(DRIVE_STATE)
         self._climate_state = copy.deepcopy(CLIMATE_STATE)
@@ -60,9 +63,7 @@ class TeslaMock:
         self._battery_combined_data = copy.deepcopy(BATTERY_COMBINED_DATA)
         self._site_config = copy.deepcopy(SITE_CONFIG)
         self._site_state = copy.deepcopy(SITE_STATE)
-        self._site_state_unknown_grid = copy.deepcopy(
-            SITE_STATE_UNKNOWN_GRID
-        )
+        self._site_state_unknown_grid = copy.deepcopy(SITE_STATE_UNKNOWN_GRID)
         self._vehicle = copy.deepcopy(VEHICLE)
         self._vehicle["drive_state"] = self._drive_state
         self._vehicle["climate_state"] = self._climate_state
@@ -195,7 +196,7 @@ class TeslaMock:
 
     async def controller_get_energysites(self):
         """Monkeypatch for controller.get_energysites()."""
-        return self._site_product_list
+        return self._solar_combined_data
 
     async def controller_get_site_config(self):
         """Monkeypatch for controller.get_site_config()."""
@@ -229,7 +230,7 @@ class TeslaMock:
 
     def data_request_solar_combined_data(self):
         """Similate the result of combined product list & site config request."""
-        return self._solar_combined_data
+        return self._solar_combined_data[0]
 
     def data_request_solar_combined_data_no_name(self):
         """Similate the result of combined product list & site config without name."""
@@ -498,8 +499,7 @@ VEHICLE = {
     "vehicle_config": None,
 }
 
-# Likely a rare setup simulating a home with two energy sites,one solar system with and
-# another without Powerwall. However, this enables testing multiple scenarios.
+# Example of battery_data response with two energy sites for future tests
 ENERGYSITE_PRODUCT_LIST = [
     {
         "energy_site_id": 12345,
@@ -547,7 +547,7 @@ ENERGYSITE_PRODUCT_LIST = [
             "load_meter": True,
             "market_type": "residential",
         },
-    }
+    },
 ]
 
 SITE_CONFIG = {
@@ -559,55 +559,8 @@ SITE_CONFIG = {
         "storm_mode_enabled": None,
         "powerwall_onboarding_settings_set": None,
         "sync_grid_alert_enabled": False,
-        "breaker_alert_enabled": False
+        "breaker_alert_enabled": False,
     },
-    "components": {
-        "solar": True,
-        "solar_type": "pv_panel",
-        "battery": False,
-        "grid": True,
-        "backup": False,
-        "gateway": "gateway_type_none",
-        "load_meter": True,
-        "tou_capable": False,
-        "storm_mode_capable": False,
-        "flex_energy_request_capable": False,
-        "car_charging_data_supported": False,
-        "off_grid_vehicle_charging_reserve_supported": False,
-        "vehicle_charging_performance_view_enabled": False,
-        "vehicle_charging_solar_offset_view_enabled": False,
-        "battery_solar_offset_view_enabled": False,
-        "energy_service_self_scheduling_enabled": True,
-        "rate_plan_manager_supported": True,
-        "configurable": False,
-        "grid_services_enabled": False
-    },
-    "installation_time_zone": "America/Los_Angeles",
-    "time_zone_offset": -420,
-    "geolocation": {
-        "latitude": 31.12345600000001,
-        "longitude": -119.1234567
-    },
-    "address": {
-        "address_line1": "1234 Tesla Energy Ave",
-        "city": "Austin",
-        "state": "TX",
-        "zip": "12345",
-        "country": "US"
-    }
-}
-# Data combined from PRODUCT_LIST & SITE_CONFIG which occurs in Controller.connect()
-SOLAR_COMBINED_DATA = {
-    "energy_site_id": 12345,
-    "resource_type": "solar",
-    "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
-    "asset_site_id": "12345",
-    "solar_power": 0,
-    "solar_type": "pv_panel",
-    "storm_mode_enabled": None,
-    "powerwall_onboarding_settings_set": None,
-    "sync_grid_alert_enabled": False,
-    "breaker_alert_enabled": False,
     "components": {
         "solar": True,
         "solar_type": "pv_panel",
@@ -629,18 +582,6 @@ SOLAR_COMBINED_DATA = {
         "configurable": False,
         "grid_services_enabled": False,
     },
-    "load_power": 0,
-    "grid_power": 0,
-    "battery_power": 0,
-    "site_name": "My Solar Home",
-    "site_number": "STE16235182-31459",
-    "installation_date": "2022-02-07T13:51:26-07:00",
-    "user_settings": {
-        "storm_mode_enabled": None,
-        "powerwall_onboarding_settings_set": None,
-        "sync_grid_alert_enabled": False,
-        "breaker_alert_enabled": False,
-    },
     "installation_time_zone": "America/Los_Angeles",
     "time_zone_offset": -420,
     "geolocation": {"latitude": 31.12345600000001, "longitude": -119.1234567},
@@ -652,6 +593,96 @@ SOLAR_COMBINED_DATA = {
         "country": "US",
     },
 }
+# Likely a rare setup simulating a home with two energy sites,one solar system with and
+# another without Powerwall. However, this enables testing multiple scenarios.
+# Simulates the list returned from Controller.get_energysites()
+SOLAR_COMBINED_DATA = [
+    {
+        "energy_site_id": 12345,
+        "resource_type": "solar",
+        "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
+        "asset_site_id": "12345",
+        "solar_power": 0,
+        "solar_type": "pv_panel",
+        "storm_mode_enabled": None,
+        "powerwall_onboarding_settings_set": None,
+        "sync_grid_alert_enabled": False,
+        "breaker_alert_enabled": False,
+        "components": {
+            "solar": True,
+            "solar_type": "pv_panel",
+            "battery": False,
+            "grid": True,
+            "backup": False,
+            "gateway": "gateway_type_none",
+            "load_meter": True,
+            "tou_capable": False,
+            "storm_mode_capable": False,
+            "flex_energy_request_capable": False,
+            "car_charging_data_supported": False,
+            "off_grid_vehicle_charging_reserve_supported": False,
+            "vehicle_charging_performance_view_enabled": False,
+            "vehicle_charging_solar_offset_view_enabled": False,
+            "battery_solar_offset_view_enabled": False,
+            "energy_service_self_scheduling_enabled": True,
+            "rate_plan_manager_supported": True,
+            "configurable": False,
+            "grid_services_enabled": False,
+        },
+        "load_power": 0,
+        "grid_power": 0,
+        "battery_power": 0,
+        "site_name": "My Solar Home",
+        "site_number": "STE16235182-31459",
+        "installation_date": "2022-02-07T13:51:26-07:00",
+        "user_settings": {
+            "storm_mode_enabled": None,
+            "powerwall_onboarding_settings_set": None,
+            "sync_grid_alert_enabled": False,
+            "breaker_alert_enabled": False,
+        },
+        "installation_time_zone": "America/Los_Angeles",
+        "time_zone_offset": -420,
+        "geolocation": {"latitude": 31.12345600000001, "longitude": -119.1234567},
+        "address": {
+            "address_line1": "1234 Tesla Energy Ave",
+            "city": "Austin",
+            "state": "TX",
+            "zip": "12345",
+            "country": "US",
+        },
+    },
+    {
+        "energy_site_id": 67890,
+        "resource_type": "battery",
+        "site_name": "My Battery Home",
+        "id": "212dbc27-333c-45b1-81bb-31e2zd2fs2cm",
+        "gateway_id": "67890",
+        "asset_site_id": "67890",
+        "energy_left": 2864.7368421052633,
+        "total_pack_energy": 14070,
+        "percentage_charged": 20.360603000037408,
+        "battery_type": "ac_powerwall",
+        "backup_capable": True,
+        "storm_mode_enabled": True,
+        "powerwall_onboarding_settings_set": True,
+        "sync_grid_alert_enabled": True,
+        "breaker_alert_enabled": True,
+        "components": {
+            "battery": True,
+            "battery_type": "ac_powerwall",
+            "solar": True,
+            "solar_type": "pv_panel",
+            "grid": True,
+            "load_meter": True,
+            "market_type": "residential",
+        },
+        "solar_power": 0,
+        "load_power": 0,
+        "grid_power": 0,
+        "battery_power": 0,
+    },
+]
 
 SOLAR_COMBINED_DATA_NO_NAME = {
     "energy_site_id": 12345,
@@ -754,7 +785,7 @@ SITE_STATE = {
     "island_status": "island_status_unknown",
     "storm_mode_active": False,
     "timestamp": "2022-07-28T17:11:27Z",
-    "wall_connectors": None
+    "wall_connectors": None,
 }
 
 SITE_STATE_UNKNOWN_GRID = {
@@ -808,157 +839,55 @@ BATTERY_DATA = {
         "configurable": False,
         "grid_services_enabled": False,
         "customer_preferred_export_rule": "battery_ok",
-        "net_meter_mode": "battery_ok"
+        "net_meter_mode": "battery_ok",
     },
     "grid_status": "Active",
     "backup": {
         "backup_reserve_percent": 100,
         "events": [
-            {
-                "timestamp": "2022-07-12T06:56:55+10:00",
-                "duration": 38773
-            },
-            {
-                "timestamp": "2022-07-11T20:46:25+10:00",
-                "duration": 66479
-            },
-            {
-                "timestamp": "2022-06-29T11:35:43+10:00",
-                "duration": 842030
-            },
-            {
-                "timestamp": "2022-06-18T15:28:35+10:00",
-                "duration": 1013486
-            },
-            {
-                "timestamp": "2022-06-15T15:43:20+10:00",
-                "duration": 210737
-            },
-            {
-                "timestamp": "2022-06-10T08:26:12+10:00",
-                "duration": 47649
-            },
-            {
-                "timestamp": "2022-06-03T13:58:52+10:00",
-                "duration": 443079
-            },
-            {
-                "timestamp": "2022-05-15T10:46:58+10:00",
-                "duration": 31389950
-            },
-            {
-                "timestamp": "2022-05-14T15:33:38+10:00",
-                "duration": 1279604
-            },
-            {
-                "timestamp": "2022-05-07T19:39:07+10:00",
-                "duration": 901817
-            },
-            {
-                "timestamp": "2022-04-23T08:26:14+10:00",
-                "duration": 437693
-            },
-            {
-                "timestamp": "2022-04-22T19:14:33+10:00",
-                "duration": 757615
-            },
-            {
-                "timestamp": "2022-04-14T11:54:35+10:00",
-                "duration": 581358
-            },
-            {
-                "timestamp": "2022-04-06T22:26:41+10:00",
-                "duration": 65188
-            },
-            {
-                "timestamp": "2022-04-03T22:12:07+10:00",
-                "duration": 654161
-            },
-            {
-                "timestamp": "2022-04-03T21:57:36+10:00",
-                "duration": 798912
-            },
-            {
-                "timestamp": "2022-04-03T18:51:05+10:00",
-                "duration": 67764
-            },
-            {
-                "timestamp": "2022-04-03T17:22:58+10:00",
-                "duration": 641782
-            },
-            {
-                "timestamp": "2022-04-03T17:21:19+10:00",
-                "duration": 69942
-            },
-            {
-                "timestamp": "2022-04-03T06:34:17+10:00",
-                "duration": 232350
-            },
-            {
-                "timestamp": "2022-04-02T19:05:41+10:00",
-                "duration": 47104
-            },
-            {
-                "timestamp": "2022-04-02T09:35:18+10:00",
-                "duration": 258895
-            },
-            {
-                "timestamp": "2022-04-02T05:21:14+10:00",
-                "duration": 63814
-            },
-            {
-                "timestamp": "2022-04-01T11:59:57+10:00",
-                "duration": 586849
-            },
-            {
-                "timestamp": "2022-04-01T11:50:56+10:00",
-                "duration": 457199
-            },
-            {
-                "timestamp": "2022-04-01T11:48:21+10:00",
-                "duration": 51065
-            },
-            {
-                "timestamp": "2022-04-01T11:47:23+10:00",
-                "duration": 41783
-            },
-            {
-                "timestamp": "2022-04-01T11:01:46+10:00",
-                "duration": 73278
-            },
-            {
-                "timestamp": "2022-03-31T17:12:00+10:00",
-                "duration": 45838
-            },
-            {
-                "timestamp": "2022-03-24T16:28:07+10:00",
-                "duration": 122233
-            },
-            {
-                "timestamp": "2022-03-24T06:15:44+10:00",
-                "duration": 5932791
-            },
-            {
-                "timestamp": "2022-03-23T17:01:37+10:00",
-                "duration": 210322
-            },
-            {
-                "timestamp": "2022-03-23T16:11:27+10:00",
-                "duration": 2608373
-            },
-            {
-                "timestamp": "2022-03-21T21:04:54+10:00",
-                "duration": 296080
-            }
+            {"timestamp": "2022-07-12T06:56:55+10:00", "duration": 38773},
+            {"timestamp": "2022-07-11T20:46:25+10:00", "duration": 66479},
+            {"timestamp": "2022-06-29T11:35:43+10:00", "duration": 842030},
+            {"timestamp": "2022-06-18T15:28:35+10:00", "duration": 1013486},
+            {"timestamp": "2022-06-15T15:43:20+10:00", "duration": 210737},
+            {"timestamp": "2022-06-10T08:26:12+10:00", "duration": 47649},
+            {"timestamp": "2022-06-03T13:58:52+10:00", "duration": 443079},
+            {"timestamp": "2022-05-15T10:46:58+10:00", "duration": 31389950},
+            {"timestamp": "2022-05-14T15:33:38+10:00", "duration": 1279604},
+            {"timestamp": "2022-05-07T19:39:07+10:00", "duration": 901817},
+            {"timestamp": "2022-04-23T08:26:14+10:00", "duration": 437693},
+            {"timestamp": "2022-04-22T19:14:33+10:00", "duration": 757615},
+            {"timestamp": "2022-04-14T11:54:35+10:00", "duration": 581358},
+            {"timestamp": "2022-04-06T22:26:41+10:00", "duration": 65188},
+            {"timestamp": "2022-04-03T22:12:07+10:00", "duration": 654161},
+            {"timestamp": "2022-04-03T21:57:36+10:00", "duration": 798912},
+            {"timestamp": "2022-04-03T18:51:05+10:00", "duration": 67764},
+            {"timestamp": "2022-04-03T17:22:58+10:00", "duration": 641782},
+            {"timestamp": "2022-04-03T17:21:19+10:00", "duration": 69942},
+            {"timestamp": "2022-04-03T06:34:17+10:00", "duration": 232350},
+            {"timestamp": "2022-04-02T19:05:41+10:00", "duration": 47104},
+            {"timestamp": "2022-04-02T09:35:18+10:00", "duration": 258895},
+            {"timestamp": "2022-04-02T05:21:14+10:00", "duration": 63814},
+            {"timestamp": "2022-04-01T11:59:57+10:00", "duration": 586849},
+            {"timestamp": "2022-04-01T11:50:56+10:00", "duration": 457199},
+            {"timestamp": "2022-04-01T11:48:21+10:00", "duration": 51065},
+            {"timestamp": "2022-04-01T11:47:23+10:00", "duration": 41783},
+            {"timestamp": "2022-04-01T11:01:46+10:00", "duration": 73278},
+            {"timestamp": "2022-03-31T17:12:00+10:00", "duration": 45838},
+            {"timestamp": "2022-03-24T16:28:07+10:00", "duration": 122233},
+            {"timestamp": "2022-03-24T06:15:44+10:00", "duration": 5932791},
+            {"timestamp": "2022-03-23T17:01:37+10:00", "duration": 210322},
+            {"timestamp": "2022-03-23T16:11:27+10:00", "duration": 2608373},
+            {"timestamp": "2022-03-21T21:04:54+10:00", "duration": 296080},
         ],
         "events_count": 0,
-        "total_events": 0
+        "total_events": 0,
     },
     "user_settings": {
         "storm_mode_enabled": True,
         "powerwall_onboarding_settings_set": True,
         "sync_grid_alert_enabled": False,
-        "breaker_alert_enabled": False
+        "breaker_alert_enabled": False,
     },
     "default_real_mode": "backup",
     "operation": "backup",
@@ -970,8 +899,8 @@ BATTERY_DATA = {
             "solar_power": 709,
             "grid_power": 2930,
             "battery_power": -3310,
-            "generator_power": 0
+            "generator_power": 0,
         }
     ],
-    "battery_count": 1
+    "battery_count": 1,
 }

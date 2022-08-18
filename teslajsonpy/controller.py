@@ -414,8 +414,6 @@ class Controller:
         self._last_attempted_update_time = round(time.time())
         self.__update_lock = asyncio.Lock()
 
-        self.energysites = await self.get_energysites()
-
         for car in cars:
             vin = car["vin"]
             if filtered_vins and vin not in filtered_vins:
@@ -443,29 +441,10 @@ class Controller:
 
             self._add_car_components(car)
 
+        self.energysites = await self.get_energysites()
+
         for energysite in self.energysites:
             energysite_id = energysite["energy_site_id"]
-            # Set initial values to initialize power sensors
-            # Actual values update immediately after setup when refresh is called
-            energysite["solar_power"] = 0
-            energysite["load_power"] = 0
-            energysite["grid_power"] = 0
-            energysite["battery_power"] = 0
-
-            if energysite["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
-                # Non-powerwall sites do not include "site_name" in "PRODUCT_LIST" endpoint
-                # Get "site_config" data for "site_name" and update energysite dict
-                site_config = await self.get_site_config(energysite_id)
-                energysite.update(site_config)
-
-            self.__id_energysiteid_map[energysite["id"]] = energysite_id
-            self.__energysiteid_id_map[energysite_id] = energysite["id"]
-            self.__energysite_name[energysite_id] = energysite.get(
-                "site_name", TESLA_DEFAULT_ENERGY_SITE_NAME
-            )
-            # Sites with Powerwall only contain "solar_type" in "components"
-            self.__energysite_type[energysite_id] = energysite["components"]["solar_type"]
-
             self.__lock[energysite_id] = asyncio.Lock()
             self._add_energysite_components(energysite)
 
@@ -559,18 +538,46 @@ class Controller:
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_energysites(self):
         """Get energy sites json from TeslaAPI and filter to solar or battery."""
-        return [
+        energysites = [
             p
             for p in (await self.api("PRODUCT_LIST"))["response"]
             if p.get("resource_type") == TESLA_RESOURCE_TYPE_SOLAR
             or p.get("resource_type") == TESLA_RESOURCE_TYPE_BATTERY
         ]
 
+        for energysite in energysites:
+            energysite_id = energysite["energy_site_id"]
+            # Set initial values to initialize power sensors
+            # Actual values update immediately after setup when refresh is called
+            energysite["solar_power"] = 0
+            energysite["load_power"] = 0
+            energysite["grid_power"] = 0
+            energysite["battery_power"] = 0
+
+            if energysite["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
+                # Non-powerwall sites do not include "site_name" in "PRODUCT_LIST" endpoint
+                # Get "site_config" data for "site_name" and update energysite dict
+                site_config = await self.get_site_config(energysite_id)
+                energysite.update(site_config)
+
+            self.__id_energysiteid_map[energysite["id"]] = energysite_id
+            self.__energysiteid_id_map[energysite_id] = energysite["id"]
+            self.__energysite_name[energysite_id] = energysite.get(
+                "site_name", TESLA_DEFAULT_ENERGY_SITE_NAME
+            )
+            # Sites with Powerwall only contain "solar_type" in "components"
+            self.__energysite_type[energysite_id] = energysite["components"][
+                "solar_type"
+            ]
+
+        return energysites
+
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_site_config(self, energysite_id):
         """Get site config json from TeslaAPI."""
-        return (await self.api("SITE_CONFIG",
-                               path_vars={"site_id": energysite_id}))["response"]
+        return (await self.api("SITE_CONFIG", path_vars={"site_id": energysite_id}))[
+            "response"
+        ]
 
     @wake_up
     async def post(
@@ -996,7 +1003,9 @@ class Controller:
                     response = data["response"]
                     self.__power[energysite_id] = response
 
-        async def _get_and_process_battery_data(energysite_id: Text, battery_id: Text) -> None:
+        async def _get_and_process_battery_data(
+            energysite_id: Text, battery_id: Text
+        ) -> None:
             async with self.__lock[battery_id]:
                 _LOGGER.debug("Updating energysite battery data %s", battery_id)
                 try:
@@ -1092,7 +1101,9 @@ class Controller:
                         tasks.append(_get_and_process_site_data(energysite_id))
                     if energysite["resource_type"] == TESLA_RESOURCE_TYPE_BATTERY:
                         battery_id = energysite["id"]
-                        tasks.append(_get_and_process_battery_data(energysite_id, battery_id))
+                        tasks.append(
+                            _get_and_process_battery_data(energysite_id, battery_id)
+                        )
 
             return any(await asyncio.gather(*tasks))
 
@@ -1628,8 +1639,13 @@ class Controller:
         self.__vehicle_id_vin_map[vehicle_id] = vin
         self.__vin_vehicle_id_map[vin] = vehicle_id
 
+    def get_power(self, energysite_id: Text, power_type: Text) -> int:
+        """Return solar power."""
+
+        return self.__power[energysite_id][power_type]
+
     @property
-    def update_interval(self) -> int:
+    def update_interval(self) -> float:
         """Return update_interval.
 
         Returns
