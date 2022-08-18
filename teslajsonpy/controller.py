@@ -1018,7 +1018,10 @@ class Controller:
                     data = None
                 if data and data["response"]:
                     response = data["response"]["power_reading"][0]
-                    # Store the response using energysite_id since that's how it's retrieved
+                    # Add grid_status to the response
+                    # Already in data for non-Powerwall sites
+                    response.update(data["response"]["grid_status"])
+                    # Use energysite_id since that's how it's retrieved
                     self.__power[energysite_id] = response
 
         async with self.__update_lock:
@@ -1198,11 +1201,6 @@ class Controller:
         if vin and vin in self.__charging:
             return self.get_charging_params(vin=vin).get("charging_state")
         return None
-
-    def get_power_params(self, site_id: Text) -> Dict:
-        """Return cached copy of power_params for site_id."""
-        energysite_id = self._id_to_energysiteid(site_id)
-        return self.__power[energysite_id]
 
     def get_state_params(self, car_id: Text = None, vin: Text = None) -> Dict:
         """Return cached copy of state_params for car_id. or all cars.
@@ -1639,11 +1637,6 @@ class Controller:
         self.__vehicle_id_vin_map[vehicle_id] = vin
         self.__vin_vehicle_id_map[vin] = vehicle_id
 
-    def get_power(self, energysite_id: Text, power_type: Text) -> int:
-        """Return solar power."""
-
-        return self.__power[energysite_id][power_type]
-
     @property
     def update_interval(self) -> float:
         """Return update_interval.
@@ -1688,6 +1681,32 @@ class Controller:
             return self.update_interval
 
         return self._update_interval_vin.get(vin, self.update_interval)
+
+    def get_power(self, energysite_id: Text, power_type: Text) -> int:
+        """Return cached copy of power in Watts for specified power_type."""
+
+        return self.__power[energysite_id][power_type]
+
+    def get_power_params(self, energysite_id: Text) -> Dict:
+        """Return cached copy of power_params for energysite_id."""
+        energysite_id = self._id_to_energysiteid(energysite_id)
+
+        data = self.__power[energysite_id]
+
+        if data:
+            # Note: Some systems that pre-date Tesla aquisition of SolarCity
+            # will have `grid_status: Unknown`, but will have solar power values.
+            # At the same time, newer systems will report spurious reads of 0 Watts
+            # and grid status unknown. If solar power is 0 return null.
+            if (
+                "grid_status" in data
+                and data["grid_status"] == "Unknown"
+                and data["solar_power"] == 0
+            ):
+                _LOGGER.debug("Possible spurious energy site power read")
+                return
+
+        return data
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
         """Return vin for a car_id."""
