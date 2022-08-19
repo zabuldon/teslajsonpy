@@ -1003,23 +1003,23 @@ class Controller:
                     )
                 except TeslaException:
                     data = None
+                if data and data["response"]:
+                    response = data["response"]
+                    # Note: Some systems that pre-date Tesla aquisition of SolarCity
+                    # and systems with a Tesla inverter (non-Powerwall) will have
+                    # `grid_status: Unknown`, but will have solar power values.
+                    # At the same time, newer systems maye report spurious reads of 0 Watts
+                    # and grid status unknown. In this case, remove values but update
+                    # self.__power with remaining data (grid and load power).
+                    if (
+                        response["grid_status"] == "Unknown"
+                        and response["solar_power"] == 0
+                    ):
+                        _LOGGER.debug("Possible spurious energy site power read")
+                        del response["grid_status"]
+                        del response["solar_power"]
 
-                response = data["response"]
-                # Note: Some systems that pre-date Tesla aquisition of SolarCity
-                # and systems with a Tesla inverter (non-Powerwall) will have
-                # `grid_status: Unknown`, but will have solar power values.
-                # At the same time, newer systems maye report spurious reads of 0 Watts
-                # and grid status unknown. In this case, remove values but update
-                # self.__power with remaining data (grid and load power).
-                if (
-                    response["grid_status"] == "Unknown"
-                    and response["solar_power"] == 0
-                ):
-                    _LOGGER.debug("Possible spurious energy site power read")
-                    del response["grid_status"]
-                    del response["solar_power"]
-
-                self.__power[energysite_id].update(response)
+                    self.__power[energysite_id].update(response)
 
         async def _get_and_process_battery_data(
             energysite_id: Text, battery_id: Text
