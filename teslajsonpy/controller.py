@@ -1001,9 +1001,23 @@ class Controller:
                     )
                 except TeslaException:
                     data = None
-                if data and data["response"]:
-                    response = data["response"]
-                    self.__power[energysite_id] = response
+
+                response = data["response"]
+                # Note: Some systems that pre-date Tesla aquisition of SolarCity
+                # and systems with a Tesla inverter (non-Powerwall) will have
+                # `grid_status: Unknown`, but will have solar power values.
+                # At the same time, newer systems maye report spurious reads of 0 Watts
+                # and grid status unknown. In this case, remove values but update
+                # self.__power with remaining data (grid and load power).
+                if (
+                    response["grid_status"] == "Unknown"
+                    and response["solar_power"] == 0
+                ):
+                    _LOGGER.debug("Possible spurious energy site power read")
+                    del response["grid_status"]
+                    del response["solar_power"]
+
+                self.__power[energysite_id].update(response)
 
         async def _get_and_process_battery_data(
             energysite_id: Text, battery_id: Text
@@ -1706,22 +1720,7 @@ class Controller:
 
     def get_power_params(self, energysite_id: Text) -> Dict:
         """Return cached copy of power_params for energysite_id."""
-        data = self.__power[energysite_id]
-
-        # if data:
-        #     # Note: Some systems that pre-date Tesla aquisition of SolarCity
-        #     # will have `grid_status: Unknown`, but will have solar power values.
-        #     # At the same time, newer systems will report spurious reads of 0 Watts
-        #     # and grid status unknown. If solar power is 0 return null.
-        #     if (
-        #         "grid_status" in data
-        #         and data["grid_status"] == "Unknown"
-        #         and data["solar_power"] == 0
-        #     ):
-        #         _LOGGER.debug("Possible spurious energy site power read")
-        #         return
-
-        return data
+        return self.__power[energysite_id]
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
         """Return vin for a car_id."""
