@@ -1098,7 +1098,7 @@ class Controller:
                             cur_time - self.get_last_park_time(vin=vin),
                             cur_time - self.get_last_wake_up_time(vin=vin),
                         )
-            if not car_id:
+            if self.energysites and not car_id:
                 # do not update energy sites if car_id was a parameter.
                 for energysite in self.energysites:
                     energysite_id = energysite["energy_site_id"]
