@@ -1026,6 +1026,24 @@ class Controller:
                     # Use energysite_id since that's how it's retrieved
                     self.__power[energysite_id] = response
 
+        async def _get_and_process_battery_summary(
+            energysite_id: Text, battery_id: Text
+        ) -> None:
+            # Battery stats are 0 in BATTERY_DATA
+            # Must get from BATTERY_SUMMARY
+            async with self.__lock[battery_id]:
+                _LOGGER.debug("Updating energysite battery summary %s", battery_id)
+                try:
+                    data = await self.api(
+                        "BATTERY_SUMMARY",
+                        path_vars={"battery_id": battery_id},
+                        wake_if_asleep=wake_if_asleep,
+                    )
+                except TeslaException:
+                    data = None
+                if data and data["response"]:
+                    self.__power[energysite_id] = data["response"]
+
         async with self.__update_lock:
             cur_time = round(time.time())
             #  Update the online cars using get_vehicles()
@@ -1108,6 +1126,9 @@ class Controller:
                         battery_id = energysite["id"]
                         tasks.append(
                             _get_and_process_battery_data(energysite_id, battery_id)
+                        )
+                        tasks.append(
+                            _get_and_process_battery_summary(energysite_id, battery_id)
                         )
 
             return any(await asyncio.gather(*tasks))
