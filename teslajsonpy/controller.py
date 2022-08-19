@@ -449,12 +449,6 @@ class Controller:
 
         for energysite in self.energysites:
             energysite_id = energysite["energy_site_id"]
-            # Set initial values to initialize power sensors
-            # Actual values update immediately after setup when refresh is called
-            energysite["solar_power"] = 0
-            energysite["load_power"] = 0
-            energysite["grid_power"] = 0
-            energysite["battery_power"] = 0
 
             if energysite["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
                 # Non-powerwall sites do not include "site_name" in "PRODUCT_LIST" endpoint
@@ -471,6 +465,14 @@ class Controller:
             self.__energysite_type[energysite_id] = energysite["components"][
                 "solar_type"
             ]
+            # Add energysite_id key to prevent a key error with get_power_params()
+            # and `_get_and_process_site_data`
+            self.__power[energysite_id] = {
+                "solar_power": 0,
+                "load_power": 0,
+                "grid_power": 0,
+                "battery_power": 0,
+            }
 
             self.__lock[energysite_id] = asyncio.Lock()
             # This is temporary to provide backwards compatability with

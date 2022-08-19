@@ -83,6 +83,11 @@ class EnergySiteDevice:
         """
         return
 
+    @property
+    def power_data(self):
+        """Return the coordinator controller power data."""
+        return self.controller.get_power_params(self._energy_site_id)
+
 
 class PowerSensor(EnergySiteDevice):
     """Home-assistant class of power sensors for Tesla Energy Sites (Solar Panels).
@@ -139,7 +144,7 @@ class SolarPowerSensor(PowerSensor):
         """Initialize the solar panel sensor."""
         super().__init__(data, controller)
         self._solar_type: Text = data["components"]["solar_type"]
-        self.__solar_power: float = data["solar_power"]
+        self.__solar_power: float = self.power_data["solar_power"]
         self.__generating_status: bool = None
         self.type = "solar panel"
         self.name = self._name()
@@ -198,7 +203,7 @@ class LoadPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the load power sensor."""
         super().__init__(data, controller)
-        self.__load_power: float = data["load_power"]
+        self.__load_power: float = self.power_data["load_power"]
         self.type = "load power"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
@@ -217,10 +222,7 @@ class LoadPowerSensor(PowerSensor):
         This assumes the controller has already been updated
         """
         super().refresh()
-        data = self._controller.get_power_params(self.energy_site_id)
-
-        if data:
-            self.__load_power = data["load_power"]
+        self.__load_power = self.power_data["load_power"]
 
 
 class GridPowerSensor(PowerSensor):
@@ -232,7 +234,7 @@ class GridPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the grid power sensor."""
         super().__init__(data, controller)
-        self.__grid_power: float = data["grid_power"]
+        self.__grid_power: float = self.power_data["grid_power"]
         self.type = "grid power"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
@@ -251,10 +253,7 @@ class GridPowerSensor(PowerSensor):
         This assumes the controller has already been updated
         """
         super().refresh()
-        data = self._controller.get_power_params(self.energy_site_id)
-
-        if data:
-            self.__grid_power = data["grid_power"]
+        self.__grid_power = self.power_data["grid_power"]
 
 
 class BatteryPowerSensor(PowerSensor):
@@ -266,7 +265,7 @@ class BatteryPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the battery power sensor."""
         super().__init__(data, controller)
-        self.__battery_power: float = data["battery_power"]
+        self.__battery_power: float = self.power_data["battery_power"]
         self.type = "battery power"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
@@ -285,7 +284,4 @@ class BatteryPowerSensor(PowerSensor):
         This assumes the controller has already been updated
         """
         super().refresh()
-        data = self._controller.get_power_params(self.energy_site_id)
-
-        if data:
-            self.__battery_power = data["battery_power"]
+        self.__battery_power = self.power_data["battery_power"]
