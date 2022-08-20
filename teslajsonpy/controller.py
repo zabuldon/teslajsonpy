@@ -1690,7 +1690,7 @@ class Controller:
         self.__vin_vehicle_id_map[vin] = vehicle_id
 
     @property
-    def update_interval(self) -> float:
+    def update_interval(self) -> int:
         """Return update_interval.
 
         Returns
