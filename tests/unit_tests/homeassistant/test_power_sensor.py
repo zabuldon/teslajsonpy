@@ -20,9 +20,12 @@ async def test_energysite_setup(monkeypatch):
     _controller = Controller(None)
     await _controller.connect()
 
+    solar_site = _controller.energysites[12345]
+    powerwall_site = _controller.energysites[67890]
+
     assert _controller.energysites is not None
-    assert _controller.energysites[0]["energy_site_id"] == 12345
-    assert _controller.energysites[1]["energy_site_id"] == 67890
+    assert solar_site.resource_type == "solar"
+    assert powerwall_site.resource_type == "battery"
 
 
 @pytest.mark.asyncio
@@ -35,15 +38,13 @@ async def test_solar_power_sensor(monkeypatch):
     _sensor = SolarPowerSensor(_data, _controller)
 
     assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
-    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
-    assert _sensor.get_power() == 0
+    assert _sensor.get_power() == 7720
     # Test a battery site (Powerwall)
     _data = _mock.data_request_battery_combined_data()
     _sensor = SolarPowerSensor(_data, _controller)
 
     assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
-    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
-    assert _sensor.get_power() == 0
+    assert _sensor.get_power() == 7720
 
 
 @pytest.mark.asyncio
@@ -56,15 +57,13 @@ async def test_load_power_sensor(monkeypatch):
     _sensor = LoadPowerSensor(_data, _controller)
 
     assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
-    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
-    assert _sensor.get_power() == 0
+    assert _sensor.get_power() == 4517.14990234375
     # Test a battery site (Powerwall)
     _data = _mock.data_request_battery_combined_data()
     _sensor = LoadPowerSensor(_data, _controller)
 
     assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
-    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
-    assert _sensor.get_power() == 0
+    assert _sensor.get_power() == 4517.14990234375
 
 
 @pytest.mark.asyncio
@@ -77,15 +76,13 @@ async def test_grid_power_sensor(monkeypatch):
     _sensor = GridPowerSensor(_data, _controller)
 
     assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
-    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
-    assert _sensor.get_power() == 0
+    assert _sensor.get_power() == -3202.85009765625
     # Test a battery site (Powerwall)
     _data = _mock.data_request_battery_combined_data()
     _sensor = GridPowerSensor(_data, _controller)
 
     assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
-    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
-    assert _sensor.get_power() == 0
+    assert _sensor.get_power() == -3202.85009765625
 
 
 @pytest.mark.asyncio
@@ -97,7 +94,6 @@ async def test_battery_power_sensor(monkeypatch):
     _sensor = BatteryPowerSensor(_data, _controller)
 
     assert _sensor.name == f"{_sensor._site_name} {_sensor.type}"
-    assert _sensor.uniq_name == f"{_sensor._energy_site_id} {_sensor.type}"
     assert _sensor.get_power() == 0
 
 

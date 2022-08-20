@@ -28,11 +28,11 @@ from teslajsonpy.const import (
     ONLINE_INTERVAL,
     UPDATE_INTERVAL,
     SLEEP_INTERVAL,
-    TESLA_PRODUCT_TYPE_ENERGY_SITES,
+    PRODUCT_TYPE_ENERGY_SITES,
     TESLA_PRODUCT_TYPE_VEHICLES,
-    TESLA_DEFAULT_ENERGY_SITE_NAME,
-    TESLA_RESOURCE_TYPE_SOLAR,
-    TESLA_RESOURCE_TYPE_BATTERY,
+    RESOURCE_TYPE,
+    RESOURCE_TYPE_SOLAR,
+    RESOURCE_TYPE_BATTERY,
 )
 from teslajsonpy.exceptions import should_giveup, RetryLimitError, TeslaException
 from teslajsonpy.homeassistant.battery_sensor import Battery, Range
@@ -74,6 +74,8 @@ from teslajsonpy.homeassistant.vehicle_data import (
     VehicleDataSensor,
     VehicleStateDataSensor,
 )
+
+from teslajsonpy.energy import SolarSite, PowerwallSite, SolarPowerwallSite
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -177,9 +179,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
     else:
         car_id = args[0] if not kwargs.get("vehicle_id") else kwargs.get("vehicle_id")
         is_wake_command = len(args) >= 2 and args[1].lower() == "wake_up"
-        is_energysite_command = (
-            kwargs.get("product_type") == TESLA_PRODUCT_TYPE_ENERGY_SITES
-        )
+        is_energysite_command = kwargs.get("product_type") == PRODUCT_TYPE_ENERGY_SITES
     result = None
     if (
         instance._id_to_vin(car_id) is None
@@ -380,14 +380,11 @@ class Controller:
         self.__update_state = {}
         self.enable_websocket = enable_websocket
         self.polling_policy = polling_policy
-        self.__energysite_name = {}
-        self.__energysite_type = {}
-        self.__power = {}
         self.cars = {}
-        self.energysites = {}
-        self.__id_energysiteid_map = {}
-        self.__energysiteid_id_map = {}
         self.endpoints = {}
+        self.energysites = {}
+        self.__energysites = {}
+        self.__power_data = {}
 
     async def connect(
         self,
@@ -445,29 +442,17 @@ class Controller:
             if not skip_add:
                 self._add_car_components(car)
 
-        self.energysites = await self.get_energysites()
+        self.__energysites = await self.get_energysites()
 
-        for energysite in self.energysites:
+        for energysite in self.__energysites:
             energysite_id = energysite["energy_site_id"]
 
-            if energysite["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
-                # Non-powerwall sites do not include "site_name" in "PRODUCT_LIST" endpoint
-                # Get "site_config" data for "site_name" and update energysite dict
+            if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
+                # Non-powerwall sites "site_name" in "SITE_DATA" endpoint
                 site_config = await self.get_site_config(energysite_id)
                 energysite.update(site_config)
 
-            self.__id_energysiteid_map[energysite["id"]] = energysite_id
-            self.__energysiteid_id_map[energysite_id] = energysite["id"]
-            self.__energysite_name[energysite_id] = energysite.get(
-                "site_name", TESLA_DEFAULT_ENERGY_SITE_NAME
-            )
-            # Sites with Powerwall only contain "solar_type" in "components"
-            self.__energysite_type[energysite_id] = energysite["components"][
-                "solar_type"
-            ]
-            # Add energysite_id key to prevent a key error with get_power_params()
-            # and `_get_and_process_site_data`
-            self.__power[energysite_id] = {
+            self.__power_data[energysite_id] = {
                 "solar_power": 0,
                 "load_power": 0,
                 "grid_power": 0,
@@ -479,6 +464,8 @@ class Controller:
             # previous version of Home Assistant Tesla Custom Integration
             if not skip_add:
                 self._add_energysite_components(energysite)
+
+        self._generate_energysite_objects()
 
         if not test_login:
             try:
@@ -573,7 +560,7 @@ class Controller:
         return [
             p
             for p in (await self.api("PRODUCT_LIST"))["response"]
-            if p.get("resource_type") == "solar"
+            if p.get(RESOURCE_TYPE) == RESOURCE_TYPE_SOLAR
         ]
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
@@ -743,6 +730,32 @@ class Controller:
             product_type=product_type,
         )
 
+    def _generate_energysite_objects(self) -> None:
+        """Generate energy site objects."""
+        for energysite in self.__energysites:
+            energysite_id = energysite["energy_site_id"]
+            # Solar only systems (no Powerwalls) are listed as "solar"
+            if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
+                self.energysites[energysite_id] = SolarSite(
+                    energysite, self.__power_data[energysite_id]
+                )
+            # Solar with Powerwall are listed as "battery"
+            if (
+                energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY
+                and energysite["components"]["solar"]
+            ):
+                self.energysites[energysite_id] = SolarPowerwallSite(
+                    energysite, self.__power_data[energysite_id]
+                )
+            # Assumed Powerwall only (no solar) is listed as "battery"
+            if (
+                energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY
+                and not energysite["components"]["solar"]
+            ):
+                self.energysites[energysite_id] = PowerwallSite(
+                    energysite, self.__power_data[energysite_id]
+                )
+
     def get_homeassistant_components(self):
         """Return list of Tesla components for Home Assistant setup.
 
@@ -754,7 +767,7 @@ class Controller:
         self.__components.append(SolarPowerSensor(energysite, self))
         self.__components.append(LoadPowerSensor(energysite, self))
         self.__components.append(GridPowerSensor(energysite, self))
-        if energysite["resource_type"] == TESLA_RESOURCE_TYPE_BATTERY:
+        if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
             self.__components.append(BatteryPowerSensor(energysite, self))
 
     def _add_car_components(self, car):
@@ -1010,7 +1023,7 @@ class Controller:
                     # `grid_status: Unknown`, but will have solar power values.
                     # At the same time, newer systems maye report spurious reads of 0 Watts
                     # and grid status unknown. In this case, remove values but update
-                    # self.__power with remaining data (grid and load power).
+                    # self.__power_data with remaining data (grid and load power).
                     if (
                         response["grid_status"] == "Unknown"
                         and response["solar_power"] == 0
@@ -1019,7 +1032,7 @@ class Controller:
                         del response["grid_status"]
                         del response["solar_power"]
 
-                    self.__power[energysite_id].update(response)
+                    self.__power_data[energysite_id].update(response)
 
         async def _get_and_process_battery_data(
             energysite_id: Text, battery_id: Text
@@ -1040,7 +1053,7 @@ class Controller:
                     # Already in data for non-Powerwall sites
                     response.update(data["response"]["grid_status"])
                     # Use energysite_id since that's how it's retrieved
-                    self.__power[energysite_id] = response
+                    self.__power_data[energysite_id] = response
 
         async def _get_and_process_battery_summary(
             energysite_id: Text, battery_id: Text
@@ -1058,7 +1071,7 @@ class Controller:
                 except TeslaException:
                     data = None
                 if data and data["response"]:
-                    self.__power[energysite_id] = data["response"]
+                    self.__power_data[energysite_id] = data["response"]
 
         async with self.__update_lock:
             cur_time = round(time.time())
@@ -1132,14 +1145,14 @@ class Controller:
                             cur_time - self.get_last_park_time(vin=vin),
                             cur_time - self.get_last_wake_up_time(vin=vin),
                         )
-            if self.energysites and not car_id:
+            if self.__energysites and not car_id:
                 # do not update energy sites if car_id was a parameter.
-                for energysite in self.energysites:
-                    energysite_id = energysite["energy_site_id"]
-                    if energysite["resource_type"] == TESLA_RESOURCE_TYPE_SOLAR:
+                for energysite in self.energysites.values():
+                    energysite_id = energysite.energysite_id
+                    if energysite.resource_type == RESOURCE_TYPE_SOLAR:
                         tasks.append(_get_and_process_site_data(energysite_id))
-                    if energysite["resource_type"] == TESLA_RESOURCE_TYPE_BATTERY:
-                        battery_id = energysite["id"]
+                    if energysite.resource_type == RESOURCE_TYPE_BATTERY:
+                        battery_id = energysite.id
                         tasks.append(
                             _get_and_process_battery_data(energysite_id, battery_id)
                         )
@@ -1722,7 +1735,7 @@ class Controller:
 
     def get_power_params(self, energysite_id: Text) -> Dict:
         """Return cached copy of power_params for energysite_id."""
-        return self.__power[energysite_id]
+        return self.__power_data[energysite_id]
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
         """Return vin for a car_id."""
@@ -1743,10 +1756,6 @@ class Controller:
     def vin_to_vehicle_id(self, vin: Text) -> Optional[Text]:
         """Return vehicle_id for a vin."""
         return self.__vin_vehicle_id_map.get(vin)
-
-    def _id_to_energysiteid(self, site_id: Text) -> Optional[Text]:
-        """Return energysiteid for a site_id."""
-        return self.__id_energysiteid_map.get(site_id)
 
     def _update_id(self, car_id: Text) -> Optional[Text]:
         """Update the car_id for a vin."""

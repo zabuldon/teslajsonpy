@@ -7,7 +7,7 @@ https://github.com/zabuldon/teslajsonpy
 import logging
 from typing import Dict, Text
 
-from teslajsonpy.const import TESLA_DEFAULT_ENERGY_SITE_NAME
+from teslajsonpy.const import DEFAULT_ENERGY_SITE_NAME
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,8 +35,8 @@ class EnergySiteDevice:
 
         """
         self._id: int = data["id"]
-        self._energy_site_id: int = data["energy_site_id"]
-        self._site_name: Text = data.get("site_name", TESLA_DEFAULT_ENERGY_SITE_NAME)
+        self._energysite_id: int = data["energy_site_id"]
+        self._site_name: Text = data.get("site_name", DEFAULT_ENERGY_SITE_NAME)
         self._controller = controller
         self.should_poll: bool = True
         self.type: Text = "device"
@@ -47,16 +47,16 @@ class EnergySiteDevice:
         return f"{self._site_name} {self.type}"
 
     def _uniq_name(self) -> Text:
-        return f"{self._energy_site_id} {self.type}"
+        return f"{self._energysite_id} {self.type}"
 
     def id(self) -> int:
         # pylint: disable=invalid-name
         """Return the id."""
         return self._id
 
-    def energy_site_id(self) -> int:
-        """Return the energy_site_id."""
-        return self._energy_site_id
+    def energysite_id(self) -> int:
+        """Return the energysite_id."""
+        return self._energysite_id
 
     def site_name(self) -> Text:
         """Return the site name."""
@@ -86,7 +86,7 @@ class EnergySiteDevice:
     @property
     def power_data(self):
         """Return the coordinator controller power data."""
-        return self.controller.get_power_params(self._energy_site_id)
+        return self._controller.get_power_params(self._energysite_id)
 
 
 class PowerSensor(EnergySiteDevice):
@@ -173,7 +173,7 @@ class SolarPowerSensor(PowerSensor):
         This assumes the controller has already been updated
         """
         super().refresh()
-        data = self._controller.get_power_params(self.energy_site_id)
+        data = self._controller.get_power_params(self.energysite_id)
 
         if data:
             # Note: Some systems that pre-date Tesla aquisition of SolarCity will have `grid_status: Unknown`,
