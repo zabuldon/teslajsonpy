@@ -443,8 +443,6 @@ class Controller:
             self.__driving[vin] = {}
             self.__gui[vin] = {}
 
-        self._generate_car_objects()
-
         self.__energysite_list = [
             p
             for p in product_list
@@ -469,13 +467,15 @@ class Controller:
 
             self.__lock[energysite_id] = asyncio.Lock()
 
-        self._generate_energysite_objects()
-
         if not test_login:
             try:
                 await self.update(wake_if_asleep=wake_if_asleep)
             except (TeslaException, RetryLimitError):
                 pass
+
+        self._generate_car_objects()
+        self._generate_energysite_objects()
+
         return {
             "refresh_token": self.__connection.refresh_token,
             "access_token": self.__connection.access_token,

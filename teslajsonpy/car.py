@@ -392,6 +392,17 @@ class TeslaCar:
         return self._controller.get_climate_params(vin=self.vin).get("outside_temp")
 
     @property
+    def rear_heated_seats(self) -> bool:
+        """Return if car has rear (second row) heated seats."""
+        # Assuming if rear left doesn't have it, there's no rear seat heating
+        if self._controller.get_climate_params(vin=self.vin).get(
+            "seat_heater_rear_left"
+        ):
+            return True
+        else:
+            return False
+
+    @property
     def sentry_mode(self) -> bool:
         """Return sentry mode."""
         return self._controller.get_state_params(vin=self.vin).get("sentry_mode")
@@ -418,6 +429,13 @@ class TeslaCar:
         """Return software update version information."""
         return self._controller.get_state_params(vin=self.vin).get(
             "software_update", {}
+        )
+
+    @property
+    def steering_wheel_heater(self) -> bool:
+        """Return steering wheel heater option."""
+        return self._controller.get_climate_params(vin=self.vin).get(
+            "steering_wheel_heater"
         )
 
     @property
@@ -555,7 +573,7 @@ class TeslaCar:
 
     def get_seat_heater_status(self, seat_id) -> int:
         """Return status of seat heater for a given seat."""
-        seat_id = f"seat_{seat_id}_heater"
+        seat_id = f"seat_heater_{SEAT_NAME_MAP[seat_id]}"
         return self._controller.get_climate_params(vin=self.vin).get(seat_id)
 
     async def schedule_software_update(self, offset_sec=0) -> None:
