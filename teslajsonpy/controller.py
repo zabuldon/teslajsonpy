@@ -75,6 +75,7 @@ from teslajsonpy.homeassistant.vehicle_data import (
     VehicleStateDataSensor,
 )
 
+from teslajsonpy.car import TeslaCar
 from teslajsonpy.energy import SolarSite, PowerwallSite, SolarPowerwallSite
 
 _LOGGER = logging.getLogger(__name__)
@@ -381,6 +382,7 @@ class Controller:
         self.enable_websocket = enable_websocket
         self.polling_policy = polling_policy
         self.cars = {}
+        self.cars_raw = {}
         self.endpoints = {}
         self.energysites = {}
         self.__energysites = {}
@@ -409,11 +411,13 @@ class Controller:
 
         if mfa_code:
             self.__connection.mfa_code = mfa_code
-        self.cars = await self.get_vehicles()
+
+        self.cars_raw = await self.get_vehicles()
+
         self._last_attempted_update_time = round(time.time())
         self.__update_lock = asyncio.Lock()
 
-        for car in self.cars:
+        for car in self.cars_raw:
             vin = car["vin"]
             if filtered_vins and vin not in filtered_vins:
                 _LOGGER.debug("Skipping car with VIN: %s", vin)
@@ -437,10 +441,8 @@ class Controller:
             self.__config[vin] = {}
             self.__driving[vin] = {}
             self.__gui[vin] = {}
-            # This is temporary to provide backwards compatability with
-            # previous version of Home Assistant Tesla Custom Integration
-            if not skip_add:
-                self._add_car_components(car)
+
+        self._generate_car_objects()
 
         self.__energysites = await self.get_energysites()
 
@@ -460,10 +462,6 @@ class Controller:
             }
 
             self.__lock[energysite_id] = asyncio.Lock()
-            # This is temporary to provide backwards compatability with
-            # previous version of Home Assistant Tesla Custom Integration
-            if not skip_add:
-                self._add_energysite_components(energysite)
 
         self._generate_energysite_objects()
 
@@ -560,7 +558,7 @@ class Controller:
         return [
             p
             for p in (await self.api("PRODUCT_LIST"))["response"]
-            if p.get(RESOURCE_TYPE) == RESOURCE_TYPE_SOLAR
+            if p.get(RESOURCE_TYPE) == RESOURCE_TYPE_SOLAR or p.get(RESOURCE_TYPE) == RESOURCE_TYPE_BATTERY
         ]
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
@@ -730,6 +728,12 @@ class Controller:
             product_type=product_type,
         )
 
+    def _generate_car_objects(self) -> None:
+        """Generate car objects."""
+        for car in self.cars_raw:
+            vin = car["vin"]
+            self.cars[vin] = TeslaCar(car, self)
+
     def _generate_energysite_objects(self) -> None:
         """Generate energy site objects."""
         for energysite in self.__energysites:
@@ -737,7 +741,7 @@ class Controller:
             # Solar only systems (no Powerwalls) are listed as "solar"
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
                 self.energysites[energysite_id] = SolarSite(
-                    energysite, self.__power_data[energysite_id]
+                    self.api, energysite, self.__power_data[energysite_id]
                 )
             # Solar with Powerwall are listed as "battery"
             if (
@@ -745,7 +749,7 @@ class Controller:
                 and energysite["components"]["solar"]
             ):
                 self.energysites[energysite_id] = SolarPowerwallSite(
-                    energysite, self.__power_data[energysite_id]
+                    self.api, energysite, self.__power_data[energysite_id]
                 )
             # Assumed Powerwall only (no solar) is listed as "battery"
             if (
@@ -753,7 +757,7 @@ class Controller:
                 and not energysite["components"]["solar"]
             ):
                 self.energysites[energysite_id] = PowerwallSite(
-                    energysite, self.__power_data[energysite_id]
+                    self.api, energysite, self.__power_data[energysite_id]
                 )
 
     def get_homeassistant_components(self):
@@ -1200,6 +1204,17 @@ class Controller:
         if vin:
             self.__climate[vin] = params
 
+    def update_climate_params(
+        self, car_id: Text = None, vin: Text = None, params: Dict = None
+    ) -> None:
+        """Set climate_params for car_id."""
+        # Used to update params in self.__climate for TeslaCar.set_temperature
+        params = params or {}
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin:
+            self.__climate[vin].update(params)
+
     def is_climate_on(self, car_id: Text = None, vin: Text = None) -> bool:
         """Return true if climate is on."""
         if car_id and not vin:
@@ -1291,6 +1306,16 @@ class Controller:
             vin = self._id_to_vin(car_id)
         if vin:
             self.__state[vin] = params
+
+    def update_state_params(
+        self, car_id: Text = None, vin: Text = None, params: Dict = None
+    ) -> None:
+        """Update state_params for car_id."""
+        params = params or {}
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin:
+            self.__state[vin].update(params)
 
     def is_sentry_mode_on(self, car_id: Text = None, vin: Text = None) -> bool:
         """Return true if sentry_mode is on."""

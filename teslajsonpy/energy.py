@@ -9,8 +9,9 @@ from teslajsonpy.const import (
 class EnergySite:
     """Base class to represents a Tesla Energy site."""
 
-    def __init__(self, energysite, power_data) -> None:
-        """Initialize energy site."""
+    def __init__(self, api, energysite, power_data) -> None:
+        """Initialize EnergySite."""
+        self._api = api
         self._energy_site = energysite
         self._power_data = power_data
 
@@ -48,8 +49,9 @@ class SolarSite(EnergySite):
     by :meth:`teslajsonpy.controller.generate_energysite_objects`.
     """
 
-    def __init__(self, energysite, power_data) -> None:
-        super().__init__(energysite, power_data)
+    def __init__(self, api, energysite, power_data) -> None:
+        """Initialize SolarSite."""
+        super().__init__(api, energysite, power_data)
 
     @property
     def grid_power(self) -> int:
@@ -81,8 +83,11 @@ class PowerwallSite(EnergySite):
     by :meth:`teslajsonpy.controller.generate_energy_site_objects`.
     """
 
-    def __init__(self, energysite, power_data) -> None:
-        super().__init__(energysite, power_data)
+    def __init__(self, api, energysite, power_data) -> None:
+        """Initialize PowerwallSite."""
+        super().__init__(api, energysite, power_data)
+        # self.__default_real_mode = None
+        # self.__backup_reserve_percent = None
 
     @property
     def battery_percent(self) -> int:
@@ -106,10 +111,19 @@ class PowerwallSite(EnergySite):
         """Return load power in Watts."""
         return self._power_data["load_power"]
 
-    def set_operation_mode() -> None:
-        """Set operation mode of Powerwall."""
-        # Implement POST request to set Powerwall operation mode
-        return
+    # async def set_operation_mode(self, real_mode, backup_reserve_percent) -> None:
+    #     """Set operation mode of Powerwall."""
+    #     # real_mode - self_consumption, backup, autonomous
+    #     # backup_reserve_percent - 1-100
+    #     data = await self._api(
+    #         "BATTERY_OPERATION_MODE",
+    #         path_vars={"battery_id": self.id},
+    #         default_real_mode=real_mode,
+    #         backup_reserve_percent=int(backup_reserve_percent),
+    #     )
+    #     if data and data["response"]["result"]:
+    #         self.__default_real_mode = real_mode
+    #         self.__backup_reserve_percent = backup_reserve_percent
 
 
 class SolarPowerwallSite(PowerwallSite, SolarSite):
@@ -119,5 +133,6 @@ class SolarPowerwallSite(PowerwallSite, SolarSite):
     by :meth:`teslajsonpy.controller.generate_energy_site_objects`.
     """
 
-    def __init__(self, energysite, power_data) -> None:
-        super().__init__(energysite, power_data)
+    def __init__(self, api, energysite, power_data) -> None:
+        """Initialize SolarPowerwallSite."""
+        super().__init__(api, energysite, power_data)
