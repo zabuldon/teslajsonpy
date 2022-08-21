@@ -380,13 +380,13 @@ class Controller:
         self.__last_parked_timestamp = {}
         self.__update_state = {}
         self.enable_websocket = enable_websocket
-        self.polling_policy = polling_policy
-        self.cars = {}
-        self.cars_raw = {}
         self.endpoints = {}
-        self.energysites = {}
-        self.__energysites = {}
+        self.polling_policy = polling_policy
+        self.__energysite_list = []
         self.__power_data = {}
+        self.__vehicle_list = []
+        self.cars = {}
+        self.energysites = {}
 
     async def connect(
         self,
@@ -394,7 +394,6 @@ class Controller:
         wake_if_asleep: bool = False,
         filtered_vins: Optional[List[Text]] = None,
         mfa_code: Text = "",
-        skip_add: bool = False,
     ) -> Dict[Text, Text]:
         """Connect controller to Tesla.
 
@@ -412,12 +411,14 @@ class Controller:
         if mfa_code:
             self.__connection.mfa_code = mfa_code
 
-        self.cars_raw = await self.get_vehicles()
+        product_list = await self.get_product_list()
 
         self._last_attempted_update_time = round(time.time())
         self.__update_lock = asyncio.Lock()
 
-        for car in self.cars_raw:
+        self.__vehicle_list = [cars for cars in product_list if "vehicle_id" in cars]
+
+        for car in self.__vehicle_list:
             vin = car["vin"]
             if filtered_vins and vin not in filtered_vins:
                 _LOGGER.debug("Skipping car with VIN: %s", vin)
@@ -444,9 +445,14 @@ class Controller:
 
         self._generate_car_objects()
 
-        self.__energysites = await self.get_energysites()
+        self.__energysite_list = [
+            p
+            for p in product_list
+            if p.get(RESOURCE_TYPE) == RESOURCE_TYPE_SOLAR
+            or p.get(RESOURCE_TYPE) == RESOURCE_TYPE_BATTERY
+        ]
 
-        for energysite in self.__energysites:
+        for energysite in self.__energysite_list:
             energysite_id = energysite["energy_site_id"]
 
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
@@ -548,22 +554,18 @@ class Controller:
         return len(self.__websocket_listeners) - 1
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
-    async def get_vehicles(self):
+    async def get_product_list(self) -> list:
+        """Get product list from Tesla."""
+        return (await self.api("PRODUCT_LIST"))["response"]
+
+    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
+    async def get_vehicles(self) -> list:
         """Get vehicles json from TeslaAPI."""
         return (await self.api("VEHICLE_LIST"))["response"]
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
-    async def get_energysites(self):
-        """Get energy sites json from TeslaAPI and filter to solar or battery sites."""
-        return [
-            p
-            for p in (await self.api("PRODUCT_LIST"))["response"]
-            if p.get(RESOURCE_TYPE) == RESOURCE_TYPE_SOLAR or p.get(RESOURCE_TYPE) == RESOURCE_TYPE_BATTERY
-        ]
-
-    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
-    async def get_site_config(self, energysite_id):
-        """Get site config json from TeslaAPI."""
+    async def get_site_config(self, energysite_id: int) -> dict:
+        """Get site config json from TeslaAPI for a given energysite_id."""
         return (await self.api("SITE_CONFIG", path_vars={"site_id": energysite_id}))[
             "response"
         ]
@@ -730,13 +732,13 @@ class Controller:
 
     def _generate_car_objects(self) -> None:
         """Generate car objects."""
-        for car in self.cars_raw:
+        for car in self.__vehicle_list:
             vin = car["vin"]
             self.cars[vin] = TeslaCar(car, self)
 
     def _generate_energysite_objects(self) -> None:
         """Generate energy site objects."""
-        for energysite in self.__energysites:
+        for energysite in self.__energysite_list:
             energysite_id = energysite["energy_site_id"]
             # Solar only systems (no Powerwalls) are listed as "solar"
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
@@ -1052,12 +1054,14 @@ class Controller:
                 except TeslaException:
                     data = None
                 if data and data["response"]:
-                    response = data["response"]["power_reading"][0]
-                    # Add grid_status to the response
-                    # Already in data for non-Powerwall sites
-                    response.update(data["response"]["grid_status"])
+                    response = data["response"]
+
+                    params = response["power_reading"][0]
+                    params["grid_status"] = response.get("grid_status")
+                    params["default_real_mode"] = response.get("default_real_mode")
+                    params["operation"] = response.get("operation")
                     # Use energysite_id since that's how it's retrieved
-                    self.__power_data[energysite_id] = response
+                    self.__power_data[energysite_id].update(params)
 
         async def _get_and_process_battery_summary(
             energysite_id: Text, battery_id: Text
@@ -1075,7 +1079,7 @@ class Controller:
                 except TeslaException:
                     data = None
                 if data and data["response"]:
-                    self.__power_data[energysite_id] = data["response"]
+                    self.__power_data[energysite_id].update(data["response"])
 
         async with self.__update_lock:
             cur_time = round(time.time())
@@ -1149,7 +1153,7 @@ class Controller:
                             cur_time - self.get_last_park_time(vin=vin),
                             cur_time - self.get_last_wake_up_time(vin=vin),
                         )
-            if self.__energysites and not car_id:
+            if self.__energysite_list and not car_id:
                 # do not update energy sites if car_id was a parameter.
                 for energysite in self.energysites.values():
                     energysite_id = energysite.energysite_id

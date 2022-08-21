@@ -5,22 +5,15 @@ from teslajsonpy.exceptions import HomelinkError
 
 _LOGGER = logging.getLogger(__name__)
 
-
-CABIN_OPTIONS = [
-    "Off",
-    "No A/C",
-    "On",
+SEAT_NAME_MAP = [
+    "left",
+    "right",
+    "rear_left",
+    "rear_center",
+    "rear_right",
+    "third_row_left",
+    "third_row_right",
 ]
-
-SEAT_ID_MAP = {
-    "left": 0,
-    "right": 1,
-    "rear_left": 2,
-    "rear_center": 4,
-    "rear_right": 5,
-    "third_row_left": 6,
-    "third_row_right": 7,
-}
 
 
 class TeslaCar:
@@ -38,7 +31,7 @@ class TeslaCar:
         return self._car["display_name"]
 
     @property
-    def id(self) -> str:
+    def id(self) -> int:
         """Return State Data."""
         return self._car["id"]
 
@@ -48,7 +41,7 @@ class TeslaCar:
         return self._car["state"]
 
     @property
-    def vehicle_id(self) -> str:
+    def vehicle_id(self) -> int:
         """Return State Data."""
         return self._car["vehicle_id"]
 
@@ -58,52 +51,54 @@ class TeslaCar:
         return self._car["vin"]
 
     @property
-    def data_available(self) -> int:
+    def data_available(self) -> bool:
         """Return if data is available."""
         return self._controller.get_state_params(vin=self.vin)
 
     @property
-    def battery_level(self) -> int:
+    def battery_level(self) -> float:
         """Return car battery level."""
         return self._controller.get_charging_params(vin=self.vin).get("battery_level")
 
     @property
-    def battery_range(self) -> int:
+    def battery_range(self) -> float:
         """Return car battery range."""
         return self._controller.get_charging_params(vin=self.vin).get("battery_range")
 
     @property
-    def cabin_overheat_protection(self) -> dict:
+    def cabin_overheat_protection(self) -> str:
         """Return cabin overheat protection."""
-        return self._controller.get_climate_params(vin=self.vin).get("cabin_overheat_protection")
+        return self._controller.get_climate_params(vin=self.vin).get(
+            "cabin_overheat_protection"
+        )
 
     @property
-    def car_type(self) -> int:
+    def car_type(self) -> str:
         """Return car type."""
         # This is actually listed in PRODUCT_LIST
         return f"Model {str(self.vin[3]).upper()}"
 
     @property
-    def car_version(self) -> int:
+    def car_version(self) -> str:
         """Return installed car software version."""
         return self._controller.get_state_params(vin=self.vin)["car_version"]
 
     @property
-    def charger_actual_current(self) -> dict:
+    def charger_actual_current(self) -> int:
         """Return charger actual current."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charger_actual_current"
         )
 
     @property
-    def charge_current_request(self) -> dict:
+    def charge_current_request(self) -> int:
         """Return charge current request."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charge_current_request"
         )
 
     @property
-    def charge_current_request_max(self) -> float:
+    def charge_current_request_max(self) -> int:
         """Return charge current request max."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charge_current_request_max"
@@ -116,7 +111,9 @@ class TeslaCar:
         "Engaged"
         Other states?
         """
-        return self._controller.get_charging_params(vin=self.vin).get("charge_port_latch")
+        return self._controller.get_charging_params(vin=self.vin).get(
+            "charge_port_latch"
+        )
 
     @property
     def charge_energy_added(self) -> float:
@@ -126,83 +123,85 @@ class TeslaCar:
         )
 
     @property
-    def charge_limit_soc(self) -> float:
+    def charge_limit_soc(self) -> int:
         """Return charge limit soc."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charge_limit_soc"
         )
 
     @property
-    def charge_limit_soc_max(self) -> float:
+    def charge_limit_soc_max(self) -> int:
         """Return charge limit soc max."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charge_limit_soc_max"
         )
 
     @property
-    def charge_limit_soc_min(self) -> float:
+    def charge_limit_soc_min(self) -> int:
         """Return charge limit soc min."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charge_limit_soc_min"
         )
 
     @property
-    def charge_miles_added_ideal(self) -> dict:
+    def charge_miles_added_ideal(self) -> float:
         """Return charge ideal miles added."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charge_miles_added_ideal"
         )
 
     @property
-    def charge_miles_added_rated(self) -> dict:
+    def charge_miles_added_rated(self) -> float:
         """Return charge rated miles added."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charge_miles_added_rated"
         )
 
     @property
-    def charger_phases(self) -> dict:
+    def charger_phases(self) -> int:
         """Return charger phase."""
         return self._controller.get_charging_params(vin=self.vin).get("charger_phases")
 
     @property
-    def charger_power(self) -> dict:
+    def charger_power(self) -> int:
         """Return charger power."""
         return self._controller.get_charging_params(vin=self.vin).get("charger_power")
 
     @property
-    def charge_rate(self) -> dict:
+    def charge_rate(self) -> str:
         """Return charge rate."""
         return self._controller.get_charging_params(vin=self.vin)["charge_rate"]
 
     @property
     def charging_state(self) -> str:
         """Return charging state."""
-        return self._controller.get_charging_params(vin=self.vin).get(
-            "charging_state"
-        )
+        return self._controller.get_charging_params(vin=self.vin).get("charging_state")
 
     @property
-    def charger_voltage(self) -> dict:
+    def charger_voltage(self) -> int:
         """Return charger voltage."""
         return self._controller.get_charging_params(vin=self.vin).get("charger_voltage")
 
     @property
-    def climate_keeper_mode(self) -> dict:
+    def climate_keeper_mode(self) -> str:
         """Return climate keeper mode mode.
 
         Returns string "dog", "camp" or "on", "off"
         API call not supported on all Tesla models.
         """
-        return self._controller.get_climate_params(vin=self.vin).get("climate_keeper_mode", "")
+        return self._controller.get_climate_params(vin=self.vin).get(
+            "climate_keeper_mode", ""
+        )
 
     @property
-    def conn_charge_cable(self) -> dict:
+    def conn_charge_cable(self) -> str:
         """Return charge cable connection."""
-        return self._controller.get_charging_params(vin=self.vin).get("conn_charge_cable")
+        return self._controller.get_charging_params(vin=self.vin).get(
+            "conn_charge_cable"
+        )
 
     @property
-    def defrost_mode(self) -> dict:
+    def defrost_mode(self) -> int:
         """Return defrost mode.
 
         On: 2
@@ -211,27 +210,35 @@ class TeslaCar:
         return self._controller.get_climate_params(vin=self.vin).get("defrost_mode", 0)
 
     @property
-    def driver_temp_setting(self) -> dict:
+    def driver_temp_setting(self) -> float:
         """Return driver temperature setting."""
-        return self._controller.get_climate_params(vin=self.vin).get("driver_temp_setting")
+        return self._controller.get_climate_params(vin=self.vin).get(
+            "driver_temp_setting"
+        )
 
     @property
-    def fast_charger_present(self) -> dict:
+    def fast_charger_present(self) -> bool:
         """Return fast charger present."""
-        return self._controller.get_charging_params(vin=self.vin).get("fast_charger_present")
+        return self._controller.get_charging_params(vin=self.vin).get(
+            "fast_charger_present"
+        )
 
     @property
-    def fast_charger_brand(self) -> dict:
+    def fast_charger_brand(self) -> str:
         """Return fast charger brand."""
-        return self._controller.get_charging_params(vin=self.vin).get("fast_charger_brand")
+        return self._controller.get_charging_params(vin=self.vin).get(
+            "fast_charger_brand"
+        )
 
     @property
-    def fast_charger_type(self) -> dict:
+    def fast_charger_type(self) -> str:
         """Return fast charger type."""
-        return self._controller.get_charging_params(vin=self.vin).get("fast_charger_type")
+        return self._controller.get_charging_params(vin=self.vin).get(
+            "fast_charger_type"
+        )
 
     @property
-    def gui_distance_units(self) -> dict:
+    def gui_distance_units(self) -> str:
         """Return gui distance units."""
         # Why set default to mi/hr?
         return self._controller.get_gui_params(vin=self.vin).get(
@@ -239,47 +246,55 @@ class TeslaCar:
         )
 
     @property
-    def gui_range_display(self) -> int:
+    def gui_range_display(self) -> str:
         """Return range display."""
         return self._controller.get_gui_params(vin=self.vin).get("gui_range_display")
 
     @property
-    def heading(self) -> str:
+    def heading(self) -> int:
         """Return heading."""
         return self._controller.get_drive_params(vin=self.vin).get("heading")
 
     @property
     def homelink_device_count(self) -> int:
         """Return Homelink device count."""
-        return self._controller.get_state_params(vin=self.vin).get("homelink_device_count")
+        return self._controller.get_state_params(vin=self.vin).get(
+            "homelink_device_count"
+        )
 
     @property
-    def homelink_nearby(self) -> dict:
+    def homelink_nearby(self) -> bool:
         """Return Homelink nearby."""
         return self._controller.get_state_params(vin=self.vin).get("homelink_nearby")
 
     @property
-    def ideal_battery_range(self) -> int:
+    def ideal_battery_range(self) -> float:
         """Return car ideal battery range."""
-        return self._controller.get_charging_params(vin=self.vin).get("ideal_battery_range")
+        return self._controller.get_charging_params(vin=self.vin).get(
+            "ideal_battery_range"
+        )
 
     @property
-    def inside_temp(self) -> dict:
+    def inside_temp(self) -> float:
         """Return inside temperature."""
         return self._controller.get_climate_params(vin=self.vin).get("inside_temp")
 
     @property
-    def is_charge_port_door_open(self) -> dict:
+    def is_charge_port_door_open(self) -> bool:
         """Return charger port door open."""
-        return self._controller.get_charging_params(vin=self.vin).get("charge_port_door_open")
+        return self._controller.get_charging_params(vin=self.vin).get(
+            "charge_port_door_open"
+        )
 
     @property
-    def is_climate_on(self) -> dict:
+    def is_climate_on(self) -> bool:
         """Return climate is on."""
-        return self._controller.get_climate_params(vin=self.vin).get("is_climate_on", False)
+        return self._controller.get_climate_params(vin=self.vin).get(
+            "is_climate_on", False
+        )
 
     @property
-    def is_frunk_locked(self) -> bool:
+    def is_frunk_locked(self) -> int:
         """Return car frunk is locked.
 
         Locked: 0
@@ -300,7 +315,9 @@ class TeslaCar:
     @property
     def is_steering_wheel_heater_on(self) -> bool:
         """Return steering wheel heater."""
-        return self._controller.get_climate_params(vin=self.vin).get("steering_wheel_heater")
+        return self._controller.get_climate_params(vin=self.vin).get(
+            "steering_wheel_heater"
+        )
 
     @property
     def is_trunk_locked(self) -> int:
@@ -317,47 +334,50 @@ class TeslaCar:
             return False
 
     @property
-    def is_on(self) -> dict:
+    def is_on(self) -> bool:
         """Return car is on."""
         return self._controller.car_online[self.vin]
 
     @property
-    def longitude(self) -> str:
+    def longitude(self) -> float:
         """Return longitude."""
         return self._controller.get_drive_params(vin=self.vin).get("longitude")
 
     @property
-    def latitude(self) -> str:
+    def latitude(self) -> float:
         """Return latitude."""
         return self._controller.get_drive_params(vin=self.vin).get("latitude")
 
     @property
-    def max_avail_temp(self) -> dict:
+    def max_avail_temp(self) -> float:
         """Return max available temperature."""
         return self._controller.get_climate_params(vin=self.vin).get("max_avail_temp")
 
     @property
-    def min_avail_temp(self) -> dict:
+    def min_avail_temp(self) -> float:
         """Return min available temperature."""
         return self._controller.get_climate_params(vin=self.vin).get("min_avail_temp")
 
     @property
-    def native_heading(self) -> str:
+    def native_heading(self) -> int:
         """Return native heading."""
+        # Not seeing this in the JSON response
         return self._controller.get_drive_params(vin=self.vin).get("native_heading")
 
     @property
-    def native_location_supported(self) -> str:
+    def native_location_supported(self) -> int:
         """Return native location supported."""
-        return self._controller.get_drive_params(vin=self.vin).get("native_location_supported")
+        return self._controller.get_drive_params(vin=self.vin).get(
+            "native_location_supported"
+        )
 
     @property
-    def native_longitude(self) -> str:
+    def native_longitude(self) -> float:
         """Return native longitude."""
         return self._controller.get_drive_params(vin=self.vin).get("native_longitude")
 
     @property
-    def native_latitude(self) -> str:
+    def native_latitude(self) -> float:
         """Return native latitude."""
         return self._controller.get_drive_params(vin=self.vin).get("native_latitude")
 
@@ -379,7 +399,9 @@ class TeslaCar:
     @property
     def sentry_mode_available(self) -> bool:
         """Return sentry mode available."""
-        return self._controller.get_state_params(vin=self.vin).get("sentry_mode_available")
+        return self._controller.get_state_params(vin=self.vin).get(
+            "sentry_mode_available"
+        )
 
     @property
     def shift_state(self) -> str:
@@ -387,17 +409,19 @@ class TeslaCar:
         return self._controller.get_drive_params(vin=self.vin).get("shift_state")
 
     @property
-    def speed(self) -> str:
+    def speed(self) -> float:
         """Return speed."""
         return self._controller.get_drive_params(vin=self.vin).get("speed")
 
     @property
     def software_update(self) -> dict:
         """Return software update version information."""
-        return self._controller.get_state_params(vin=self.vin).get("software_update", {})
+        return self._controller.get_state_params(vin=self.vin).get(
+            "software_update", {}
+        )
 
     @property
-    def third_row_seats(self) -> bool:
+    def third_row_seats(self) -> str:
         """Return third row seats option."""
         return self._controller.get_state_params(vin=self.vin).get("third_row_seats")
 
@@ -410,7 +434,7 @@ class TeslaCar:
 
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
-    ):
+    ) -> dict:
         """Wrapper for sending commands to the Tesla API."""
         _LOGGER.debug("Sending command: %s", name)
         data = await self._controller.api(
@@ -419,7 +443,7 @@ class TeslaCar:
         _LOGGER.debug("Response from command %s: %s", name, data)
         return data
 
-    def _get_lat_long(self):
+    def _get_lat_long(self) -> float:
         """Get current latitude and longitude."""
         lat = None
         long = None
@@ -443,9 +467,7 @@ class TeslaCar:
         )
 
         if data and data["response"]["result"] is True:
-            params = {
-                "charge_limit_soc": int(value)
-            }
+            params = {"charge_limit_soc": int(value)}
             self._controller.update_charging_params(vin=self.vin, params=params)
 
     async def charge_port_door_close(self) -> None:
@@ -456,10 +478,8 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"]:
-            params = {
-                "charge_port_door_open": False
-            }
+        if data and data["response"]["result"] is True:
+            params = {"charge_port_door_open": False}
             self._controller.update_state_params(vin=self.vin, params=params)
 
     async def charge_port_door_open(self) -> None:
@@ -470,10 +490,8 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"]:
-            params = {
-                "charge_port_door_open": True
-            }
+        if data and data["response"]["result"] is True:
+            params = {"charge_port_door_open": True}
             self._controller.update_state_params(vin=self.vin, params=params)
 
     async def flash_lights(self) -> None:
@@ -502,9 +520,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
         if data and data["response"]["result"] is True:
-            params = {
-                "locked": True
-            }
+            params = {"locked": True}
             self._controller.update_state_params(vin=self.vin, params=params)
 
     async def remote_seat_heater_request(self, level: int, seat_id: int) -> None:
@@ -533,10 +549,8 @@ class TeslaCar:
             level=level,
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"]:
-            params = {
-                f"seat_{seat_id}_heater": level
-            }
+        if data and data["response"]["result"] is True:
+            params = {f"seat_heater_{SEAT_NAME_MAP[seat_id]}": level}
             self._controller.update_climate_params(vin=self.vin, params=params)
 
     def get_seat_heater_status(self, seat_id) -> int:
@@ -563,9 +577,7 @@ class TeslaCar:
         )
 
         if data and data["response"]["result"] is True:
-            params = {
-                "charge_amps": int(value)
-            }
+            params = {"charge_amps": int(value)}
             self._controller.update_charging_params(vin=self.vin, params=params)
 
     async def set_cabin_overheat_protection(self, option: str) -> None:
@@ -595,9 +607,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
         if data and data["response"]["result"]:
-            params = {
-                "cabin_overheat_protection": option
-            }
+            params = {"cabin_overheat_protection": option}
             self._controller.update_climate_params(vin=self.vin, params=params)
 
     async def set_climate_keeper_mode(self, keeper_id) -> None:
@@ -623,10 +633,8 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"]:
-            params = {
-                "steering_wheel_heater": value
-            }
+        if data and data["response"]["result"] is True:
+            params = {"steering_wheel_heater": value}
             self._controller.update_climate_params(vin=self.vin, params=params)
 
     async def set_hvac_mode(self, on_off: str) -> None:
@@ -667,10 +675,8 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"]:
-            params = {
-                "sentry_mode": value
-            }
+        if data and data["response"]["result"] is True:
+            params = {"sentry_mode": value}
             self._controller.update_state_params(vin=self.vin, params=params)
 
     async def set_temperature(self, temp) -> dict:
@@ -682,10 +688,8 @@ class TeslaCar:
             passenger_temp=temp,
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"]:
-            params = {
-                "driver_temp_setting": temp
-            }
+        if data and data["response"]["result"] is True:
+            params = {"driver_temp_setting": temp}
 
             self._controller.update_climate_params(vin=self.vin, params=params)
 
@@ -698,11 +702,9 @@ class TeslaCar:
         )
 
         if data and data["response"]["result"] is True:
-            params = {
-                "charging_state": "Charging"
-            }
+            params = {"charging_state": "Charging"}
             self._controller.update_charging_params(vin=self.vin, params=params)
-    
+
     async def stop_charge(self):
         """Send command to start charge."""
         data = await self._send_command(
@@ -712,9 +714,7 @@ class TeslaCar:
         )
 
         if data and data["response"]["result"] is True:
-            params = {
-                "charging_state": None
-            }
+            params = {"charging_state": None}
             self._controller.update_charging_params(vin=self.vin, params=params)
 
     async def wake_up(self) -> None:
@@ -733,16 +733,12 @@ class TeslaCar:
             which_trunk="rear",
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"]:
+        if data and data["response"]["result"] is True:
             if self.is_trunk_locked:
-                params = {
-                    "rt": 0
-                }
+                params = {"rt": 0}
                 self._controller.update_state_params(vin=self.vin, params=params)
             if not self.is_trunk_locked:
-                params = {
-                    "rt": 255
-                }
+                params = {"rt": 255}
                 self._controller.update_state_params(vin=self.vin, params=params)
 
     async def toggle_frunk(self):
@@ -753,16 +749,12 @@ class TeslaCar:
             which_trunk="front",
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"]:
+        if data and data["response"]["result"] is True:
             if self.is_frunk_locked:
-                params = {
-                    "ft": 0
-                }
+                params = {"ft": 0}
                 self._controller.update_state_params(vin=self.vin, params=params)
             if not self.is_frunk_locked:
-                params = {
-                    "ft": 255
-                }
+                params = {"ft": 255}
                 self._controller.update_state_params(vin=self.vin, params=params)
 
     async def trigger_homelink(self):
@@ -797,8 +789,6 @@ class TeslaCar:
             path_vars={"vehicle_id": self.id},
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"]:
-            params = {
-                "locked": False
-            }
+        if data and data["response"]["result"] is True:
+            params = {"locked": False}
             self._controller.update_state_params(vin=self.vin, params=params)
