@@ -6,6 +6,23 @@ from teslajsonpy.exceptions import HomelinkError
 _LOGGER = logging.getLogger(__name__)
 
 
+CABIN_OPTIONS = [
+    "Off",
+    "No A/C",
+    "On",
+]
+
+SEAT_ID_MAP = {
+    "left": 0,
+    "right": 1,
+    "rear_left": 2,
+    "rear_center": 4,
+    "rear_right": 5,
+    "third_row_left": 6,
+    "third_row_right": 7,
+}
+
+
 class TeslaCar:
     """Base class to represents a Tesla car."""
 
@@ -16,29 +33,34 @@ class TeslaCar:
         self._controller = controller
 
     @property
-    def display_name(self) -> dict:
+    def display_name(self) -> str:
         """Return State Data."""
         return self._car["display_name"]
 
     @property
-    def id(self) -> dict:
+    def id(self) -> str:
         """Return State Data."""
         return self._car["id"]
 
     @property
-    def state(self) -> dict:
+    def state(self) -> str:
         """Return State Data."""
         return self._car["state"]
 
     @property
-    def vehicle_id(self) -> dict:
+    def vehicle_id(self) -> str:
         """Return State Data."""
         return self._car["vehicle_id"]
 
     @property
-    def vin(self) -> dict:
+    def vin(self) -> str:
         """Return State Data."""
         return self._car["vin"]
+
+    @property
+    def data_available(self) -> int:
+        """Return if data is available."""
+        return self._controller.get_state_params(vin=self.vin)
 
     @property
     def battery_level(self) -> int:
@@ -49,6 +71,22 @@ class TeslaCar:
     def battery_range(self) -> int:
         """Return car battery range."""
         return self._controller.get_charging_params(vin=self.vin).get("battery_range")
+
+    @property
+    def cabin_overheat_protection(self) -> dict:
+        """Return cabin overheat protection."""
+        return self._controller.get_climate_params(vin=self.vin).get("cabin_overheat_protection")
+
+    @property
+    def car_type(self) -> int:
+        """Return car type."""
+        # This is actually listed in PRODUCT_LIST
+        return f"Model {str(self.vin[3]).upper()}"
+
+    @property
+    def car_version(self) -> int:
+        """Return installed car software version."""
+        return self._controller.get_state_params(vin=self.vin)["car_version"]
 
     @property
     def charger_actual_current(self) -> dict:
@@ -65,14 +103,14 @@ class TeslaCar:
         )
 
     @property
-    def charge_current_request_max(self) -> dict:
+    def charge_current_request_max(self) -> float:
         """Return charge current request max."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charge_current_request_max"
         )
 
     @property
-    def charge_port_latch(self) -> dict:
+    def charge_port_latch(self) -> str:
         """Return charger port latch state.
 
         "Engaged"
@@ -81,17 +119,31 @@ class TeslaCar:
         return self._controller.get_charging_params(vin=self.vin).get("charge_port_latch")
 
     @property
-    def charge_energy_added(self) -> dict:
+    def charge_energy_added(self) -> float:
         """Return charge energy added."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charge_energy_added"
         )
 
     @property
-    def charge_limit_soc(self) -> dict:
+    def charge_limit_soc(self) -> float:
         """Return charge limit soc."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charge_limit_soc"
+        )
+
+    @property
+    def charge_limit_soc_max(self) -> float:
+        """Return charge limit soc max."""
+        return self._controller.get_charging_params(vin=self.vin).get(
+            "charge_limit_soc_max"
+        )
+
+    @property
+    def charge_limit_soc_min(self) -> float:
+        """Return charge limit soc min."""
+        return self._controller.get_charging_params(vin=self.vin).get(
+            "charge_limit_soc_min"
         )
 
     @property
@@ -124,7 +176,7 @@ class TeslaCar:
         return self._controller.get_charging_params(vin=self.vin)["charge_rate"]
 
     @property
-    def charging_state(self) -> dict:
+    def charging_state(self) -> str:
         """Return charging state."""
         return self._controller.get_charging_params(vin=self.vin).get(
             "charging_state"
@@ -199,17 +251,17 @@ class TeslaCar:
     @property
     def homelink_device_count(self) -> int:
         """Return Homelink device count."""
-        return self._controller.get_state_params(vin=self.vin)["homelink_device_count"]
+        return self._controller.get_state_params(vin=self.vin).get("homelink_device_count")
 
     @property
     def homelink_nearby(self) -> dict:
         """Return Homelink nearby."""
-        return self._controller.get_state_params(vin=self.vin)["homelink_nearby"]
+        return self._controller.get_state_params(vin=self.vin).get("homelink_nearby")
 
     @property
     def ideal_battery_range(self) -> int:
         """Return car ideal battery range."""
-        return self._controller.get_charging_params(vin=self.vin)["ideal_battery_range"]
+        return self._controller.get_charging_params(vin=self.vin).get("ideal_battery_range")
 
     @property
     def inside_temp(self) -> dict:
@@ -244,6 +296,11 @@ class TeslaCar:
     def is_locked(self) -> bool:
         """Return car is locked."""
         return self._controller.get_state_params(vin=self.vin).get("locked")
+
+    @property
+    def is_steering_wheel_heater_on(self) -> bool:
+        """Return steering wheel heater."""
+        return self._controller.get_climate_params(vin=self.vin).get("steering_wheel_heater")
 
     @property
     def is_trunk_locked(self) -> int:
@@ -315,14 +372,34 @@ class TeslaCar:
         return self._controller.get_climate_params(vin=self.vin).get("outside_temp")
 
     @property
-    def speed(self) -> str:
-        """Return speed."""
-        return self._controller.get_drive_params(vin=self.vin).get("speed")
+    def sentry_mode(self) -> bool:
+        """Return sentry mode."""
+        return self._controller.get_state_params(vin=self.vin).get("sentry_mode")
+
+    @property
+    def sentry_mode_available(self) -> bool:
+        """Return sentry mode available."""
+        return self._controller.get_state_params(vin=self.vin).get("sentry_mode_available")
 
     @property
     def shift_state(self) -> str:
         """Return shift state."""
         return self._controller.get_drive_params(vin=self.vin).get("shift_state")
+
+    @property
+    def speed(self) -> str:
+        """Return speed."""
+        return self._controller.get_drive_params(vin=self.vin).get("speed")
+
+    @property
+    def software_update(self) -> dict:
+        """Return software update version information."""
+        return self._controller.get_state_params(vin=self.vin).get("software_update", {})
+
+    @property
+    def third_row_seats(self) -> bool:
+        """Return third row seats option."""
+        return self._controller.get_state_params(vin=self.vin).get("third_row_seats")
 
     @property
     def time_to_full_charge(self) -> float:
@@ -355,6 +432,21 @@ class TeslaCar:
             lat = self.latitude
 
         return lat, long
+
+    async def change_charge_limit(self, value: float) -> None:
+        """Send command to change charge limit."""
+        data = await self._send_command(
+            "CHANGE_CHARGE_LIMIT",
+            path_vars={"vehicle_id": self.id},
+            percent=int(value),
+            wake_if_asleep=True,
+        )
+
+        if data and data["response"]["result"] is True:
+            params = {
+                "charge_limit_soc": int(value)
+            }
+            self._controller.update_charging_params(vin=self.vin, params=params)
 
     async def charge_port_door_close(self) -> None:
         """Send command to close charge port door."""
@@ -409,11 +501,104 @@ class TeslaCar:
             path_vars={"vehicle_id": self.id},
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"]:
+        if data and data["response"]["result"] is True:
             params = {
                 "locked": True
             }
             self._controller.update_state_params(vin=self.vin, params=params)
+
+    async def remote_seat_heater_request(self, level: int, seat_id: int) -> None:
+        """Send command to change seat heat.
+
+        Levels:
+        -Off: 0
+        -Low: 1
+        -Medium: 2
+        -High: 3
+
+        Seat ID:
+        -Left: 0
+        -Right": 1
+        -Rear_left": 2
+        -Rear_center": 4
+        -Rear_right": 5
+        -Third_row_left": 6
+        -Third_row_right": 7
+        """
+
+        data = await self._send_command(
+            "REMOTE_SEAT_HEATER_REQUEST",
+            path_vars={"vehicle_id": self.id},
+            heater=seat_id,
+            level=level,
+            wake_if_asleep=True,
+        )
+        if data and data["response"]["result"]:
+            params = {
+                f"seat_{seat_id}_heater": level
+            }
+            self._controller.update_climate_params(vin=self.vin, params=params)
+
+    def get_seat_heater_status(self, seat_id) -> int:
+        """Return status of seat heater for a given seat."""
+        seat_id = f"seat_{seat_id}_heater"
+        return self._controller.get_climate_params(vin=self.vin).get(seat_id)
+
+    async def schedule_software_update(self, offset_sec=0) -> None:
+        """Send command to install software update."""
+        await self._coordinator.controller.api(
+            "SCHEDULE_SOFTWARE_UPDATE",
+            path_vars={"vehicle_id": self.id},
+            offset_sec=offset_sec,
+            wake_if_asleep=True,
+        )
+
+    async def set_charging_amps(self, value: float) -> None:
+        """Send command to set charging amps."""
+        data = await self._send_command(
+            "CHARGING_AMPS",
+            path_vars={"vehicle_id": self.id},
+            charging_amps=int(value),
+            wake_if_asleep=True,
+        )
+
+        if data and data["response"]["result"] is True:
+            params = {
+                "charge_amps": int(value)
+            }
+            self._controller.update_charging_params(vin=self.vin, params=params)
+
+    async def set_cabin_overheat_protection(self, option: str) -> None:
+        """Send command to set cabin overheat protection.
+
+        Options:
+        -"Off"
+        -"No A/C"
+        -"On"
+        """
+
+        if option == "Off":
+            body_on = False
+            fan_only = False
+        elif option == "No A/C":
+            body_on = True
+            fan_only = True
+        elif option == "On":
+            body_on = True
+            fan_only = False
+
+        data = await self._send_command(
+            "SET_CABIN_OVERHEAT_PROTECTION",
+            path_vars={"vehicle_id": self.id},
+            on=body_on,
+            fan_only=fan_only,
+            wake_if_asleep=True,
+        )
+        if data and data["response"]["result"]:
+            params = {
+                "cabin_overheat_protection": option
+            }
+            self._controller.update_climate_params(vin=self.vin, params=params)
 
     async def set_climate_keeper_mode(self, keeper_id) -> None:
         """Send command to set climate keeper mode.
@@ -429,33 +614,19 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-    async def set_max_defrost(self, state: bool) -> None:
-        """Send command to set max defrost.
-
-        On: 2
-        Off: 0
-        """
-        await self._send_command(
-            "MAX_DEFROST",
-            path_vars={"vehicle_id": self.id},
-            on=state,
-            wake_if_asleep=True,
-        )
-
-    async def set_temperature(self, temp) -> dict:
-        """Send command to set temperature."""
+    async def set_heated_steering_wheel(self, value: bool) -> None:
+        """Send command to set heated steering wheel."""
         data = await self._send_command(
-            "CHANGE_CLIMATE_TEMPERATURE_SETTING",
+            "REMOTE_STEERING_WHEEL_HEATER_REQUEST",
             path_vars={"vehicle_id": self.id},
-            driver_temp=temp,
-            passenger_temp=temp,
+            on=value,
             wake_if_asleep=True,
         )
+
         if data and data["response"]["result"]:
             params = {
-                "driver_temp_setting": temp
+                "steering_wheel_heater": value
             }
-
             self._controller.update_climate_params(vin=self.vin, params=params)
 
     async def set_hvac_mode(self, on_off: str) -> None:
@@ -473,6 +644,78 @@ class TeslaCar:
                 path_vars={"vehicle_id": self.id},
                 wake_if_asleep=True,
             )
+
+    async def set_max_defrost(self, state: bool) -> None:
+        """Send command to set max defrost.
+
+        On: 2
+        Off: 0
+        """
+        await self._send_command(
+            "MAX_DEFROST",
+            path_vars={"vehicle_id": self.id},
+            on=state,
+            wake_if_asleep=True,
+        )
+
+    async def set_sentry_mode(self, value: bool) -> None:
+        """Send command to set sentry mode."""
+        data = await self._send_command(
+            "SET_SENTRY_MODE",
+            path_vars={"vehicle_id": self.id},
+            on=value,
+            wake_if_asleep=True,
+        )
+
+        if data and data["response"]["result"]:
+            params = {
+                "sentry_mode": value
+            }
+            self._controller.update_state_params(vin=self.vin, params=params)
+
+    async def set_temperature(self, temp) -> dict:
+        """Send command to set temperature."""
+        data = await self._send_command(
+            "CHANGE_CLIMATE_TEMPERATURE_SETTING",
+            path_vars={"vehicle_id": self.id},
+            driver_temp=temp,
+            passenger_temp=temp,
+            wake_if_asleep=True,
+        )
+        if data and data["response"]["result"]:
+            params = {
+                "driver_temp_setting": temp
+            }
+
+            self._controller.update_climate_params(vin=self.vin, params=params)
+
+    async def start_charge(self):
+        """Send command to start charge."""
+        data = await self._send_command(
+            "START_CHARGE",
+            path_vars={"vehicle_id": self.id},
+            wake_if_asleep=True,
+        )
+
+        if data and data["response"]["result"] is True:
+            params = {
+                "charging_state": "Charging"
+            }
+            self._controller.update_charging_params(vin=self.vin, params=params)
+    
+    async def stop_charge(self):
+        """Send command to start charge."""
+        data = await self._send_command(
+            "STOP_CHARGE",
+            path_vars={"vehicle_id": self.id},
+            wake_if_asleep=True,
+        )
+
+        if data and data["response"]["result"] is True:
+            params = {
+                "charging_state": None
+            }
+            self._controller.update_charging_params(vin=self.vin, params=params)
 
     async def wake_up(self) -> None:
         """Send command to wake up."""

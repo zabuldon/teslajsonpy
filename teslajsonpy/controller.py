@@ -554,7 +554,7 @@ class Controller:
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_energysites(self):
-        """Get energy sites json from TeslaAPI and filter to solar."""
+        """Get energy sites json from TeslaAPI and filter to solar or battery sites."""
         return [
             p
             for p in (await self.api("PRODUCT_LIST"))["response"]
@@ -1260,6 +1260,16 @@ class Controller:
             vin = self._id_to_vin(car_id)
         if vin:
             self.__charging[vin] = params
+
+    def update_charging_params(
+        self, car_id: Text = None, vin: Text = None, params: Dict = None
+    ) -> None:
+        """Update charging_params for car_id."""
+        params = params or {}
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin:
+            self.__charging[vin].update(params)
 
     def charging_state(self, car_id: Text = None, vin: Text = None) -> Text:
         """Return charging state for a single vehicle."""
