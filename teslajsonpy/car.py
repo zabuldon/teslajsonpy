@@ -1,5 +1,6 @@
 """Tesla car."""
 import logging
+from typing import Optional
 
 from teslajsonpy.exceptions import HomelinkError
 
@@ -186,8 +187,10 @@ class TeslaCar:
     def climate_keeper_mode(self) -> str:
         """Return climate keeper mode mode.
 
-        Returns string "dog", "camp" or "on", "off"
-        API call not supported on all Tesla models.
+        Returns
+            str: dog, camp, on, off
+
+        Not supported on all Tesla models.
         """
         return self._controller.get_climate_params(vin=self.vin).get(
             "climate_keeper_mode", ""
@@ -204,8 +207,8 @@ class TeslaCar:
     def defrost_mode(self) -> int:
         """Return defrost mode.
 
-        On: 2
-        Off: 0
+        Returns
+            int: 2 (on), 0 (off)
         """
         return self._controller.get_climate_params(vin=self.vin).get("defrost_mode", 0)
 
@@ -295,10 +298,10 @@ class TeslaCar:
 
     @property
     def is_frunk_locked(self) -> int:
-        """Return car frunk is locked.
+        """Return car frunk is locked (closed).
 
-        Locked: 0
-        Unlocked: 255
+        Returns
+            int: 0 (locked), 255 (unlocked)
         """
         response = self._controller.get_state_params(vin=self.vin).get("ft")
 
@@ -321,10 +324,10 @@ class TeslaCar:
 
     @property
     def is_trunk_locked(self) -> int:
-        """Return car trunk is locked.
+        """Return car trunk is locked (closed).
 
-        Locked: 0
-        Unlocked: 255
+        Returns
+            int: 0 (locked), 255 (unlocked)
         """
         response = self._controller.get_state_params(vin=self.vin).get("rt")
 
@@ -544,20 +547,10 @@ class TeslaCar:
     async def remote_seat_heater_request(self, level: int, seat_id: int) -> None:
         """Send command to change seat heat.
 
-        Levels:
-        -Off: 0
-        -Low: 1
-        -Medium: 2
-        -High: 3
-
-        Seat ID:
-        -Left: 0
-        -Right": 1
-        -Rear_left": 2
-        -Rear_center": 4
-        -Rear_right": 5
-        -Third_row_left": 6
-        -Third_row_right": 7
+        Args
+            levels: 0 (off), 1 (low), 2 (medium), 3 (high)
+            seat_id: 0 (front left), 1 (front right), 2 (rear left), 4 (rear center)
+                     5 (rear right), 6 (third row left), 7 (third row right)
         """
 
         data = await self._send_command(
@@ -571,12 +564,12 @@ class TeslaCar:
             params = {f"seat_heater_{SEAT_NAME_MAP[seat_id]}": level}
             self._controller.update_climate_params(vin=self.vin, params=params)
 
-    def get_seat_heater_status(self, seat_id) -> int:
+    def get_seat_heater_status(self, seat_id: int) -> int:
         """Return status of seat heater for a given seat."""
         seat_id = f"seat_heater_{SEAT_NAME_MAP[seat_id]}"
         return self._controller.get_climate_params(vin=self.vin).get(seat_id)
 
-    async def schedule_software_update(self, offset_sec=0) -> None:
+    async def schedule_software_update(self, offset_sec: Optional[int] = 0) -> None:
         """Send command to install software update."""
         await self._coordinator.controller.api(
             "SCHEDULE_SOFTWARE_UPDATE",
@@ -601,10 +594,8 @@ class TeslaCar:
     async def set_cabin_overheat_protection(self, option: str) -> None:
         """Send command to set cabin overheat protection.
 
-        Options:
-        -"Off"
-        -"No A/C"
-        -"On"
+        Args
+            option: "Off", "No A/C", "On"
         """
 
         if option == "Off":
@@ -628,12 +619,11 @@ class TeslaCar:
             params = {"cabin_overheat_protection": option}
             self._controller.update_climate_params(vin=self.vin, params=params)
 
-    async def set_climate_keeper_mode(self, keeper_id) -> None:
+    async def set_climate_keeper_mode(self, keeper_id: int) -> None:
         """Send command to set climate keeper mode.
 
-        Keep On: 1
-        Dog Mode: 2
-        Camp Mode: 3
+        Args
+            keeper_id: 1 (keep on), 2 (dog mode), 3 (camp mode)
         """
         await self._send_command(
             "SET_CLIMATE_KEEPER_MODE",
@@ -671,11 +661,11 @@ class TeslaCar:
                 wake_if_asleep=True,
             )
 
-    async def set_max_defrost(self, state: bool) -> None:
+    async def set_max_defrost(self, state: int) -> None:
         """Send command to set max defrost.
 
-        On: 2
-        Off: 0
+        Args
+            state: 2 = on, 0 = off
         """
         await self._send_command(
             "MAX_DEFROST",
@@ -697,7 +687,7 @@ class TeslaCar:
             params = {"sentry_mode": value}
             self._controller.update_state_params(vin=self.vin, params=params)
 
-    async def set_temperature(self, temp) -> dict:
+    async def set_temperature(self, temp: float) -> None:
         """Send command to set temperature."""
         data = await self._send_command(
             "CHANGE_CLIMATE_TEMPERATURE_SETTING",
@@ -711,7 +701,7 @@ class TeslaCar:
 
             self._controller.update_climate_params(vin=self.vin, params=params)
 
-    async def start_charge(self):
+    async def start_charge(self) -> None:
         """Send command to start charge."""
         data = await self._send_command(
             "START_CHARGE",
@@ -723,7 +713,7 @@ class TeslaCar:
             params = {"charging_state": "Charging"}
             self._controller.update_charging_params(vin=self.vin, params=params)
 
-    async def stop_charge(self):
+    async def stop_charge(self) -> None:
         """Send command to start charge."""
         data = await self._send_command(
             "STOP_CHARGE",
@@ -743,7 +733,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-    async def toggle_trunk(self):
+    async def toggle_trunk(self) -> None:
         """Actuate rear trunk lock."""
         data = await self._send_command(
             "ACTUATE_TRUNK",
@@ -759,7 +749,7 @@ class TeslaCar:
                 params = {"rt": 255}
                 self._controller.update_state_params(vin=self.vin, params=params)
 
-    async def toggle_frunk(self):
+    async def toggle_frunk(self) -> None:
         """Actuate front trunk lock."""
         data = await self._send_command(
             "ACTUATE_TRUNK",
@@ -775,7 +765,7 @@ class TeslaCar:
                 params = {"ft": 255}
                 self._controller.update_state_params(vin=self.vin, params=params)
 
-    async def trigger_homelink(self):
+    async def trigger_homelink(self) -> None:
         """Send command to trigger homelink."""
         if self.homelink_device_count is None:
             raise HomelinkError(f"No homelink devices added to {self.display_name}.")
@@ -800,7 +790,7 @@ class TeslaCar:
             if result is False:
                 raise HomelinkError(f"Error calling trigger_homelink: {reason}")
 
-    async def unlock(self):
+    async def unlock(self) -> None:
         """Send unlock command."""
         data = await self._send_command(
             "UNLOCK",

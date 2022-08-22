@@ -13,7 +13,7 @@ import logging
 import json
 import pkgutil
 import time
-from typing import Callable, Dict, List, Optional, Text
+from typing import Any, Callable, Dict, List, Optional, Text
 
 import backoff
 import httpx
@@ -76,7 +76,7 @@ from teslajsonpy.homeassistant.vehicle_data import (
 )
 
 from teslajsonpy.car import TeslaCar
-from teslajsonpy.energy import SolarSite, PowerwallSite, SolarPowerwallSite
+from teslajsonpy.energy import EnergySite, SolarSite, PowerwallSite, SolarPowerwallSite
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -382,11 +382,11 @@ class Controller:
         self.enable_websocket = enable_websocket
         self.endpoints = {}
         self.polling_policy = polling_policy
-        self.__energysite_list = []
-        self.__power_data = {}
-        self.__vehicle_list = []
-        self.cars = {}
-        self.energysites = {}
+        self.__energysite_list: List[dict] = []
+        self.__power_data: Dict[str, Any] = {}
+        self.__vehicle_list: List[dict] = []
+        self.cars: Dict[str, TeslaCar] = {}
+        self.energysites: Dict[int, EnergySite] = {}
 
     async def connect(
         self,

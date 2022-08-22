@@ -108,7 +108,7 @@ class PowerwallSite(EnergySite):
         """Return load power in Watts."""
         return self._power_data["load_power"]
 
-    # async def set_operation_mode(self, real_mode, value) -> None:
+    # async def set_operation_mode(self, real_mode: str, value: int) -> None:
     #     """Set operation mode of Powerwall.
 
     #     Mode: "self_consumption", "backup", "autonomous"
