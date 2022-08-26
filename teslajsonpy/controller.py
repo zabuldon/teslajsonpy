@@ -383,7 +383,8 @@ class Controller:
         self.endpoints = {}
         self.polling_policy = polling_policy
         self.__energysite_list: List[dict] = []
-        self.__power_data: Dict[str, Any] = {}
+        self.__grid_status: Dict[int, dict] = {}
+        self.__power_data: Dict[int, dict] = {}
         self.__vehicle_list: List[dict] = []
         self.cars: Dict[str, TeslaCar] = {}
         self.energysites: Dict[int, EnergySite] = {}
@@ -464,6 +465,8 @@ class Controller:
                 "grid_power": 0,
                 "battery_power": 0,
             }
+            # Default to True but check in first update
+            self.__grid_status[energysite_id] = {"grid_always_unk": True}
 
             self.__lock[energysite_id] = asyncio.Lock()
 
@@ -1030,7 +1033,10 @@ class Controller:
                     # At the same time, newer systems maye report spurious reads of 0 Watts
                     # and grid status unknown. In this case, remove values but update
                     # self.__power_data with remaining data (grid and load power).
-                    if (
+                    if response["grid_status"] == "Active":
+                        self.__grid_status[energysite_id]["grid_always_unk"] = False
+
+                    if not self.__grid_status[energysite_id]["grid_always_unk"] and (
                         response["grid_status"] == "Unknown"
                         and response["solar_power"] == 0
                     ):
@@ -1741,9 +1747,10 @@ class Controller:
     @update_interval.setter
     def update_interval(self, value: int) -> None:
         """Set update_interval."""
-        if value < 0:
+        # Sometimes receive a value of None
+        if value and value < 0:
             value = UPDATE_INTERVAL
-        if value:
+        if value and value:
             _LOGGER.debug("Update interval set to %s.", value)
             self._update_interval = int(value)
 
