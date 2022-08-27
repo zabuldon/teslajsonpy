@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.3 (2022-08-27)
+### Fix
+* Fix grid status and load sensor issues ([#343](https://github.com/zabuldon/teslajsonpy/issues/343)) ([`d815446`](https://github.com/zabuldon/teslajsonpy/commit/d815446aaba5b17363ed6ca60c07243e027d564b))
+
 ## v2.4.2 (2022-08-17)
 ### Fix
 * Use solar name from app ([#339](https://github.com/zabuldon/teslajsonpy/issues/339)) ([`a1c3a41`](https://github.com/zabuldon/teslajsonpy/commit/a1c3a41f14b24bdeeb5206c7ad2afbaf81529fc6))
