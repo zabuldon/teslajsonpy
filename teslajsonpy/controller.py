@@ -736,7 +736,7 @@ class Controller:
 
     def _add_energysite_components(self, energysite):
         self.__components.append(SolarPowerSensor(energysite, self))
-        if energysite["components"]["load_meter"]:
+        if energysite.get("components").get("load_meter"):
             self.__components.append(LoadPowerSensor(energysite, self))
             self.__components.append(GridPowerSensor(energysite, self))
 

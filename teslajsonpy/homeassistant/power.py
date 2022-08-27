@@ -198,7 +198,7 @@ class LoadPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the load power sensor."""
         super().__init__(data, controller)
-        self.__load_power: float = data["load_power"]
+        self.__load_power: float = data.get("load_power")
         self.type = "load power"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
@@ -220,7 +220,7 @@ class LoadPowerSensor(PowerSensor):
         data = self._controller.get_power_params(self._id)
 
         if data:
-            self.__load_power = data["load_power"]
+            self.__load_power = data.get("load_power")
 
 
 class GridPowerSensor(PowerSensor):
@@ -232,7 +232,7 @@ class GridPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the grid power sensor."""
         super().__init__(data, controller)
-        self.__grid_power: float = data["grid_power"]
+        self.__grid_power: float = data.get("grid_power")
         self.type = "grid power"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
@@ -254,4 +254,4 @@ class GridPowerSensor(PowerSensor):
         data = self._controller.get_power_params(self._id)
 
         if data:
-            self.__grid_power = data["grid_power"]
+            self.__grid_power = data.get("grid_power")
