@@ -141,6 +141,7 @@ class SolarPowerSensor(PowerSensor):
         self._solar_type: Text = data["solar_type"]
         self.__solar_power: float = data["solar_power"]
         self.__generating_status: bool = None
+        self.__grid_status: dict = controller._grid_status[self._energy_site_id]
         self.type = "solar panel"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
@@ -174,15 +175,14 @@ class SolarPowerSensor(PowerSensor):
             # Note: Some systems that pre-date Tesla aquisition of SolarCity will have `grid_status: Unknown`,
             # but will have solar power values. At the same time, newer systems will report spurious reads of 0 Watts
             # and grid status unknown. If solar power is 0 return null.
-            if (
-                "grid_status" in data
-                and data["grid_status"] == "Unknown"
-                and data["solar_power"] == 0
+            if not self.__grid_status["grid_always_unk"] and (
+                data["grid_status"] == "Unknown" and data["solar_power"] == 0
             ):
                 _LOGGER.debug("Spurious energy site power read")
                 return
 
             self.__solar_power = data["solar_power"]
+
             if data["solar_power"] is not None:
                 self.__generating_status = (
                     "Generating" if data["solar_power"] > 0 else "Idle"
@@ -198,7 +198,7 @@ class LoadPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the load power sensor."""
         super().__init__(data, controller)
-        self.__load_power: float = data["load_power"]
+        self.__load_power: float = data.get("load_power")
         self.type = "load power"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
@@ -220,7 +220,7 @@ class LoadPowerSensor(PowerSensor):
         data = self._controller.get_power_params(self._id)
 
         if data:
-            self.__load_power = data["load_power"]
+            self.__load_power = data.get("load_power")
 
 
 class GridPowerSensor(PowerSensor):
@@ -232,7 +232,7 @@ class GridPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the grid power sensor."""
         super().__init__(data, controller)
-        self.__grid_power: float = data["grid_power"]
+        self.__grid_power: float = data.get("grid_power")
         self.type = "grid power"
         self.name = self._name()
         self.uniq_name = self._uniq_name()
@@ -254,4 +254,4 @@ class GridPowerSensor(PowerSensor):
         data = self._controller.get_power_params(self._id)
 
         if data:
-            self.__grid_power = data["grid_power"]
+            self.__grid_power = data.get("grid_power")

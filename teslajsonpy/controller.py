@@ -30,7 +30,7 @@ from teslajsonpy.const import (
     SLEEP_INTERVAL,
     TESLA_PRODUCT_TYPE_ENERGY_SITES,
     TESLA_PRODUCT_TYPE_VEHICLES,
-    TESLA_DEFAULT_ENERGY_SITE_NAME
+    TESLA_DEFAULT_ENERGY_SITE_NAME,
 )
 from teslajsonpy.exceptions import should_giveup, RetryLimitError, TeslaException
 from teslajsonpy.homeassistant.battery_sensor import Battery, Range
@@ -379,6 +379,7 @@ class Controller:
         self.polling_policy = polling_policy
         self.__energysite_name = {}
         self.__energysite_type = {}
+        self._grid_status = {}
         self.__power = {}
         self.energysites = {}
         self.__id_energysiteid_map = {}
@@ -457,6 +458,8 @@ class Controller:
             )
             self.__energysite_type[energysite_id] = energysite["solar_type"]
             self.__power[energysite_id] = {"solar_power": energysite["solar_power"]}
+            # Default to True but will be checked in first update
+            self._grid_status[energysite_id] = {"grid_always_unk": True}
 
             self.__lock[energysite_id] = asyncio.Lock()
             self._add_energysite_components(energysite)
@@ -560,8 +563,9 @@ class Controller:
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_site_config(self, energysite_id):
         """Get site config json from TeslaAPI."""
-        return (await self.api("SITE_CONFIG",
-                               path_vars={"site_id": energysite_id}))["response"]
+        return (await self.api("SITE_CONFIG", path_vars={"site_id": energysite_id}))[
+            "response"
+        ]
 
     @wake_up
     async def post(
@@ -732,8 +736,9 @@ class Controller:
 
     def _add_energysite_components(self, energysite):
         self.__components.append(SolarPowerSensor(energysite, self))
-        self.__components.append(LoadPowerSensor(energysite, self))
-        self.__components.append(GridPowerSensor(energysite, self))
+        if energysite.get("components").get("load_meter"):
+            self.__components.append(LoadPowerSensor(energysite, self))
+            self.__components.append(GridPowerSensor(energysite, self))
 
     def _add_car_components(self, car):
         self.__components.append(Climate(car, self))
@@ -983,6 +988,9 @@ class Controller:
                     data = None
                 if data and data["response"]:
                     response = data["response"]
+                    if response["grid_status"] == "Active":
+                        self._grid_status[energysite_id]["grid_always_unk"] = False
+
                     self.__power[energysite_id] = response
 
         async with self.__update_lock:

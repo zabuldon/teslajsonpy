@@ -3,7 +3,12 @@
 import pytest
 
 from teslajsonpy.controller import Controller
-from teslajsonpy.homeassistant.power import PowerSensor, SolarPowerSensor, LoadPowerSensor, GridPowerSensor
+from teslajsonpy.homeassistant.power import (
+    PowerSensor,
+    SolarPowerSensor,
+    LoadPowerSensor,
+    GridPowerSensor,
+)
 
 from tests.tesla_mock import TeslaMock
 
@@ -13,6 +18,7 @@ def test_device_class(monkeypatch):
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller._grid_status = {1234567890: {"grid_always_unk": True}}
 
     _data = _mock.data_request_energy_site()
     _sensor = PowerSensor(_data, _controller)
@@ -34,6 +40,7 @@ def test_device_class(monkeypatch):
     assert _sensor.type == "grid power"
     assert _sensor.name == "My Home grid power"
 
+
 def test_site_with_name(monkeypatch):
     """Test site with no site_name in json data."""
 
@@ -44,6 +51,7 @@ def test_site_with_name(monkeypatch):
     _sensor = PowerSensor(_data, _controller)
 
     assert _sensor.site_name() == "My Home"
+
 
 def test_site_without_name(monkeypatch):
     """Test site with no site_name in json data."""
@@ -56,17 +64,20 @@ def test_site_without_name(monkeypatch):
 
     assert _sensor.site_name() == "My Home"
 
+
 def test_get_solar_power_on_init(monkeypatch):
     """Test get_power() after initialization."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller._grid_status = {1234567890: {"grid_always_unk": True}}
 
     _data = _mock.data_request_energy_site()
     _sensor = SolarPowerSensor(_data, _controller)
 
     assert _sensor is not None
     assert _sensor.get_power() == 4230
+
 
 def test_get_load_power_on_init(monkeypatch):
     """Test get_load_power() after initialization."""
@@ -80,6 +91,7 @@ def test_get_load_power_on_init(monkeypatch):
     assert _sensor is not None
     assert _sensor.get_load_power() == 3245.4599609375
 
+
 def test_get_grid_power_on_init(monkeypatch):
     """Test get_grid_power() after initialization."""
 
@@ -92,12 +104,14 @@ def test_get_grid_power_on_init(monkeypatch):
     assert _sensor is not None
     assert _sensor.get_grid_power() == -984.5400390625
 
+
 @pytest.mark.asyncio
 async def test_get_power_after_update(monkeypatch):
     """Test get_power() after an update."""
 
     _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
+    _controller._grid_status = {1234567890: {"grid_always_unk": True}}
 
     _data = _mock.data_request_energy_site()
     _data["solar_power"] = 1800
@@ -108,6 +122,7 @@ async def test_get_power_after_update(monkeypatch):
     assert _sensor is not None
     assert not _sensor.get_power() is None
     assert _sensor.get_power() == 7720
+
 
 @pytest.mark.asyncio
 async def test_get_load_power_after_update(monkeypatch):
@@ -126,6 +141,7 @@ async def test_get_load_power_after_update(monkeypatch):
     assert not _sensor.get_load_power() is None
     assert _sensor.get_load_power() == 4517.14990234375
 
+
 @pytest.mark.asyncio
 async def test_get_grid_power_after_update(monkeypatch):
     """Test get_grid_power() after an update."""
@@ -143,6 +159,7 @@ async def test_get_grid_power_after_update(monkeypatch):
     assert not _sensor.get_grid_power() is None
     assert _sensor.get_grid_power() == -3202.85009765625
 
+
 @pytest.mark.asyncio
 async def test_get_power_after_update_with_unknown_status(monkeypatch):
     """Test get_power()  after an update with an unknown grid status."""
@@ -152,6 +169,7 @@ async def test_get_power_after_update_with_unknown_status(monkeypatch):
         Controller, "get_power_params", _mock.mock_get_power_unknown_grid_params
     )
     _controller = Controller(None)
+    _controller._grid_status = {1234567890: {"grid_always_unk": True}}
 
     _data = _mock.data_request_energy_site()
     _data["solar_power"] = 1800
