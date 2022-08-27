@@ -36,13 +36,27 @@ class TeslaMock:
         # self._monkeypatch.setattr(
         #     Controller, "get_state_params", self.mock_get_state_params
         # )
-        self._monkeypatch.setattr(Controller, "get_vehicles", self.mock_get_vehicles)
         self._monkeypatch.setattr(
-            Controller, "get_energysites", self.mock_get_energysites
+            Controller, "get_product_list", self.mock_get_product_list
         )
         self._monkeypatch.setattr(
             Controller, "get_site_config", self.mock_get_site_config
         )
+        # self._monkeypatch.setattr(
+        #     Controller,
+        #     "_get_and_process_car_data",
+        #     self.mock_get_and_process_car_data,
+        # )
+        # self._monkeypatch.setattr(
+        #     Controller,
+        #     "_get_and_process_site_data",
+        #     self.mock_get_and_process_site_data,
+        # )
+        # self._monkeypatch.setattr(
+        #     Controller,
+        #     "_get_and_process_battery_data",
+        #     self.mock_get_and_process_battery_data,
+        # )
         # self._monkeypatch.setattr(
         #     Controller, "get_last_update_time", self.mock_get_last_update_time
         # )
@@ -50,19 +64,19 @@ class TeslaMock:
         self._monkeypatch.setattr(
             Controller, "get_power_params", self.mock_get_power_params
         )
-        self._vehicle_product_list = copy.deepcopy(VEHICLE_PRODUCT_LIST)
+        self._product_list = copy.deepcopy(PRODUCT_LIST)
+        self._vehicle_data = copy.deepcopy(VEHICLE_DATA)
+        self._site_data = copy.deepcopy(SITE_DATA)
+        self._battery_data = copy.deepcopy(BATTERY_DATA)
         self._drive_state = copy.deepcopy(DRIVE_STATE)
         self._climate_state = copy.deepcopy(CLIMATE_STATE)
         self._charge_state = copy.deepcopy(CHARGE_STATE)
         self._gui_settings = copy.deepcopy(GUI_SETTINGS)
         self._vehicle_state = copy.deepcopy(VEHICLE_STATE)
         self._vehicle_config = copy.deepcopy(VEHICLE_CONFIG)
-        self._product_list = copy.deepcopy(ENERGYSITE_PRODUCT_LIST)
         self._solar_combined_data = copy.deepcopy(SOLAR_COMBINED_DATA)
         self._solar_combined_data_no_name = copy.deepcopy(SOLAR_COMBINED_DATA_NO_NAME)
-        self._battery_combined_data = copy.deepcopy(BATTERY_COMBINED_DATA)
         self._site_config = copy.deepcopy(SITE_CONFIG)
-        self._site_state = copy.deepcopy(SITE_STATE)
         self._site_state_unknown_grid = copy.deepcopy(SITE_STATE_UNKNOWN_GRID)
         self._vehicle = copy.deepcopy(VEHICLE)
         self._vehicle["drive_state"] = self._drive_state
@@ -122,20 +136,30 @@ class TeslaMock:
         """Mock controller's get_state_params method."""
         return self.controller_get_state_params()
 
-    def mock_get_vehicles(self, *args, **kwargs):
+    def mock_get_product_list(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """Mock controller's get_vehicles method."""
-        return self.controller_get_vehicles()
-
-    def mock_get_energysites(self, *args, **kwargs):
-        # pylint: disable=unused-argument
-        """Mock controller's get_energysites method."""
-        return self.controller_get_energysites()
+        """Mock controller's get_product_list method."""
+        return self.controller_get_product_list()
 
     def mock_get_site_config(self, *args, **kwargs):
         # pylint: disable=unused-argument
         """Mock controller's get_site_config method."""
         return self.controller_get_site_config()
+
+    def mock_get_and_process_car_data(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's _get_and_process_car_data method."""
+        return self.controller_get_and_process_car_data()
+
+    def mock_get_and_process_site_data(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's _get_and_process_site_data method."""
+        return self.controller_get_and_process_site_data()
+
+    def mock_get_and_process_battery_data(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's _get_and_process_battery_data method."""
+        return self.controller_get_and_process_battery_data()
 
     def mock_get_last_update_time(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -190,17 +214,25 @@ class TeslaMock:
         """Monkeypatch for controller.get_state_params()."""
         return self._vehicle_state
 
-    async def controller_get_vehicles(self):
-        """Monkeypatch for controller.get_vehicles()."""
-        return self._vehicle_product_list
-
-    async def controller_get_energysites(self):
-        """Monkeypatch for controller.get_energysites()."""
+    async def controller_get_product_list(self):
+        """Monkeypatch for controller.get_product_list()."""
         return self._product_list
 
     async def controller_get_site_config(self):
         """Monkeypatch for controller.get_site_config()."""
         return self._site_config
+
+    async def controller_get_and_process_car_data(self):
+        """Monkeypatch for controller.update._get_and_process_car_data()."""
+        return self._vehicle_data
+
+    async def controller_get_and_process_site_data(self):
+        """Monkeypatch for controller.update._get_and_process_site_data()."""
+        return self._site_data
+
+    async def controller_get_and_process_battery_data(self):
+        """Monkeypatch for controller.update._get_and_process_battery_data()."""
+        return self._battery_data
 
     @staticmethod
     async def controller_update():
@@ -236,14 +268,6 @@ class TeslaMock:
         """Similate the result of combined product list & site config without name."""
         return self._solar_combined_data_no_name
 
-    def data_request_battery_combined_data(self):
-        """Similate the result of a battery site from product_list."""
-        return self._battery_combined_data
-
-    def data_request_site_state(self):
-        """Similate the result of site state request."""
-        return self._site_state
-
     def data_request_site_state_unknown_grid(self):
         """Similate the result of site state with unknown grid data request."""
         return self._site_state_unknown_grid
@@ -267,7 +291,7 @@ RESULT_VEHICLE_UNAVAILABLE = {
 VIN = "5YJSA11111111111"
 CAR_ID = 12345678901234567
 
-VEHICLE_PRODUCT_LIST = [
+PRODUCT_LIST = [
     {
         "id": 12345678901234567,
         "vehicle_id": 1234567890,
@@ -284,8 +308,58 @@ VEHICLE_PRODUCT_LIST = [
         "api_version": 36,
         "backseat_token": None,
         "backseat_token_updated_at": None,
-    }
+    },
+    {
+        "energy_site_id": 12345,
+        "resource_type": "solar",
+        "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
+        "asset_site_id": "12345",
+        "solar_power": 2260,
+        "solar_type": "pv_panel",
+        "storm_mode_enabled": None,
+        "powerwall_onboarding_settings_set": None,
+        "sync_grid_alert_enabled": False,
+        "breaker_alert_enabled": False,
+        "components": {
+            "battery": False,
+            "solar": True,
+            "solar_type": "pv_panel",
+            "grid": True,
+            "load_meter": True,
+            "market_type": "residential",
+        },
+    },
+    {
+        "energy_site_id": 67890,
+        "resource_type": "battery",
+        "site_name": "My Battery Home",
+        "id": "212dbc27-333c-45b1-81bb-31e2zd2fs2cm",
+        "gateway_id": "67890",
+        "asset_site_id": "67890",
+        "energy_left": 2864.7368421052633,
+        "total_pack_energy": 14070,
+        "percentage_charged": 20.360603000037408,
+        "battery_type": "ac_powerwall",
+        "backup_capable": True,
+        "battery_power": 3080,
+        "storm_mode_enabled": True,
+        "powerwall_onboarding_settings_set": True,
+        "sync_grid_alert_enabled": True,
+        "breaker_alert_enabled": True,
+        "components": {
+            "battery": True,
+            "battery_type": "ac_powerwall",
+            "solar": True,
+            "solar_type": "pv_panel",
+            "grid": True,
+            "load_meter": True,
+            "market_type": "residential",
+        },
+    },
 ]
+
+# Temporary
+VEHICLE_DATA = 123
 
 DRIVE_STATE = {
     "gps_as_of": 1538363883,
@@ -499,57 +573,6 @@ VEHICLE = {
     "vehicle_config": None,
 }
 
-# Example of battery_data response with two energy sites for future tests
-ENERGYSITE_PRODUCT_LIST = [
-    {
-        "energy_site_id": 12345,
-        "resource_type": "solar",
-        "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
-        "asset_site_id": "12345",
-        "solar_power": 2260,
-        "solar_type": "pv_panel",
-        "storm_mode_enabled": None,
-        "powerwall_onboarding_settings_set": None,
-        "sync_grid_alert_enabled": False,
-        "breaker_alert_enabled": False,
-        "components": {
-            "battery": False,
-            "solar": True,
-            "solar_type": "pv_panel",
-            "grid": True,
-            "load_meter": True,
-            "market_type": "residential",
-        },
-    },
-    {
-        "energy_site_id": 67890,
-        "resource_type": "battery",
-        "site_name": "My Battery Home",
-        "id": "212dbc27-333c-45b1-81bb-31e2zd2fs2cm",
-        "gateway_id": "67890",
-        "asset_site_id": "67890",
-        "energy_left": 2864.7368421052633,
-        "total_pack_energy": 14070,
-        "percentage_charged": 20.360603000037408,
-        "battery_type": "ac_powerwall",
-        "backup_capable": True,
-        "battery_power": 3080,
-        "storm_mode_enabled": True,
-        "powerwall_onboarding_settings_set": True,
-        "sync_grid_alert_enabled": True,
-        "breaker_alert_enabled": True,
-        "components": {
-            "battery": True,
-            "battery_type": "ac_powerwall",
-            "solar": True,
-            "solar_type": "pv_panel",
-            "grid": True,
-            "load_meter": True,
-            "market_type": "residential",
-        },
-    },
-]
-
 SITE_CONFIG = {
     "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
     "site_name": "My Solar Home",
@@ -739,38 +762,38 @@ SOLAR_COMBINED_DATA_NO_NAME = {
     },
 }
 # Data added from Controller.connect() initialization (solar_power, load_power, etc.)
-BATTERY_COMBINED_DATA = {
-    "energy_site_id": 67890,
-    "resource_type": "battery",
-    "site_name": "My Battery Home",
-    "id": "212dbc27-333c-45b1-81bb-31e2zd2fs2cm",
-    "gateway_id": "67890",
-    "asset_site_id": "67890",
-    "energy_left": 2864.7368421052633,
-    "total_pack_energy": 14070,
-    "percentage_charged": 20.360603000037408,
-    "battery_type": "ac_powerwall",
-    "backup_capable": True,
-    "battery_power": 0,
-    "storm_mode_enabled": True,
-    "powerwall_onboarding_settings_set": True,
-    "sync_grid_alert_enabled": True,
-    "breaker_alert_enabled": True,
-    "components": {
-        "battery": True,
-        "battery_type": "ac_powerwall",
-        "solar": True,
-        "solar_type": "pv_panel",
-        "grid": True,
-        "load_meter": True,
-        "market_type": "residential",
-    },
-    "solar_power": 0,
-    "load_power": 0,
-    "grid_power": 0,
-}
+# BATTERY_COMBINED_DATA = {
+#     "energy_site_id": 67890,
+#     "resource_type": "battery",
+#     "site_name": "My Battery Home",
+#     "id": "212dbc27-333c-45b1-81bb-31e2zd2fs2cm",
+#     "gateway_id": "67890",
+#     "asset_site_id": "67890",
+#     "energy_left": 2864.7368421052633,
+#     "total_pack_energy": 14070,
+#     "percentage_charged": 20.360603000037408,
+#     "battery_type": "ac_powerwall",
+#     "backup_capable": True,
+#     "battery_power": 0,
+#     "storm_mode_enabled": True,
+#     "powerwall_onboarding_settings_set": True,
+#     "sync_grid_alert_enabled": True,
+#     "breaker_alert_enabled": True,
+#     "components": {
+#         "battery": True,
+#         "battery_type": "ac_powerwall",
+#         "solar": True,
+#         "solar_type": "pv_panel",
+#         "grid": True,
+#         "load_meter": True,
+#         "market_type": "residential",
+#     },
+#     "solar_power": 0,
+#     "load_power": 0,
+#     "grid_power": 0,
+# }
 
-SITE_STATE = {
+SITE_DATA = {
     "solar_power": 7720,
     "energy_left": 0,
     "total_pack_energy": 1,
@@ -797,7 +820,7 @@ SITE_STATE_UNKNOWN_GRID = {
 }
 # Example of battery_data response for future tests
 BATTERY_DATA = {
-    "energy_site_id": 123456789,
+    "energy_site_id": 67890,
     "resource_type": "battery",
     "site_name": "My Battery Home",
     "id": "XXX",

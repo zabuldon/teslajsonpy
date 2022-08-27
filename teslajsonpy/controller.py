@@ -20,6 +20,7 @@ import httpx
 import wrapt
 from yarl import URL
 
+from teslajsonpy.car import TeslaCar
 from teslajsonpy.connection import Connection
 from teslajsonpy.const import (
     AUTH_DOMAIN,
@@ -34,49 +35,8 @@ from teslajsonpy.const import (
     RESOURCE_TYPE_SOLAR,
     RESOURCE_TYPE_BATTERY,
 )
-from teslajsonpy.exceptions import should_giveup, RetryLimitError, TeslaException
-from teslajsonpy.homeassistant.battery_sensor import Battery, Range
-from teslajsonpy.homeassistant.binary_sensor import (
-    ChargerConnectionSensor,
-    OnlineSensor,
-    ParkingSensor,
-    UpdateSensor,
-)
-from teslajsonpy.homeassistant.charger import (
-    ChargerSwitch,
-    ChargingEnergySensor,
-    ChargingSensor,
-    RangeSwitch,
-)
-from teslajsonpy.homeassistant.climate import Climate, TempSensor
-from teslajsonpy.homeassistant.gps import GPS, Odometer
-from teslajsonpy.homeassistant.heated_seats import HeatedSeatSelect
-from teslajsonpy.homeassistant.lock import ChargerLock, Lock
-from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
-from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
-from teslajsonpy.homeassistant.heated_steering_wheel import HeatedSteeringWheelSwitch
-from teslajsonpy.homeassistant.power import (
-    SolarPowerSensor,
-    GridPowerSensor,
-    LoadPowerSensor,
-    BatteryPowerSensor,
-)
-from teslajsonpy.homeassistant.alerts import Horn, FlashLights
-from teslajsonpy.homeassistant.homelink import TriggerHomelink
-from teslajsonpy.homeassistant.vehicle_data import (
-    ChargeStateDataSensor,
-    ClimateStateDataSensor,
-    DriveStateDataSensor,
-    GuiSettingsDataSensor,
-    SoftwareDataSensor,
-    SpeedLimitDataSensor,
-    VehicleConfigDataSensor,
-    VehicleDataSensor,
-    VehicleStateDataSensor,
-)
-
-from teslajsonpy.car import TeslaCar
 from teslajsonpy.energy import EnergySite, SolarSite, PowerwallSite, SolarPowerwallSite
+from teslajsonpy.exceptions import should_giveup, RetryLimitError, TeslaException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -353,7 +313,6 @@ class Controller:
             expiration=expiration,
             auth_domain=auth_domain,
         )
-        self.__components = []
         self._update_interval: int = update_interval
         self._update_interval_vin = {}
         self.__update = {}
@@ -765,68 +724,6 @@ class Controller:
                     self.api, energysite, self.__power_data[energysite_id]
                 )
 
-    def get_homeassistant_components(self):
-        """Return list of Tesla components for Home Assistant setup.
-
-        Use get_vehicles() for general API use.
-        """
-        return self.__components
-
-    def _add_energysite_components(self, energysite):
-        self.__components.append(SolarPowerSensor(energysite, self))
-        self.__components.append(LoadPowerSensor(energysite, self))
-        self.__components.append(GridPowerSensor(energysite, self))
-        if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
-            self.__components.append(BatteryPowerSensor(energysite, self))
-
-    def _add_car_components(self, car):
-        self.__components.append(Climate(car, self))
-        self.__components.append(Battery(car, self))
-        self.__components.append(Range(car, self))
-        self.__components.append(TempSensor(car, self))
-        self.__components.append(Lock(car, self))
-        self.__components.append(ChargerLock(car, self))
-        self.__components.append(ChargerConnectionSensor(car, self))
-        self.__components.append(ChargingSensor(car, self))
-        self.__components.append(ChargingEnergySensor(car, self))
-        self.__components.append(ChargerSwitch(car, self))
-        self.__components.append(RangeSwitch(car, self))
-        self.__components.append(ParkingSensor(car, self))
-        self.__components.append(GPS(car, self))
-        self.__components.append(Odometer(car, self))
-        self.__components.append(OnlineSensor(car, self))
-        self.__components.append(SentryModeSwitch(car, self))
-        self.__components.append(TrunkLock(car, self))
-        self.__components.append(FrunkLock(car, self))
-        self.__components.append(UpdateSensor(car, self))
-        self.__components.append(HeatedSteeringWheelSwitch(car, self))
-        self.__components.append(Horn(car, self))
-        self.__components.append(FlashLights(car, self))
-        self.__components.append(TriggerHomelink(car, self))
-        self.__components.append(ChargeStateDataSensor(car, self))
-        self.__components.append(ClimateStateDataSensor(car, self))
-        self.__components.append(DriveStateDataSensor(car, self))
-        self.__components.append(GuiSettingsDataSensor(car, self))
-        self.__components.append(SoftwareDataSensor(car, self))
-        self.__components.append(SpeedLimitDataSensor(car, self))
-        self.__components.append(VehicleConfigDataSensor(car, self))
-        self.__components.append(VehicleDataSensor(car, self))
-        self.__components.append(VehicleStateDataSensor(car, self))
-
-        for seat in [
-            "left",
-            "right",
-            "rear_left",
-            "rear_center",
-            "rear_right",
-            "third_row_left",
-            "third_row_right",
-        ]:
-            try:
-                self.__components.append(HeatedSeatSelect(car, self, seat))
-            except KeyError:
-                _LOGGER.debug("Seat warmer %s not detected", seat)
-
     async def _wake_up(self, car_id):
         car_vin = self._id_to_vin(car_id)
         car_id = self._update_id(car_id)
@@ -1033,12 +930,12 @@ class Controller:
                     # At the same time, newer systems maye report spurious reads of 0 Watts
                     # and grid status unknown. In this case, remove values but update
                     # self.__power_data with remaining data (grid and load power).
-                    if response["grid_status"] == "Active":
+                    if response.get("grid_status") == "Active":
                         self.__grid_status[energysite_id]["grid_always_unk"] = False
 
                     if not self.__grid_status[energysite_id]["grid_always_unk"] and (
-                        response["grid_status"] == "Unknown"
-                        and response["solar_power"] == 0
+                        response.get("grid_status") == "Unknown"
+                        and response.get("solar_power") == 0
                     ):
                         _LOGGER.debug("Possible spurious energy site power read")
                         del response["grid_status"]

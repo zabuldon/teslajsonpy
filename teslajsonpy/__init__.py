@@ -12,23 +12,7 @@ from teslajsonpy.exceptions import (
     IncompleteCredentials,
     TeslaException,
     UnknownPresetMode,
-    HomelinkError,
 )
-from teslajsonpy.homeassistant.battery_sensor import Battery, Range
-from teslajsonpy.homeassistant.binary_sensor import (
-    ChargerConnectionSensor,
-    OnlineSensor,
-    ParkingSensor,
-    UpdateSensor,
-)
-from teslajsonpy.homeassistant.charger import ChargerSwitch, ChargingSensor, RangeSwitch
-from teslajsonpy.homeassistant.climate import Climate, TempSensor
-from teslajsonpy.homeassistant.gps import GPS, Odometer
-from teslajsonpy.homeassistant.lock import Lock
-from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
-from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
-from teslajsonpy.homeassistant.alerts import Horn, FlashLights
-from teslajsonpy.homeassistant.homelink import TriggerHomelink
 from teslajsonpy.teslaproxy import TeslaProxy
 from .__version__ import __version__
 
@@ -36,30 +20,8 @@ __all__ = [
     "Connection",
     "Controller",
     "TeslaProxy",
-    "Battery",
-    "Range",
-    "ChargerConnectionSensor",
-    "ChargingSensor",
-    "OnlineSensor",
-    "ParkingSensor",
-    "UpdateSensor",
-    "ChargerSwitch",
-    "RangeSwitch",
-    "Climate",
-    "TempSensor",
-    "Controller",
     "TeslaException",
     "UnknownPresetMode",
-    "HomelinkError",
-    "GPS",
-    "Odometer",
-    "Lock",
-    "SentryModeSwitch",
-    "Horn",
-    "FlashLights",
-    "TriggerHomelink",
-    "TrunkLock",
-    "FrunkLock",
     "__version__",
     "RetryLimitError",
     "IncompleteCredentials",
