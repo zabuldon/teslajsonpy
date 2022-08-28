@@ -176,16 +176,16 @@ class SolarPowerSensor(PowerSensor):
             # but will have solar power values. At the same time, newer systems will report spurious reads of 0 Watts
             # and grid status unknown. If solar power is 0 return null.
             if not self.__grid_status["grid_always_unk"] and (
-                data["grid_status"] == "Unknown" and data["solar_power"] == 0
+                data.get("grid_status") == "Unknown" and data.get("solar_power") == 0
             ):
                 _LOGGER.debug("Spurious energy site power read")
                 return
 
-            self.__solar_power = data["solar_power"]
+            self.__solar_power = data.get("solar_power")
 
-            if data["solar_power"] is not None:
+            if data.get("solar_power") is not None:
                 self.__generating_status = (
-                    "Generating" if data["solar_power"] > 0 else "Idle"
+                    "Generating" if data.get("solar_power") > 0 else "Idle"
                 )
 
 
