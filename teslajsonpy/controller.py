@@ -924,21 +924,23 @@ class Controller:
                     data = None
                 if data and data["response"]:
                     response = data["response"]
-                    # Note: Some systems that pre-date Tesla aquisition of SolarCity
-                    # and systems with a Tesla inverter (non-Powerwall) will have
-                    # `grid_status: Unknown`, but will have solar power values.
-                    # At the same time, newer systems maye report spurious reads of 0 Watts
-                    # and grid status unknown. In this case, remove values but update
-                    # self.__power_data with remaining data (grid and load power).
-                    if response.get("grid_status") == "Active":
+                    # Some setups always report grid_status of "Unknown" regardless
+                    # of the actual grid status. Others only report grid_status "Unknown"
+                    # when the actual grid status is unknown. These setups also sometimes
+                    # report an incorrect solar_power value of 0.
+                    if (
+                        "grid_status" not in response
+                        or response.get("grid_status") != "Unknown"
+                    ):
                         self.__grid_status[energysite_id]["grid_always_unk"] = False
 
                     if not self.__grid_status[energysite_id]["grid_always_unk"] and (
                         response.get("grid_status") == "Unknown"
                         and response.get("solar_power") == 0
                     ):
-                        _LOGGER.debug("Possible spurious energy site power read")
-                        del response["grid_status"]
+                        _LOGGER.debug(
+                            "Ignoring possible spurious energy site solar power read."
+                        )
                         del response["solar_power"]
 
                     self.__power_data[energysite_id].update(response)
