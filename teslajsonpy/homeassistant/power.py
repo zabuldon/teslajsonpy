@@ -138,8 +138,8 @@ class SolarPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the solar panel sensor."""
         super().__init__(data, controller)
-        self._solar_type: Text = data["solar_type"]
-        self.__solar_power: float = data["solar_power"]
+        self._solar_type: Text = data.get("solar_type")
+        self.__solar_power: float = data.get("solar_power")
         self.__generating_status: bool = None
         self.__grid_status: dict = controller._grid_status[self._energy_site_id]
         self.type = "solar panel"
@@ -183,9 +183,9 @@ class SolarPowerSensor(PowerSensor):
 
             self.__solar_power = data.get("solar_power")
 
-            if data.get("solar_power") is not None:
+            if self.__solar_power is not None:
                 self.__generating_status = (
-                    "Generating" if data.get("solar_power") > 0 else "Idle"
+                    "Generating" if self.__solar_power > 0 else "Idle"
                 )
 
 
