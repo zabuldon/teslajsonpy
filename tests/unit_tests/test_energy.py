@@ -2,10 +2,11 @@
 
 import pytest
 
+from teslajsonpy.const import DEFAULT_ENERGYSITE_NAME
 from teslajsonpy.controller import Controller
 from teslajsonpy.energy import EnergySite
 
-from tests.tesla_mock import TeslaMock
+from tests.tesla_mock import TeslaMock, ENERGYSITES, SITE_CONFIG
 
 
 @pytest.mark.asyncio
@@ -19,8 +20,8 @@ async def test_energysite_setup(monkeypatch):
     powerwall_site = _controller.energysites[67890]
 
     assert _controller.energysites is not None
-    assert solar_site.resource_type == "solar"
-    assert powerwall_site.resource_type == "battery"
+    assert solar_site.resource_type == ENERGYSITES[0]["resource_type"]
+    assert powerwall_site.resource_type == ENERGYSITES[1]["resource_type"]
 
 
 @pytest.mark.asyncio
@@ -39,18 +40,19 @@ async def test_solar_site(monkeypatch):
         "load_power": 0,
         "grid_power": 0,
         "battery_power": 0,
+        "battery_percentage": 0,
     }
 
-    assert _solar_site.energysite_id == 12345
-    assert _solar_site.has_load_meter
-    assert _solar_site.id == "313dbc37-555c-45b1-83aa-62a4ef9ff7ac"
-    assert _solar_site.resource_type == "solar"
-    assert _solar_site.site_name == "My Solar Home"
+    assert _solar_site.energysite_id == ENERGYSITES[0]["energy_site_id"]
+    assert _solar_site.has_load_meter == ENERGYSITES[0]["components"]["load_meter"]
+    assert _solar_site.id == ENERGYSITES[0]["id"]
+    assert _solar_site.resource_type == ENERGYSITES[0]["resource_type"]
+    assert _solar_site.site_name == SITE_CONFIG["site_name"]
 
     assert _solar_site.grid_power == 0
     assert _solar_site.load_power == 0
     assert _solar_site.solar_power == 0
-    assert _solar_site.solar_type == "pv_panel"
+    assert _solar_site.solar_type == ENERGYSITES[0]["components"]["solar_type"]
 
 
 @pytest.mark.asyncio
@@ -69,20 +71,26 @@ async def test_powerwall_site(monkeypatch):
         "load_power": 0,
         "grid_power": 0,
         "battery_power": 0,
+        "battery_percentage": 0,
     }
 
-    assert _solar_powerwall_site.energysite_id == 67890
-    assert _solar_powerwall_site.has_load_meter
-    assert _solar_powerwall_site.id == "212dbc27-333c-45b1-81bb-31e2zd2fs2cm"
-    assert _solar_powerwall_site.resource_type == "battery"
-    assert _solar_powerwall_site.site_name == "My Battery Home"
+    assert _solar_powerwall_site.energysite_id == ENERGYSITES[1]["energy_site_id"]
+    assert (
+        _solar_powerwall_site.has_load_meter
+        == ENERGYSITES[1]["components"]["load_meter"]
+    )
+    assert _solar_powerwall_site.id == ENERGYSITES[1]["id"]
+    assert _solar_powerwall_site.resource_type == ENERGYSITES[1]["resource_type"]
+    assert _solar_powerwall_site.site_name == ENERGYSITES[1]["site_name"]
 
-    # assert _solar_powerwall_site.battery_percent == 0
-    # assert _solar_powerwall_site.battery_power == 0
+    assert _solar_powerwall_site.battery_percent == 0
+    assert _solar_powerwall_site.battery_power == 0
     assert _solar_powerwall_site.grid_power == 0
     assert _solar_powerwall_site.load_power == 0
     assert _solar_powerwall_site.solar_power == 0
-    assert _solar_powerwall_site.solar_type == "pv_panel"
+    assert (
+        _solar_powerwall_site.solar_type == ENERGYSITES[1]["components"]["solar_type"]
+    )
 
 
 @pytest.mark.asyncio
@@ -94,7 +102,7 @@ async def test_energysite_with_no_name(monkeypatch):
     _power_data = _mock.controller_get_power_params()
     _sensor = EnergySite(_api, _energysite, _power_data)
 
-    assert _sensor.site_name == "My Home"
+    assert _sensor.site_name == DEFAULT_ENERGYSITE_NAME
 
 
 # Test reponse with "grid_status" of "Unknown"
