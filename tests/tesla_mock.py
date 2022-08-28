@@ -21,21 +21,21 @@ class TeslaMock:
         # self._monkeypatch.setattr(Controller, "connect", self.mock_connect)
         self._monkeypatch.setattr(Controller, "command", self.mock_command)
         self._monkeypatch.setattr(Controller, "api", self.mock_api)
-        # self._monkeypatch.setattr(
-        #     Controller, "get_charging_params", self.mock_get_charging_params
-        # )
-        # self._monkeypatch.setattr(
-        #     Controller, "get_climate_params", self.mock_get_climate_params
-        # )
-        # self._monkeypatch.setattr(
-        #     Controller, "get_drive_params", self.mock_get_drive_params
-        # )
-        # self._monkeypatch.setattr(
-        #     Controller, "get_gui_params", self.mock_get_gui_params
-        # )
-        # self._monkeypatch.setattr(
-        #     Controller, "get_state_params", self.mock_get_state_params
-        # )
+        self._monkeypatch.setattr(
+            Controller, "get_charging_params", self.mock_get_charging_params
+        )
+        self._monkeypatch.setattr(
+            Controller, "get_climate_params", self.mock_get_climate_params
+        )
+        self._monkeypatch.setattr(
+            Controller, "get_drive_params", self.mock_get_drive_params
+        )
+        self._monkeypatch.setattr(
+            Controller, "get_gui_params", self.mock_get_gui_params
+        )
+        self._monkeypatch.setattr(
+            Controller, "get_state_params", self.mock_get_state_params
+        )
         self._monkeypatch.setattr(
             Controller, "get_product_list", self.mock_get_product_list
         )
@@ -64,6 +64,7 @@ class TeslaMock:
         self._monkeypatch.setattr(
             Controller, "get_power_params", self.mock_get_power_params
         )
+        self._energysites = copy.deepcopy(ENERGYSITES)
         self._product_list = copy.deepcopy(PRODUCT_LIST)
         self._vehicle_data = copy.deepcopy(VEHICLE_DATA)
         self._site_data = copy.deepcopy(SITE_DATA)
@@ -77,7 +78,7 @@ class TeslaMock:
         self._solar_combined_data = copy.deepcopy(SOLAR_COMBINED_DATA)
         self._solar_combined_data_no_name = copy.deepcopy(SOLAR_COMBINED_DATA_NO_NAME)
         self._site_config = copy.deepcopy(SITE_CONFIG)
-        self._site_state_unknown_grid = copy.deepcopy(SITE_STATE_UNKNOWN_GRID)
+        self._site_data_unknown_grid = copy.deepcopy(SITE_DATA_UNKNOWN_GRID)
         self._vehicle = copy.deepcopy(VEHICLE)
         self._vehicle["drive_state"] = self._drive_state
         self._vehicle["climate_state"] = self._climate_state
@@ -196,11 +197,11 @@ class TeslaMock:
 
     def controller_get_power_params(self):
         """Monkeypatch for controller.get_climate_params()."""
-        return self._site_state
+        return self._site_data
 
     def controller_get_power_unknown_grid_params(self):
         """Monkeypatch for controller.get_climate_params()."""
-        return self._site_state_unknown_grid
+        return self._site_data_unknown_grid
 
     def controller_get_drive_params(self):
         """Monkeypatch for controller.get_drive_params()."""
@@ -260,17 +261,17 @@ class TeslaMock:
         """Simulate the result of vehicle state data request."""
         return self._vehicle_state
 
-    def data_request_solar_combined_data(self):
+    def data_request_energysites(self):
         """Similate the result of combined product list & site config request."""
-        return self._solar_combined_data[0]
+        return self._energysites
 
     def data_request_solar_combined_data_no_name(self):
         """Similate the result of combined product list & site config without name."""
         return self._solar_combined_data_no_name
 
-    def data_request_site_state_unknown_grid(self):
+    def data_request_site_data_unknown_grid(self):
         """Similate the result of site state with unknown grid data request."""
-        return self._site_state_unknown_grid
+        return self._site_data_unknown_grid
 
     @staticmethod
     def command_ok():
@@ -573,6 +574,56 @@ VEHICLE = {
     "vehicle_config": None,
 }
 
+ENERGYSITES = [
+    {
+        "energy_site_id": 12345,
+        "resource_type": "solar",
+        "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
+        "asset_site_id": "12345",
+        "solar_power": 2260,
+        "solar_type": "pv_panel",
+        "storm_mode_enabled": None,
+        "powerwall_onboarding_settings_set": None,
+        "sync_grid_alert_enabled": False,
+        "breaker_alert_enabled": False,
+        "components": {
+            "battery": False,
+            "solar": True,
+            "solar_type": "pv_panel",
+            "grid": True,
+            "load_meter": True,
+            "market_type": "residential",
+        },
+    },
+    {
+        "energy_site_id": 67890,
+        "resource_type": "battery",
+        "site_name": "My Battery Home",
+        "id": "212dbc27-333c-45b1-81bb-31e2zd2fs2cm",
+        "gateway_id": "67890",
+        "asset_site_id": "67890",
+        "energy_left": 2864.7368421052633,
+        "total_pack_energy": 14070,
+        "percentage_charged": 20.360603000037408,
+        "battery_type": "ac_powerwall",
+        "backup_capable": True,
+        "battery_power": 3080,
+        "storm_mode_enabled": True,
+        "powerwall_onboarding_settings_set": True,
+        "sync_grid_alert_enabled": True,
+        "breaker_alert_enabled": True,
+        "components": {
+            "battery": True,
+            "battery_type": "ac_powerwall",
+            "solar": True,
+            "solar_type": "pv_panel",
+            "grid": True,
+            "load_meter": True,
+            "market_type": "residential",
+        },
+    },
+]
+
 SITE_CONFIG = {
     "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
     "site_name": "My Solar Home",
@@ -811,7 +862,7 @@ SITE_DATA = {
     "wall_connectors": None,
 }
 
-SITE_STATE_UNKNOWN_GRID = {
+SITE_DATA_UNKNOWN_GRID = {
     "id": 12345678901234567,
     "timestamp": "2011-01-01",
     "solar_power": 1750,

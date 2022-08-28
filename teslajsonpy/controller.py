@@ -878,7 +878,7 @@ class Controller:
                     )
                 except TeslaException:
                     data = None
-                if data and data["response"]:
+                if data and data.get("response"):
                     response = data["response"]
                     self.set_climate_params(vin=vin, params=response["climate_state"])
                     self.set_charging_params(vin=vin, params=response["charge_state"])
@@ -922,7 +922,7 @@ class Controller:
                     )
                 except TeslaException:
                     data = None
-                if data and data["response"]:
+                if data and data.get("response"):
                     response = data["response"]
                     # Some setups always report grid_status of "Unknown" regardless
                     # of the actual grid status. Others only report grid_status "Unknown"
@@ -958,7 +958,7 @@ class Controller:
                     )
                 except TeslaException:
                     data = None
-                if data and data["response"]:
+                if data and data.get("response").get("power_reading"):
                     response = data["response"]
 
                     params = response["power_reading"][0]
@@ -967,6 +967,8 @@ class Controller:
                     params["operation"] = response.get("operation")
                     # Use energysite_id since that's how it's retrieved
                     self.__power_data[energysite_id].update(params)
+                else:
+                    _LOGGER.info("No power readings for energy site %s", energysite_id)
 
         async def _get_and_process_battery_summary(
             energysite_id: Text, battery_id: Text
@@ -983,7 +985,7 @@ class Controller:
                     )
                 except TeslaException:
                     data = None
-                if data and data["response"]:
+                if data and data.get("response"):
                     self.__power_data[energysite_id].update(data["response"])
 
         async with self.__update_lock:

@@ -29,27 +29,27 @@ class TeslaCar:
     @property
     def display_name(self) -> str:
         """Return State Data."""
-        return self._car["display_name"]
+        return self._car.get("display_name")
 
     @property
     def id(self) -> int:
         """Return State Data."""
-        return self._car["id"]
+        return self._car.get("id")
 
     @property
     def state(self) -> str:
         """Return State Data."""
-        return self._car["state"]
+        return self._car.get("state")
 
     @property
     def vehicle_id(self) -> int:
         """Return State Data."""
-        return self._car["vehicle_id"]
+        return self._car.get("vehicle_id")
 
     @property
     def vin(self) -> str:
         """Return State Data."""
-        return self._car["vin"]
+        return self._car.get("vin")
 
     @property
     def data_available(self) -> bool:
@@ -82,7 +82,7 @@ class TeslaCar:
     @property
     def car_version(self) -> str:
         """Return installed car software version."""
-        return self._controller.get_state_params(vin=self.vin)["car_version"]
+        return self._controller.get_state_params(vin=self.vin).get("car_version")
 
     @property
     def charger_actual_current(self) -> int:
@@ -171,7 +171,7 @@ class TeslaCar:
     @property
     def charge_rate(self) -> str:
         """Return charge rate."""
-        return self._controller.get_charging_params(vin=self.vin)["charge_rate"]
+        return self._controller.get_charging_params(vin=self.vin).get("charge_rate")
 
     @property
     def charging_state(self) -> str:
@@ -387,7 +387,7 @@ class TeslaCar:
     @property
     def odometer(self) -> float:
         """Return odometer."""
-        return self._controller.get_state_params(vin=self.vin)["odometer"]
+        return self._controller.get_state_params(vin=self.vin).get("odometer")
 
     @property
     def outside_temp(self) -> float:
@@ -487,7 +487,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {"charge_limit_soc": int(value)}
             self._controller.update_charging_params(vin=self.vin, params=params)
 
@@ -499,7 +499,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {"charge_port_door_open": False}
             self._controller.update_state_params(vin=self.vin, params=params)
 
@@ -511,7 +511,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {"charge_port_door_open": True}
             self._controller.update_state_params(vin=self.vin, params=params)
 
@@ -540,7 +540,7 @@ class TeslaCar:
             path_vars={"vehicle_id": self.id},
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {"locked": True}
             self._controller.update_state_params(vin=self.vin, params=params)
 
@@ -560,7 +560,7 @@ class TeslaCar:
             level=level,
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {f"seat_heater_{SEAT_NAME_MAP[seat_id]}": level}
             self._controller.update_climate_params(vin=self.vin, params=params)
 
@@ -587,7 +587,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {"charge_amps": int(value)}
             self._controller.update_charging_params(vin=self.vin, params=params)
 
@@ -615,7 +615,7 @@ class TeslaCar:
             fan_only=fan_only,
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"]:
+        if data and data.get("response").get("result"):
             params = {"cabin_overheat_protection": option}
             self._controller.update_climate_params(vin=self.vin, params=params)
 
@@ -641,7 +641,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {"steering_wheel_heater": value}
             self._controller.update_climate_params(vin=self.vin, params=params)
 
@@ -683,7 +683,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {"sentry_mode": value}
             self._controller.update_state_params(vin=self.vin, params=params)
 
@@ -696,7 +696,7 @@ class TeslaCar:
             passenger_temp=temp,
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {"driver_temp_setting": temp}
 
             self._controller.update_climate_params(vin=self.vin, params=params)
@@ -709,7 +709,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {"charging_state": "Charging"}
             self._controller.update_charging_params(vin=self.vin, params=params)
 
@@ -721,7 +721,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {"charging_state": None}
             self._controller.update_charging_params(vin=self.vin, params=params)
 
@@ -741,7 +741,7 @@ class TeslaCar:
             which_trunk="rear",
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             if self.is_trunk_locked:
                 params = {"rt": 0}
                 self._controller.update_state_params(vin=self.vin, params=params)
@@ -757,7 +757,7 @@ class TeslaCar:
             which_trunk="front",
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             if self.is_frunk_locked:
                 params = {"ft": 0}
                 self._controller.update_state_params(vin=self.vin, params=params)
@@ -785,8 +785,8 @@ class TeslaCar:
 
         if data and data.get("response"):
             _LOGGER.debug("Homelink response: %s", data.get("response"))
-            result = data["response"].get("result")
-            reason = data["response"].get("reason")
+            result = data.get("response").get("result")
+            reason = data.get("response").get("reason")
             if result is False:
                 raise HomelinkError(f"Error calling trigger_homelink: {reason}")
 
@@ -797,6 +797,6 @@ class TeslaCar:
             path_vars={"vehicle_id": self.id},
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"] is True:
+        if data and data.get("response").get("result") is True:
             params = {"locked": False}
             self._controller.update_state_params(vin=self.vin, params=params)
