@@ -30,7 +30,6 @@ from teslajsonpy.const import (
     UPDATE_INTERVAL,
     SLEEP_INTERVAL,
     PRODUCT_TYPE_ENERGY_SITES,
-    TESLA_PRODUCT_TYPE_VEHICLES,
     RESOURCE_TYPE,
     RESOURCE_TYPE_SOLAR,
     RESOURCE_TYPE_BATTERY,
@@ -423,6 +422,7 @@ class Controller:
                 "load_power": 0,
                 "grid_power": 0,
                 "battery_power": 0,
+                "battery_percentage": 0,
             }
             # Default to True but check in first update
             self.__grid_status[energysite_id] = {"grid_always_unk": True}
@@ -532,166 +532,6 @@ class Controller:
             "response"
         ]
 
-    @wake_up
-    async def post(
-        self,
-        car_id,
-        command,
-        data=None,
-        wake_if_asleep=True,
-        product_type: str = TESLA_PRODUCT_TYPE_VEHICLES,
-    ):
-        #  pylint: disable=unused-argument
-        """Send post command to the car_id.
-
-        This is a wrapped function by wake_up.
-
-        Parameters
-        ----------
-        car_id : string
-            Identifier for the car on the owner-api endpoint. It is the id
-            field for identifying the car across the owner-api endpoint.
-            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
-        command : string
-            Tesla API command. https://tesla-api.timdorr.com/vehicle/commands
-        data : dict
-            Optional parameters.
-        wake_if_asleep : bool
-            Function for wake_up decorator indicating whether a failed response
-            should wake up the vehicle or retry.
-        product_type: string
-            Indicates whether this is a vehicle or a energy site. Defaults to TESLA_PRODUCT_TYPE_VEHICLES
-
-        Returns
-        -------
-        dict
-            Tesla json object.
-
-        """
-        car_id = self._update_id(car_id)
-        data = data or {}
-        return await self.__connection.post(
-            f"{product_type}/{car_id}/{command}", data=data
-        )
-
-    @wake_up
-    async def get(
-        self,
-        car_id,
-        command,
-        wake_if_asleep=False,
-        product_type: str = TESLA_PRODUCT_TYPE_VEHICLES,
-    ):
-        #  pylint: disable=unused-argument
-        """Send get command to the car_id.
-
-        This is a wrapped function by wake_up.
-
-        Parameters
-        ----------
-        car_id : string
-            Identifier for the car on the owner-api endpoint. It is the id
-            field for identifying the car across the owner-api endpoint.
-            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
-        command : string
-            Tesla API command. https://tesla-api.timdorr.com/vehicle/commands
-        wake_if_asleep : bool
-            Function for wake_up decorator indicating whether a failed response
-            should wake up the vehicle or retry.
-        product_type: string
-            Indicates whether this is a vehicle or a energy site. Defaults to TESLA_PRODUCT_TYPE_VEHICLES
-
-        Returns
-        -------
-        dict
-            Tesla json object.
-
-        """
-        car_id = self._update_id(car_id)
-        return await self.__connection.get(f"{product_type}/{car_id}/{command}")
-
-    async def vehicle_data_request(self, car_id, name, wake_if_asleep=False):
-        """Get requested data from car_id.
-
-        Parameters
-        ----------
-        car_id : string
-            Identifier for the car on the owner-api endpoint. It is the id
-            field for identifying the car across the owner-api endpoint.
-            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
-        name: string
-            Name of data to be requested from the data_request endpoint which
-            rolls ups all data plus vehicle configuration.
-            https://tesla-api.timdorr.com/vehicle/state/data
-        wake_if_asleep : bool
-            Function for underlying api call for whether a failed response
-            should wake up the vehicle or retry.
-
-        Returns
-        -------
-        dict
-            Tesla json object.
-
-        """
-        car_id = self._update_id(car_id)
-        return (
-            await self.get(
-                car_id, f"vehicle_data/{name}", wake_if_asleep=wake_if_asleep
-            )
-        )["response"]
-
-    @backoff.on_exception(
-        min_expo,
-        TeslaException,
-        max_time=60,
-        logger=__name__,
-        min_value=15,
-        giveup=should_giveup,
-    )
-    async def command(
-        self,
-        car_id,
-        name,
-        data=None,
-        wake_if_asleep=True,
-        product_type: str = TESLA_PRODUCT_TYPE_VEHICLES,
-    ):
-        """Post name command to the car_id.
-
-        This will be deprecated. Use :meth:`teslajsonpy.Controller.api` instead.
-
-        Parameters
-        ----------
-        car_id : string
-            Identifier for the car on the owner-api endpoint. It is the id
-            field for identifying the car across the owner-api endpoint.
-            https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
-        name : string
-            Tesla API command. https://tesla-api.timdorr.com/vehicle/commands
-        data : dict
-            Optional parameters.
-        wake_if_asleep : bool
-            Function for underlying api call for whether a failed response
-            should wake up the vehicle or retry.
-        product_type: string
-            Indicates whether this is a vehicle or a energy site. Defaults to TESLA_PRODUCT_TYPE_VEHICLES
-
-        Returns
-        -------
-        dict
-            Tesla json object.
-
-        """
-        car_id = self._update_id(car_id)
-        data = data or {}
-        return await self.post(
-            car_id,
-            f"command/{name}",
-            data=data,
-            wake_if_asleep=wake_if_asleep,
-            product_type=product_type,
-        )
-
     def _generate_car_objects(self) -> None:
         """Generate car objects."""
         for car in self.__vehicle_list:
@@ -732,8 +572,8 @@ class Controller:
             if not self.is_car_online(vin=car_vin) or (
                 self._last_wake_up_attempt[car_vin] < self._last_attempted_update_time
             ):
-                result = await self.post(
-                    car_id, "wake_up", wake_if_asleep=False
+                result = await self.api(
+                    "WAKE_UP", path_vars={"vehicle_id": car_id}, wake_if_asleep=False
                 )  # avoid wrapper loop
                 self.set_car_online(
                     car_id=car_id, online_status=result["response"]["state"] == "online"

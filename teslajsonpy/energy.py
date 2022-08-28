@@ -18,17 +18,17 @@ class EnergySite:
     @property
     def energysite_id(self) -> int:
         """Return energy site id (aka site_id)."""
-        return self._energysite["energy_site_id"]
+        return self._energysite.get("energy_site_id")
 
     @property
     def has_load_meter(self) -> bool:
         """Return True if energy site has a load meter."""
-        return self._energysite["components"]["load_meter"]
+        return self._energysite.get("components").get("load_meter")
 
     @property
     def id(self) -> int:
         """Return id (aka battery_id)."""
-        return self._energysite["id"]
+        return self._energysite.get("id")
 
     @property
     def resource_type(self) -> str:
@@ -73,7 +73,7 @@ class SolarSite(EnergySite):
     @property
     def solar_type(self) -> str:
         """Return type of solar (e.g. pv_panels or roof)."""
-        return self._energysite["components"]["solar_type"]
+        return self._energysite.get("components").get("solar_type")
 
 
 class PowerwallSite(EnergySite):
