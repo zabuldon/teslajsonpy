@@ -988,7 +988,10 @@ class Controller:
                     data = None
                 if data and data["response"]:
                     response = data["response"]
-                    if response["grid_status"] == "Active":
+                    if (
+                        "grid_status" not in response
+                        or response.get("grid_status") != "Unknown"
+                    ):
                         self._grid_status[energysite_id]["grid_always_unk"] = False
 
                     self.__power[energysite_id] = response
