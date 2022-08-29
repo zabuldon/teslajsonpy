@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.4 (2022-08-29)
+### Fix
+* Handle missing grid_status key(#346) ([`8c8f727`](https://github.com/zabuldon/teslajsonpy/commit/8c8f72728efedb29f027351caf407b1e73e914f0))
+
 ## v2.4.3 (2022-08-27)
 ### Fix
 * Fix grid status and load sensor issues ([#343](https://github.com/zabuldon/teslajsonpy/issues/343)) ([`d815446`](https://github.com/zabuldon/teslajsonpy/commit/d815446aaba5b17363ed6ca60c07243e027d564b))
