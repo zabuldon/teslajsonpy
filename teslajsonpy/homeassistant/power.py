@@ -138,8 +138,8 @@ class SolarPowerSensor(PowerSensor):
     def __init__(self, data, controller):
         """Initialize the solar panel sensor."""
         super().__init__(data, controller)
-        self._solar_type: Text = data["solar_type"]
-        self.__solar_power: float = data["solar_power"]
+        self._solar_type: Text = data.get("solar_type")
+        self.__solar_power: float = data.get("solar_power")
         self.__generating_status: bool = None
         self.__grid_status: dict = controller._grid_status[self._energy_site_id]
         self.type = "solar panel"
@@ -176,16 +176,16 @@ class SolarPowerSensor(PowerSensor):
             # but will have solar power values. At the same time, newer systems will report spurious reads of 0 Watts
             # and grid status unknown. If solar power is 0 return null.
             if not self.__grid_status["grid_always_unk"] and (
-                data["grid_status"] == "Unknown" and data["solar_power"] == 0
+                data.get("grid_status") == "Unknown" and data.get("solar_power") == 0
             ):
                 _LOGGER.debug("Spurious energy site power read")
                 return
 
-            self.__solar_power = data["solar_power"]
+            self.__solar_power = data.get("solar_power")
 
-            if data["solar_power"] is not None:
+            if self.__solar_power is not None:
                 self.__generating_status = (
-                    "Generating" if data["solar_power"] > 0 else "Idle"
+                    "Generating" if self.__solar_power > 0 else "Idle"
                 )
 
 
