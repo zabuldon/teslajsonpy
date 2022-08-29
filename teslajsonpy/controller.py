@@ -409,7 +409,7 @@ class Controller:
         ]
 
         for energysite in self.__energysite_list:
-            energysite_id = energysite.get["energy_site_id"]
+            energysite_id = energysite.get("energy_site_id")
             battery_id = energysite.get("id")
 
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
