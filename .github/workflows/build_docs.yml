@@ -1,4 +1,4 @@
-name: semantic_release
+name: build_docs
 
 on:
   push:
