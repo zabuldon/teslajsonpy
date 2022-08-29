@@ -435,9 +435,6 @@ class Controller:
             except (TeslaException, RetryLimitError):
                 pass
 
-        self._generate_car_objects()
-        self._generate_energysite_objects()
-
         return {
             "refresh_token": self.__connection.refresh_token,
             "access_token": self.__connection.access_token,
@@ -532,13 +529,15 @@ class Controller:
             "response"
         ]
 
-    def _generate_car_objects(self) -> None:
+    def generate_car_objects(self) -> Dict[str, TeslaCar]:
         """Generate car objects."""
         for car in self.__vehicle_list:
             vin = car["vin"]
             self.cars[vin] = TeslaCar(car, self)
 
-    def _generate_energysite_objects(self) -> None:
+        return self.cars
+
+    def generate_energysite_objects(self) -> Dict[int, EnergySite]:
         """Generate energy site objects."""
         for energysite in self.__energysite_list:
             energysite_id = energysite["energy_site_id"]
@@ -563,6 +562,8 @@ class Controller:
                 self.energysites[energysite_id] = PowerwallSite(
                     self.api, energysite, self.__power_data[energysite_id]
                 )
+
+        return self.energysites
 
     async def _wake_up(self, car_id):
         car_vin = self._id_to_vin(car_id)
