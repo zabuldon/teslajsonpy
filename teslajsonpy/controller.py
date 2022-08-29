@@ -409,7 +409,8 @@ class Controller:
         ]
 
         for energysite in self.__energysite_list:
-            energysite_id = energysite["energy_site_id"]
+            energysite_id = energysite.get["energy_site_id"]
+            battery_id = energysite.get("id")
 
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
                 # Non-powerwall sites "site_name" in "SITE_DATA" endpoint
@@ -427,6 +428,7 @@ class Controller:
             self.__grid_status[energysite_id] = {"grid_always_unk": True}
 
             self.__lock[energysite_id] = asyncio.Lock()
+            self.__lock[battery_id] = asyncio.Lock()
 
         if not test_login:
             try:
