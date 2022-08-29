@@ -18,36 +18,40 @@ SEAT_NAME_MAP = [
 
 
 class TeslaCar:
-    """Base class to represents a Tesla car."""
+    """Represents a Tesla car.
+
+    This class shouldn't be instantiated directly; it will be instantiated
+    by :meth:`teslajsonpy.controller.generate_car_objects`.
+    """
 
     def __init__(self, car, controller) -> None:
-        """Initialize EnergySite."""
+        """Initialize TeslaCar."""
         self._car = car
         self._controller = controller
 
     @property
     def display_name(self) -> str:
-        """Return State Data."""
+        """Return display name."""
         return self._car.get("display_name")
 
     @property
     def id(self) -> int:
-        """Return State Data."""
+        """Return id."""
         return self._car.get("id")
 
     @property
     def state(self) -> str:
-        """Return State Data."""
+        """Return car state."""
         return self._car.get("state")
 
     @property
     def vehicle_id(self) -> int:
-        """Return State Data."""
+        """Return car id."""
         return self._car.get("vehicle_id")
 
     @property
     def vin(self) -> str:
-        """Return State Data."""
+        """Return car vin."""
         return self._car.get("vin")
 
     @property

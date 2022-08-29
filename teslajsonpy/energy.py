@@ -1,5 +1,4 @@
 """Tesla Energy energy site."""
-
 from teslajsonpy.const import (
     RESOURCE_TYPE,
     DEFAULT_ENERGYSITE_NAME,

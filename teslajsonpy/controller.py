@@ -9,16 +9,15 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import asyncio
-import logging
-import json
-import pkgutil
-import time
-from typing import Any, Callable, Dict, List, Optional, Text
-
 import backoff
 import httpx
-import wrapt
+import json
+import logging
+import pkgutil
+import time
+from typing import Callable, Dict, List, Optional, Text
 from yarl import URL
+import wrapt
 
 from teslajsonpy.car import TeslaCar
 from teslajsonpy.connection import Connection
@@ -35,7 +34,7 @@ from teslajsonpy.const import (
     RESOURCE_TYPE_BATTERY,
 )
 from teslajsonpy.energy import EnergySite, SolarSite, PowerwallSite, SolarPowerwallSite
-from teslajsonpy.exceptions import should_giveup, RetryLimitError, TeslaException
+from teslajsonpy.exceptions import RetryLimitError, TeslaException
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -8,20 +8,19 @@ Underlying connection logic.
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
+import aiohttp
 import asyncio
 import base64
+from bs4 import BeautifulSoup
 import calendar
 import datetime
 import hashlib
+import httpx
 import json
 import logging
 import secrets
 import time
 from typing import Dict, Text
-
-import aiohttp
-from bs4 import BeautifulSoup
-import httpx
 import yarl
 from yarl import URL
 
