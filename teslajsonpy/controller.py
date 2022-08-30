@@ -339,9 +339,9 @@ class Controller:
         self.enable_websocket = enable_websocket
         self.endpoints = {}
         self.polling_policy = polling_policy
+        self.__energysite_data: Dict[int, dict] = {}
         self.__energysite_list: List[dict] = []
         self.__grid_status: Dict[int, dict] = {}
-        self.__power_data: Dict[int, dict] = {}
         self.__vehicle_list: List[dict] = []
         self.cars: Dict[str, TeslaCar] = {}
         self.energysites: Dict[int, EnergySite] = {}
@@ -417,12 +417,12 @@ class Controller:
                 site_config = await self.get_site_config(energysite_id)
                 energysite.update(site_config)
 
-            self.__power_data[energysite_id] = {
+            self.__energysite_data[energysite_id] = {
                 "solar_power": 0,
                 "load_power": 0,
                 "grid_power": 0,
                 "battery_power": 0,
-                "battery_percentage": 0,
+                "percentage_charged": 0,
             }
             # Default to True but check in first update
             self.__grid_status[energysite_id] = {"grid_always_unk": True}
@@ -545,7 +545,7 @@ class Controller:
             # Solar only systems (no Powerwalls) are listed as "solar"
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
                 self.energysites[energysite_id] = SolarSite(
-                    self.api, energysite, self.__power_data[energysite_id]
+                    self.api, energysite, self.__energysite_data[energysite_id]
                 )
             # Solar with Powerwall are listed as "battery"
             if (
@@ -553,7 +553,7 @@ class Controller:
                 and energysite["components"]["solar"]
             ):
                 self.energysites[energysite_id] = SolarPowerwallSite(
-                    self.api, energysite, self.__power_data[energysite_id]
+                    self.api, energysite, self.__energysite_data[energysite_id]
                 )
             # Assumed Powerwall only (no solar) is listed as "battery"
             if (
@@ -561,7 +561,7 @@ class Controller:
                 and not energysite["components"]["solar"]
             ):
                 self.energysites[energysite_id] = PowerwallSite(
-                    self.api, energysite, self.__power_data[energysite_id]
+                    self.api, energysite, self.__energysite_data[energysite_id]
                 )
 
         return self.energysites
@@ -785,7 +785,7 @@ class Controller:
                         )
                         del response["solar_power"]
 
-                    self.__power_data[energysite_id].update(response)
+                    self.__energysite_data[energysite_id].update(response)
 
         async def _get_and_process_battery_data(
             energysite_id: Text, battery_id: Text
@@ -800,15 +800,19 @@ class Controller:
                     )
                 except TeslaException:
                     data = None
-                if data and data["response"].get("power_reading"):
+                if data and data["response"]:
                     response = data["response"]
-
-                    params = response["power_reading"][0]
+                    params = {}
+                    if response.get("power_reading"):
+                        params = response["power_reading"][0]
+                    params["backup_reserve_percent"] = response.get("backup").get(
+                        "backup_reserve_percent"
+                    )
                     params["grid_status"] = response.get("grid_status")
                     params["default_real_mode"] = response.get("default_real_mode")
                     params["operation"] = response.get("operation")
                     # Use energysite_id since that's how it's retrieved
-                    self.__power_data[energysite_id].update(params)
+                    self.__energysite_data[energysite_id].update(params)
                 else:
                     _LOGGER.info("No power readings for energy site %s", energysite_id)
 
@@ -828,7 +832,7 @@ class Controller:
                 except TeslaException:
                     data = None
                 if data and data["response"]:
-                    self.__power_data[energysite_id].update(data["response"])
+                    self.__energysite_data[energysite_id].update(data["response"])
 
         async with self.__update_lock:
             cur_time = round(time.time())
@@ -1524,7 +1528,7 @@ class Controller:
 
     def get_power_params(self, energysite_id: Text) -> Dict:
         """Return cached copy of power_params for energysite_id."""
-        return self.__power_data[energysite_id]
+        return self.__energysite_data[energysite_id]
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
         """Return vin for a car_id."""

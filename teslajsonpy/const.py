@@ -19,10 +19,10 @@ WS_URL = "wss://streaming.vn.teslamotors.com/streaming"
 TESLA_PRODUCT_TYPE_VEHICLES = "vehicles"
 
 CHARGE_CURRENT_MIN = 5
-
+DEFAULT_ENERGYSITE_NAME = "My Home"
+GRID_ACTIVE = "Active"
 PRODUCT_TYPE_ENERGY_SITES = "energy_sites"
 PRODUCT_TYPE_POWERWALLS = "powerwalls"
-DEFAULT_ENERGYSITE_NAME = "My Home"
 RESOURCE_TYPE = "resource_type"
 RESOURCE_TYPE_SOLAR = "solar"
 RESOURCE_TYPE_BATTERY = "battery"
