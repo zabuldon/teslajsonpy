@@ -49,7 +49,7 @@ class EnergySite:
     ) -> dict:
         """Wrapper for sending commands to the Tesla API."""
         _LOGGER.debug("Sending command: %s", name)
-        data = await self._controller.api(
+        data = await self._api(
             name, path_vars=path_vars, wake_if_asleep=wake_if_asleep, **kwargs
         )
         _LOGGER.debug("Response from command %s: %s", name, data)
@@ -151,7 +151,7 @@ class PowerwallSite(EnergySite):
             "BATTERY_OPERATION_MODE",
             path_vars={"site_id": self.energysite_id},
             default_real_mode=real_mode,
-            backup_reserve_percent=self.battery_reserve_percent,
+            backup_reserve_percent=self.backup_reserve_percent,
         )
         if data and data["response"]["result"] is True:
             self._data["default_real_mode"] = real_mode
