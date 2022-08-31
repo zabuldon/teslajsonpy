@@ -18,6 +18,8 @@ WS_URL = "wss://streaming.vn.teslamotors.com/streaming"
 
 TESLA_PRODUCT_TYPE_VEHICLES = "vehicles"
 
+BACKUP_RESERVE_MAX = 100
+BACKUP_RESERVE_MIN = 0
 CHARGE_CURRENT_MIN = 5
 DEFAULT_ENERGYSITE_NAME = "My Home"
 GRID_ACTIVE = "Active"

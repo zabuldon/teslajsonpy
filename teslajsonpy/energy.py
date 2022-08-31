@@ -1,8 +1,12 @@
 """Tesla Energy energy site."""
+import logging
+
 from teslajsonpy.const import (
     RESOURCE_TYPE,
     DEFAULT_ENERGYSITE_NAME,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class EnergySite:
@@ -39,6 +43,17 @@ class EnergySite:
         """Return energy site name."""
         # "site_name" not a valid key if name never set in Tesla app
         return self._energysite.get("site_name", DEFAULT_ENERGYSITE_NAME)
+
+    async def _send_command(
+        self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
+    ) -> dict:
+        """Wrapper for sending commands to the Tesla API."""
+        _LOGGER.debug("Sending command: %s", name)
+        data = await self._controller.api(
+            name, path_vars=path_vars, wake_if_asleep=wake_if_asleep, **kwargs
+        )
+        _LOGGER.debug("Response from command %s: %s", name, data)
+        return data
 
 
 class SolarSite(EnergySite):
@@ -87,14 +102,14 @@ class PowerwallSite(EnergySite):
         super().__init__(api, energysite, data)
 
     @property
+    def backup_reserve_percent(self) -> int:
+        """Return backup reserve percentage."""
+        return self._data["backup_reserve_percent"]
+
+    @property
     def battery_power(self) -> float:
         """Return battery power in Watts."""
         return self._data["battery_power"]
-
-    @property
-    def battery_reserve_percent(self) -> float:
-        """Return battery reserve percentage."""
-        return self._data["backup_reserve_percent"]
 
     @property
     def energy_left(self) -> float:
@@ -118,24 +133,40 @@ class PowerwallSite(EnergySite):
         return self._data["load_power"]
 
     @property
+    def operation_mode(self) -> str:
+        """Return operation mode."""
+        return self._data["operation"]
+
+    @property
     def percentage_charged(self) -> float:
         """Return battery percentage charged."""
         return self._data["percentage_charged"]
 
-    async def set_operation_mode(self, real_mode: str, value: int) -> None:
+    async def set_operation_mode(self, real_mode: str) -> None:
         """Set operation mode of Powerwall.
 
         Mode: "self_consumption", "backup", "autonomous"
-        Value: 0-100
         """
-        data = await self._api(
+        data = await self._send_command(
             "BATTERY_OPERATION_MODE",
-            path_vars={"battery_id": self.id},
+            path_vars={"site_id": self.energysite_id},
             default_real_mode=real_mode,
-            backup_reserve_percent=int(value),
+            backup_reserve_percent=self.battery_reserve_percent,
         )
         if data and data["response"]["result"] is True:
             self._data["default_real_mode"] = real_mode
+
+    async def set_reserve_percent(self, value: int) -> None:
+        """Set reserve percentage of Powerwall.
+
+        Value: 0-100
+        """
+        data = await self._send_command(
+            "BACKUP_RESERVE",
+            path_vars={"site_id": self.energysite_id},
+            backup_reserve_percent=int(value),
+        )
+        if data and data["response"]["result"] is True:
             self._data["backup_reserve_percent"] = value
 
 

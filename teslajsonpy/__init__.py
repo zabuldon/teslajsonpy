@@ -17,10 +17,15 @@ from teslajsonpy.teslaproxy import TeslaProxy
 from .__version__ import __version__
 
 __all__ = [
+    "TeslaCar",
     "Connection",
     "Controller",
+    "EnergySite",
+    "PowerwallSite",
     "TeslaProxy",
     "TeslaException",
+    "SolarPowerwallSite",
+    "SolarSite",
     "UnknownPresetMode",
     "__version__",
     "RetryLimitError",
