@@ -149,9 +149,8 @@ class PowerwallSite(EnergySite):
         """
         data = await self._send_command(
             "BATTERY_OPERATION_MODE",
-            path_vars={"site_id": self.energysite_id},
+            path_vars={"battery_id": self.id},
             default_real_mode=real_mode,
-            backup_reserve_percent=self.backup_reserve_percent,
         )
         if data and data["response"]["result"] is True:
             self._data["default_real_mode"] = real_mode
