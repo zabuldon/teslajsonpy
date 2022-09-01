@@ -808,6 +808,9 @@ class Controller:
                     params["backup_reserve_percent"] = response.get("backup").get(
                         "backup_reserve_percent"
                     )
+                    params["customer_preferred_export_rule"] = response.get(
+                        "components"
+                    ).get("customer_preferred_export_rule")
                     params["grid_status"] = response.get("grid_status")
                     params["default_real_mode"] = response.get("default_real_mode")
                     params["operation"] = response.get("operation")

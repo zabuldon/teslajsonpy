@@ -29,6 +29,16 @@ class EnergySite:
         return self._energysite.get("components").get("load_meter")
 
     @property
+    def has_battery(self) -> bool:
+        """Return True if energy site has battery."""
+        return self._energysite.get("components").get("battery")
+
+    @property
+    def has_solar(self) -> bool:
+        """Return True if energy site has solar."""
+        return self._energysite.get("components").get("solar")
+
+    @property
     def id(self) -> int:
         """Return id (aka battery_id)."""
         return self._energysite.get("id")
@@ -112,9 +122,19 @@ class PowerwallSite(EnergySite):
         return self._data["battery_power"]
 
     @property
+    def disallow_grid_charging(self) -> bool:
+        """Return disallow grid charging."""
+        return
+
+    @property
     def energy_left(self) -> float:
         """Return battery energy left in Watt hours."""
         return self._data["energy_left"]
+
+    @property
+    def export_rule(self) -> str:
+        """Return energy export rule setting."""
+        return self._data["customer_preferred_export_rule"]
 
     @property
     def grid_power(self) -> float:
@@ -141,6 +161,34 @@ class PowerwallSite(EnergySite):
     def percentage_charged(self) -> float:
         """Return battery percentage charged."""
         return self._data["percentage_charged"]
+
+    async def set_export_rule(self, setting: str) -> None:
+        """Set energy export setting of Powerwall.
+
+        Settings
+          Solar: "pv_only"
+          Everything: "battery_ok"
+        """
+        await self._send_command(
+            "ENERGY_SITE_IMPORT_EXPORT_CONFIG",
+            path_vars={"site_id": self.energysite_id},
+            customer_preferred_export_rule=setting,
+        )
+        # This endpoint returns an empty response instead of a result code
+        # Add check to only set if not a bad response?
+        self._data["customer_preferred_export_rule"] = setting
+
+    async def set_grid_charging(self, disallow_grid_charging: bool) -> None:
+        """Set grid charging setting of Powerwall."""
+        await self._send_command(
+            "ENERGY_SITE_IMPORT_EXPORT_CONFIG",
+            path_vars={"site_id": self.energysite_id},
+            disallow_charge_from_grid_with_solar_installed=disallow_grid_charging,
+        )
+        # This endpoint returns an empty response instead of a result code
+        self._data[
+            "disallow_charge_from_grid_with_solar_installed"
+        ] = disallow_grid_charging
 
     async def set_operation_mode(self, real_mode: str) -> None:
         """Set operation mode of Powerwall.
