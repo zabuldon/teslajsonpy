@@ -802,15 +802,21 @@ class Controller:
                     data = None
                 if data and data["response"]:
                     response = data["response"]
+                    components = response.get("components")
                     params = {}
                     if response.get("power_reading"):
                         params = response["power_reading"][0]
                     params["backup_reserve_percent"] = response.get("backup").get(
                         "backup_reserve_percent"
                     )
-                    params["customer_preferred_export_rule"] = response.get(
-                        "components"
-                    ).get("customer_preferred_export_rule")
+                    params["customer_preferred_export_rule"] = components.get(
+                        "customer_preferred_export_rule"
+                    )
+                    params[
+                        "disallow_charge_from_grid_with_solar_installed"
+                    ] = components.get(
+                        "disallow_charge_from_grid_with_solar_installed", False
+                    )
                     params["grid_status"] = response.get("grid_status")
                     params["default_real_mode"] = response.get("default_real_mode")
                     params["operation"] = response.get("operation")
@@ -832,10 +838,15 @@ class Controller:
                 except TeslaException:
                     data = None
                 if data and data["response"]:
-                    current_val = self.__energysite_data.get("percentage_charged")
-                    new_val = data["response"].get("percentage_charged")
-                    # percentage_charged sometimes incorrectly reports 0 so ignore
-                    # it if the current percentage_charged is > 5
+                    current_val = self.__energysite_data[energysite_id][
+                        "percentage_charged"
+                    ]
+                    # Default to current_val to prevent None type
+                    new_val = int(
+                        data["response"].get("percentage_charged", current_val)
+                    )
+                    # percentage_charged sometimes incorrectly reports 0
+                    # Ignore if the current percentage_charged is > 5
                     if current_val > 5 and new_val == 0:
                         return
                     self.__energysite_data[energysite_id].update(data["response"])
