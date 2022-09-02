@@ -175,7 +175,7 @@ class PowerwallSite(EnergySite):
             path_vars={"site_id": self.energysite_id},
             backup_reserve_percent=int(value),
         )
-        if data and data["response"]["result"] is True:
+        if data and data["response"]["code"] == 201:
             self._data["backup_reserve_percent"] = value
 
 
