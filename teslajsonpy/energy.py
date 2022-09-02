@@ -122,19 +122,9 @@ class PowerwallSite(EnergySite):
         return self._data["battery_power"]
 
     @property
-    def grid_charging(self) -> bool:
-        """Return grid charging."""
-        return not self._data["disallow_charge_from_grid_with_solar_installed"]
-
-    @property
     def energy_left(self) -> float:
         """Return battery energy left in Watt hours."""
         return self._data["energy_left"]
-
-    @property
-    def export_rule(self) -> str:
-        """Return energy export rule setting."""
-        return self._data["customer_preferred_export_rule"]
 
     @property
     def grid_power(self) -> float:
@@ -162,33 +152,6 @@ class PowerwallSite(EnergySite):
         """Return battery percentage charged."""
         return self._data["percentage_charged"]
 
-    async def set_export_rule(self, setting: str) -> None:
-        """Set energy export setting of Powerwall.
-
-        Settings
-          Solar: "pv_only"
-          Everything: "battery_ok"
-        """
-        await self._send_command(
-            "ENERGY_SITE_IMPORT_EXPORT_CONFIG",
-            path_vars={"site_id": self.energysite_id},
-            customer_preferred_export_rule=setting,
-        )
-        # This endpoint returns an empty response instead of a result code
-        # Add check to only set if not a bad response?
-        self._data["customer_preferred_export_rule"] = setting
-
-    async def set_grid_charging(self, value: bool) -> None:
-        """Set grid charging setting of Powerwall."""
-        param = not value
-        await self._send_command(
-            "ENERGY_SITE_IMPORT_EXPORT_CONFIG",
-            path_vars={"site_id": self.energysite_id},
-            disallow_charge_from_grid_with_solar_installed=param,
-        )
-        # This endpoint returns an empty response instead of a result code
-        self._data["disallow_charge_from_grid_with_solar_installed"] = param
-
     async def set_operation_mode(self, real_mode: str) -> None:
         """Set operation mode of Powerwall.
 
@@ -200,7 +163,7 @@ class PowerwallSite(EnergySite):
             default_real_mode=real_mode,
         )
         if data and data["response"]["code"] == 201:
-            self._data["default_real_mode"] = real_mode
+            self._data["operation"] = real_mode
 
     async def set_reserve_percent(self, value: int) -> None:
         """Set reserve percentage of Powerwall.
@@ -226,3 +189,40 @@ class SolarPowerwallSite(PowerwallSite, SolarSite):
     def __init__(self, api, energysite, data) -> None:
         """Initialize SolarPowerwallSite."""
         super().__init__(api, energysite, data)
+
+    @property
+    def export_rule(self) -> str:
+        """Return energy export rule setting."""
+        return self._data["customer_preferred_export_rule"]
+
+    @property
+    def grid_charging(self) -> bool:
+        """Return grid charging."""
+        return not self._data["disallow_charge_from_grid_with_solar_installed"]
+
+    async def set_grid_charging(self, value: bool) -> None:
+        """Set grid charging setting of Powerwall."""
+        param = not value
+        await self._send_command(
+            "ENERGY_SITE_IMPORT_EXPORT_CONFIG",
+            path_vars={"site_id": self.energysite_id},
+            disallow_charge_from_grid_with_solar_installed=param,
+        )
+        # This endpoint returns an empty response instead of a result code
+        self._data["disallow_charge_from_grid_with_solar_installed"] = param
+
+    async def set_export_rule(self, setting: str) -> None:
+        """Set energy export setting of Powerwall.
+
+        Settings
+          Solar: "pv_only"
+          Everything: "battery_ok"
+        """
+        await self._send_command(
+            "ENERGY_SITE_IMPORT_EXPORT_CONFIG",
+            path_vars={"site_id": self.energysite_id},
+            customer_preferred_export_rule=setting,
+        )
+        # This endpoint returns an empty response instead of a result code
+        # Add check to only set if not a bad response?
+        self._data["customer_preferred_export_rule"] = setting

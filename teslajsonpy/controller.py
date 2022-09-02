@@ -818,7 +818,6 @@ class Controller:
                         "disallow_charge_from_grid_with_solar_installed", False
                     )
                     params["grid_status"] = response.get("grid_status")
-                    params["default_real_mode"] = response.get("default_real_mode")
                     params["operation"] = response.get("operation")
                     self.__energysite_data[energysite_id].update(params)
 
