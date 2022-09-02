@@ -264,7 +264,8 @@ class TeslaMock:
         return RESULT_OK
 
 
-RESULT_OK = {"response": {"reason": "", "result": True}}
+# Response includes either result or code, not both. Combined here for now.
+RESULT_OK = {"response": {"reason": "", "result": True, "code": 201}}
 RESULT_NOT_OK = {"response": {"reason": "", "result": False}}
 
 # 408 - Request Timeout

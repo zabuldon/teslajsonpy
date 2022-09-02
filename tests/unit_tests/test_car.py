@@ -17,6 +17,7 @@ async def test_car_properties(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
 
     _car = _controller.cars[VIN]
 
@@ -216,6 +217,7 @@ async def test_change_charge_limit(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.change_charge_limit(70.0) is None
@@ -227,6 +229,7 @@ async def test_charge_port_door_open_close(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.charge_port_door_open() is None
@@ -240,6 +243,7 @@ async def test_flash_lights(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.flash_lights() is None
@@ -251,6 +255,7 @@ async def test_honk_horn(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.honk_horn() is None
@@ -262,6 +267,7 @@ async def test_lock(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.lock() is None
@@ -273,6 +279,7 @@ async def test_remote_seat_heater_request(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.remote_seat_heater_request(3, 1) is None
@@ -284,6 +291,7 @@ async def test_schedule_software_update(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.schedule_software_update() is None
@@ -295,6 +303,7 @@ async def test_set_charging_amps(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_charging_amps(32.0) is None
@@ -306,6 +315,7 @@ async def test_set_cabin_overheat_protection(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_cabin_overheat_protection("On") is None
@@ -317,6 +327,7 @@ async def test_set_climate_keeper_mode(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_climate_keeper_mode(1) is None
@@ -328,6 +339,7 @@ async def test_set_heated_steering_wheel(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_heated_steering_wheel(True) is None
@@ -339,6 +351,7 @@ async def test_set_hvac_mode(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_hvac_mode("on") is None
@@ -350,6 +363,7 @@ async def test_set_max_defrost(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_max_defrost(2) is None
@@ -361,6 +375,7 @@ async def test_set_sentry_mode(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_sentry_mode(True) is None
@@ -372,6 +387,7 @@ async def test_set_temperature(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_temperature(22.0) is None
@@ -383,6 +399,7 @@ async def test_start_stop_charge(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.start_charge() is None
@@ -396,6 +413,7 @@ async def test_wake_up(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.wake_up() is None
@@ -407,6 +425,7 @@ async def test_toggle_trunk(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.toggle_trunk() is None
@@ -418,6 +437,7 @@ async def test_toggle_frunk(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.toggle_frunk() is None
@@ -429,6 +449,7 @@ async def test_trigger_homelink(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.trigger_homelink() is None
@@ -440,6 +461,7 @@ async def test_unlock(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.unlock() is None
