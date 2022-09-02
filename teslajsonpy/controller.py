@@ -814,10 +814,7 @@ class Controller:
                     params["grid_status"] = response.get("grid_status")
                     params["default_real_mode"] = response.get("default_real_mode")
                     params["operation"] = response.get("operation")
-                    # Use energysite_id since that's how it's retrieved
                     self.__energysite_data[energysite_id].update(params)
-                else:
-                    _LOGGER.info("No power readings for energy site %s", energysite_id)
 
         async def _get_and_process_battery_summary(
             energysite_id: Text, battery_id: Text
@@ -835,6 +832,12 @@ class Controller:
                 except TeslaException:
                     data = None
                 if data and data["response"]:
+                    current_val = self.__energysite_data["percentage_charged"]
+                    new_val = data["response"]["percentage_charged"]
+                    # percentage_charged sometimes incorrectly reports 0 so ignore
+                    # it if the current percentage_charged is > 5
+                    if current_val > 5 and new_val == 0:
+                        return
                     self.__energysite_data[energysite_id].update(data["response"])
 
         async with self.__update_lock:
