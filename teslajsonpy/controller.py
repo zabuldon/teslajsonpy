@@ -832,8 +832,8 @@ class Controller:
                 except TeslaException:
                     data = None
                 if data and data["response"]:
-                    current_val = self.__energysite_data["percentage_charged"]
-                    new_val = data["response"]["percentage_charged"]
+                    current_val = self.__energysite_data.get("percentage_charged")
+                    new_val = data["response"].get("percentage_charged")
                     # percentage_charged sometimes incorrectly reports 0 so ignore
                     # it if the current percentage_charged is > 5
                     if current_val > 5 and new_val == 0:
