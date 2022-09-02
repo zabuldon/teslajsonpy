@@ -200,7 +200,7 @@ class PowerwallSite(EnergySite):
             path_vars={"battery_id": self.id},
             default_real_mode=real_mode,
         )
-        if data and data["response"]["result"] is True:
+        if data and data["response"]["code"] == 201:
             self._data["default_real_mode"] = real_mode
 
     async def set_reserve_percent(self, value: int) -> None:
