@@ -295,9 +295,7 @@ class TeslaCar:
     @property
     def is_climate_on(self) -> bool:
         """Return climate is on."""
-        return self._controller.get_climate_params(vin=self.vin).get(
-            "is_climate_on", False
-        )
+        return self._controller.get_climate_params(vin=self.vin).get("is_climate_on")
 
     @property
     def is_frunk_locked(self) -> int:
@@ -321,7 +319,6 @@ class TeslaCar:
     @property
     def is_steering_wheel_heater_on(self) -> bool:
         """Return steering wheel heater."""
-        # Not seeing this in the JSON response for 2015 Model S 85D on 28 Aug 2022
         return self._controller.get_climate_params(vin=self.vin).get(
             "steering_wheel_heater"
         )
@@ -399,15 +396,13 @@ class TeslaCar:
         return self._controller.get_climate_params(vin=self.vin).get("outside_temp")
 
     @property
-    def rear_heated_seats(self) -> bool:
-        """Return if car has rear (second row) heated seats."""
-        # Assuming if rear left doesn't have it, there's no rear seat heating
-        if self._controller.get_climate_params(vin=self.vin).get(
-            "seat_heater_rear_left"
-        ):
-            return True
-        else:
-            return False
+    def rear_seat_heaters(self) -> int:
+        """Return if car has rear (second row) heated seats.
+
+        Returns
+            int: 0 (no rear heated seats), int: ? (rear heated seats)
+        """
+        return self._controller.get_config_params(vin=self.vin).get("rear_seat_heaters")
 
     @property
     def sentry_mode(self) -> bool:
@@ -650,21 +645,32 @@ class TeslaCar:
             params = {"steering_wheel_heater": value}
             self._controller.update_climate_params(vin=self.vin, params=params)
 
-    async def set_hvac_mode(self, on_off: str) -> None:
-        """Send command to set HVAC mode."""
-        # Better name for on_off?
-        if on_off == "off":
-            await self._send_command(
+    async def set_hvac_mode(self, value: str) -> None:
+        """Send command to set HVAC mode.
+
+        Args
+            "off"
+            "on"
+        """
+        if value == "off":
+            data = await self._send_command(
                 "CLIMATE_OFF",
                 path_vars={"vehicle_id": self.id},
                 wake_if_asleep=True,
             )
-        elif on_off == "on":
-            await self._send_command(
+            if data and data["response"]["result"] is True:
+                params = {"is_climate_on": False}
+                self._controller.update_climate_params(vin=self.vin, params=params)
+
+        elif value == "on":
+            data = await self._send_command(
                 "CLIMATE_ON",
                 path_vars={"vehicle_id": self.id},
                 wake_if_asleep=True,
             )
+            if data and data["response"]["result"] is True:
+                params = {"is_climate_on": True}
+                self._controller.update_climate_params(vin=self.vin, params=params)
 
     async def set_max_defrost(self, state: int) -> None:
         """Send command to set max defrost.

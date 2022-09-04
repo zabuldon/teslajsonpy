@@ -25,6 +25,9 @@ class TeslaMock:
             Controller, "get_climate_params", self.mock_get_climate_params
         )
         self._monkeypatch.setattr(
+            Controller, "get_config_params", self.mock_get_config_params
+        )
+        self._monkeypatch.setattr(
             Controller, "get_drive_params", self.mock_get_drive_params
         )
         self._monkeypatch.setattr(
@@ -74,6 +77,11 @@ class TeslaMock:
         # pylint: disable=unused-argument
         """Mock controller's get_climate_params method."""
         return self.controller_get_climate_params()
+
+    def mock_get_config_params(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's get_config_params method."""
+        return self.controller_get_config_params()
 
     def mock_get_power_unknown_grid_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -133,6 +141,10 @@ class TeslaMock:
         """Monkeypatch for controller.get_climate_params()."""
         return self._climate_state
 
+    def controller_get_config_params(self):
+        """Monkeypatch for controller.get_climate_params()."""
+        return self._vehicle_config
+
     def controller_get_power_unknown_grid_params(self):
         """Monkeypatch for controller.get_power_params() with grid unknown."""
         return self._site_data_unknown_grid
@@ -184,7 +196,7 @@ class TeslaMock:
         return self._vehicle_state
 
     def data_request_energysites(self):
-        """Similate the result of combined product list & site config request."""
+        """Simulate the result of combined product list & site config request."""
         return self._energysites
 
     def data_request_site_config(self):
@@ -196,7 +208,7 @@ class TeslaMock:
         return self._site_data
 
     def data_request_site_data_unknown_grid(self):
-        """Similate the result of site state with unknown grid data request."""
+        """Simulate the result of site state with unknown grid data request."""
         return self._site_data_unknown_grid
 
     def data_request_battery_data(self):

@@ -184,9 +184,7 @@ async def test_car_properties(monkeypatch):
 
     assert _car.outside_temp == VEHICLE_DATA["climate_state"]["outside_temp"]
 
-    assert _car.rear_heated_seats == VEHICLE_DATA["climate_state"].get(
-        "seat_heater_rear_left", False
-    )
+    assert _car.rear_seat_heaters == VEHICLE_DATA["vehicle_config"]["rear_seat_heaters"]
 
     assert _car.sentry_mode == VEHICLE_DATA["vehicle_state"].get("sentry_mode")
 
