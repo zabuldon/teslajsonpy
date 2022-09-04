@@ -429,7 +429,6 @@ class Controller:
 
             for energysite in self._energysite_list:
                 energysite_id = energysite.get("energy_site_id")
-                battery_id = energysite.get("id")
 
                 if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
                     # site_name comes from site_config for non-Powerwall sites
@@ -444,9 +443,6 @@ class Controller:
                 # For dealing with sites that always report "Unknown"
                 # Default to True and check during updates
                 self._grid_status_unknown = {energysite_id: True}
-
-                self.__lock[energysite_id] = asyncio.Lock()
-                self.__lock[battery_id] = asyncio.Lock()
 
         if not test_login:
             try:
@@ -781,70 +777,61 @@ class Controller:
                         )
 
         async def _get_and_process_site_data(energysite_id: int) -> None:
-            async with self.__lock[energysite_id]:
-                _LOGGER.debug("Updating SITE_DATA for energysite: %s", energysite_id)
+            _LOGGER.debug("Updating SITE_DATA for energysite: %s", energysite_id)
+            try:
+                data = await self.api("SITE_DATA", path_vars={"site_id": energysite_id})
+            except TeslaException:
+                data = None
 
-                try:
-                    data = await self.api(
-                        "SITE_DATA", path_vars={"site_id": energysite_id}
+            if data and data["response"]:
+                response = data["response"]
+                # Some setups always report grid_status of "Unknown" regardless
+                # of the actual grid status. Others only report grid_status "Unknown"
+                # when the actual grid status is unknown. These setups also sometimes
+                # report an incorrect solar_power value of 0.
+                if (
+                    "grid_status" not in response
+                    or response.get("grid_status") != "Unknown"
+                ):
+                    self._grid_status_unknown[energysite_id] = False
+
+                if not self._grid_status_unknown[energysite_id] and (
+                    response.get("grid_status") == "Unknown"
+                    and response.get("solar_power") == 0
+                ):
+                    _LOGGER.debug(
+                        "Ignoring possible spurious energy site solar power read."
                     )
-                except TeslaException:
-                    data = None
+                    del response["solar_power"]
 
-                if data and data["response"]:
-                    response = data["response"]
-                    # Some setups always report grid_status of "Unknown" regardless
-                    # of the actual grid status. Others only report grid_status "Unknown"
-                    # when the actual grid status is unknown. These setups also sometimes
-                    # report an incorrect solar_power value of 0.
-                    if (
-                        "grid_status" not in response
-                        or response.get("grid_status") != "Unknown"
-                    ):
-                        self._grid_status_unknown[energysite_id] = False
-
-                    if not self._grid_status_unknown[energysite_id] and (
-                        response.get("grid_status") == "Unknown"
-                        and response.get("solar_power") == 0
-                    ):
-                        _LOGGER.debug(
-                            "Ignoring possible spurious energy site solar power read."
-                        )
-                        del response["solar_power"]
-
-                self._site_data[energysite_id].update(response)
+            self._site_data[energysite_id].update(response)
 
         async def _get_and_process_battery_data(
             energysite_id: int, battery_id: str
         ) -> None:
-            async with self.__lock[battery_id]:
-                _LOGGER.debug("Updating BATTERY_DATA for energysite: %s", energysite_id)
+            _LOGGER.debug("Updating BATTERY_DATA for energysite: %s", energysite_id)
+            try:
+                data = await self.api(
+                    "BATTERY_DATA", path_vars={"battery_id": battery_id}
+                )
+            except TeslaException:
+                data = None
 
-                try:
-                    data = await self.api(
-                        "BATTERY_DATA", path_vars={"battery_id": battery_id}
-                    )
-                except TeslaException:
-                    data = None
-
-                self._battery_data[energysite_id].update(data)
+            self._battery_data[energysite_id].update(data)
 
         async def _get_and_process_battery_summary(
             energysite_id: int, battery_id: str
         ) -> None:
-            async with self.__lock[battery_id]:
-                _LOGGER.debug(
-                    "Updating BATTERY_SUMMARY for energysite: %s", energysite_id
+            _LOGGER.debug("Updating BATTERY_SUMMARY for energysite: %s", energysite_id)
+
+            try:
+                data = await self.api(
+                    "BATTERY_SUMMARY", path_vars={"battery_id": battery_id}
                 )
+            except TeslaException:
+                data = None
 
-                try:
-                    data = await self.api(
-                        "BATTERY_SUMMARY", path_vars={"battery_id": battery_id}
-                    )
-                except TeslaException:
-                    data = None
-
-                self._battery_summary[energysite_id].update(data)
+            self._battery_summary[energysite_id].update(data)
 
         async with self.__update_lock:
             if self._include_vehicles:
