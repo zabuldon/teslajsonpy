@@ -1,12 +1,18 @@
 """Test energy sites."""
-
 import pytest
 
 from teslajsonpy.const import DEFAULT_ENERGYSITE_NAME
 from teslajsonpy.controller import Controller
-from teslajsonpy.energy import EnergySite
+from teslajsonpy.energy import SolarSite
 
-from tests.tesla_mock import TeslaMock, ENERGYSITES, SITE_CONFIG
+from tests.tesla_mock import (
+    BATTERY_DATA,
+    BATTERY_SUMMARY,
+    ENERGYSITES,
+    SITE_CONFIG,
+    SITE_DATA,
+    TeslaMock,
+)
 
 
 @pytest.mark.asyncio
@@ -28,22 +34,17 @@ async def test_energysite_setup(monkeypatch):
 @pytest.mark.asyncio
 async def test_solar_site(monkeypatch):
     """Test SolarSite class."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    # Add site_data since we're not mocking Controller.update()
+    _controller._site_data = {12345: _mock.data_request_site_data()}
     _controller.generate_energysite_objects()
 
     _solar_site = _controller.energysites[12345]
 
     assert _solar_site._api is not None
     assert _solar_site._energysite is not None
-    assert _solar_site._data == {
-        "solar_power": 0,
-        "load_power": 0,
-        "grid_power": 0,
-        "battery_power": 0,
-        "percentage_charged": 0,
-    }
 
     assert _solar_site.energysite_id == ENERGYSITES[0]["energy_site_id"]
     assert _solar_site.has_battery == ENERGYSITES[0]["components"]["battery"]
@@ -53,31 +54,27 @@ async def test_solar_site(monkeypatch):
     assert _solar_site.resource_type == ENERGYSITES[0]["resource_type"]
     assert _solar_site.site_name == SITE_CONFIG["site_name"]
 
-    assert _solar_site.grid_power == 0
-    assert _solar_site.load_power == 0
-    assert _solar_site.solar_power == 0
+    assert _solar_site.grid_power == SITE_DATA["grid_power"]
+    assert _solar_site.load_power == SITE_DATA["load_power"]
+    assert _solar_site.solar_power == SITE_DATA["solar_power"]
     assert _solar_site.solar_type == ENERGYSITES[0]["components"]["solar_type"]
 
 
 @pytest.mark.asyncio
 async def test_powerwall_site(monkeypatch):
     """Test PowerwallSite class."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    # Add battery_data and battery_summary since we're not mocking Controller.update()
+    _controller._battery_data = {67890: _mock.data_request_battery_data()}
+    _controller._battery_summary = {67890: _mock.data_request_battery_summary()}
     _controller.generate_energysite_objects()
 
     _solar_powerwall_site = _controller.energysites[67890]
 
     assert _solar_powerwall_site._api is not None
     assert _solar_powerwall_site._energysite is not None
-    assert _solar_powerwall_site._data == {
-        "solar_power": 0,
-        "load_power": 0,
-        "grid_power": 0,
-        "battery_power": 0,
-        "percentage_charged": 0,
-    }
 
     assert _solar_powerwall_site.energysite_id == ENERGYSITES[1]["energy_site_id"]
     assert (
@@ -89,12 +86,26 @@ async def test_powerwall_site(monkeypatch):
     assert _solar_powerwall_site.has_solar == ENERGYSITES[1]["components"]["solar"]
     assert _solar_powerwall_site.resource_type == ENERGYSITES[1]["resource_type"]
     assert _solar_powerwall_site.site_name == ENERGYSITES[1]["site_name"]
-
-    assert _solar_powerwall_site.percentage_charged == 0
-    assert _solar_powerwall_site.battery_power == 0
-    assert _solar_powerwall_site.grid_power == 0
-    assert _solar_powerwall_site.load_power == 0
-    assert _solar_powerwall_site.solar_power == 0
+    assert (
+        _solar_powerwall_site.percentage_charged
+        == BATTERY_SUMMARY["percentage_charged"]
+    )
+    assert (
+        _solar_powerwall_site.battery_power
+        == BATTERY_DATA["power_reading"][0]["battery_power"]
+    )
+    assert (
+        _solar_powerwall_site.grid_power
+        == BATTERY_DATA["power_reading"][0]["grid_power"]
+    )
+    assert (
+        _solar_powerwall_site.load_power
+        == BATTERY_DATA["power_reading"][0]["load_power"]
+    )
+    assert (
+        _solar_powerwall_site.solar_power
+        == BATTERY_DATA["power_reading"][0]["solar_power"]
+    )
     assert (
         _solar_powerwall_site.solar_type == ENERGYSITES[1]["components"]["solar_type"]
     )
@@ -106,8 +117,9 @@ async def test_energysite_with_no_name(monkeypatch):
     _mock = TeslaMock(monkeypatch)
     _api = Controller(None)
     _energysite = _mock.data_request_energysites()[0]
-    _energysite_data = _mock.controller_get_power_params()
-    _sensor = EnergySite(_api, _energysite, _energysite_data)
+    _site_config = {12345: _mock.data_request_site_config()}
+    _site_data = {12345: _mock.data_request_site_data()}
+    _sensor = SolarSite(_api, _energysite, _site_config, _site_data)
 
     assert _sensor.site_name == DEFAULT_ENERGYSITE_NAME
 
@@ -115,9 +127,11 @@ async def test_energysite_with_no_name(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_operation_mode(monkeypatch):
     """Test set operation mode."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._battery_data = {67890: _mock.data_request_battery_data()}
+    _controller._battery_summary = {67890: _mock.data_request_battery_summary()}
     _controller.generate_energysite_objects()
     _energysite = _controller.energysites[67890]
 
@@ -127,9 +141,11 @@ async def test_set_operation_mode(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_reserve_percent(monkeypatch):
     """Test set reserve percent."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._battery_data = {67890: _mock.data_request_battery_data()}
+    _controller._battery_summary = {67890: _mock.data_request_battery_summary()}
     _controller.generate_energysite_objects()
     _energysite = _controller.energysites[67890]
 
@@ -139,9 +155,11 @@ async def test_set_reserve_percent(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_grid_charging(monkeypatch):
     """Test set grid charging."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._battery_data = {67890: _mock.data_request_battery_data()}
+    _controller._battery_summary = {67890: _mock.data_request_battery_summary()}
     _controller.generate_energysite_objects()
     _energysite = _controller.energysites[67890]
 
@@ -151,9 +169,11 @@ async def test_set_grid_charging(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_export_rule(monkeypatch):
     """Test set export rule."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._battery_data = {67890: _mock.data_request_battery_data()}
+    _controller._battery_summary = {67890: _mock.data_request_battery_summary()}
     _controller.generate_energysite_objects()
     _energysite = _controller.energysites[67890]
 

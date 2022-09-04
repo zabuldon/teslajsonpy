@@ -538,7 +538,7 @@ class TeslaCar:
             wake_if_asleep=True,
         )
 
-    async def lock(self):
+    async def lock(self) -> None:
         """Send lock command."""
         data = await self._send_command(
             "LOCK",

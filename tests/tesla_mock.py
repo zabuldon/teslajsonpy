@@ -1,5 +1,4 @@
 """Tesla mock."""
-
 import copy
 
 from teslajsonpy.controller import Controller
@@ -40,33 +39,13 @@ class TeslaMock:
         self._monkeypatch.setattr(
             Controller, "get_site_config", self.mock_get_site_config
         )
-        # self._monkeypatch.setattr(
-        #     Controller,
-        #     "_get_and_process_car_data",
-        #     self.mock_get_and_process_car_data,
-        # )
-        # self._monkeypatch.setattr(
-        #     Controller,
-        #     "_get_and_process_site_data",
-        #     self.mock_get_and_process_site_data,
-        # )
-        # self._monkeypatch.setattr(
-        #     Controller,
-        #     "_get_and_process_battery_data",
-        #     self.mock_get_and_process_battery_data,
-        # )
-        # self._monkeypatch.setattr(
-        #     Controller, "get_last_update_time", self.mock_get_last_update_time
-        # )
         self._monkeypatch.setattr(Controller, "update", self.mock_update)
-        self._monkeypatch.setattr(
-            Controller, "get_power_params", self.mock_get_power_params
-        )
         self._energysites = copy.deepcopy(ENERGYSITES)
         self._product_list = copy.deepcopy(PRODUCT_LIST)
         self._vehicle_data = copy.deepcopy(VEHICLE_DATA)
         self._site_data = copy.deepcopy(SITE_DATA)
         self._battery_data = copy.deepcopy(BATTERY_DATA)
+        self._battery_summary = copy.deepcopy(BATTERY_SUMMARY)
         self._drive_state = copy.deepcopy(VEHICLE_DATA["drive_state"])
         self._climate_state = copy.deepcopy(VEHICLE_DATA["climate_state"])
         self._charge_state = copy.deepcopy(VEHICLE_DATA["charge_state"])
@@ -80,11 +59,6 @@ class TeslaMock:
         # pylint: disable=unused-argument
         """Mock controller's api method."""
         return self.controller_api()
-
-    def mock_connect(self, *args, **kwargs):
-        # pylint: disable=unused-argument
-        """Mock controller's connect method."""
-        return self.controller_connect()
 
     def mock_command(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -100,11 +74,6 @@ class TeslaMock:
         # pylint: disable=unused-argument
         """Mock controller's get_climate_params method."""
         return self.controller_get_climate_params()
-
-    def mock_get_power_params(self, *args, **kwargs):
-        # pylint: disable=unused-argument
-        """Mock controller's get_power_params method."""
-        return self.controller_get_power_params()
 
     def mock_get_power_unknown_grid_params(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -136,21 +105,6 @@ class TeslaMock:
         """Mock controller's get_site_config method."""
         return self.controller_get_site_config()
 
-    def mock_get_and_process_car_data(self, *args, **kwargs):
-        # pylint: disable=unused-argument
-        """Mock controller's _get_and_process_car_data method."""
-        return self.controller_get_and_process_car_data()
-
-    def mock_get_and_process_site_data(self, *args, **kwargs):
-        # pylint: disable=unused-argument
-        """Mock controller's _get_and_process_site_data method."""
-        return self.controller_get_and_process_site_data()
-
-    def mock_get_and_process_battery_data(self, *args, **kwargs):
-        # pylint: disable=unused-argument
-        """Mock controller's _get_and_process_battery_data method."""
-        return self.controller_get_and_process_battery_data()
-
     def mock_get_last_update_time(self, *args, **kwargs):
         # pylint: disable=unused-argument
         """Mock controller's get_last_update_time method."""
@@ -160,11 +114,6 @@ class TeslaMock:
         # pylint: disable=unused-argument
         """Mock controller's update method."""
         return self.controller_update()
-
-    @staticmethod
-    def controller_connect():
-        """Monkeypatch for controller.connect()."""
-        return ("abc123", "cba321")
 
     @staticmethod
     async def controller_api():
@@ -183,10 +132,6 @@ class TeslaMock:
     def controller_get_climate_params(self):
         """Monkeypatch for controller.get_climate_params()."""
         return self._climate_state
-
-    def controller_get_power_params(self):
-        """Monkeypatch for controller.get_power_params()."""
-        return self._site_data
 
     def controller_get_power_unknown_grid_params(self):
         """Monkeypatch for controller.get_power_params() with grid unknown."""
@@ -211,18 +156,6 @@ class TeslaMock:
     async def controller_get_site_config(self):
         """Monkeypatch for controller.get_site_config()."""
         return self._site_config
-
-    async def controller_get_and_process_car_data(self):
-        """Monkeypatch for controller.update._get_and_process_car_data()."""
-        return self._vehicle_data
-
-    async def controller_get_and_process_site_data(self):
-        """Monkeypatch for controller.update._get_and_process_site_data()."""
-        return self._site_data
-
-    async def controller_get_and_process_battery_data(self):
-        """Monkeypatch for controller.update._get_and_process_battery_data()."""
-        return self._battery_data
 
     @staticmethod
     async def controller_update():
@@ -254,9 +187,25 @@ class TeslaMock:
         """Similate the result of combined product list & site config request."""
         return self._energysites
 
+    def data_request_site_config(self):
+        """Get site_data."""
+        return self._site_config
+
+    def data_request_site_data(self):
+        """Get site_data."""
+        return self._site_data
+
     def data_request_site_data_unknown_grid(self):
         """Similate the result of site state with unknown grid data request."""
         return self._site_data_unknown_grid
+
+    def data_request_battery_data(self):
+        """Get battery_data."""
+        return self._battery_data
+
+    def data_request_battery_summary(self):
+        """Get battery_summary."""
+        return self._battery_summary
 
     @staticmethod
     def command_ok():
@@ -753,4 +702,13 @@ BATTERY_DATA = {
         }
     ],
     "battery_count": 1,
+}
+
+BATTERY_SUMMARY = {
+    "site_name": "My Battery Home",
+    "id": "XXX",
+    "energy_left": 13610.736842105263,
+    "total_pack_energy": 14056,
+    "percentage_charged": 96.8322199922116,
+    "battery_power": 400,
 }

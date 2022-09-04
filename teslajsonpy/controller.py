@@ -16,8 +16,8 @@ import logging
 import pkgutil
 import time
 from typing import Callable, Dict, List, Optional, Text
-from yarl import URL
 import wrapt
+from yarl import URL
 
 from teslajsonpy.car import TeslaCar
 from teslajsonpy.connection import Connection
@@ -339,10 +339,17 @@ class Controller:
         self.enable_websocket = enable_websocket
         self.endpoints = {}
         self.polling_policy = polling_policy
-        self.__energysite_data: Dict[int, dict] = {}
-        self.__energysite_list: List[dict] = []
-        self.__grid_status: Dict[int, dict] = {}
-        self.__vehicle_list: List[dict] = []
+
+        self._include_vehicles: bool = True
+        self._include_energysites: bool = True
+        self._product_list: List[dict] = []
+        self._vehicle_list: List[dict] = []
+        self._energysite_list: List[dict] = []
+        self._site_config: Dict[int:dict] = {}
+        self._site_data: Dict[int:dict] = {}
+        self._battery_data: Dict[int:dict] = {}
+        self._battery_summary: Dict[int:dict] = {}
+        self._grid_status_unknown: Dict[int, bool] = {}
         self.cars: Dict[str, TeslaCar] = {}
         self.energysites: Dict[int, EnergySite] = {}
 
@@ -351,6 +358,8 @@ class Controller:
         test_login: bool = False,
         wake_if_asleep: bool = False,
         filtered_vins: Optional[List[Text]] = None,
+        include_vehicles: bool = True,
+        include_energysites: bool = True,
         mfa_code: Text = "",
     ) -> Dict[Text, Text]:
         """Connect controller to Tesla.
@@ -359,6 +368,8 @@ class Controller:
             test_login (bool, optional): Whether to test credentials only. Defaults to False.
             wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update state. Defaults to False.
             filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.
+            include_vehicles (bool, optional): Whether to include vehicles. Defaults to True.
+            include_energysites(bool, optional): Whether to include energysites. Defaults to True.
             mfa_code (Text, optional): MFA code to use for connection
 
         Returns
@@ -369,66 +380,73 @@ class Controller:
         if mfa_code:
             self.__connection.mfa_code = mfa_code
 
-        product_list = await self.get_product_list()
-
         self._last_attempted_update_time = round(time.time())
         self.__update_lock = asyncio.Lock()
+        self._include_vehicles = include_vehicles
+        self._include_energysites = include_energysites
 
-        self.__vehicle_list = [cars for cars in product_list if "vehicle_id" in cars]
+        self._product_list = await self.get_product_list()
 
-        for car in self.__vehicle_list:
-            vin = car["vin"]
-            if filtered_vins and vin not in filtered_vins:
-                _LOGGER.debug("Skipping car with VIN: %s", vin)
-                continue
+        if self._include_vehicles:
+            self._vehicle_list = [
+                cars for cars in self._product_list if "vehicle_id" in cars
+            ]
 
-            self.set_id_vin(car_id=car["id"], vin=vin)
-            self.set_vehicle_id_vin(vehicle_id=car["vehicle_id"], vin=vin)
-            self.__lock[vin] = asyncio.Lock()
-            self.__wakeup_conds[vin] = asyncio.Lock()
-            self._last_update_time[vin] = 0
-            self._last_wake_up_attempt[vin] = 0
-            self._last_wake_up_time[vin] = 0
-            self.__update[vin] = True
-            self.__update_state[vin] = "normal"
-            self.car_state[vin] = car
-            self.set_car_online(vin=vin, online_status=car["state"] == "online")
-            self.set_last_park_time(vin=vin, timestamp=self._last_attempted_update_time)
-            self.__climate[vin] = {}
-            self.__charging[vin] = {}
-            self.__state[vin] = {}
-            self.__config[vin] = {}
-            self.__driving[vin] = {}
-            self.__gui[vin] = {}
+            for car in self._vehicle_list:
+                vin = car["vin"]
+                if filtered_vins and vin not in filtered_vins:
+                    _LOGGER.debug("Skipping car with VIN: %s", vin)
+                    continue
 
-        self.__energysite_list = [
-            p
-            for p in product_list
-            if p.get(RESOURCE_TYPE) == RESOURCE_TYPE_SOLAR
-            or p.get(RESOURCE_TYPE) == RESOURCE_TYPE_BATTERY
-        ]
+                self.set_id_vin(car_id=car["id"], vin=vin)
+                self.set_vehicle_id_vin(vehicle_id=car["vehicle_id"], vin=vin)
+                self.__lock[vin] = asyncio.Lock()
+                self.__wakeup_conds[vin] = asyncio.Lock()
+                self._last_update_time[vin] = 0
+                self._last_wake_up_attempt[vin] = 0
+                self._last_wake_up_time[vin] = 0
+                self.__update[vin] = True
+                self.__update_state[vin] = "normal"
+                self.car_state[vin] = car
+                self.set_car_online(vin=vin, online_status=car["state"] == "online")
+                self.set_last_park_time(
+                    vin=vin, timestamp=self._last_attempted_update_time
+                )
+                self.__climate[vin] = {}
+                self.__charging[vin] = {}
+                self.__state[vin] = {}
+                self.__config[vin] = {}
+                self.__driving[vin] = {}
+                self.__gui[vin] = {}
 
-        for energysite in self.__energysite_list:
-            energysite_id = energysite.get("energy_site_id")
-            battery_id = energysite.get("id")
+        if self._include_energysites:
+            self._energysite_list = [
+                p
+                for p in self._product_list
+                if p.get(RESOURCE_TYPE) == RESOURCE_TYPE_SOLAR
+                or p.get(RESOURCE_TYPE) == RESOURCE_TYPE_BATTERY
+            ]
 
-            if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
-                # Non-powerwall sites "site_name" in "SITE_DATA" endpoint
-                site_config = await self.get_site_config(energysite_id)
-                energysite.update(site_config)
+            for energysite in self._energysite_list:
+                energysite_id = energysite.get("energy_site_id")
+                battery_id = energysite.get("id")
 
-            self.__energysite_data[energysite_id] = {
-                "solar_power": 0,
-                "load_power": 0,
-                "grid_power": 0,
-                "battery_power": 0,
-                "percentage_charged": 0,
-            }
-            # Default to True but check in first update
-            self.__grid_status[energysite_id] = {"grid_always_unk": True}
+                if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
+                    # site_name comes from site_config for non-Powerwall sites
+                    self._site_config[energysite_id] = await self.get_site_config(
+                        energysite_id
+                    )
+                    self._site_data[energysite_id] = {}
 
-            self.__lock[energysite_id] = asyncio.Lock()
-            self.__lock[battery_id] = asyncio.Lock()
+                if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
+                    self._battery_data[energysite_id] = {}
+                    self._battery_summary[energysite_id] = {}
+                # For dealing with sites that always report "Unknown"
+                # Default to True and check during updates
+                self._grid_status_unknown = {energysite_id: True}
+
+                self.__lock[energysite_id] = asyncio.Lock()
+                self.__lock[battery_id] = asyncio.Lock()
 
         if not test_login:
             try:
@@ -532,7 +550,7 @@ class Controller:
 
     def generate_car_objects(self) -> Dict[str, TeslaCar]:
         """Generate car objects."""
-        for car in self.__vehicle_list:
+        for car in self._vehicle_list:
             vin = car["vin"]
             self.cars[vin] = TeslaCar(car, self)
 
@@ -540,12 +558,15 @@ class Controller:
 
     def generate_energysite_objects(self) -> Dict[int, EnergySite]:
         """Generate energy site objects."""
-        for energysite in self.__energysite_list:
+        for energysite in self._energysite_list:
             energysite_id = energysite["energy_site_id"]
             # Solar only systems (no Powerwalls) are listed as "solar"
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
                 self.energysites[energysite_id] = SolarSite(
-                    self.api, energysite, self.__energysite_data[energysite_id]
+                    self.api,
+                    energysite,
+                    self._site_config[energysite_id],
+                    self._site_data[energysite_id],
                 )
             # Solar with Powerwall are listed as "battery"
             if (
@@ -553,7 +574,10 @@ class Controller:
                 and energysite["components"]["solar"]
             ):
                 self.energysites[energysite_id] = SolarPowerwallSite(
-                    self.api, energysite, self.__energysite_data[energysite_id]
+                    self.api,
+                    energysite,
+                    self._battery_data[energysite_id],
+                    self._battery_summary[energysite_id],
                 )
             # Assumed Powerwall only (no solar) is listed as "battery"
             if (
@@ -561,7 +585,10 @@ class Controller:
                 and not energysite["components"]["solar"]
             ):
                 self.energysites[energysite_id] = PowerwallSite(
-                    self.api, energysite, self.__energysite_data[energysite_id]
+                    self.api,
+                    energysite,
+                    self._battery_data[energysite_id],
+                    self._battery_summary[energysite_id],
                 )
 
         return self.energysites
@@ -753,17 +780,17 @@ class Controller:
                             )
                         )
 
-        async def _get_and_process_site_data(energysite_id: Text) -> None:
+        async def _get_and_process_site_data(energysite_id: int) -> None:
             async with self.__lock[energysite_id]:
-                _LOGGER.debug("Updating energysite site data %s", energysite_id)
+                _LOGGER.debug("Updating SITE_DATA for energysite: %s", energysite_id)
+
                 try:
                     data = await self.api(
-                        "SITE_DATA",
-                        path_vars={"site_id": energysite_id},
-                        wake_if_asleep=wake_if_asleep,
+                        "SITE_DATA", path_vars={"site_id": energysite_id}
                     )
                 except TeslaException:
                     data = None
+
                 if data and data["response"]:
                     response = data["response"]
                     # Some setups always report grid_status of "Unknown" regardless
@@ -774,9 +801,9 @@ class Controller:
                         "grid_status" not in response
                         or response.get("grid_status") != "Unknown"
                     ):
-                        self.__grid_status[energysite_id]["grid_always_unk"] = False
+                        self._grid_status_unknown[energysite_id] = False
 
-                    if not self.__grid_status[energysite_id]["grid_always_unk"] and (
+                    if not self._grid_status_unknown[energysite_id] and (
                         response.get("grid_status") == "Unknown"
                         and response.get("solar_power") == 0
                     ):
@@ -785,151 +812,124 @@ class Controller:
                         )
                         del response["solar_power"]
 
-                    self.__energysite_data[energysite_id].update(response)
+                self._site_data[energysite_id].update(response)
 
         async def _get_and_process_battery_data(
-            energysite_id: Text, battery_id: Text
+            energysite_id: int, battery_id: str
         ) -> None:
             async with self.__lock[battery_id]:
-                _LOGGER.debug("Updating energysite battery data %s", battery_id)
+                _LOGGER.debug("Updating BATTERY_DATA for energysite: %s", energysite_id)
+
                 try:
                     data = await self.api(
-                        "BATTERY_DATA",
-                        path_vars={"battery_id": battery_id},
-                        wake_if_asleep=wake_if_asleep,
+                        "BATTERY_DATA", path_vars={"battery_id": battery_id}
                     )
                 except TeslaException:
                     data = None
-                if data and data["response"]:
-                    response = data["response"]
-                    components = response.get("components")
-                    params = {}
-                    if response.get("power_reading"):
-                        params = response["power_reading"][0]
-                    params["backup_reserve_percent"] = response.get("backup").get(
-                        "backup_reserve_percent"
-                    )
-                    params["customer_preferred_export_rule"] = components.get(
-                        "customer_preferred_export_rule"
-                    )
-                    params[
-                        "disallow_charge_from_grid_with_solar_installed"
-                    ] = components.get(
-                        "disallow_charge_from_grid_with_solar_installed", False
-                    )
-                    params["grid_status"] = response.get("grid_status")
-                    params["operation"] = response.get("operation")
-                    self.__energysite_data[energysite_id].update(params)
+
+                self._battery_data[energysite_id].update(data)
 
         async def _get_and_process_battery_summary(
-            energysite_id: Text, battery_id: Text
+            energysite_id: int, battery_id: str
         ) -> None:
-            # Battery stats are 0 in BATTERY_DATA
-            # Must get from BATTERY_SUMMARY
             async with self.__lock[battery_id]:
-                _LOGGER.debug("Updating energysite battery summary %s", battery_id)
+                _LOGGER.debug(
+                    "Updating BATTERY_SUMMARY for energysite: %s", energysite_id
+                )
+
                 try:
                     data = await self.api(
-                        "BATTERY_SUMMARY",
-                        path_vars={"battery_id": battery_id},
-                        wake_if_asleep=wake_if_asleep,
+                        "BATTERY_SUMMARY", path_vars={"battery_id": battery_id}
                     )
                 except TeslaException:
                     data = None
-                if data and data["response"]:
-                    current_val = self.__energysite_data[energysite_id][
-                        "percentage_charged"
-                    ]
-                    # Default to current_val to prevent None type
-                    new_val = int(
-                        data["response"].get("percentage_charged", current_val)
-                    )
-                    # percentage_charged sometimes incorrectly reports 0
-                    # Ignore if the current percentage_charged is > 5
-                    if current_val > 5 and new_val == 0:
-                        return
-                    self.__energysite_data[energysite_id].update(data["response"])
+
+                self._battery_summary[energysite_id].update(data)
 
         async with self.__update_lock:
-            cur_time = round(time.time())
-            #  Update the online cars using get_vehicles()
-            last_update = self._last_attempted_update_time
-            _LOGGER.debug(
-                "Get vehicles. Force: %s Time: %s Interval %s",
-                force,
-                cur_time - last_update,
-                ONLINE_INTERVAL,
-            )
-            if force or cur_time - last_update >= ONLINE_INTERVAL:
-                cars = await self.get_vehicles()
-                for car in cars:
-                    self.set_id_vin(car_id=car["id"], vin=car["vin"])
-                    self.set_vehicle_id_vin(
-                        vehicle_id=car["vehicle_id"], vin=car["vin"]
-                    )
-                    self.set_car_online(
-                        vin=car["vin"], online_status=car["state"] == "online"
-                    )
-                    self.car_state[car["vin"]] = car
-                self._last_attempted_update_time = cur_time
+            if self._include_vehicles:
+                cur_time = round(time.time())
+                #  Update the online cars using get_vehicles()
+                last_update = self._last_attempted_update_time
+                _LOGGER.debug(
+                    "Get vehicles. Force: %s Time: %s Interval %s",
+                    force,
+                    cur_time - last_update,
+                    ONLINE_INTERVAL,
+                )
+                if force or cur_time - last_update >= ONLINE_INTERVAL:
+                    cars = await self.get_vehicles()
+                    for car in cars:
+                        self.set_id_vin(car_id=car["id"], vin=car["vin"])
+                        self.set_vehicle_id_vin(
+                            vehicle_id=car["vehicle_id"], vin=car["vin"]
+                        )
+                        self.set_car_online(
+                            vin=car["vin"], online_status=car["state"] == "online"
+                        )
+                        self.car_state[car["vin"]] = car
+                    self._last_attempted_update_time = cur_time
 
-            # Only update online vehicles that haven't been updated recently
-            # The throttling is per car's last succesful update
-            # Note: This separate check is because there may be individual cars
-            # to update.
-            car_id = self._update_id(car_id)
-            car_vin = self._id_to_vin(car_id)
-            tasks = []
-            for vin, online in self.get_car_online().items():
-                # If specific car_id provided, only update match
-                if (
-                    (car_vin and car_vin != vin)
-                    or vin not in self.__lock
-                    or (vin and self.car_state[vin].get("in_service"))
-                ):
-                    continue
-                async with self.__lock[vin]:
-                    car_state = self.car_state[vin].get("state")
+                # Only update online vehicles that haven't been updated recently
+                # The throttling is per car's last succesful update
+                # Note: This separate check is because there may be individual cars
+                # to update.
+                car_id = self._update_id(car_id)
+                car_vin = self._id_to_vin(car_id)
+                tasks = []
+                for vin, online in self.get_car_online().items():
+                    # If specific car_id provided, only update match
                     if (
-                        (
-                            online
-                            or (wake_if_asleep and car_state in ["asleep", "offline"])
-                        )
-                        and (  # pylint: disable=too-many-boolean-expressions
-                            self.__update.get(vin)
-                        )  # Only update cars with update flag on
-                        and (
-                            force
-                            or vin not in self._last_update_time
-                            or (
-                                cur_time - self._last_update_time[vin]
-                                >= self._calculate_next_interval(vin)
-                            )
-                        )
+                        (car_vin and car_vin != vin)
+                        or vin not in self.__lock
+                        or (vin and self.car_state[vin].get("in_service"))
                     ):
-                        tasks.append(_get_and_process_car_data(vin))
-                    else:
-                        _LOGGER.debug(
+                        continue
+                    async with self.__lock[vin]:
+                        car_state = self.car_state[vin].get("state")
+                        if (
                             (
-                                "%s: Skipping update with state %s. Polling: %s. "
-                                "Last update: %s ago. Last parked: %s ago. "
-                                "Last wake_up %s ago. "
-                            ),
-                            vin[-5:],
-                            car_state,
-                            self.__update.get(vin),
-                            cur_time - self._last_update_time[vin],
-                            cur_time - self.get_last_park_time(vin=vin),
-                            cur_time - self.get_last_wake_up_time(vin=vin),
-                        )
-            if self.__energysite_list and not car_id:
+                                online
+                                or (
+                                    wake_if_asleep
+                                    and car_state in ["asleep", "offline"]
+                                )
+                            )
+                            and (  # pylint: disable=too-many-boolean-expressions
+                                self.__update.get(vin)
+                            )  # Only update cars with update flag on
+                            and (
+                                force
+                                or vin not in self._last_update_time
+                                or (
+                                    cur_time - self._last_update_time[vin]
+                                    >= self._calculate_next_interval(vin)
+                                )
+                            )
+                        ):
+                            tasks.append(_get_and_process_car_data(vin))
+                        else:
+                            _LOGGER.debug(
+                                (
+                                    "%s: Skipping update with state %s. Polling: %s. "
+                                    "Last update: %s ago. Last parked: %s ago. "
+                                    "Last wake_up %s ago. "
+                                ),
+                                vin[-5:],
+                                car_state,
+                                self.__update.get(vin),
+                                cur_time - self._last_update_time[vin],
+                                cur_time - self.get_last_park_time(vin=vin),
+                                cur_time - self.get_last_wake_up_time(vin=vin),
+                            )
+            if self._include_energysites and self._energysite_list and not car_id:
                 # do not update energy sites if car_id was a parameter.
-                for energysite in self.energysites.values():
-                    energysite_id = energysite.energysite_id
-                    if energysite.resource_type == RESOURCE_TYPE_SOLAR:
+                for energysite in self._energysite_list:
+                    energysite_id = energysite["energy_site_id"]
+                    if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
                         tasks.append(_get_and_process_site_data(energysite_id))
-                    if energysite.resource_type == RESOURCE_TYPE_BATTERY:
-                        battery_id = energysite.id
+                    if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
+                        battery_id = energysite["id"]
                         tasks.append(
                             _get_and_process_battery_data(energysite_id, battery_id)
                         )
@@ -1541,10 +1541,6 @@ class Controller:
             return self.update_interval
 
         return self._update_interval_vin.get(vin, self.update_interval)
-
-    def get_power_params(self, energysite_id: Text) -> Dict:
-        """Return cached copy of power_params for energysite_id."""
-        return self.__energysite_data[energysite_id]
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
         """Return vin for a car_id."""
