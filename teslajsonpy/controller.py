@@ -817,7 +817,8 @@ class Controller:
             except TeslaException:
                 data = None
 
-            self._battery_data[energysite_id].update(data)
+            if data and data["response"]:
+                self._battery_data[energysite_id].update(data["response"])
 
         async def _get_and_process_battery_summary(
             energysite_id: int, battery_id: str
@@ -831,7 +832,8 @@ class Controller:
             except TeslaException:
                 data = None
 
-            self._battery_summary[energysite_id].update(data)
+            if data and data["response"]:
+                self._battery_summary[energysite_id].update(data["response"])
 
         async with self.__update_lock:
             if self._include_vehicles:
