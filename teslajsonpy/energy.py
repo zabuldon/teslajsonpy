@@ -216,20 +216,22 @@ class SolarPowerwallSite(PowerwallSite):
     @property
     def export_rule(self) -> str:
         """Return energy export rule setting."""
-        return self._battery_data["components"].get("customer_preferred_export_rule")
+        return self._battery_data.get("components").get(
+            "customer_preferred_export_rule"
+        )
 
     @property
     def grid_charging(self) -> bool:
         """Return grid charging."""
         # Key is missing from battery_data when False
-        return not self._battery_data["components"].get(
+        return not self._battery_data.get("components").get(
             "disallow_charge_from_grid_with_solar_installed", False
         )
 
     @property
     def solar_type(self) -> str:
         """Return type of solar (e.g. pv_panels or roof)."""
-        return self._battery_data["components"].get("solar_type")
+        return self._battery_data.get("components").get("solar_type")
 
     async def set_grid_charging(self, value: bool) -> None:
         """Set grid charging setting of Powerwall."""
