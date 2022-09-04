@@ -804,7 +804,7 @@ class Controller:
                     )
                     del response["solar_power"]
 
-            self._site_data[energysite_id].update(response)
+                self._site_data[energysite_id].update(response)
 
         async def _get_and_process_battery_data(
             energysite_id: int, battery_id: str
