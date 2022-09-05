@@ -13,10 +13,11 @@ _LOGGER = logging.getLogger(__name__)
 class EnergySite:
     """Base class to represents a Tesla energy site."""
 
-    def __init__(self, api: Callable, energysite: dict) -> None:
+    def __init__(self, api: Callable, energysite: dict, site_config: dict) -> None:
         """Initialize EnergySite."""
-        self._api: Callable = api
-        self._energysite: dict = energysite
+        self._api = api
+        self._energysite = energysite
+        self._site_config = site_config
 
     @property
     def energysite_id(self) -> int:
@@ -71,9 +72,8 @@ class SolarSite(EnergySite):
         self, api: Callable, energysite: dict, site_config: dict, site_data: dict
     ) -> None:
         """Initialize SolarSite."""
-        super().__init__(api, energysite)
-        self._site_config: dict = site_config
-        self._site_data: dict = site_data
+        super().__init__(api, energysite, site_config)
+        self._site_data = site_data
 
     @property
     def grid_power(self) -> float:
@@ -110,10 +110,15 @@ class PowerwallSite(EnergySite):
     """
 
     def __init__(
-        self, api: Callable, energysite: dict, battery_data: dict, battery_summary: dict
+        self,
+        api: Callable,
+        energysite: dict,
+        site_config: dict,
+        battery_data: dict,
+        battery_summary: dict,
     ) -> None:
         """Initialize PowerwallSite."""
-        super().__init__(api, energysite)
+        super().__init__(api, energysite, site_config)
         self._battery_data: dict = battery_data
         self._battery_summary: dict = battery_summary
 
@@ -173,6 +178,11 @@ class PowerwallSite(EnergySite):
         if self._battery_data.get("power_reading"):
             return self._battery_data["power_reading"][0]["solar_power"]
 
+    @property
+    def version(self) -> float:
+        """Return firmware version."""
+        return self._site_config.get("version")
+
     async def set_operation_mode(self, real_mode: str) -> None:
         """Set operation mode of Powerwall.
 
@@ -208,10 +218,15 @@ class SolarPowerwallSite(PowerwallSite):
     """
 
     def __init__(
-        self, api: Callable, energysite: dict, battery_data: dict, battery_summary: dict
+        self,
+        api: Callable,
+        energysite: dict,
+        site_config: dict,
+        battery_data: dict,
+        battery_summary: dict,
     ) -> None:
         """Initialize SolarPowerwallSite."""
-        super().__init__(api, energysite, battery_data, battery_summary)
+        super().__init__(api, energysite, site_config, battery_data, battery_summary)
 
     @property
     def export_rule(self) -> str:

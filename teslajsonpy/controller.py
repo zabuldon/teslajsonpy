@@ -430,16 +430,13 @@ class Controller:
             for energysite in self._energysite_list:
                 energysite_id = energysite.get("energy_site_id")
 
-                if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
-                    # site_name comes from site_config for non-Powerwall sites
-                    self._site_config[energysite_id] = await self.get_site_config(
-                        energysite_id
-                    )
-                    self._site_data[energysite_id] = {}
-
-                if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
-                    self._battery_data[energysite_id] = {}
-                    self._battery_summary[energysite_id] = {}
+                self._site_config[energysite_id] = await self.get_site_config(
+                    energysite_id
+                )
+                # These will get updated when self.update is called below
+                self._site_data[energysite_id] = {}
+                self._battery_data[energysite_id] = {}
+                self._battery_summary[energysite_id] = {}
                 # For dealing with sites that always report "Unknown"
                 # Default to True and check during updates
                 self._grid_status_unknown = {energysite_id: True}
@@ -572,6 +569,7 @@ class Controller:
                 self.energysites[energysite_id] = SolarPowerwallSite(
                     self.api,
                     energysite,
+                    self._site_config[energysite_id],
                     self._battery_data[energysite_id],
                     self._battery_summary[energysite_id],
                 )
@@ -583,6 +581,7 @@ class Controller:
                 self.energysites[energysite_id] = PowerwallSite(
                     self.api,
                     energysite,
+                    self._site_config[energysite_id],
                     self._battery_data[energysite_id],
                     self._battery_summary[energysite_id],
                 )
