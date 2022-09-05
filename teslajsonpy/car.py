@@ -324,11 +324,11 @@ class TeslaCar:
         )
 
     @property
-    def is_trunk_locked(self) -> int:
+    def is_trunk_locked(self) -> bool:
         """Return car trunk is locked (closed).
 
         Returns
-            int: 0 (locked), 255 (unlocked)
+            bool: False (0), True (255)
         """
         response = self._controller.get_state_params(vin=self.vin).get("rt")
 
@@ -340,7 +340,7 @@ class TeslaCar:
     @property
     def is_on(self) -> bool:
         """Return car is on."""
-        return self._controller.car_online[self.vin]
+        return self._controller.is_car_online(vin=self.vin)
 
     @property
     def longitude(self) -> float:
