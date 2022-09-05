@@ -586,6 +586,14 @@ class TeslaCar:
             charging_amps=int(value),
             wake_if_asleep=True,
         )
+        # A second API call allows setting below 5 Amps
+        if value < 5:
+            data = await self._send_command(
+                "CHARGING_AMPS",
+                path_vars={"vehicle_id": self.id},
+                charging_amps=int(value),
+                wake_if_asleep=True,
+            )
 
         if data and data["response"]["result"] is True:
             params = {"charge_amps": int(value)}
