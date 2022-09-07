@@ -344,6 +344,7 @@ class Controller:
         self._include_energysites: bool = True
         self._product_list: List[dict] = []
         self._vehicle_list: List[dict] = []
+        self._vehicle_data: List[dict] = {}
         self._energysite_list: List[dict] = []
         self._site_config: Dict[int:dict] = {}
         self._site_data: Dict[int:dict] = {}
@@ -418,6 +419,8 @@ class Controller:
                 self.__config[vin] = {}
                 self.__driving[vin] = {}
                 self.__gui[vin] = {}
+
+                self._vehicle_data[vin] = {}
 
         if self._include_energysites:
             self._energysite_list = [
@@ -545,7 +548,7 @@ class Controller:
         """Generate car objects."""
         for car in self._vehicle_list:
             vin = car["vin"]
-            self.cars[vin] = TeslaCar(car, self)
+            self.cars[vin] = TeslaCar(car, self, self._vehicle_data[vin])
 
         return self.cars
 
@@ -774,6 +777,8 @@ class Controller:
                                 on_disconnect=self._process_websocket_disconnect,
                             )
                         )
+
+                    self._vehicle_data[vin].update(response)
 
         async def _get_and_process_site_data(energysite_id: int) -> None:
             _LOGGER.debug("Updating SITE_DATA for energysite: %s", energysite_id)

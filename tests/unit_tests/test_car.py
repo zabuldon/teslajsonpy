@@ -14,9 +14,10 @@ from tests.tesla_mock import (
 @pytest.mark.asyncio
 async def test_car_properties(monkeypatch):
     """Test TeslaCar class properties."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
 
     _car = _controller.cars[VIN]
@@ -202,7 +203,9 @@ async def test_car_properties(monkeypatch):
         "steering_wheel_heater"
     )
 
-    assert _car.third_row_seats == VEHICLE_DATA["vehicle_state"].get("third_row_seats")
+    assert _car.third_row_seats == str(
+        VEHICLE_DATA["vehicle_state"].get("third_row_seats")
+    )
 
     assert (
         _car.time_to_full_charge == VEHICLE_DATA["charge_state"]["time_to_full_charge"]
@@ -212,9 +215,10 @@ async def test_car_properties(monkeypatch):
 @pytest.mark.asyncio
 async def test_change_charge_limit(monkeypatch):
     """Test change charge limit."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -224,9 +228,10 @@ async def test_change_charge_limit(monkeypatch):
 @pytest.mark.asyncio
 async def test_charge_port_door_open_close(monkeypatch):
     """Test charge port door open/close command."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -238,9 +243,10 @@ async def test_charge_port_door_open_close(monkeypatch):
 @pytest.mark.asyncio
 async def test_flash_lights(monkeypatch):
     """Test flash lights command."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -250,9 +256,10 @@ async def test_flash_lights(monkeypatch):
 @pytest.mark.asyncio
 async def test_honk_horn(monkeypatch):
     """Test honk horn command."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -262,9 +269,10 @@ async def test_honk_horn(monkeypatch):
 @pytest.mark.asyncio
 async def test_lock(monkeypatch):
     """Test lock command."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -274,9 +282,10 @@ async def test_lock(monkeypatch):
 @pytest.mark.asyncio
 async def test_remote_seat_heater_request(monkeypatch):
     """Test remote seat heater request."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -286,9 +295,10 @@ async def test_remote_seat_heater_request(monkeypatch):
 @pytest.mark.asyncio
 async def test_schedule_software_update(monkeypatch):
     """Test scheduling software update."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -298,9 +308,10 @@ async def test_schedule_software_update(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_charging_amps(monkeypatch):
     """Test setting charging amps."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -310,9 +321,10 @@ async def test_set_charging_amps(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_cabin_overheat_protection(monkeypatch):
     """Test setting heated steering wheel."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -322,9 +334,10 @@ async def test_set_cabin_overheat_protection(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_climate_keeper_mode(monkeypatch):
     """Test setting climate keeper mode."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -334,9 +347,10 @@ async def test_set_climate_keeper_mode(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_heated_steering_wheel(monkeypatch):
     """Test setting heated steering wheel."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -346,9 +360,10 @@ async def test_set_heated_steering_wheel(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_hvac_mode(monkeypatch):
     """Test setting HVAC mode."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -358,9 +373,10 @@ async def test_set_hvac_mode(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_max_defrost(monkeypatch):
     """Test wake up."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -370,9 +386,10 @@ async def test_set_max_defrost(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_sentry_mode(monkeypatch):
     """Test wake up."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -382,9 +399,10 @@ async def test_set_sentry_mode(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_temperature(monkeypatch):
     """Test wake up."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -394,9 +412,10 @@ async def test_set_temperature(monkeypatch):
 @pytest.mark.asyncio
 async def test_start_stop_charge(monkeypatch):
     """Test wake up."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -408,9 +427,10 @@ async def test_start_stop_charge(monkeypatch):
 @pytest.mark.asyncio
 async def test_wake_up(monkeypatch):
     """Test wake up."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -420,9 +440,10 @@ async def test_wake_up(monkeypatch):
 @pytest.mark.asyncio
 async def test_toggle_trunk(monkeypatch):
     """Test toggle trunk."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -432,9 +453,10 @@ async def test_toggle_trunk(monkeypatch):
 @pytest.mark.asyncio
 async def test_toggle_frunk(monkeypatch):
     """Test toggle frunk."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -444,9 +466,10 @@ async def test_toggle_frunk(monkeypatch):
 @pytest.mark.asyncio
 async def test_trigger_homelink(monkeypatch):
     """Test unlock."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
@@ -456,9 +479,10 @@ async def test_trigger_homelink(monkeypatch):
 @pytest.mark.asyncio
 async def test_unlock(monkeypatch):
     """Test unlock."""
-    TeslaMock(monkeypatch)
+    _mock = TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
+    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
     _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
