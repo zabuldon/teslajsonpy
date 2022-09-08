@@ -974,7 +974,6 @@ class Controller:
         self, car_id: Text = None, vin: Text = None, params: Dict = None
     ) -> None:
         """Set climate_params for car_id."""
-        # Used to update params in self.__climate for TeslaCar.set_temperature
         params = params or {}
         if car_id and not vin:
             vin = self._id_to_vin(car_id)

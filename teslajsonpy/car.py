@@ -634,6 +634,8 @@ class TeslaCar:
             if data and data["response"]["result"] is True:
                 params = {"is_climate_on": False}
                 self._vehicle_data["climate_state"].update(params)
+            # Need to update controller car data for polling functions
+            self._controller.update_climate_params(vin=self.vin, params=params)
 
         elif value == "on":
             data = await self._send_command(
@@ -644,6 +646,8 @@ class TeslaCar:
             if data and data["response"]["result"] is True:
                 params = {"is_climate_on": True}
                 self._vehicle_data["climate_state"].update(params)
+            # Need to update controller car data for polling functions
+            self._controller.update_climate_params(vin=self.vin, params=params)
 
     async def set_max_defrost(self, state: int) -> None:
         """Send command to set max defrost.
@@ -673,6 +677,8 @@ class TeslaCar:
         if data and data["response"]["result"] is True:
             params = {"sentry_mode": value}
             self._vehicle_data["vehicle_state"].update(params)
+            # Need to update controller car data for polling functions
+            self._controller.update_state_params(vin=self.vin, params=params)
 
     async def set_temperature(self, temp: float) -> None:
         """Send command to set temperature."""
@@ -698,6 +704,8 @@ class TeslaCar:
         if data and data["response"]["result"] is True:
             params = {"charging_state": "Charging"}
             self._vehicle_data["charge_state"].update(params)
+            # Need to update controller car data for polling functions
+            self._controller.update_charging_params(vin=self.vin, params=params)
 
     async def stop_charge(self) -> None:
         """Send command to start charge."""
@@ -710,6 +718,8 @@ class TeslaCar:
         if data and data["response"]["result"] is True:
             params = {"charging_state": "Stopped"}
             self._vehicle_data["charge_state"].update(params)
+            # Need to update controller car data for polling functions
+            self._controller.update_charging_params(vin=self.vin, params=params)
 
     async def wake_up(self) -> None:
         """Send command to wake up."""
