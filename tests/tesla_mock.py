@@ -18,24 +18,24 @@ class TeslaMock:
 
         self._monkeypatch = monkeypatch
         self._monkeypatch.setattr(Controller, "api", self.mock_api)
-        self._monkeypatch.setattr(
-            Controller, "get_charging_params", self.mock_get_charging_params
-        )
-        self._monkeypatch.setattr(
-            Controller, "get_climate_params", self.mock_get_climate_params
-        )
-        self._monkeypatch.setattr(
-            Controller, "get_config_params", self.mock_get_config_params
-        )
-        self._monkeypatch.setattr(
-            Controller, "get_drive_params", self.mock_get_drive_params
-        )
-        self._monkeypatch.setattr(
-            Controller, "get_gui_params", self.mock_get_gui_params
-        )
-        self._monkeypatch.setattr(
-            Controller, "get_state_params", self.mock_get_state_params
-        )
+        # self._monkeypatch.setattr(
+        #     Controller, "get_charging_params", self.mock_get_charging_params
+        # )
+        # self._monkeypatch.setattr(
+        #     Controller, "get_climate_params", self.mock_get_climate_params
+        # )
+        # self._monkeypatch.setattr(
+        #     Controller, "get_config_params", self.mock_get_config_params
+        # )
+        # self._monkeypatch.setattr(
+        #     Controller, "get_drive_params", self.mock_get_drive_params
+        # )
+        # self._monkeypatch.setattr(
+        #     Controller, "get_gui_params", self.mock_get_gui_params
+        # )
+        # self._monkeypatch.setattr(
+        #     Controller, "get_state_params", self.mock_get_state_params
+        # )
         self._monkeypatch.setattr(
             Controller, "get_product_list", self.mock_get_product_list
         )

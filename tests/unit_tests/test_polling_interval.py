@@ -13,11 +13,11 @@ CAR_ID2 = 86543210987654321
 def test_update_interval(monkeypatch):
     """Test update_interval property"""
 
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
 
     monkeypatch.setitem(_controller.car_online, VIN, True)
-    monkeypatch.setitem(_controller.car_state, VIN, _mock.data_request_vehicle())
+
     _controller.set_id_vin(CAR_ID, VIN)
 
     # Test default update polling interval is set
@@ -32,11 +32,11 @@ def test_update_interval(monkeypatch):
 def test_set_update_interval_vin(monkeypatch):
     """Test set_update_interval_vin()."""
 
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
 
     monkeypatch.setitem(_controller.car_online, VIN, True)
-    monkeypatch.setitem(_controller.car_state, VIN, _mock.data_request_vehicle())
+
     _controller.set_id_vin(CAR_ID, VIN)
     _controller.set_id_vin(CAR_ID2, VIN2)
 
@@ -62,11 +62,11 @@ def test_set_update_interval_vin(monkeypatch):
 def test_get_update_interval_vin(monkeypatch):
     """Test get_update_interval_vin()."""
 
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
 
     monkeypatch.setitem(_controller.car_online, VIN, True)
-    monkeypatch.setitem(_controller.car_state, VIN, _mock.data_request_vehicle())
+
     _controller.set_id_vin(CAR_ID, VIN)
     _controller.update_interval = UPDATE_INTERVAL
 

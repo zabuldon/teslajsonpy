@@ -65,7 +65,7 @@ class TeslaCar:
     @property
     def data_available(self) -> bool:
         """Return if data is available."""
-        return self._controller.get_state_params(vin=self.vin)
+        return self._vehicle_data
 
     @property
     def battery_level(self) -> float:
@@ -253,6 +253,11 @@ class TeslaCar:
         return self._vehicle_data.get("charge_state").get("ideal_battery_range")
 
     @property
+    def in_service(self) -> bool:
+        """Return car in_service."""
+        return self._vehicle_data.get("in_service")
+
+    @property
     def inside_temp(self) -> float:
         """Return inside temperature."""
         return self._vehicle_data.get("climate_state").get("inside_temp")
@@ -280,6 +285,11 @@ class TeslaCar:
             return True
         if response == 255:
             return False
+
+    @property
+    def is_in_gear(self) -> bool:
+        """Return car is gear (i.e. drive or reverse)."""
+        return self.shift_state in ["D", "R"]
 
     @property
     def is_locked(self) -> bool:
@@ -351,6 +361,11 @@ class TeslaCar:
         return self._vehicle_data.get("drive_state").get("native_latitude")
 
     @property
+    def native_type(self) -> float:
+        """Return native type."""
+        return self._vehicle_data.get("drive_state").get("native_type")
+
+    @property
     def odometer(self) -> float:
         """Return odometer."""
         return self._vehicle_data.get("vehicle_state").get("odometer")
@@ -359,6 +374,11 @@ class TeslaCar:
     def outside_temp(self) -> float:
         """Return outside temperature."""
         return self._vehicle_data.get("climate_state").get("outside_temp")
+
+    @property
+    def power(self) -> int:
+        """Return power."""
+        return self._vehicle_data.get("drive_state").get("power")
 
     @property
     def rear_seat_heaters(self) -> int:
@@ -397,7 +417,6 @@ class TeslaCar:
     @property
     def steering_wheel_heater(self) -> bool:
         """Return steering wheel heater option."""
-        # Not seeing this in the JSON response for 2015 Model S 85D on 28 Aug 2022
         return self._vehicle_data.get("climate_state").get("steering_wheel_heater")
 
     @property
@@ -634,8 +653,6 @@ class TeslaCar:
             if data and data["response"]["result"] is True:
                 params = {"is_climate_on": False}
                 self._vehicle_data["climate_state"].update(params)
-            # Need to update controller car data for polling functions
-            self._controller.update_climate_params(vin=self.vin, params=params)
 
         elif value == "on":
             data = await self._send_command(
@@ -646,8 +663,6 @@ class TeslaCar:
             if data and data["response"]["result"] is True:
                 params = {"is_climate_on": True}
                 self._vehicle_data["climate_state"].update(params)
-            # Need to update controller car data for polling functions
-            self._controller.update_climate_params(vin=self.vin, params=params)
 
     async def set_max_defrost(self, state: int) -> None:
         """Send command to set max defrost.
@@ -677,8 +692,6 @@ class TeslaCar:
         if data and data["response"]["result"] is True:
             params = {"sentry_mode": value}
             self._vehicle_data["vehicle_state"].update(params)
-            # Need to update controller car data for polling functions
-            self._controller.update_state_params(vin=self.vin, params=params)
 
     async def set_temperature(self, temp: float) -> None:
         """Send command to set temperature."""
@@ -704,8 +717,6 @@ class TeslaCar:
         if data and data["response"]["result"] is True:
             params = {"charging_state": "Charging"}
             self._vehicle_data["charge_state"].update(params)
-            # Need to update controller car data for polling functions
-            self._controller.update_charging_params(vin=self.vin, params=params)
 
     async def stop_charge(self) -> None:
         """Send command to start charge."""
@@ -718,8 +729,6 @@ class TeslaCar:
         if data and data["response"]["result"] is True:
             params = {"charging_state": "Stopped"}
             self._vehicle_data["charge_state"].update(params)
-            # Need to update controller car data for polling functions
-            self._controller.update_charging_params(vin=self.vin, params=params)
 
     async def wake_up(self) -> None:
         """Send command to wake up."""
@@ -785,6 +794,10 @@ class TeslaCar:
             reason = data["response"]["reason"]
             if result is False:
                 raise HomelinkError(f"Error calling trigger_homelink: {reason}")
+
+    async def update_car_state(self, state: dict) -> None:
+        """Update the car state."""
+        self._vehicle_data.update(state)
 
     async def unlock(self) -> None:
         """Send unlock command."""
