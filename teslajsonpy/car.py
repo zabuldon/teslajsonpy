@@ -37,6 +37,7 @@ class TeslaCar:
         self._controller = controller
         self._vehicle_data = vehicle_data
 
+        self._previous_charging_state = self.charging_state
         self._previous_driver_temp = self.driver_temp_setting
         self._previous_fan_status = self.fan_status
         self._previous_passenger_temp = self.passenger_temp_setting
@@ -171,9 +172,15 @@ class TeslaCar:
         """Return charging state.
 
         Returns
-            str: Charging, Stopped, Complete, others?
+            str: Charging, Stopped, Complete, Disconnected, NoPower
         """
-        return self._vehicle_data.get("charge_state").get("charging_state")
+        current_charging_state = self._vehicle_data.get("charge_state").get(
+            "charging_state"
+        )
+        # Tesla API returns None when car is sleeping
+        if current_charging_state:
+            return current_charging_state
+        return self._previous_charging_state
 
     @property
     def charger_voltage(self) -> int:
