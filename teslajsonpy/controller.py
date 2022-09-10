@@ -361,7 +361,6 @@ class Controller:
 
         Args
             test_login (bool, optional): Whether to test credentials only. Defaults to False.
-            wake_if_asleep (bool, optional): Whether to wake up any sleeping cars to update state. Defaults to False.
             filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.
             include_vehicles (bool, optional): Whether to include vehicles. Defaults to True.
             include_energysites(bool, optional): Whether to include energysites. Defaults to True.
@@ -380,7 +379,7 @@ class Controller:
         self._include_vehicles = include_vehicles
         self._include_energysites = include_energysites
 
-        self._product_list = await self.get_product_list()
+        self._product_list = await self.get_product_list(wake_if_asleep=wake_if_asleep)
 
         if self._include_vehicles or not test_login:
             self._vehicle_list = [
@@ -408,7 +407,9 @@ class Controller:
                 )
                 self.__driving[vin] = {}
 
-                self._vehicle_data[vin] = await self.get_vehicle_data(vin)
+                self._vehicle_data[vin] = await self.get_vehicle_data(
+                    vin, wake_if_asleep=wake_if_asleep
+                )
 
         if self._include_energysites or not test_login:
             self._energysite_list = [
@@ -519,14 +520,18 @@ class Controller:
         return len(self.__websocket_listeners) - 1
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
-    async def get_product_list(self) -> list:
+    async def get_product_list(self, wake_if_asleep: bool = False) -> list:
         """Get product list from Tesla."""
-        return (await self.api("PRODUCT_LIST"))["response"]
+        return (await self.api("PRODUCT_LIST", wake_if_asleep=wake_if_asleep))[
+            "response"
+        ]
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
-    async def get_vehicles(self) -> list:
+    async def get_vehicles(self, wake_if_asleep: bool = False) -> list:
         """Get vehicles json from TeslaAPI."""
-        return (await self.api("VEHICLE_LIST"))["response"]
+        return (await self.api("VEHICLE_LIST", wake_if_asleep=wake_if_asleep))[
+            "response"
+        ]
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_site_config(self, energysite_id: int) -> dict:
@@ -536,11 +541,13 @@ class Controller:
         ]
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
-    async def get_vehicle_data(self, vin: str) -> dict:
+    async def get_vehicle_data(self, vin: str, wake_if_asleep: bool = False) -> dict:
         """Get vehicle data json from TeslaAPI for a given vin."""
         return (
             await self.api(
-                "VEHICLE_DATA", path_vars={"vehicle_id": self.__vin_id_map[vin]}
+                "VEHICLE_DATA",
+                path_vars={"vehicle_id": self.__vin_id_map[vin]},
+                wake_if_asleep=wake_if_asleep,
             )
         )["response"]
 
@@ -757,7 +764,9 @@ class Controller:
             async with self.__lock[vin]:
                 _LOGGER.debug("%s: Updating VEHICLE_DATA", vin[-5:])
                 try:
-                    data = await self.get_vehicle_data(vin)
+                    data = await self.get_vehicle_data(
+                        vin, wake_if_asleep=wake_if_asleep
+                    )
                 except TeslaException:
                     data = None
                 if data:

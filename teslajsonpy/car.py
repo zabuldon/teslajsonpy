@@ -37,6 +37,10 @@ class TeslaCar:
         self._controller = controller
         self._vehicle_data = vehicle_data
 
+        self._previous_driver_temp = self.driver_temp_setting
+        self._previous_fan_status = self.fan_status
+        self._previous_passenger_temp = self.passenger_temp_setting
+
     @property
     def display_name(self) -> str:
         """Return display name."""
@@ -207,6 +211,11 @@ class TeslaCar:
         return self._vehicle_data.get("climate_state").get("driver_temp_setting")
 
     @property
+    def fan_status(self) -> int:
+        """Return fan status setting."""
+        return self._vehicle_data.get("climate_state").get("fan_status")
+
+    @property
     def fast_charger_present(self) -> bool:
         """Return fast charger present."""
         return self._vehicle_data.get("charge_state").get("fast_charger_present")
@@ -374,6 +383,11 @@ class TeslaCar:
     def outside_temp(self) -> float:
         """Return outside temperature."""
         return self._vehicle_data.get("climate_state").get("outside_temp")
+
+    @property
+    def passenger_temp_setting(self) -> float:
+        """Return passenger temperature setting."""
+        return self._vehicle_data.get("climate_state").get("passenger_temp_setting")
 
     @property
     def power(self) -> int:
@@ -621,7 +635,10 @@ class TeslaCar:
             wake_if_asleep=True,
         )
         if data and data["response"]["result"] is True:
-            params = {"climate_keeper_mode": CLIMATE_KEEPER_ID_MAP[keeper_id]}
+            params = {
+                "climate_keeper_mode": CLIMATE_KEEPER_ID_MAP[keeper_id],
+                "is_climate_on": True,
+            }
             self._vehicle_data["climate_state"].update(params)
 
     async def set_heated_steering_wheel(self, value: bool) -> None:
@@ -651,7 +668,15 @@ class TeslaCar:
                 wake_if_asleep=True,
             )
             if data and data["response"]["result"] is True:
-                params = {"is_climate_on": False}
+                # Set additional values if turning HVAC off after defrost max
+                params = {
+                    "defrost_mode": 0,
+                    "driver_temp_setting": self._previous_driver_temp,
+                    "is_climate_on": False,
+                    "is_front_defroster_on": False,
+                    "is_rear_defroster_on": False,
+                    "passenger_temp_setting": self._previous_passenger_temp,
+                }
                 self._vehicle_data["climate_state"].update(params)
 
         elif value == "on":
@@ -677,7 +702,30 @@ class TeslaCar:
             wake_if_asleep=True,
         )
         if data and data["response"]["result"] is True:
-            params = {"defrost_mode": state}
+            self._previous_driver_temp = self.driver_temp_setting
+            self._previous_passenger_temp = self.passenger_temp_setting
+            self._previous_fan_status = self.fan_status
+
+            if state == 2:
+                params = {
+                    "defrost_mode": state,
+                    "driver_temp_setting": self.max_avail_temp,
+                    "fan_status": 7,
+                    "is_climate_on": True,
+                    "is_front_defroster_on": True,
+                    "is_rear_defroster_on": True,
+                    "passenger_temp_setting": self.max_avail_temp,
+                }
+            if state == 0:
+                params = {
+                    "defrost_mode": state,
+                    "driver_temp_setting": self._previous_driver_temp,
+                    "fan_status": self._previous_fan_status,
+                    "is_climate_on": True,
+                    "is_front_defroster_on": False,
+                    "is_rear_defroster_on": False,
+                    "passenger_temp_setting": self._previous_passenger_temp,
+                }
             self._vehicle_data["climate_state"].update(params)
 
     async def set_sentry_mode(self, value: bool) -> None:
