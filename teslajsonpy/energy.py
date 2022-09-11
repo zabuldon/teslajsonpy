@@ -76,6 +76,11 @@ class SolarSite(EnergySite):
         self._site_data = site_data
 
     @property
+    def data_available(self) -> bool:
+        """Return if data is available."""
+        return self._site_data != {}
+
+    @property
     def grid_power(self) -> float:
         """Return grid power in Watts."""
         return self._site_data.get("grid_power")
@@ -132,6 +137,11 @@ class PowerwallSite(EnergySite):
         """Return battery power in Watts."""
         if self._battery_data.get("power_reading"):
             return self._battery_data["power_reading"][0]["battery_power"]
+
+    @property
+    def data_available(self) -> bool:
+        """Return if data is available."""
+        return self._battery_data != {}
 
     @property
     def energy_left(self) -> float:

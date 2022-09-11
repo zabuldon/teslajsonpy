@@ -624,6 +624,7 @@ class Controller:
         car_id = self._update_id(car_id)
         async with self.__wakeup_conds[car_vin]:
             cur_time = round(time.time())
+
             if not self.is_car_online(vin=car_vin) or (
                 self._last_wake_up_attempt[car_vin] < self._last_attempted_update_time
             ):
@@ -636,6 +637,7 @@ class Controller:
                 await self.cars[car_vin].update_car_state(result["response"])
                 self._last_wake_up_attempt[car_vin] = cur_time
                 _LOGGER.debug("%s: Wakeup: %s", car_vin[-5:], self.cars[car_vin].state)
+
             return self.is_car_online(vin=car_vin)
 
     def _calculate_next_interval(self, vin: Text) -> int:
@@ -656,10 +658,12 @@ class Controller:
         )
         if vin not in self.__update_state:
             self.__update_state[vin] = "normal"
+
         if self.cars[vin].state == "asleep" or self.cars[vin].shift_state:
             self.set_last_park_time(
                 vin=vin, timestamp=cur_time, shift_state=self.cars[vin].shift_state
             )
+
         if self.cars[vin].is_in_gear:
             driving_interval = min(
                 DRIVING_INTERVAL, self.get_update_interval_vin(vin=vin)
@@ -672,6 +676,7 @@ class Controller:
                     driving_interval,
                 )
             return driving_interval
+
         if self.polling_policy == "always":
             _LOGGER.debug(
                 "%s: %s; Polling policy set to '%s'. Scanning every %s seconds",
@@ -682,6 +687,7 @@ class Controller:
             )
             self.__update_state[vin] = "normal"
             return self.get_update_interval_vin(vin=vin)
+
         if self.polling_policy == "connected" and (
             self.cars[vin].sentry_mode
             or self.cars[vin].is_climate_on
@@ -703,6 +709,7 @@ class Controller:
             )
             self.__update_state[vin] = "normal"
             return self.get_update_interval_vin(vin=vin)
+
         if (cur_time - self.get_last_park_time(vin=vin) > IDLE_INTERVAL) and not (
             self.cars[vin].sentry_mode
             or self.cars[vin].is_climate_on
@@ -720,6 +727,7 @@ class Controller:
                 sleep_interval + self._last_update_time[vin] - cur_time,
             )
             return sleep_interval
+
         if self.__update_state[vin] != "normal":
             self.__update_state[vin] = "normal"
             _LOGGER.debug(
@@ -729,6 +737,7 @@ class Controller:
                 self.polling_policy,
                 self.get_update_interval_vin(vin=vin),
             )
+
         return self.get_update_interval_vin(vin=vin)
 
     async def update(
@@ -764,13 +773,13 @@ class Controller:
             async with self.__lock[vin]:
                 _LOGGER.debug("%s: Updating VEHICLE_DATA", vin[-5:])
                 try:
-                    data = await self.get_vehicle_data(
+                    response = await self.get_vehicle_data(
                         vin, wake_if_asleep=wake_if_asleep
                     )
                 except TeslaException:
-                    data = None
-                if data:
-                    response = data
+                    response = None
+
+                if response:
                     if (
                         self.cars[vin].is_climate_on
                         and self.cars[vin].is_climate_on
@@ -786,6 +795,7 @@ class Controller:
                             shift_state=response["drive_state"]["shift_state"],
                         )
                     self._last_update_time[vin] = round(time.time())
+
                     if self.enable_websocket and self.cars[vin].is_in_gear:
                         asyncio.create_task(
                             self.__connection.websocket_connect(
@@ -801,12 +811,11 @@ class Controller:
         async def _get_and_process_site_data(energysite_id: int) -> None:
             _LOGGER.debug("Updating SITE_DATA for energysite: %s", energysite_id)
             try:
-                data = await self.get_site_data(energysite_id)
+                response = await self.get_site_data(energysite_id)
             except TeslaException:
-                data = None
+                response = None
 
-            if data:
-                response = data
+            if response:
                 # Some setups always report grid_status of "Unknown" regardless
                 # of the actual grid status. Others only report grid_status "Unknown"
                 # when the actual grid status is unknown. These setups also sometimes
@@ -833,25 +842,24 @@ class Controller:
         ) -> None:
             _LOGGER.debug("Updating BATTERY_DATA for energysite: %s", energysite_id)
             try:
-                data = await self.get_battery_data(battery_id)
+                response = await self.get_battery_data(battery_id)
             except TeslaException:
-                data = None
+                response = None
 
-            if data:
-                self._battery_data[energysite_id].update(data)
+            if response:
+                self._battery_data[energysite_id].update(response)
 
         async def _get_and_process_battery_summary(
             energysite_id: int, battery_id: str
         ) -> None:
             _LOGGER.debug("Updating BATTERY_SUMMARY for energysite: %s", energysite_id)
-
             try:
-                data = await self._battery_summary(battery_id)
+                response = await self._battery_summary(battery_id)
             except TeslaException:
-                data = None
+                response = None
 
-            if data:
-                self._battery_summary[energysite_id].update(data)
+            if response:
+                self._battery_summary[energysite_id].update(response)
 
         async with self.__update_lock:
             if self._include_vehicles:
@@ -892,6 +900,7 @@ class Controller:
                         or (vin and self.cars[vin].in_service)
                     ):
                         continue
+
                     async with self.__lock[vin]:
                         if (
                             (
@@ -932,8 +941,10 @@ class Controller:
                 # do not update energy sites if car_id was a parameter.
                 for energysite in self._energysite_list:
                     energysite_id = energysite["energy_site_id"]
+
                     if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
                         tasks.append(_get_and_process_site_data(energysite_id))
+
                     if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
                         battery_id = energysite["id"]
                         tasks.append(

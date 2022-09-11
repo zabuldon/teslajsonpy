@@ -70,7 +70,7 @@ class TeslaCar:
     @property
     def data_available(self) -> bool:
         """Return if data is available."""
-        return self._vehicle_data
+        return self._vehicle_data != {}
 
     @property
     def battery_level(self) -> float:
@@ -177,7 +177,7 @@ class TeslaCar:
         current_charging_state = self._vehicle_data.get("charge_state").get(
             "charging_state"
         )
-        # Tesla API returns None when car is sleeping
+        # Tesla API returns None when car is sleeping; use previous reported state
         if current_charging_state:
             return current_charging_state
         return self._previous_charging_state
@@ -240,7 +240,6 @@ class TeslaCar:
     @property
     def gui_distance_units(self) -> str:
         """Return gui distance units."""
-        # Why set default to mi/hr?
         return self._vehicle_data.get("gui_settings").get("gui_distance_units")
 
     @property
