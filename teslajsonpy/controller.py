@@ -854,7 +854,7 @@ class Controller:
         ) -> None:
             _LOGGER.debug("Updating BATTERY_SUMMARY for energysite: %s", energysite_id)
             try:
-                response = await self._battery_summary(battery_id)
+                response = await self.get_battery_summary(battery_id)
             except TeslaException:
                 response = None
 
