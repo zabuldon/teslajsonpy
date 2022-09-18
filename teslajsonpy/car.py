@@ -849,10 +849,6 @@ class TeslaCar:
             if result is False:
                 raise HomelinkError(f"Error calling trigger_homelink: {reason}")
 
-    async def update_car_state(self, state: dict) -> None:
-        """Update the car state."""
-        self._vehicle_data.update(state)
-
     async def unlock(self) -> None:
         """Send unlock command."""
         data = await self._send_command(

@@ -351,8 +351,6 @@ class Controller:
     async def connect(
         self,
         test_login: bool = False,
-        wake_if_asleep: bool = False,
-        filtered_vins: Optional[List[Text]] = None,
         include_vehicles: bool = True,
         include_energysites: bool = True,
         mfa_code: Text = "",
@@ -361,7 +359,6 @@ class Controller:
 
         Args
             test_login (bool, optional): Whether to test credentials only. Defaults to False.
-            filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.
             include_vehicles (bool, optional): Whether to include vehicles. Defaults to True.
             include_energysites(bool, optional): Whether to include energysites. Defaults to True.
             mfa_code (Text, optional): MFA code to use for connection
@@ -379,68 +376,21 @@ class Controller:
         self._include_vehicles = include_vehicles
         self._include_energysites = include_energysites
 
-        self._product_list = await self.get_product_list(wake_if_asleep=wake_if_asleep)
+        if not test_login:
+            self._product_list = await self.get_product_list()
 
-        if self._include_vehicles or not test_login:
-            self._vehicle_list = [
-                cars for cars in self._product_list if "vehicle_id" in cars
-            ]
+            if self._include_vehicles:
+                self._vehicle_list = [
+                    cars for cars in self._product_list if "vehicle_id" in cars
+                ]
 
-            for car in self._vehicle_list:
-                vin = car["vin"]
-                if filtered_vins and vin not in filtered_vins:
-                    _LOGGER.debug("Skipping car with VIN: %s", vin)
-                    continue
-
-                self.set_id_vin(car_id=car["id"], vin=vin)
-                self.set_vehicle_id_vin(vehicle_id=car["vehicle_id"], vin=vin)
-                self.__lock[vin] = asyncio.Lock()
-                self.__wakeup_conds[vin] = asyncio.Lock()
-                self._last_update_time[vin] = 0
-                self._last_wake_up_attempt[vin] = 0
-                self._last_wake_up_time[vin] = 0
-                self.__update[vin] = True
-                self.__update_state[vin] = "normal"
-                self.set_car_online(vin=vin, online_status=car["state"] == "online")
-                self.set_last_park_time(
-                    vin=vin, timestamp=self._last_attempted_update_time
-                )
-                self.__driving[vin] = {}
-
-                self._vehicle_data[vin] = await self.get_vehicle_data(
-                    vin, wake_if_asleep=wake_if_asleep
-                )
-
-        if self._include_energysites or not test_login:
-            self._energysite_list = [
-                p
-                for p in self._product_list
-                if p.get(RESOURCE_TYPE) == RESOURCE_TYPE_SOLAR
-                or p.get(RESOURCE_TYPE) == RESOURCE_TYPE_BATTERY
-            ]
-
-            for energysite in self._energysite_list:
-                energysite_id = energysite.get("energy_site_id")
-
-                self._site_config[energysite_id] = await self.get_site_config(
-                    energysite_id
-                )
-
-                if energysite.get(RESOURCE_TYPE) == RESOURCE_TYPE_SOLAR:
-                    self._site_data[energysite_id] = await self.get_site_data(
-                        energysite_id
-                    )
-                if energysite.get(RESOURCE_TYPE) == RESOURCE_TYPE_BATTERY:
-                    battery_id = energysite.get("id")
-                    self._battery_data[energysite_id] = await self.get_battery_data(
-                        battery_id
-                    )
-                    self._battery_summary[
-                        energysite_id
-                    ] = await self.get_battery_summary(battery_id)
-                # For dealing with sites that always report "Unknown"
-                # Default to True and check during updates
-                self._grid_status_unknown = {energysite_id: True}
+            if self._include_energysites:
+                self._energysite_list = [
+                    p
+                    for p in self._product_list
+                    if p.get(RESOURCE_TYPE) == RESOURCE_TYPE_SOLAR
+                    or p.get(RESOURCE_TYPE) == RESOURCE_TYPE_BATTERY
+                ]
 
         return {
             "refresh_token": self.__connection.refresh_token,
@@ -572,50 +522,91 @@ class Controller:
             await self.api("BATTERY_SUMMARY", path_vars={"battery_id": battery_id})
         )["response"]
 
-    def generate_car_objects(self) -> Dict[str, TeslaCar]:
-        """Generate car objects."""
+    async def generate_car_objects(
+        self,
+        wake_if_asleep: bool = False,
+        filtered_vins: Optional[List[Text]] = None,
+    ) -> Dict[str, TeslaCar]:
+        """Generate car objects.
+
+        Args
+            wake_if_asleep (bool, optional): Wake up vehicles if asleep.
+            filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.
+        """
         for car in self._vehicle_list:
             vin = car["vin"]
+            if filtered_vins and vin not in filtered_vins:
+                _LOGGER.debug("Skipping car with VIN: %s", vin)
+                continue
+
+            self.set_id_vin(car_id=car["id"], vin=vin)
+            self.set_vehicle_id_vin(vehicle_id=car["vehicle_id"], vin=vin)
+            self.__lock[vin] = asyncio.Lock()
+            self.__wakeup_conds[vin] = asyncio.Lock()
+            self._last_update_time[vin] = 0
+            self._last_wake_up_attempt[vin] = 0
+            self._last_wake_up_time[vin] = 0
+            self.__update[vin] = True
+            self.__update_state[vin] = "normal"
+            self.set_car_online(vin=vin, online_status=car["state"] == "online")
+            self.set_last_park_time(vin=vin, timestamp=self._last_attempted_update_time)
+            self.__driving[vin] = {}
+            self._vehicle_data[vin] = {}  # Prevent KeyError for _wake_up method
+
+            self._vehicle_data[vin] = await self.get_vehicle_data(
+                vin, wake_if_asleep=wake_if_asleep
+            )
             self.cars[vin] = TeslaCar(car, self, self._vehicle_data[vin])
 
         return self.cars
 
-    def generate_energysite_objects(self) -> Dict[int, EnergySite]:
+    async def generate_energysite_objects(self) -> Dict[int, EnergySite]:
         """Generate energy site objects."""
         for energysite in self._energysite_list:
             energysite_id = energysite["energy_site_id"]
+
+            self._site_config[energysite_id] = await self.get_site_config(energysite_id)
+            # For dealing with sites that always report "Unknown"
+            # Default to True and check during updates
+            self._grid_status_unknown = {energysite_id: True}
             # Solar only systems (no Powerwalls) are listed as "solar"
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
+                self._site_data[energysite_id] = await self.get_site_data(energysite_id)
+
                 self.energysites[energysite_id] = SolarSite(
                     self.api,
                     energysite,
                     self._site_config[energysite_id],
                     self._site_data[energysite_id],
                 )
-            # Solar with Powerwall are listed as "battery"
-            if (
-                energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY
-                and energysite["components"]["solar"]
-            ):
-                self.energysites[energysite_id] = SolarPowerwallSite(
-                    self.api,
-                    energysite,
-                    self._site_config[energysite_id],
-                    self._battery_data[energysite_id],
-                    self._battery_summary[energysite_id],
+            # Powerwall systems listed as "battery"
+            if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
+                battery_id = energysite.get("id")
+
+                self._battery_data[energysite_id] = await self.get_battery_data(
+                    battery_id
                 )
-            # Assumed Powerwall only (no solar) is listed as "battery"
-            if (
-                energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY
-                and not energysite["components"]["solar"]
-            ):
-                self.energysites[energysite_id] = PowerwallSite(
-                    self.api,
-                    energysite,
-                    self._site_config[energysite_id],
-                    self._battery_data[energysite_id],
-                    self._battery_summary[energysite_id],
+
+                self._battery_summary[energysite_id] = await self.get_battery_summary(
+                    battery_id
                 )
+
+                if energysite["components"]["solar"]:
+                    self.energysites[energysite_id] = SolarPowerwallSite(
+                        self.api,
+                        energysite,
+                        self._site_config[energysite_id],
+                        self._battery_data[energysite_id],
+                        self._battery_summary[energysite_id],
+                    )
+                else:
+                    self.energysites[energysite_id] = PowerwallSite(
+                        self.api,
+                        energysite,
+                        self._site_config[energysite_id],
+                        self._battery_data[energysite_id],
+                        self._battery_summary[energysite_id],
+                    )
 
         return self.energysites
 
@@ -634,7 +625,7 @@ class Controller:
                 self.set_car_online(
                     car_id=car_id, online_status=result["response"]["state"] == "online"
                 )
-                await self.cars[car_vin].update_car_state(result["response"])
+                self._vehicle_data[car_vin].update(result["response"])
                 self._last_wake_up_attempt[car_vin] = cur_time
                 _LOGGER.debug("%s: Wakeup: %s", car_vin[-5:], self.cars[car_vin].state)
 
@@ -882,7 +873,7 @@ class Controller:
                         self.set_car_online(
                             vin=car["vin"], online_status=car["state"] == "online"
                         )
-                        await self.cars[car["vin"]].update_car_state(car)
+                        self._vehicle_data[car["vin"]].update(car)
                     self._last_attempted_update_time = cur_time
 
                 # Only update online vehicles that haven't been updated recently
