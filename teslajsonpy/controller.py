@@ -625,7 +625,11 @@ class Controller:
                 )
                 self._vehicle_data[car_vin].update(result["response"])
                 self._last_wake_up_attempt[car_vin] = cur_time
-                _LOGGER.debug("%s: Wakeup: %s", car_vin[-5:], self.cars[car_vin].state)
+                _LOGGER.debug(
+                    "%s: Wakeup: %s",
+                    car_vin[-5:],
+                    self._vehicle_data[car_vin].get("state"),
+                )
 
             return self.is_car_online(vin=car_vin)
 
