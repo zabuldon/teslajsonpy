@@ -373,18 +373,16 @@ class Controller:
 
         self._last_attempted_update_time = round(time.time())
         self.__update_lock = asyncio.Lock()
-        self._include_vehicles = include_vehicles
-        self._include_energysites = include_energysites
 
         if not test_login:
             self._product_list = await self.get_product_list()
 
-            if self._include_vehicles:
+            if include_vehicles:
                 self._vehicle_list = [
                     cars for cars in self._product_list if "vehicle_id" in cars
                 ]
 
-            if self._include_energysites:
+            if include_energysites:
                 self._energysite_list = [
                     p
                     for p in self._product_list
@@ -853,7 +851,7 @@ class Controller:
                 self._battery_summary[energysite_id].update(response)
 
         async with self.__update_lock:
-            if self._include_vehicles:
+            if self._vehicle_list:
                 cur_time = round(time.time())
                 #  Update the online cars using get_vehicles()
                 last_update = self._last_attempted_update_time
@@ -928,7 +926,7 @@ class Controller:
                                 cur_time - self.get_last_park_time(vin=vin),
                                 cur_time - self.get_last_wake_up_time(vin=vin),
                             )
-            if self._include_energysites and self._energysite_list and not car_id:
+            if self._energysite_list and not car_id:
                 # do not update energy sites if car_id was a parameter.
                 for energysite in self._energysite_list:
                     energysite_id = energysite["energy_site_id"]
