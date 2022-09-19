@@ -7,15 +7,16 @@ https://github.com/zabuldon/teslajsonpy
 """
 import time
 from typing import Text
+from homeassistant.components.cover import CoverEntityFeature
 
 from teslajsonpy.homeassistant.vehicle import VehicleDevice
 
 
-class TrunkLock(VehicleDevice):
-    """Home-Assistant rear trunk lock for a Tesla VehicleDevice."""
+class TrunkCover(VehicleDevice):
+    """Home-Assistant rear trunk cover for a Tesla VehicleDevice."""
 
     def __init__(self, data, controller):
-        """Initialize the rear trunk lock.
+        """Initialize the rear trunk cover.
 
         Args:
             data (Dict): The vehicle state for a Tesla vehicle.
@@ -24,14 +25,15 @@ class TrunkLock(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__lock_state: int = None
-        self.type: Text = "trunk lock"
-        self.hass_type: Text = "lock"
-        self.sensor_type: Text = "door"
+        self.__cover_state: int = None
+        self.type: Text = "trunk"
+        self.hass_type: Text = "cover"
         self.bin_type = 0x7
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
         self.__manual_update_time = 0
+        self.device_class: Text = "DEVICE_CLASS_DOOR"
+        self.supported_features = CoverEntityFeature.OPEN|CoverEntityFeature.CLOSE
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the rear trunk state."""
@@ -47,13 +49,13 @@ class TrunkLock(VehicleDevice):
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_state_params(self._id)
-            self.__lock_state = data["rt"] if (data and "rt" in data) else None
+            self.__cover_state = data["rt"] if (data and "rt" in data) else None
 
-    def is_locked(self):
+    def is_closed(self):
         """Return whether the rear trunk is closed."""
-        return self.__lock_state == 0
+        return self.__cover_state == 0
 
-    async def unlock(self):
+    async def open_cover(self):
         """Open the rear trunk."""
         if self.is_locked():
             data = await self._controller.api(
@@ -63,10 +65,10 @@ class TrunkLock(VehicleDevice):
                 wake_if_asleep=True,
             )
             if data and data["response"]["result"]:
-                self.__lock_state = 255
+                self.__cover_state = 255
             self.__manual_update_time = time.time()
 
-    async def lock(self):
+    async def close_cover(self):
         """Close the rear trunk."""
         if not self.is_locked():
             data = await self._controller.api(
@@ -76,7 +78,7 @@ class TrunkLock(VehicleDevice):
                 wake_if_asleep=True,
             )
             if data and data["response"]["result"]:
-                self.__lock_state = 0
+                self.__cover_state = 0
             self.__manual_update_time = time.time()
 
     @staticmethod
@@ -85,11 +87,11 @@ class TrunkLock(VehicleDevice):
         return False
 
 
-class FrunkLock(VehicleDevice):
-    """Home-Assistant front trunk (frunk) lock for a Tesla VehicleDevice."""
+class FrunkCover(VehicleDevice):
+    """Home-Assistant front trunk (frunk) cover for a Tesla VehicleDevice."""
 
     def __init__(self, data, controller):
-        """Initialize the front trunk (frunk) lock.
+        """Initialize the front trunk (frunk) cover.
 
         Args:
             data (Dict): The vehicle state for a Tesla vehicle.
@@ -98,14 +100,15 @@ class FrunkLock(VehicleDevice):
 
         """
         super().__init__(data, controller)
-        self.__lock_state: int = None
-        self.type: Text = "frunk lock"
-        self.hass_type: Text = "lock"
-        self.sensor_type: Text = "door"
+        self.__cover_state: int = None
+        self.type: Text = "frunk"
+        self.hass_type: Text = "cover"
         self.bin_type = 0x7
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
         self.__manual_update_time = 0
+        self.supported_features = CoverEntityFeature.OPEN|CoverEntityFeature.CLOSE
+
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update the front trunk (frunk) state."""
@@ -121,11 +124,11 @@ class FrunkLock(VehicleDevice):
         last_update = self._controller.get_last_update_time(self._id)
         if last_update >= self.__manual_update_time:
             data = self._controller.get_state_params(self._id)
-            self.__lock_state = data["ft"] if (data and "ft" in data) else None
+            self.__cover_state = data["ft"] if (data and "ft" in data) else None
 
-    def is_locked(self):
+    def is_closed(self):
         """Return whether the front trunk (frunk) is closed."""
-        return self.__lock_state == 0
+        return self.__cover_state == 0
 
     async def unlock(self):
         """Open the front trunk (frunk)."""
@@ -137,7 +140,7 @@ class FrunkLock(VehicleDevice):
                 wake_if_asleep=True,
             )
             if data and data["response"]["result"]:
-                self.__lock_state = 255
+                self.__cover_state = 255
             self.__manual_update_time = time.time()
 
     async def lock(self):
@@ -150,7 +153,7 @@ class FrunkLock(VehicleDevice):
                 wake_if_asleep=True,
             )
             if data and data["response"]["result"]:
-                self.__lock_state = 0
+                self.__cover_state = 0
             self.__manual_update_time = time.time()
 
     @staticmethod

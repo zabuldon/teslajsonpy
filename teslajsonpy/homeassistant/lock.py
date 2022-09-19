@@ -8,7 +8,7 @@ https://github.com/zabuldon/teslajsonpy
 import time
 
 from teslajsonpy.homeassistant.vehicle import VehicleDevice
-
+from homeassistant.components.cover import CoverEntityFeature
 
 class Lock(VehicleDevice):
     """Home-assistant lock class for Tesla vehicles.
@@ -92,8 +92,8 @@ class Lock(VehicleDevice):
         return False
 
 
-class ChargerLock(VehicleDevice):
-    """Home-assistant lock class for the charger of Tesla vehicles.
+class ChargerCover(VehicleDevice):
+    """Home-assistant cover class for the charger of Tesla vehicles.
 
     This is intended to be partially inherited by a Home-Assitant entity.
     """
@@ -118,13 +118,15 @@ class ChargerLock(VehicleDevice):
         self.__manual_update_time = 0
         self.__lock_state = None
 
-        self.type = "charger door lock"
-        self.hass_type = "lock"
+        self.type = "charger door"
+        self.hass_type = "cover"
 
         self.name = self._name()
 
         self.uniq_name = self._uniq_name()
         self.bin_type = 0x7
+        self.device_class: Text = "DEVICE_CLASS_DOOR"
+        self.supported_features = CoverEntityFeature.OPEN|CoverEntityFeature.CLOSE
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
         """Update state of the charger lock."""
@@ -149,7 +151,7 @@ class ChargerLock(VehicleDevice):
                 else None
             )
 
-    async def lock(self):
+    async def close_cover(self):
         """Close the charger door."""
         data = await self._controller.api(
             "CHARGE_PORT_DOOR_CLOSE",
@@ -160,7 +162,7 @@ class ChargerLock(VehicleDevice):
             self.__lock_state = True
         self.__manual_update_time = time.time()
 
-    async def unlock(self):
+    async def open_cover(self):
         """Open the charger door."""
         data = await self._controller.api(
             "CHARGE_PORT_DOOR_OPEN",
@@ -171,7 +173,7 @@ class ChargerLock(VehicleDevice):
             self.__lock_state = False
         self.__manual_update_time = time.time()
 
-    def is_locked(self):
+    def is_closed(self):
         """Return whether the charger is closed."""
         return self.__lock_state
 

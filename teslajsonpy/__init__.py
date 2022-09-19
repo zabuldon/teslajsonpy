@@ -26,7 +26,7 @@ from teslajsonpy.homeassistant.climate import Climate, TempSensor
 from teslajsonpy.homeassistant.gps import GPS, Odometer
 from teslajsonpy.homeassistant.lock import Lock
 from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
-from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
+from teslajsonpy.homeassistant.trunk import FrunkCover, TrunkCover
 from teslajsonpy.homeassistant.alerts import Horn, FlashLights
 from teslajsonpy.homeassistant.homelink import TriggerHomelink
 from teslajsonpy.teslaproxy import TeslaProxy
@@ -58,8 +58,8 @@ __all__ = [
     "Horn",
     "FlashLights",
     "TriggerHomelink",
-    "TrunkLock",
-    "FrunkLock",
+    "TrunkCover",
+    "FrunkCover",
     "__version__",
     "RetryLimitError",
     "IncompleteCredentials",

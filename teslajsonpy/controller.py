@@ -49,9 +49,9 @@ from teslajsonpy.homeassistant.charger import (
 from teslajsonpy.homeassistant.climate import Climate, TempSensor
 from teslajsonpy.homeassistant.gps import GPS, Odometer
 from teslajsonpy.homeassistant.heated_seats import HeatedSeatSelect
-from teslajsonpy.homeassistant.lock import ChargerLock, Lock
+from teslajsonpy.homeassistant.lock import ChargerCover, Lock
 from teslajsonpy.homeassistant.sentry_mode import SentryModeSwitch
-from teslajsonpy.homeassistant.trunk import FrunkLock, TrunkLock
+from teslajsonpy.homeassistant.trunk import FrunkCover, TrunkCover
 from teslajsonpy.homeassistant.heated_steering_wheel import HeatedSteeringWheelSwitch
 from teslajsonpy.homeassistant.power import (
     SolarPowerSensor,
@@ -746,7 +746,7 @@ class Controller:
         self.__components.append(Range(car, self))
         self.__components.append(TempSensor(car, self))
         self.__components.append(Lock(car, self))
-        self.__components.append(ChargerLock(car, self))
+        self.__components.append(ChargerCover(car, self))
         self.__components.append(ChargerConnectionSensor(car, self))
         self.__components.append(ChargingSensor(car, self))
         self.__components.append(ChargingEnergySensor(car, self))
@@ -757,8 +757,8 @@ class Controller:
         self.__components.append(Odometer(car, self))
         self.__components.append(OnlineSensor(car, self))
         self.__components.append(SentryModeSwitch(car, self))
-        self.__components.append(TrunkLock(car, self))
-        self.__components.append(FrunkLock(car, self))
+        self.__components.append(TrunkCover(car, self))
+        self.__components.append(FrunkCover(car, self))
         self.__components.append(UpdateSensor(car, self))
         self.__components.append(HeatedSteeringWheelSwitch(car, self))
         self.__components.append(Horn(car, self))
