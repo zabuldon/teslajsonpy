@@ -107,7 +107,7 @@ class FrunkCover(VehicleDevice):
         self.name: Text = self._name()
         self.uniq_name: Text = self._uniq_name()
         self.__manual_update_time = 0
-        self.supported_features = CoverEntityFeature.OPEN|CoverEntityFeature.CLOSE
+        self.supported_features = CoverEntityFeature.OPEN
 
 
     async def async_update(self, wake_if_asleep=False, force=False) -> None:
@@ -130,7 +130,7 @@ class FrunkCover(VehicleDevice):
         """Return whether the front trunk (frunk) is closed."""
         return self.__cover_state == 0
 
-    async def unlock(self):
+    async def open_cover(self):
         """Open the front trunk (frunk)."""
         if self.is_locked():
             data = await self._controller.api(
@@ -141,19 +141,6 @@ class FrunkCover(VehicleDevice):
             )
             if data and data["response"]["result"]:
                 self.__cover_state = 255
-            self.__manual_update_time = time.time()
-
-    async def lock(self):
-        """Close the front trunk (frunk)."""
-        if not self.is_locked():
-            data = await self._controller.api(
-                "ACTUATE_TRUNK",
-                path_vars={"vehicle_id": self._id},
-                which_trunk="front",
-                wake_if_asleep=True,
-            )
-            if data and data["response"]["result"]:
-                self.__cover_state = 0
             self.__manual_update_time = time.time()
 
     @staticmethod
