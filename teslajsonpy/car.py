@@ -45,27 +45,27 @@ class TeslaCar:
     @property
     def display_name(self) -> str:
         """Return display name."""
-        return self._vehicle_data.get("display_name")
+        return self._car.get("display_name")
 
     @property
     def id(self) -> int:
         """Return id."""
-        return self._vehicle_data.get("id")
+        return self._car.get("id")
 
     @property
     def state(self) -> str:
         """Return car state."""
-        return self._vehicle_data.get("state")
+        return self._car.get("state")
 
     @property
     def vehicle_id(self) -> int:
         """Return car id."""
-        return self._vehicle_data.get("vehicle_id")
+        return self._car.get("vehicle_id")
 
     @property
     def vin(self) -> str:
         """Return car vin."""
-        return self._vehicle_data.get("vin")
+        return self._car.get("vin")
 
     @property
     def data_available(self) -> bool:
@@ -288,18 +288,15 @@ class TeslaCar:
         return self._vehicle_data.get("climate_state").get("is_climate_on")
 
     @property
-    def is_frunk_locked(self) -> int:
-        """Return car frunk is locked (closed).
+    def is_frunk_closed(self) -> bool:
+        """Return car frunk is closed.
 
         Returns
-            int: 0 (locked), 255 (unlocked)
+            bool: True (0), False (255)
         """
         response = self._vehicle_data.get("vehicle_state").get("ft")
 
-        if response == 0:
-            return True
-        if response == 255:
-            return False
+        return True if response == 0 else False
 
     @property
     def is_in_gear(self) -> bool:
@@ -317,18 +314,15 @@ class TeslaCar:
         return self._vehicle_data.get("climate_state").get("steering_wheel_heater")
 
     @property
-    def is_trunk_locked(self) -> bool:
-        """Return car trunk is locked (closed).
+    def is_trunk_closed(self) -> bool:
+        """Return car trunk is closed.
 
         Returns
-            bool: False (0), True (255)
+            bool: True (0), False (255)
         """
         response = self._vehicle_data.get("vehicle_state").get("rt")
 
-        if response == 0:
-            return True
-        if response == 255:
-            return False
+        return True if response == 0 else False
 
     @property
     def is_on(self) -> bool:
@@ -793,7 +787,8 @@ class TeslaCar:
         )
 
     async def toggle_trunk(self) -> None:
-        """Actuate rear trunk lock."""
+        """Actuate rear trunk."""
+        prev_is_trunk_closed = self.is_trunk_closed
         data = await self._send_command(
             "ACTUATE_TRUNK",
             path_vars={"vehicle_id": self.id},
@@ -801,15 +796,16 @@ class TeslaCar:
             wake_if_asleep=True,
         )
         if data and data["response"]["result"] is True:
-            if self.is_trunk_locked:
+            if not prev_is_trunk_closed:
                 params = {"rt": 0}
                 self._vehicle_data["vehicle_state"].update(params)
-            if not self.is_trunk_locked:
+            if prev_is_trunk_closed:
                 params = {"rt": 255}
                 self._vehicle_data["vehicle_state"].update(params)
 
     async def toggle_frunk(self) -> None:
-        """Actuate front trunk lock."""
+        """Actuate front trunk."""
+        prev_is_frunk_closed = self.is_frunk_closed
         data = await self._send_command(
             "ACTUATE_TRUNK",
             path_vars={"vehicle_id": self.id},
@@ -817,10 +813,10 @@ class TeslaCar:
             wake_if_asleep=True,
         )
         if data and data["response"]["result"] is True:
-            if self.is_frunk_locked:
+            if not prev_is_frunk_closed:
                 params = {"ft": 0}
                 self._vehicle_data["vehicle_state"].update(params)
-            if not self.is_frunk_locked:
+            if prev_is_frunk_closed:
                 params = {"ft": 255}
                 self._vehicle_data["vehicle_state"].update(params)
 
