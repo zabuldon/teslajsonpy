@@ -395,6 +395,11 @@ class TeslaCar:
         return self._vehicle_data.get("drive_state").get("power")
 
     @property
+    def powered_lift_gate(self) -> bool:
+        """Return True if car has power lift gate."""
+        return self._vehicle_data.get("vehicle_config").get("plg")
+
+    @property
     def rear_seat_heaters(self) -> int:
         """Return if car has rear (second row) heated seats.
 
