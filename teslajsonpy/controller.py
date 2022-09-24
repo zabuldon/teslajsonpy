@@ -132,6 +132,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
     is_wake_command = False
     is_wake_api = False
     is_energysite_command = False
+
     if wrapped.__name__ == "api":
         car_id = kwargs.get("path_vars", {}).get("vehicle_id", "")
         is_wake_api = kwargs.get("name", "").lower() == "wake_up"
@@ -139,7 +140,9 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         car_id = args[0] if not kwargs.get("vehicle_id") else kwargs.get("vehicle_id")
         is_wake_command = len(args) >= 2 and args[1].lower() == "wake_up"
         is_energysite_command = kwargs.get("product_type") == PRODUCT_TYPE_ENERGY_SITES
+
     result = None
+
     if (
         instance._id_to_vin(car_id) is None
         or (car_id and instance.is_car_online(car_id=car_id))
@@ -156,6 +159,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
                 instance.set_car_online(car_id=car_id, online_status=False)
                 # instance.car_online[instance._id_to_vin(car_id)] = False
             raise
+
     if (
         valid_result(result)
         or is_wake_command
@@ -163,6 +167,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
         or instance._id_to_vin(car_id) is None
     ):
         return result
+
     _LOGGER.debug(
         "%s: "
         "wake_up needed for %s -> %s "
@@ -242,6 +247,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
             "Exception: %s\n%s(%s %s)", str(ex), wrapped.__name__, args, kwargs
         )
         raise
+
     if valid_result(result):
         _LOGGER.debug("Result: %s", result)
         if (
@@ -259,6 +265,7 @@ async def wake_up(wrapped, instance, args, kwargs) -> Callable:
                 online_status=result.get("response").get("state") == "online",
             )
         return result
+
     raise TeslaException("could_not_wake_buses")
 
 

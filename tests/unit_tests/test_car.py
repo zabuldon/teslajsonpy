@@ -14,11 +14,10 @@ from tests.tesla_mock import (
 @pytest.mark.asyncio
 async def test_car_properties(monkeypatch):
     """Test TeslaCar class properties."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
 
     _car = _controller.cars[VIN]
 
@@ -150,7 +149,7 @@ async def test_car_properties(monkeypatch):
 
     assert _car.is_climate_on == VEHICLE_DATA["climate_state"]["is_climate_on"]
 
-    assert _car.is_frunk_locked
+    assert _car.is_frunk_closed
 
     assert _car.is_locked == VEHICLE_DATA["vehicle_state"]["locked"]
 
@@ -158,7 +157,7 @@ async def test_car_properties(monkeypatch):
         "steering_wheel_heater"
     )
 
-    assert _car.is_trunk_locked
+    assert _car.is_trunk_closed
 
     assert _car.is_on
 
@@ -215,11 +214,10 @@ async def test_car_properties(monkeypatch):
 @pytest.mark.asyncio
 async def test_change_charge_limit(monkeypatch):
     """Test change charge limit."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.change_charge_limit(70.0) is None
@@ -228,11 +226,10 @@ async def test_change_charge_limit(monkeypatch):
 @pytest.mark.asyncio
 async def test_charge_port_door_open_close(monkeypatch):
     """Test charge port door open/close command."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.charge_port_door_open() is None
@@ -243,11 +240,10 @@ async def test_charge_port_door_open_close(monkeypatch):
 @pytest.mark.asyncio
 async def test_flash_lights(monkeypatch):
     """Test flash lights command."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.flash_lights() is None
@@ -256,11 +252,10 @@ async def test_flash_lights(monkeypatch):
 @pytest.mark.asyncio
 async def test_honk_horn(monkeypatch):
     """Test honk horn command."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.honk_horn() is None
@@ -269,11 +264,10 @@ async def test_honk_horn(monkeypatch):
 @pytest.mark.asyncio
 async def test_lock(monkeypatch):
     """Test lock command."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.lock() is None
@@ -282,11 +276,10 @@ async def test_lock(monkeypatch):
 @pytest.mark.asyncio
 async def test_remote_seat_heater_request(monkeypatch):
     """Test remote seat heater request."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.remote_seat_heater_request(3, 1) is None
@@ -295,11 +288,10 @@ async def test_remote_seat_heater_request(monkeypatch):
 @pytest.mark.asyncio
 async def test_schedule_software_update(monkeypatch):
     """Test scheduling software update."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.schedule_software_update() is None
@@ -308,11 +300,10 @@ async def test_schedule_software_update(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_charging_amps(monkeypatch):
     """Test setting charging amps."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_charging_amps(32.0) is None
@@ -321,11 +312,10 @@ async def test_set_charging_amps(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_cabin_overheat_protection(monkeypatch):
     """Test setting heated steering wheel."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_cabin_overheat_protection("On") is None
@@ -334,11 +324,10 @@ async def test_set_cabin_overheat_protection(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_climate_keeper_mode(monkeypatch):
     """Test setting climate keeper mode."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_climate_keeper_mode(1) is None
@@ -347,11 +336,10 @@ async def test_set_climate_keeper_mode(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_heated_steering_wheel(monkeypatch):
     """Test setting heated steering wheel."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_heated_steering_wheel(True) is None
@@ -360,11 +348,10 @@ async def test_set_heated_steering_wheel(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_hvac_mode(monkeypatch):
     """Test setting HVAC mode."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_hvac_mode("on") is None
@@ -373,11 +360,10 @@ async def test_set_hvac_mode(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_max_defrost(monkeypatch):
     """Test wake up."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_max_defrost(2) is None
@@ -386,11 +372,10 @@ async def test_set_max_defrost(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_sentry_mode(monkeypatch):
     """Test wake up."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_sentry_mode(True) is None
@@ -399,11 +384,10 @@ async def test_set_sentry_mode(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_temperature(monkeypatch):
     """Test wake up."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.set_temperature(22.0) is None
@@ -412,11 +396,10 @@ async def test_set_temperature(monkeypatch):
 @pytest.mark.asyncio
 async def test_start_stop_charge(monkeypatch):
     """Test wake up."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.start_charge() is None
@@ -427,11 +410,10 @@ async def test_start_stop_charge(monkeypatch):
 @pytest.mark.asyncio
 async def test_wake_up(monkeypatch):
     """Test wake up."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.wake_up() is None
@@ -440,11 +422,10 @@ async def test_wake_up(monkeypatch):
 @pytest.mark.asyncio
 async def test_toggle_trunk(monkeypatch):
     """Test toggle trunk."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.toggle_trunk() is None
@@ -453,11 +434,10 @@ async def test_toggle_trunk(monkeypatch):
 @pytest.mark.asyncio
 async def test_toggle_frunk(monkeypatch):
     """Test toggle frunk."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.toggle_frunk() is None
@@ -466,11 +446,10 @@ async def test_toggle_frunk(monkeypatch):
 @pytest.mark.asyncio
 async def test_trigger_homelink(monkeypatch):
     """Test unlock."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.trigger_homelink() is None
@@ -479,11 +458,10 @@ async def test_trigger_homelink(monkeypatch):
 @pytest.mark.asyncio
 async def test_unlock(monkeypatch):
     """Test unlock."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._vehicle_data = _mock.data_request_vehicle_by_vin()
-    _controller.generate_car_objects()
+    await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
     assert await _car.unlock() is None

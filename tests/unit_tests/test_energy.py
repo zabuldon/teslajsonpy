@@ -21,7 +21,7 @@ async def test_energysite_setup(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller.generate_energysite_objects()
+    await _controller.generate_energysite_objects()
 
     solar_site = _controller.energysites[12345]
     powerwall_site = _controller.energysites[67890]
@@ -34,12 +34,10 @@ async def test_energysite_setup(monkeypatch):
 @pytest.mark.asyncio
 async def test_solar_site(monkeypatch):
     """Test SolarSite class."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    # Add site_data since we're not mocking Controller.update()
-    _controller._site_data = {12345: _mock.data_request_site_data()}
-    _controller.generate_energysite_objects()
+    await _controller.generate_energysite_objects()
 
     _solar_site = _controller.energysites[12345]
 
@@ -63,13 +61,10 @@ async def test_solar_site(monkeypatch):
 @pytest.mark.asyncio
 async def test_powerwall_site(monkeypatch):
     """Test PowerwallSite class."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    # Add battery_data and battery_summary since we're not mocking Controller.update()
-    _controller._battery_data = {67890: _mock.data_request_battery_data()}
-    _controller._battery_summary = {67890: _mock.data_request_battery_summary()}
-    _controller.generate_energysite_objects()
+    await _controller.generate_energysite_objects()
 
     _solar_powerwall_site = _controller.energysites[67890]
 
@@ -127,12 +122,10 @@ async def test_energysite_with_no_name(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_operation_mode(monkeypatch):
     """Test set operation mode."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._battery_data = {67890: _mock.data_request_battery_data()}
-    _controller._battery_summary = {67890: _mock.data_request_battery_summary()}
-    _controller.generate_energysite_objects()
+    await _controller.generate_energysite_objects()
     _energysite = _controller.energysites[67890]
 
     assert await _energysite.set_operation_mode("autonomous") is None
@@ -141,12 +134,10 @@ async def test_set_operation_mode(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_reserve_percent(monkeypatch):
     """Test set reserve percent."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._battery_data = {67890: _mock.data_request_battery_data()}
-    _controller._battery_summary = {67890: _mock.data_request_battery_summary()}
-    _controller.generate_energysite_objects()
+    await _controller.generate_energysite_objects()
     _energysite = _controller.energysites[67890]
 
     assert await _energysite.set_reserve_percent(10) is None
@@ -155,12 +146,10 @@ async def test_set_reserve_percent(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_grid_charging(monkeypatch):
     """Test set grid charging."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._battery_data = {67890: _mock.data_request_battery_data()}
-    _controller._battery_summary = {67890: _mock.data_request_battery_summary()}
-    _controller.generate_energysite_objects()
+    await _controller.generate_energysite_objects()
     _energysite = _controller.energysites[67890]
 
     assert await _energysite.set_grid_charging(True) is None
@@ -169,12 +158,10 @@ async def test_set_grid_charging(monkeypatch):
 @pytest.mark.asyncio
 async def test_set_export_rule(monkeypatch):
     """Test set export rule."""
-    _mock = TeslaMock(monkeypatch)
+    TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
-    _controller._battery_data = {67890: _mock.data_request_battery_data()}
-    _controller._battery_summary = {67890: _mock.data_request_battery_summary()}
-    _controller.generate_energysite_objects()
+    await _controller.generate_energysite_objects()
     _energysite = _controller.energysites[67890]
 
     assert await _energysite.set_export_rule("pv_only") is None

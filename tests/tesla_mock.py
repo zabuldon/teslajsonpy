@@ -33,16 +33,23 @@ class TeslaMock:
         # self._monkeypatch.setattr(
         #     Controller, "get_gui_params", self.mock_get_gui_params
         # )
-        # self._monkeypatch.setattr(
-        #     Controller, "get_state_params", self.mock_get_state_params
-        # )
         self._monkeypatch.setattr(
             Controller, "get_product_list", self.mock_get_product_list
         )
         self._monkeypatch.setattr(
             Controller, "get_site_config", self.mock_get_site_config
         )
+        self._monkeypatch.setattr(Controller, "get_site_data", self.mock_get_site_data)
+        self._monkeypatch.setattr(
+            Controller, "get_battery_data", self.mock_get_battery_data
+        )
+        self._monkeypatch.setattr(
+            Controller, "get_battery_summary", self.mock_get_battery_summary
+        )
         self._monkeypatch.setattr(Controller, "update", self.mock_update)
+        self._monkeypatch.setattr(
+            Controller, "get_vehicle_data", self.mock_get_vehicle_data
+        )
         self._energysites = copy.deepcopy(ENERGYSITES)
         self._product_list = copy.deepcopy(PRODUCT_LIST)
         self._vehicle_data = copy.deepcopy(VEHICLE_DATA)
@@ -114,6 +121,26 @@ class TeslaMock:
         """Mock controller's get_site_config method."""
         return self.controller_get_site_config()
 
+    def mock_get_site_data(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's get_site_data method."""
+        return self.controller_get_site_data()
+
+    def mock_get_battery_data(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's get_battery_data method."""
+        return self.controller_get_battery_data()
+
+    def mock_get_battery_summary(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's get_battery_summary method."""
+        return self.controller_get_battery_summary()
+
+    def mock_get_vehicle_data(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's get_vehicle_data method."""
+        return self.controller_get_vehicle_data()
+
     def mock_get_last_update_time(self, *args, **kwargs):
         # pylint: disable=unused-argument
         """Mock controller's get_last_update_time method."""
@@ -169,6 +196,22 @@ class TeslaMock:
     async def controller_get_site_config(self):
         """Monkeypatch for controller.get_site_config()."""
         return self._site_config
+
+    async def controller_get_site_data(self):
+        """Monkeypatch for controller.get_site_data()."""
+        return self._site_data
+
+    async def controller_get_battery_data(self):
+        """Monkeypatch for controller.get_battery_data()."""
+        return self._battery_data
+
+    async def controller_get_battery_summary(self):
+        """Monkeypatch for controller.get_battery_summary()."""
+        return self._battery_summary
+
+    async def controller_get_vehicle_data(self):
+        """Monkeypatch for controller.get_vehicle_data()."""
+        return self._vehicle_data
 
     @staticmethod
     async def controller_update():
