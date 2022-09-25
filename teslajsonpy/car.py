@@ -228,7 +228,7 @@ class TeslaCar:
     def conn_charge_cable(self) -> str:
         """Return charge cable connection."""
         if self._charge_state:
-            return self._charge_state.get("charger_voltage")
+            return self._charge_state.get("conn_charge_cable")
 
     @property
     def defrost_mode(self) -> int:
