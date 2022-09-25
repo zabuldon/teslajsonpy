@@ -496,7 +496,7 @@ class TeslaCar:
     def software_update(self) -> dict:
         """Return software update version information."""
         if self._vehicle_state:
-            return self._vehicle_state.get("software_update", {})
+            return self._vehicle_state.get("software_update")
 
     @property
     def steering_wheel_heater(self) -> bool:
