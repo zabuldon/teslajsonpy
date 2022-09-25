@@ -498,13 +498,21 @@ class Controller:
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_vehicle_data(self, vin: str, wake_if_asleep: bool = False) -> dict:
         """Get vehicle data json from TeslaAPI for a given vin."""
-        return (
-            await self.api(
-                "VEHICLE_DATA",
-                path_vars={"vehicle_id": self.__vin_id_map[vin]},
-                wake_if_asleep=wake_if_asleep,
-            )
-        )["response"]
+        try:
+            response = (
+                await self.api(
+                    "VEHICLE_DATA",
+                    path_vars={"vehicle_id": self.__vin_id_map[vin]},
+                    wake_if_asleep=wake_if_asleep,
+                )
+            )["response"]
+
+        except TeslaException as ex:
+            if ex.message == "VEHICLE_UNAVAILABLE":
+                _LOGGER.debug("Vehicle asleep - data unavailable.")
+                return {}
+
+        return response
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_site_data(self, energysite_id: int) -> dict:
@@ -768,6 +776,7 @@ class Controller:
             RetryLimitError
 
         """
+        tasks = []
 
         async def _get_and_process_car_data(vin: str) -> None:
             async with self.__lock[vin]:
@@ -891,7 +900,7 @@ class Controller:
                 # to update.
                 car_id = self._update_id(car_id)
                 car_vin = self._id_to_vin(car_id)
-                tasks = []
+
                 for vin, online in self.get_car_online().items():
                     # If specific car_id provided, only update match
                     if (
