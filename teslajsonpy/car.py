@@ -36,12 +36,6 @@ class TeslaCar:
         self._car = car
         self._controller = controller
         self._vehicle_data = vehicle_data
-        self._charge_state = vehicle_data.get("charge_state")
-        self._climate_state = vehicle_data.get("climate_state")
-        self._drive_state = vehicle_data.get("drive_state")
-        self._gui_settings = vehicle_data.get("gui_settings")
-        self._vehicle_config = vehicle_data.get("vehicle_config")
-        self._vehicle_state = vehicle_data.get("vehicle_state")
 
         self._previous_driver_temp = self.driver_temp_setting
         self._previous_fan_status = self.fan_status
@@ -77,26 +71,25 @@ class TeslaCar:
         """Return if data from VEHICLE_DATA endpoint is available."""
         # self._vehicle_data gets updated with some data from VEHICLE_LIST endpoint
         # Only return True if data specifically from VEHICLE_DATA endpoint is available
-        if self._vehicle_config:
+        if self._vehicle_data.get("vehicle_config", {}):
             return True
 
     @property
     def battery_level(self) -> float:
         """Return car battery level."""
-        if self._charge_state:
-            return self._charge_state.get("battery_level")
+        return self._vehicle_data.get("charge_state", {}).get("battery_level")
 
     @property
     def battery_range(self) -> float:
         """Return car battery range."""
-        if self._charge_state:
-            return self._charge_state.get("battery_range")
+        return self._vehicle_data.get("charge_state", {}).get("battery_range")
 
     @property
     def cabin_overheat_protection(self) -> str:
         """Return cabin overheat protection."""
-        if self._climate_state:
-            return self._climate_state.get("cabin_overheat_protection")
+        return self._vehicle_data.get("climate_state", {}).get(
+            "cabin_overheat_protection"
+        )
 
     @property
     def car_type(self) -> str:
@@ -106,26 +99,24 @@ class TeslaCar:
     @property
     def car_version(self) -> str:
         """Return installed car software version."""
-        if self._vehicle_state:
-            return self._vehicle_state.get("car_version")
+        return self._vehicle_data.get("vehicle_state", {}).get("car_version")
 
     @property
     def charger_actual_current(self) -> int:
         """Return charger actual current."""
-        if self._charge_state:
-            return self._charge_state.get("charger_actual_current")
+        return self._vehicle_data.get("charge_state", {}).get("charger_actual_current")
 
     @property
     def charge_current_request(self) -> int:
         """Return charge current request."""
-        if self._charge_state:
-            return self._charge_state.get("charge_current_request")
+        return self._vehicle_data.get("charge_state", {}).get("charge_current_request")
 
     @property
     def charge_current_request_max(self) -> int:
         """Return charge current request max."""
-        if self._charge_state:
-            return self._charge_state.get("charge_current_request_max")
+        return self._vehicle_data.get("charge_state", {}).get(
+            "charge_current_request_max"
+        )
 
     @property
     def charge_port_latch(self) -> str:
@@ -133,84 +124,78 @@ class TeslaCar:
 
         Returns
             str: Engaged
-            Other states?
+        Other states?
         """
-        if self._charge_state:
-            return self._charge_state.get("charge_port_latch")
+        return self._vehicle_data.get("charge_state", {}).get("charge_port_latch")
 
     @property
     def charge_energy_added(self) -> float:
         """Return charge energy added."""
-        if self._charge_state:
-            return self._charge_state.get("charge_energy_added")
+        return self._vehicle_data.get("charge_state", {}).get("charge_energy_added")
 
     @property
     def charge_limit_soc(self) -> int:
         """Return charge limit soc."""
-        if self._charge_state:
-            return self._charge_state.get("charge_limit_soc")
+        return self._vehicle_data.get("charge_state", {}).get("charge_limit_soc")
 
     @property
     def charge_limit_soc_max(self) -> int:
         """Return charge limit soc max."""
-        if self._charge_state:
-            return self._charge_state.get("charge_limit_soc_max")
+        return self._vehicle_data.get("charge_state", {}).get("charge_limit_soc_max")
 
     @property
     def charge_limit_soc_min(self) -> int:
         """Return charge limit soc min."""
-        if self._charge_state:
-            return self._charge_state.get("charge_limit_soc_min")
+        return self._vehicle_data.get("charge_state", {}).get("charge_limit_soc_min")
 
     @property
     def charge_miles_added_ideal(self) -> float:
         """Return charge ideal miles added."""
-        if self._charge_state:
-            return self._charge_state.get("charge_miles_added_ideal")
+        return self._vehicle_data.get("charge_state", {}).get(
+            "charge_miles_added_ideal"
+        )
 
     @property
     def charge_miles_added_rated(self) -> float:
         """Return charge rated miles added."""
-        if self._charge_state:
-            return self._charge_state.get("charge_miles_added_rated")
+        return self._vehicle_data.get("charge_state", {}).get(
+            "charge_miles_added_rated"
+        )
 
     @property
     def charger_phases(self) -> int:
         """Return charger phase."""
-        if self._charge_state:
-            return self._charge_state.get("charger_phases")
+        return self._vehicle_data.get("charge_state", {}).get("charger_phases")
 
     @property
     def charger_power(self) -> int:
         """Return charger power."""
-        if self._charge_state:
-            return self._charge_state.get("charger_power")
+        return self._vehicle_data.get("charge_state", {}).get("charger_power")
 
     @property
     def charge_rate(self) -> str:
         """Return charge rate."""
-        if self._charge_state:
-            return self._charge_state.get("charge_rate")
+        return self._vehicle_data.get("charge_state", {}).get("charge_rate")
 
     @property
     def charging_state(self) -> str:
         """Return charging state.
 
         Returns
-            str: Charging, Stopped, Complete, Disconnected, NoPower
+        str: Charging, Stopped, Complete, Disconnected, NoPower
         """
-        if self._charge_state:
-            charging_state = self._charge_state.get("charging_state")
-            states = ["Charging", "Stopped", "Complete", "Disconnected"]
-            if self._charge_state.get("charging_state") not in states:
-                _LOGGER.warn("Charging state is %s", charging_state)
-            return self._charge_state.get("charging_state")
+        charging_state = self._vehicle_data.get("charge_state", {}).get(
+            "charging_state"
+        )
+        states = ["Charging", "Stopped", "Complete", "Disconnected"]
+        if charging_state not in states:
+            _LOGGER.warn("Charging state is %s", charging_state)
+        return self._vehicle_data.get("charge_state", {}).get("charging_state")
 
     @property
     def charger_voltage(self) -> int:
         """Return charger voltage."""
-        if self._charge_state:
-            return self._charge_state.get("charger_voltage")
+        return self._vehicle_data.get("charge_state", {}).get("charger_voltage")
 
     @property
     def climate_keeper_mode(self) -> str:
@@ -221,14 +206,12 @@ class TeslaCar:
 
         Not supported on all Tesla models.
         """
-        if self._climate_state:
-            return self._climate_state.get("climate_keeper_mode")
+        return self._vehicle_data.get("climate_state", {}).get("climate_keeper_mode")
 
     @property
     def conn_charge_cable(self) -> str:
         """Return charge cable connection."""
-        if self._charge_state:
-            return self._charge_state.get("conn_charge_cable")
+        return self._vehicle_data.get("charge_state", {}).get("conn_charge_cable")
 
     @property
     def defrost_mode(self) -> int:
@@ -237,74 +220,62 @@ class TeslaCar:
         Returns
             int: 2 (on), 0 (off)
         """
-        if self._climate_state:
-            return self._climate_state.get("defrost_mode", 0)
+        return self._vehicle_data.get("climate_state", {}).get("defrost_mode", 0)
 
     @property
     def driver_temp_setting(self) -> float:
         """Return driver temperature setting."""
-        if self._climate_state:
-            return self._climate_state.get("driver_temp_setting")
+        return self._vehicle_data.get("climate_state", {}).get("driver_temp_setting")
 
     @property
     def fan_status(self) -> int:
         """Return fan status setting."""
-        if self._climate_state:
-            return self._climate_state.get("fan_status")
+        return self._vehicle_data.get("climate_state", {}).get("fan_status")
 
     @property
     def fast_charger_present(self) -> bool:
         """Return fast charger present."""
-        if self._charge_state:
-            return self._charge_state.get("fast_charger_present")
+        return self._vehicle_data.get("charge_state", {}).get("fast_charger_present")
 
     @property
     def fast_charger_brand(self) -> str:
         """Return fast charger brand."""
-        if self._charge_state:
-            return self._charge_state.get("fast_charger_brand")
+        return self._vehicle_data.get("charge_state", {}).get("fast_charger_brand")
 
     @property
     def fast_charger_type(self) -> str:
         """Return fast charger type."""
-        if self._charge_state:
-            return self._charge_state.get("fast_charger_type")
+        return self._vehicle_data.get("charge_state", {}).get("fast_charger_type")
 
     @property
     def gui_distance_units(self) -> str:
         """Return gui distance units."""
-        if self._gui_settings:
-            return self._gui_settings.get("gui_distance_units")
+        return self._vehicle_data.get("gui_settings", {}).get("gui_distance_units")
 
     @property
     def gui_range_display(self) -> str:
         """Return range display."""
-        if self._gui_settings:
-            return self._gui_settings.get("gui_range_display")
+        return self._vehicle_data.get("gui_settings", {}).get("gui_range_display")
 
     @property
     def heading(self) -> int:
         """Return heading."""
-        if self._drive_state:
-            return self._drive_state.get("heading")
+        return self._vehicle_data.get("drive_state", {}).get("heading")
 
     @property
     def homelink_device_count(self) -> int:
         """Return Homelink device count."""
-        if self._vehicle_state:
-            return self._vehicle_state.get("homelink_device_count")
+        return self._vehicle_data.get("vehicle_state", {}).get("homelink_device_count")
 
     @property
     def homelink_nearby(self) -> bool:
         """Return Homelink nearby."""
-        if self._vehicle_state:
-            return self._vehicle_state.get("homelink_nearby")
+        return self._vehicle_data.get("vehicle_state", {}).get("homelink_nearby")
 
     @property
     def ideal_battery_range(self) -> float:
         """Return car ideal battery range."""
-        if self._charge_state:
-            return self._charge_state.get("ideal_battery_range")
+        return self._vehicle_data.get("charge_state", {}).get("ideal_battery_range")
 
     @property
     def in_service(self) -> bool:
@@ -315,20 +286,17 @@ class TeslaCar:
     @property
     def inside_temp(self) -> float:
         """Return inside temperature."""
-        if self._climate_state:
-            return self._climate_state.get("inside_temp")
+        return self._vehicle_data.get("climate_state", {}).get("inside_temp")
 
     @property
     def is_charge_port_door_open(self) -> bool:
         """Return charger port door open."""
-        if self._charge_state:
-            return self._charge_state.get("charge_port_door_open")
+        return self._vehicle_data.get("charge_state", {}).get("charge_port_door_open")
 
     @property
     def is_climate_on(self) -> bool:
         """Return climate is on."""
-        if self._climate_state:
-            return self._climate_state.get("is_climate_on")
+        return self._vehicle_data.get("climate_state", {}).get("is_climate_on")
 
     @property
     def is_frunk_closed(self) -> bool:
@@ -337,9 +305,8 @@ class TeslaCar:
         Returns
             bool: True (0), False (255)
         """
-        if self._vehicle_state:
-            response = self._vehicle_state.get("ft")
-            return True if response == 0 else False
+        response = self._vehicle_data.get("vehicle_state", {}).get("ft")
+        return True if response == 0 else False
 
     @property
     def is_in_gear(self) -> bool:
@@ -349,14 +316,12 @@ class TeslaCar:
     @property
     def is_locked(self) -> bool:
         """Return car is locked."""
-        if self._vehicle_state:
-            return self._vehicle_state.get("locked")
+        return self._vehicle_data.get("vehicle_state", {}).get("locked")
 
     @property
     def is_steering_wheel_heater_on(self) -> bool:
         """Return steering wheel heater."""
-        if self._climate_state:
-            return self._climate_state.get("steering_wheel_heater")
+        return self._vehicle_data.get("climate_state", {}).get("steering_wheel_heater")
 
     @property
     def is_trunk_closed(self) -> bool:
@@ -365,9 +330,8 @@ class TeslaCar:
         Returns
             bool: True (0), False (1-255)
         """
-        if self._vehicle_state:
-            response = self._vehicle_state.get("rt")
-            return True if response == 0 else False
+        response = self._vehicle_data.get("vehicle_state", {}).get("rt")
+        return True if response == 0 else False
 
     @property
     def is_on(self) -> bool:
@@ -377,86 +341,74 @@ class TeslaCar:
     @property
     def longitude(self) -> float:
         """Return longitude."""
-        if self._drive_state:
-            return self._drive_state.get("longitude")
+        return self._vehicle_data.get("drive_state", {}).get("longitude")
 
     @property
     def latitude(self) -> float:
         """Return latitude."""
-        if self._drive_state:
-            return self._drive_state.get("latitude")
+        return self._vehicle_data.get("drive_state", {}).get("latitude")
 
     @property
     def max_avail_temp(self) -> float:
         """Return max available temperature."""
-        if self._climate_state:
-            return self._climate_state.get("max_avail_temp")
+        return self._vehicle_data.get("climate_state", {}).get("max_avail_temp")
 
     @property
     def min_avail_temp(self) -> float:
         """Return min available temperature."""
-        if self._climate_state:
-            return self._climate_state.get("min_avail_temp")
+        return self._vehicle_data.get("climate_state", {}).get("min_avail_temp")
 
     @property
     def native_heading(self) -> int:
         """Return native heading."""
-        if self._drive_state:
-            return self._drive_state.get("native_heading")
+        return self._vehicle_data.get("drive_state", {}).get("native_heading")
 
     @property
     def native_location_supported(self) -> int:
         """Return native location supported."""
-        if self._drive_state:
-            return self._drive_state.get("native_location_supported")
+        return self._vehicle_data.get("drive_state", {}).get(
+            "native_location_supported"
+        )
 
     @property
     def native_longitude(self) -> float:
         """Return native longitude."""
-        if self._drive_state:
-            return self._drive_state.get("native_longitude")
+        return self._vehicle_data.get("drive_state", {}).get("native_longitude")
 
     @property
     def native_latitude(self) -> float:
         """Return native latitude."""
-        if self._drive_state:
-            return self._drive_state.get("native_latitude")
+        return self._vehicle_data.get("drive_state", {}).get("native_latitude")
 
     @property
     def native_type(self) -> float:
         """Return native type."""
-        if self._drive_state:
-            return self._drive_state.get("native_type")
+        return self._vehicle_data.get("drive_state", {}).get("native_type")
 
     @property
     def odometer(self) -> float:
         """Return odometer."""
-        if self._vehicle_state:
-            return self._vehicle_state.get("odometer")
+        return self._vehicle_data.get("vehicle_state", {}).get("odometer")
 
     @property
     def outside_temp(self) -> float:
         """Return outside temperature."""
-        if self._climate_state:
-            return self._climate_state.get("outside_temp")
+        return self._vehicle_data.get("climate_state", {}).get("outside_temp")
 
     @property
     def passenger_temp_setting(self) -> float:
         """Return passenger temperature setting."""
-        if self._climate_state:
-            return self._climate_state.get("passenger_temp_setting")
+        return self._vehicle_data.get("climate_state", {}).get("passenger_temp_setting")
 
     @property
     def power(self) -> int:
         """Return power."""
-        if self._drive_state:
-            return self._drive_state.get("power")
+        return self._vehicle_data.get("drive_state", {}).get("power")
 
     @property
     def powered_lift_gate(self) -> bool:
         """Return True if car has power lift gate."""
-        if self._vehicle_config:
-            return self._vehicle_config.get("plg")
+        return self._vehicle_data.get("vehicle_config", {}).get("plg")
 
     @property
     def rear_seat_heaters(self) -> int:
@@ -465,44 +417,37 @@ class TeslaCar:
         Returns
             int: 0 (no rear heated seats), int: ? (rear heated seats)
         """
-        if self._vehicle_config:
-            return self._vehicle_config.get("rear_seat_heaters")
+        return self._vehicle_data.get("vehicle_config", {}).get("rear_seat_heaters")
 
     @property
     def sentry_mode(self) -> bool:
         """Return sentry mode."""
-        if self._vehicle_state:
-            return self._vehicle_state.get("sentry_mode")
+        return self._vehicle_data.get("vehicle_state", {}).get("sentry_mode")
 
     @property
     def sentry_mode_available(self) -> bool:
         """Return sentry mode available."""
-        if self._vehicle_state:
-            return self._vehicle_state.get("sentry_mode_available")
+        return self._vehicle_data.get("vehicle_state", {}).get("sentry_mode_available")
 
     @property
     def shift_state(self) -> str:
         """Return shift state."""
-        if self._drive_state:
-            return self._drive_state.get("shift_state")
+        return self._vehicle_data.get("drive_state", {}).get("shift_state")
 
     @property
     def speed(self) -> float:
         """Return speed."""
-        if self._drive_state:
-            return self._drive_state.get("speed")
+        return self._vehicle_data.get("drive_state", {}).get("speed")
 
     @property
     def software_update(self) -> dict:
         """Return software update version information."""
-        if self._vehicle_state:
-            return self._vehicle_state.get("software_update")
+        return self._vehicle_data.get("vehicle_state", {}).get("software_update")
 
     @property
     def steering_wheel_heater(self) -> bool:
         """Return steering wheel heater option."""
-        if self._climate_state:
-            return self._climate_state.get("steering_wheel_heater")
+        return self._vehicle_data.get("climate_state", {}).get("steering_wheel_heater")
 
     @property
     def third_row_seats(self) -> str:
@@ -511,14 +456,12 @@ class TeslaCar:
         Returns
             str: None
         """
-        if self._vehicle_config:
-            return self._vehicle_config.get("third_row_seats")
+        return self._vehicle_data.get("vehicle_config", {}).get("third_row_seats")
 
     @property
     def time_to_full_charge(self) -> float:
         """Return time to full charge."""
-        if self._charge_state:
-            return self._charge_state.get("time_to_full_charge")
+        return self._vehicle_data.get("charge_state", {}).get("time_to_full_charge")
 
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
