@@ -183,13 +183,8 @@ class TeslaCar:
 
         Returns
         str: Charging, Stopped, Complete, Disconnected, NoPower
+        None: When car is asleep
         """
-        charging_state = self._vehicle_data.get("charge_state", {}).get(
-            "charging_state"
-        )
-        states = ["Charging", "Stopped", "Complete", "Disconnected"]
-        if charging_state not in states:
-            _LOGGER.warn("Charging state is %s", charging_state)
         return self._vehicle_data.get("charge_state", {}).get("charging_state")
 
     @property
