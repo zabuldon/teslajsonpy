@@ -118,11 +118,9 @@ class RangeSwitch(VehicleDevice):
         if last_update >= self.__manual_update_time:
             data = self._controller.get_charging_params(self._id)
             if data:
-                """
-                Version 2022.36 seems to not include charge_to_max_range
-                but we can use charge_limit_soc[_max] to determine it if
-                charge_to_max_range is not available
-                """
+                # Version 2022.36 seems to not include charge_to_max_range
+                # but we can use charge_limit_soc[_max] to determine it if
+                # charge_to_max_range is not available
                 if "charge_to_max_range" in data:
                     self.__maxrange_state = data["charge_to_max_range"]
                 else:
