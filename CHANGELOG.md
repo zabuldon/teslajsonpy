@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.5 (2022-10-09)
+### Fix
+* Fix key_error in version 2022.36 ([#351](https://github.com/zabuldon/teslajsonpy/issues/351)) ([`4deda7f`](https://github.com/zabuldon/teslajsonpy/commit/4deda7fcd282c9b8d3cfbfc5fcbe145f5e261947))
+
 ## v2.4.4 (2022-08-29)
 ### Fix
 * Handle missing grid_status key(#346) ([`8c8f727`](https://github.com/zabuldon/teslajsonpy/commit/8c8f72728efedb29f027351caf407b1e73e914f0))
