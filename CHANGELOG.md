@@ -2,6 +2,22 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.5 (2022-10-09)
+### Fix
+* Fix key_error in version 2022.36 ([#351](https://github.com/zabuldon/teslajsonpy/issues/351)) ([`4deda7f`](https://github.com/zabuldon/teslajsonpy/commit/4deda7fcd282c9b8d3cfbfc5fcbe145f5e261947))
+
+## v2.4.4 (2022-08-29)
+### Fix
+* Handle missing grid_status key(#346) ([`8c8f727`](https://github.com/zabuldon/teslajsonpy/commit/8c8f72728efedb29f027351caf407b1e73e914f0))
+
+## v2.4.3 (2022-08-27)
+### Fix
+* Fix grid status and load sensor issues ([#343](https://github.com/zabuldon/teslajsonpy/issues/343)) ([`d815446`](https://github.com/zabuldon/teslajsonpy/commit/d815446aaba5b17363ed6ca60c07243e027d564b))
+
+## v2.4.2 (2022-08-17)
+### Fix
+* Use solar name from app ([#339](https://github.com/zabuldon/teslajsonpy/issues/339)) ([`a1c3a41`](https://github.com/zabuldon/teslajsonpy/commit/a1c3a41f14b24bdeeb5206c7ad2afbaf81529fc6))
+
 ## v2.4.1 (2022-08-13)
 ### Fix
 * Revert solar power name to prevent breaking change ([#336](https://github.com/zabuldon/teslajsonpy/issues/336)) ([`bf02629`](https://github.com/zabuldon/teslajsonpy/commit/bf02629fc7e7359339890089f4c240cfa3f17636))

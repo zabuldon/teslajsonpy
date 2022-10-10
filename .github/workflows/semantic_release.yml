@@ -54,17 +54,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           repository_username: __token__
           repository_password: ${{ secrets.TESLA_PYPY_TOKEN }}
-      - name: Make documentation
-        run: |
-          make docs
-      - name: Setup Git and commit docs
-        run: |
-          git config --global user.name "semantic-release"
-          git config --global user.email "semantic-release@GitHub"
-          git pull
-          git add docs
-          git commit -am "docs: update documentation"
-          git push
       - name: Push changes to dev
         uses: ad-m/github-push-action@master
         with:
