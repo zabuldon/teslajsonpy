@@ -545,6 +545,7 @@ class Controller:
         Args
             wake_if_asleep (bool, optional): Wake up vehicles if asleep.
             filtered_vins (list, optional): If not empty, filters the cars by the provided VINs.
+
         """
         for car in self._vehicle_list:
             vin = car["vin"]

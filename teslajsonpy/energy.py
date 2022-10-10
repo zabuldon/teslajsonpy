@@ -41,7 +41,7 @@ class EnergySite:
 
     @property
     def id(self) -> str:
-        """Return id (aka battery_id)."""
+        """Return battery_id."""
         return self._energysite.get("id")
 
     @property
@@ -52,7 +52,7 @@ class EnergySite:
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
     ) -> dict:
-        """Wrapper for sending commands to the Tesla API."""
+        """Wrap commands sent to Tesla API."""
         _LOGGER.debug("Sending command: %s", name)
         data = await self._api(
             name, path_vars=path_vars, wake_if_asleep=wake_if_asleep, **kwargs
