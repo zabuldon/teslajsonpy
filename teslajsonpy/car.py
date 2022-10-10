@@ -124,7 +124,9 @@ class TeslaCar:
 
         Returns
             str: Engaged
+
         Other states?
+
         """
         return self._vehicle_data.get("charge_state", {}).get("charge_port_latch")
 
@@ -182,8 +184,9 @@ class TeslaCar:
         """Return charging state.
 
         Returns
-        str: Charging, Stopped, Complete, Disconnected, NoPower
-        None: When car is asleep
+            str: Charging, Stopped, Complete, Disconnected, NoPower
+            None: When car is asleep
+
         """
         return self._vehicle_data.get("charge_state", {}).get("charging_state")
 
@@ -200,6 +203,7 @@ class TeslaCar:
             str: dog, camp, on, off
 
         Not supported on all Tesla models.
+
         """
         return self._vehicle_data.get("climate_state", {}).get("climate_keeper_mode")
 
@@ -214,6 +218,7 @@ class TeslaCar:
 
         Returns
             int: 2 (on), 0 (off)
+
         """
         return self._vehicle_data.get("climate_state", {}).get("defrost_mode", 0)
 
@@ -299,6 +304,7 @@ class TeslaCar:
 
         Returns
             bool: True (0), False (255)
+
         """
         response = self._vehicle_data.get("vehicle_state", {}).get("ft")
         return True if response == 0 else False
@@ -324,6 +330,7 @@ class TeslaCar:
 
         Returns
             bool: True (0), False (1-255)
+
         """
         response = self._vehicle_data.get("vehicle_state", {}).get("rt")
         return True if response == 0 else False
@@ -411,6 +418,7 @@ class TeslaCar:
 
         Returns
             int: 0 (no rear heated seats), int: ? (rear heated seats)
+
         """
         return self._vehicle_data.get("vehicle_config", {}).get("rear_seat_heaters")
 
@@ -450,6 +458,7 @@ class TeslaCar:
 
         Returns
             str: None
+
         """
         return self._vehicle_data.get("vehicle_config", {}).get("third_row_seats")
 
@@ -461,7 +470,7 @@ class TeslaCar:
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
     ) -> dict:
-        """Wrapper for sending commands to the Tesla API."""
+        """Wrap commands sent to Tesla API."""
         _LOGGER.debug("Sending command: %s", name)
         data = await self._controller.api(
             name, path_vars=path_vars, wake_if_asleep=wake_if_asleep, **kwargs
@@ -553,9 +562,10 @@ class TeslaCar:
         """Send command to change seat heat.
 
         Args
-            levels: 0 (off), 1 (low), 2 (medium), 3 (high)
+            level: 0 (off), 1 (low), 2 (medium), 3 (high)
             seat_id: 0 (front left), 1 (front right), 2 (rear left), 4 (rear center)
                      5 (rear right), 6 (third row left), 7 (third row right)
+
         """
 
         data = await self._send_command(
@@ -610,6 +620,7 @@ class TeslaCar:
 
         Args
             option: "Off", "No A/C", "On"
+
         """
 
         if option == "Off":
@@ -638,6 +649,7 @@ class TeslaCar:
 
         Args
             keeper_id: 1 (keep on), 2 (dog mode), 3 (camp mode)
+
         """
         data = await self._send_command(
             "SET_CLIMATE_KEEPER_MODE",
@@ -669,8 +681,8 @@ class TeslaCar:
         """Send command to set HVAC mode.
 
         Args
-            "off"
-            "on"
+            value: on, off
+
         """
         if value == "off":
             data = await self._send_command(
@@ -705,6 +717,7 @@ class TeslaCar:
 
         Args
             state: 2 = on, 0 = off
+
         """
         data = await self._send_command(
             "MAX_DEFROST",
