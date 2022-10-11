@@ -9,13 +9,13 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import asyncio
-import backoff
-import httpx
 import json
 import logging
 import pkgutil
 import time
 from typing import Callable, Dict, List, Optional, Text
+import backoff
+import httpx
 import wrapt
 from yarl import URL
 

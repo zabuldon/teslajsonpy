@@ -5,8 +5,10 @@ Python Package for controlling Tesla API.
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
+from teslajsonpy.car import TeslaCar
 from teslajsonpy.connection import Connection
 from teslajsonpy.controller import Controller
+from teslajsonpy.energy import EnergySite, PowerwallSite, SolarPowerwallSite, SolarSite
 from teslajsonpy.exceptions import (
     RetryLimitError,
     IncompleteCredentials,

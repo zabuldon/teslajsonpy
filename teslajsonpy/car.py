@@ -25,6 +25,7 @@ SEAT_ID_MAP = {
 
 
 class TeslaCar:
+    #  pylint: disable=too-many-public-methods
     """Represents a Tesla car.
 
     This class shouldn't be instantiated directly; it will be instantiated
@@ -48,6 +49,7 @@ class TeslaCar:
 
     @property
     def id(self) -> int:
+        # pylint: disable=invalid-name
         """Return id."""
         return self._car.get("id")
 
@@ -73,6 +75,7 @@ class TeslaCar:
         # Only return True if data specifically from VEHICLE_DATA endpoint is available
         if self._vehicle_data.get("vehicle_config", {}):
             return True
+        return None
 
     @property
     def battery_level(self) -> float:
@@ -282,6 +285,7 @@ class TeslaCar:
         """Return car in_service."""
         if self.data_available:
             return self._vehicle_data.get("in_service")
+        return None
 
     @property
     def inside_temp(self) -> float:
@@ -307,7 +311,7 @@ class TeslaCar:
 
         """
         response = self._vehicle_data.get("vehicle_state", {}).get("ft")
-        return True if response == 0 else False
+        return response == 0
 
     @property
     def is_in_gear(self) -> bool:
@@ -333,7 +337,7 @@ class TeslaCar:
 
         """
         response = self._vehicle_data.get("vehicle_state", {}).get("rt")
-        return True if response == 0 else False
+        return response == 0
 
     @property
     def is_on(self) -> bool:
@@ -584,6 +588,7 @@ class TeslaCar:
         seat_id = f"seat_heater_{SEAT_ID_MAP[seat_id]}"
         if self.data_available:
             return self._vehicle_data.get("climate_state").get(seat_id)
+        return None
 
     async def schedule_software_update(self, offset_sec: Optional[int] = 0) -> None:
         """Send command to install software update."""

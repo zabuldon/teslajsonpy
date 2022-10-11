@@ -41,6 +41,7 @@ class EnergySite:
 
     @property
     def id(self) -> str:
+        # pylint: disable=invalid-name
         """Return battery_id."""
         return self._energysite.get("id")
 
@@ -137,6 +138,7 @@ class PowerwallSite(EnergySite):
         """Return battery power in Watts."""
         if self._battery_data.get("power_reading"):
             return self._battery_data["power_reading"][0]["battery_power"]
+        return None
 
     @property
     def data_available(self) -> bool:
@@ -153,6 +155,7 @@ class PowerwallSite(EnergySite):
         """Return grid power in Watts."""
         if self._battery_data.get("power_reading"):
             return self._battery_data["power_reading"][0]["grid_power"]
+        return None
 
     @property
     def grid_status(self) -> str:
@@ -164,6 +167,7 @@ class PowerwallSite(EnergySite):
         """Return load power in Watts."""
         if self._battery_data.get("power_reading"):
             return self._battery_data["power_reading"][0]["load_power"]
+        return None
 
     @property
     def operation_mode(self) -> str:
@@ -187,6 +191,7 @@ class PowerwallSite(EnergySite):
         """Return solar power in Watts."""
         if self._battery_data.get("power_reading"):
             return self._battery_data["power_reading"][0]["solar_power"]
+        return None
 
     @property
     def version(self) -> float:
@@ -226,17 +231,6 @@ class SolarPowerwallSite(PowerwallSite):
     This class shouldn't be instantiated directly; it will be instantiated
     by :meth:`teslajsonpy.controller.generate_energysite_objects`.
     """
-
-    def __init__(
-        self,
-        api: Callable,
-        energysite: dict,
-        site_config: dict,
-        battery_data: dict,
-        battery_summary: dict,
-    ) -> None:
-        """Initialize SolarPowerwallSite."""
-        super().__init__(api, energysite, site_config, battery_data, battery_summary)
 
     @property
     def export_rule(self) -> str:
