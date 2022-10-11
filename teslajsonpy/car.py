@@ -574,7 +574,7 @@ class TeslaCar:
         Args
             level: 0 (off), 1 (low), 2 (medium), 3 (high)
             seat_id: 0 (front left), 1 (front right), 2 (rear left), 4 (rear center)
-                     5 (rear right), 6 (third row left), 7 (third row right)
+            5 (rear right), 6 (third row left), 7 (third row right)
 
         """
 
