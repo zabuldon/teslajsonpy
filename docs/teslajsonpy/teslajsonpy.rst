@@ -29,7 +29,7 @@ Classes
 =======
 
 - :py:class:`TeslaCar`:
-  Class to handle car attributes and methods.
+  Represents a Tesla car.
 
 - :py:class:`Connection`:
   Connection to Tesla Motors API.
@@ -37,11 +37,20 @@ Classes
 - :py:class:`Controller`:
   Controller for connections to Tesla Motors API.
 
-- :py:class:`Energy`:
-  Class to handle energy site attributes and methods.
+- :py:class:`EnergySite`:
+  Base class to represents a Tesla energy site.
+
+- :py:class:`PowerwallSite`:
+  Represents a Tesla Energy Powerwall site.
 
 - :py:class:`TeslaProxy`:
   Class to handle proxy login connections to Alexa.
+
+- :py:class:`SolarPowerwallSite`:
+  Represents a Tesla Energy Solar site with Powerwall(s).
+
+- :py:class:`SolarSite`:
+  Represents a Tesla Energy Solar site.
 
 
 .. autoclass:: TeslaCar
@@ -65,11 +74,18 @@ Classes
    .. inheritance-diagram:: Controller
       :parts: 1
 
-.. autoclass:: Energy
+.. autoclass:: EnergySite
    :members:
 
    .. rubric:: Inheritance
-   .. inheritance-diagram:: Energy
+   .. inheritance-diagram:: EnergySite
+      :parts: 1
+
+.. autoclass:: PowerwallSite
+   :members:
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: PowerwallSite
       :parts: 1
 
 .. autoclass:: TeslaProxy
@@ -77,6 +93,20 @@ Classes
 
    .. rubric:: Inheritance
    .. inheritance-diagram:: TeslaProxy
+      :parts: 1
+
+.. autoclass:: SolarPowerwallSite
+   :members:
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: SolarPowerwallSite
+      :parts: 1
+
+.. autoclass:: SolarSite
+   :members:
+
+   .. rubric:: Inheritance
+   .. inheritance-diagram:: SolarSite
       :parts: 1
 
 
@@ -88,9 +118,6 @@ Exceptions
 
 - :py:exc:`UnknownPresetMode`:
   Class of exceptions for Unknown Preset.
-
-- :py:exc:`HomelinkError`:
-  Class of exceptions for Homelink Error.
 
 - :py:exc:`RetryLimitError`:
   Class of exceptions for hitting retry limits.
@@ -109,12 +136,6 @@ Exceptions
 
    .. rubric:: Inheritance
    .. inheritance-diagram:: UnknownPresetMode
-      :parts: 1
-
-.. autoexception:: HomelinkError
-
-   .. rubric:: Inheritance
-   .. inheritance-diagram:: HomelinkError
       :parts: 1
 
 .. autoexception:: RetryLimitError
@@ -140,4 +161,4 @@ Variables
 
    .. code-block:: text
 
-      '2.4.0'
+      '2.4.5'
