@@ -1,26 +1,22 @@
+#  SPDX-License-Identifier: Apache-2.0
 """
 Python Package for controlling Tesla API.
-
-SPDX-License-Identifier: Apache-2.0
-
-Underlying connection logic.
 
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import asyncio
 import base64
+import time
 import calendar
 import datetime
 import hashlib
 import json
 import logging
 import secrets
-import time
 from typing import Dict, Text
-
-import aiohttp
 from bs4 import BeautifulSoup
+import aiohttp
 import httpx
 import yarl
 from yarl import URL

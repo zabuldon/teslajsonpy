@@ -17,6 +17,14 @@ API_URL = "https://owner-api.teslamotors.com"
 WS_URL = "wss://streaming.vn.teslamotors.com/streaming"
 
 TESLA_PRODUCT_TYPE_VEHICLES = "vehicles"
-TESLA_PRODUCT_TYPE_ENERGY_SITES = "energy_sites"
-TESLA_PRODUCT_TYPE_POWERWALLS = "powerwalls"
-TESLA_DEFAULT_ENERGY_SITE_NAME = "My Home"
+
+BACKUP_RESERVE_MAX = 100
+BACKUP_RESERVE_MIN = 0
+CHARGE_CURRENT_MIN = 0
+DEFAULT_ENERGYSITE_NAME = "My Home"
+GRID_ACTIVE = "Active"
+PRODUCT_TYPE_ENERGY_SITES = "energy_sites"
+PRODUCT_TYPE_POWERWALLS = "powerwalls"
+RESOURCE_TYPE = "resource_type"
+RESOURCE_TYPE_SOLAR = "solar"
+RESOURCE_TYPE_BATTERY = "battery"
