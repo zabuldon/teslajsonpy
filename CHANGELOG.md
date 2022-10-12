@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v3.0.0 (2022-10-12)
+### Feature
+* Add support for solar systems and powerwall ([#341](https://github.com/zabuldon/teslajsonpy/issues/341)) ([`5827dc9`](https://github.com/zabuldon/teslajsonpy/commit/5827dc9bda57e47dc0dafa674aeca2551582f43c))
+
+### Breaking
+* HomeAssistant specific code has been moved out. The API is now just a communication layer ([`5827dc9`](https://github.com/zabuldon/teslajsonpy/commit/5827dc9bda57e47dc0dafa674aeca2551582f43c))
+
 ## v2.4.5 (2022-10-09)
 ### Fix
 * Fix key_error in version 2022.36 ([#351](https://github.com/zabuldon/teslajsonpy/issues/351)) ([`4deda7f`](https://github.com/zabuldon/teslajsonpy/commit/4deda7fcd282c9b8d3cfbfc5fcbe145f5e261947))
