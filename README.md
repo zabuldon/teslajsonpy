@@ -1,4 +1,5 @@
 # teslajsonpy
+
 [![Version status](https://img.shields.io/pypi/status/teslajsonpy)](https://pypi.org/project/teslajsonpy)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python version compatibility](https://img.shields.io/pypi/pyversions/teslajsonpy)](https://pypi.org/project/teslajsonpy)
@@ -35,6 +36,7 @@ Also thanks to [Tim Dorr](https://tesla-api.timdorr.com/) for documenting the AP
 12. Submit a [pull request](https://github.com/zabuldon/teslajsonpy/pulls)!
 
 # Documentation
+
 [API docs](https://teslajsonpy.readthedocs.io/en/latest/).
 
 # License

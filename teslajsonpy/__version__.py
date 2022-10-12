@@ -2,10 +2,7 @@
 """
 Python Package for controlling Tesla API.
 
-This is the version info.
-
 For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
-
 __version__ = "2.4.5"
