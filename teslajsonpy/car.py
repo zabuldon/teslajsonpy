@@ -257,6 +257,26 @@ class TeslaCar:
         return self._vehicle_data.get("charge_state", {}).get("fast_charger_type")
 
     @property
+    def door_df(self) -> int:
+        """Return driver front door status."""
+        return self._vehicle_data.get("vehicle_state", {}).get("df")
+
+    @property
+    def door_dr(self) -> int:
+        """Return driver rear door status."""
+        return self._vehicle_data.get("vehicle_state", {}).get("dr")
+
+    @property
+    def door_pf(self) -> int:
+        """Return passenger front door status."""
+        return self._vehicle_data.get("vehicle_state", {}).get("pf")
+
+    @property
+    def door_pr(self) -> int:
+        """Return passenger rear door status."""
+        return self._vehicle_data.get("vehicle_state", {}).get("pr")
+
+    @property
     def gui_distance_units(self) -> str:
         """Return gui distance units."""
         return self._vehicle_data.get("gui_settings", {}).get("gui_distance_units")
@@ -463,6 +483,26 @@ class TeslaCar:
         return self._vehicle_data.get("climate_state", {}).get("steering_wheel_heater")
 
     @property
+    def tpms_pressure_fl(self) -> float:
+        """Return tire pressure sensor for front left tire."""
+        return self._vehicle_data.get("vehicle_state", {}).get("tpms_pressure_fl")
+
+    @property
+    def tpms_pressure_fr(self) -> float:
+        """Return tire pressure sensor for front right tire."""
+        return self._vehicle_data.get("vehicle_state", {}).get("tpms_pressure_fr")
+
+    @property
+    def tpms_pressure_rl(self) -> float:
+        """Return tire pressure sensor for rear left tire."""
+        return self._vehicle_data.get("vehicle_state", {}).get("tpms_pressure_rl")
+
+    @property
+    def tpms_pressure_rr(self) -> float:
+        """Return tire pressure sensor for rear right tire."""
+        return self._vehicle_data.get("vehicle_state", {}).get("tpms_pressure_rr")
+
+    @property
     def third_row_seats(self) -> str:
         """Return third row seats option.
 
@@ -476,6 +516,26 @@ class TeslaCar:
     def time_to_full_charge(self) -> float:
         """Return time to full charge."""
         return self._vehicle_data.get("charge_state", {}).get("time_to_full_charge")
+
+    @property
+    def window_fd(self) -> int:
+        """Return front driver window status."""
+        return self._vehicle_data.get("vehicle_state", {}).get("fd_window")
+
+    @property
+    def window_fp(self) -> int:
+        """Return front passenger window status."""
+        return self._vehicle_data.get("vehicle_state", {}).get("fp_window")
+
+    @property
+    def window_rd(self) -> int:
+        """Return rear driver window status."""
+        return self._vehicle_data.get("vehicle_state", {}).get("rd_window")
+
+    @property
+    def window_rp(self) -> int:
+        """Return rear passenger window status."""
+        return self._vehicle_data.get("vehicle_state", {}).get("rp_window")
 
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
