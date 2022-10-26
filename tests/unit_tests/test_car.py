@@ -114,6 +114,14 @@ async def test_car_properties(monkeypatch):
         _car.driver_temp_setting == VEHICLE_DATA["climate_state"]["driver_temp_setting"]
     )
 
+    assert _car.door_df == VEHICLE_DATA["vehicle_state"]["df"]
+
+    assert _car.door_dr == VEHICLE_DATA["vehicle_state"]["dr"]
+
+    assert _car.door_pf == VEHICLE_DATA["vehicle_state"]["pf"]
+
+    assert _car.door_pr == VEHICLE_DATA["vehicle_state"]["pr"]
+
     assert (
         _car.fast_charger_present
         == VEHICLE_DATA["charge_state"]["fast_charger_present"]
@@ -192,6 +200,22 @@ async def test_car_properties(monkeypatch):
         "sentry_mode_available"
     )
 
+    assert _car.tpms_pressure_fl == VEHICLE_DATA["vehicle_state"].get(
+        "tpms_pressure_fl"
+    )
+
+    assert _car.tpms_pressure_fr == VEHICLE_DATA["vehicle_state"].get(
+        "tpms_pressure_fr"
+    )
+
+    assert _car.tpms_pressure_rl == VEHICLE_DATA["vehicle_state"].get(
+        "tpms_pressure_rl"
+    )
+
+    assert _car.tpms_pressure_rr == VEHICLE_DATA["vehicle_state"].get(
+        "tpms_pressure_rr"
+    )
+
     assert _car.shift_state == VEHICLE_DATA["drive_state"]["shift_state"]
 
     assert _car.speed == VEHICLE_DATA["drive_state"]["speed"]
@@ -209,6 +233,14 @@ async def test_car_properties(monkeypatch):
     assert (
         _car.time_to_full_charge == VEHICLE_DATA["charge_state"]["time_to_full_charge"]
     )
+
+    assert _car.window_fd == VEHICLE_DATA["vehicle_state"]["fd_window"]
+
+    assert _car.window_fp == VEHICLE_DATA["vehicle_state"]["fp_window"]
+
+    assert _car.window_rd == VEHICLE_DATA["vehicle_state"]["rd_window"]
+
+    assert _car.window_rp == VEHICLE_DATA["vehicle_state"]["rp_window"]
 
 
 @pytest.mark.asyncio
