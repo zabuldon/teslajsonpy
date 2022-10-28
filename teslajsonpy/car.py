@@ -546,8 +546,8 @@ class TeslaCar:
             or self._vehicle_data.get("vehicle_state", {}).get("rd_window")
             or self._vehicle_data.get("vehicle_state", {}).get("rp_window")
         ):
-            return 1
-        return 0
+            return True
+        return False
 
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
@@ -988,8 +988,8 @@ class TeslaCar:
             "WINDOW_CONTROL",
             path_vars={"vehicle_id": self.id},
             command="close",
-            lat=0,
-            long=0,
+            lat=self.latitude,
+            long=self.longitude,
             wake_if_asleep=True,
         )
         if data and data["response"]["result"] is True:
