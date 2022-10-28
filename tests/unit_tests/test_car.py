@@ -502,7 +502,7 @@ async def test_unlock(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_vent_window(monkeypatch):
+async def test_vent_windows(monkeypatch):
     """Test vent windows."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
@@ -510,11 +510,11 @@ async def test_vent_window(monkeypatch):
     await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
-    assert await _car.vent_window() is None
+    assert await _car.vent_windows() is None
 
 
 @pytest.mark.asyncio
-async def test_close_window(monkeypatch):
+async def test_close_windows(monkeypatch):
     """Test close windows."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
@@ -522,4 +522,4 @@ async def test_close_window(monkeypatch):
     await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
-    assert await _car.close_window() is None
+    assert await _car.close_windows() is None
