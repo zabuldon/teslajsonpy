@@ -547,8 +547,7 @@ class TeslaCar:
             or self._vehicle_data.get("vehicle_state", {}).get("rp_window")
         ):
             return 1
-        else:
-            return 0
+        return 0
 
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
@@ -965,7 +964,7 @@ class TeslaCar:
             self._vehicle_data["vehicle_state"].update(params)
 
     async def vent_windows(self) -> None:
-        """Vent Windows"""
+        """Vent Windows."""
         data = await self._send_command(
             "WINDOW_CONTROL",
             path_vars={"vehicle_id": self.id},
@@ -984,7 +983,7 @@ class TeslaCar:
             self._vehicle_data["vehicle_state"].update(params)
 
     async def close_windows(self) -> None:
-        """Close Windows"""
+        """Close Windows."""
         data = await self._send_command(
             "WINDOW_CONTROL",
             path_vars={"vehicle_id": self.id},
