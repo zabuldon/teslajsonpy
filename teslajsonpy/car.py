@@ -538,16 +538,16 @@ class TeslaCar:
         return self._vehicle_data.get("vehicle_state", {}).get("rp_window")
 
     @property
-    def is_window_open(self) -> bool:
-        """Return car is window open."""
+    def is_window_closed(self) -> bool:
+        """Return all car windows are close."""
         if (
             self._vehicle_data.get("vehicle_state", {}).get("fd_window")
             or self._vehicle_data.get("vehicle_state", {}).get("fp_window")
             or self._vehicle_data.get("vehicle_state", {}).get("rd_window")
             or self._vehicle_data.get("vehicle_state", {}).get("rp_window")
         ):
-            return True
-        return False
+            return False
+        return True
 
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs

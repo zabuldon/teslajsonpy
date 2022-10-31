@@ -169,7 +169,7 @@ async def test_car_properties(monkeypatch):
 
     assert _car.is_on
 
-    assert _car.is_window_open == VEHICLE_DATA["vehicle_state"]["fd_window"]
+    assert _car.is_window_closed
 
     assert _car.longitude == VEHICLE_DATA["drive_state"]["longitude"]
 
