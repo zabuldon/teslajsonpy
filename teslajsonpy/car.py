@@ -537,6 +537,18 @@ class TeslaCar:
         """Return rear passenger window status."""
         return self._vehicle_data.get("vehicle_state", {}).get("rp_window")
 
+    @property
+    def is_window_closed(self) -> bool:
+        """Return all car windows are close."""
+        if (
+            self._vehicle_data.get("vehicle_state", {}).get("fd_window")
+            or self._vehicle_data.get("vehicle_state", {}).get("fp_window")
+            or self._vehicle_data.get("vehicle_state", {}).get("rd_window")
+            or self._vehicle_data.get("vehicle_state", {}).get("rp_window")
+        ):
+            return False
+        return True
+
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
     ) -> dict:
@@ -949,4 +961,42 @@ class TeslaCar:
         )
         if data and data["response"]["result"] is True:
             params = {"locked": False}
+            self._vehicle_data["vehicle_state"].update(params)
+
+    async def vent_windows(self) -> None:
+        """Vent Windows."""
+        data = await self._send_command(
+            "WINDOW_CONTROL",
+            path_vars={"vehicle_id": self.id},
+            command="vent",
+            lat=0,
+            long=0,
+            wake_if_asleep=True,
+        )
+        if data and data["response"]["result"] is True:
+            params = {
+                "fd_window": 1,
+                "fp_window": 1,
+                "rd_window": 1,
+                "rp_window": 1,
+            }
+            self._vehicle_data["vehicle_state"].update(params)
+
+    async def close_windows(self) -> None:
+        """Close Windows."""
+        data = await self._send_command(
+            "WINDOW_CONTROL",
+            path_vars={"vehicle_id": self.id},
+            command="close",
+            lat=self.latitude,
+            long=self.longitude,
+            wake_if_asleep=True,
+        )
+        if data and data["response"]["result"] is True:
+            params = {
+                "fd_window": 0,
+                "fp_window": 0,
+                "rd_window": 0,
+                "rp_window": 0,
+            }
             self._vehicle_data["vehicle_state"].update(params)
