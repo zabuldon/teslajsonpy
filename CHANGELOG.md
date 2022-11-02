@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v3.1.0 (2022-11-02)
+### Feature
+* Add window control and binary sensor ([#357](https://github.com/zabuldon/teslajsonpy/issues/357)) ([`29fabf7`](https://github.com/zabuldon/teslajsonpy/commit/29fabf726bc589dacf2c3fc6cd8432a776eaf6d9))
+* Add tpms, door and window properties ([`e66ff45`](https://github.com/zabuldon/teslajsonpy/commit/e66ff45d817a1b2db705b3e00a5515e6ea46f733))
+
+### Fix
+* Check energysite_id in _grid_status_unknown ([`d828ab4`](https://github.com/zabuldon/teslajsonpy/commit/d828ab4978e645094af9b595b99af4e20ce01ce1))
+
 ## v3.0.0 (2022-10-12)
 ### Feature
 * Add support for solar systems and powerwall ([#341](https://github.com/zabuldon/teslajsonpy/issues/341)) ([`5827dc9`](https://github.com/zabuldon/teslajsonpy/commit/5827dc9bda57e47dc0dafa674aeca2551582f43c))
