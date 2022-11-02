@@ -833,9 +833,13 @@ class Controller:
                 ):
                     self._grid_status_unknown[energysite_id] = False
 
-                if not self._grid_status_unknown[energysite_id] and (
-                    response.get("grid_status") == "Unknown"
-                    and response.get("solar_power") == 0
+                if (
+                    energysite_id in self._grid_status_unknown
+                    and not self._grid_status_unknown[energysite_id]
+                    and (
+                        response.get("grid_status") == "Unknown"
+                        and response.get("solar_power") == 0
+                    )
                 ):
                     _LOGGER.debug(
                         "Ignoring possible spurious energy site solar power read."
