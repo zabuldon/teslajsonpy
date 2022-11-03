@@ -592,7 +592,7 @@ class TeslaCar:
 
     @property
     def scheduled_charging_mode(self) -> str:
-        """Return if scheduled charging is enabled."""
+        """Returns 'Off', 'DepartBy', or 'StartAt' for schedule disabled, scheduled departure, and scheduled charging respectively."""
         return self._vehicle_data.get("charge_state", {}).get("scheduled_charging_mode")
 
     @property
@@ -827,7 +827,6 @@ class TeslaCar:
                 mode_str = "Off"
             params = {
                 "scheduled_charging_mode": mode_str,
-                "scheduled_charging_start_time_app": time,
             }
             self._vehicle_data["charge_state"].update(params)
 
