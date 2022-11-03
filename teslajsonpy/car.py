@@ -549,6 +549,66 @@ class TeslaCar:
             return False
         return True
 
+    @property
+    def scheduled_departure_time(self) -> int:
+        """Return the scheduled departure time."""
+        return self._vehicle_data.get("charge_state", {}).get(
+            "scheduled_departure_time"
+        )
+
+    @property
+    def scheduled_departure_time_minutes(self) -> int:
+        """Return the scheduled depatrue time in minutes after midnight."""
+        return self._vehicle_data.get("charge_state", {}).get(
+            "scheduled_departure_time_minutes"
+        )
+
+    @property
+    def is_off_peak_charging_enabled(self) -> bool:
+        """Return if peak charging is enabled."""
+        return self._vehicle_data.get("charge_state", {}).get(
+            "off_peak_charging_enabled"
+        )
+
+    @property
+    def off_peak_charging_times(self) -> str:
+        """Return off peak charging times."""
+        return self._vehicle_data.get("charge_state", {}).get("off_peak_charging_times")
+
+    @property
+    def off_peak_hours_end_time(self) -> int:
+        """Return end of off peak hours in minutes after midnight."""
+        return self._vehicle_data.get("charge_state", {}).get("off_peak_hours_end_time")
+
+    @property
+    def is_preconditioning_enabled(self) -> bool:
+        """Return if preconditioning is enabled."""
+        return self._vehicle_data.get("charge_state", {}).get("preconditioning_enabled")
+
+    @property
+    def preconditioning_times(self) -> str:
+        """Return if preconditioning is weekend only."""
+        return self._vehicle_data.get("charge_state", {}).get("preconditioning_times")
+
+    @property
+    def scheduled_charging_mode(self) -> str:
+        """Return if scheduled charging is enabled."""
+        return self._vehicle_data.get("charge_state", {}).get("scheduled_charging_mode")
+
+    @property
+    def is_scheduled_charging_pending(self) -> bool:
+        """Return if preconditioning is enabled."""
+        return self._vehicle_data.get("charge_state", {}).get(
+            "scheduled_charging_pending"
+        )
+
+    @property
+    def scheduled_charging_start_time_app(self) -> int:
+        """Return the scheduled charging start time."""
+        return self._vehicle_data.get("charge_state", {}).get(
+            "scheduled_charging_start_time_app"
+        )
+
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
     ) -> dict:
@@ -696,6 +756,79 @@ class TeslaCar:
 
         if data and data["response"]["result"] is True:
             params = {"charge_amps": int(value)}
+            self._vehicle_data["charge_state"].update(params)
+
+    async def set_scheduled_departure(
+        self,
+        enable: bool,
+        departure_time: int,
+        preconditioning_enabled: bool,
+        preconditioning_weekdays_only: bool,
+        off_peak_charging_enabled: bool,
+        off_peak_charging_weekdays_only: bool,
+        end_off_peak_time: int,
+    ) -> None:
+        """Send command to set depature time.
+
+        Args
+            enable: Turn on (True) or turn off (False) the scheduled departure.
+            departure_time: Time in minutes after midnight (local time) for the departure.
+            preconditioning_enabled: Enable (True) or disbale (False) the climate preconditioning.
+            preconditioning_weekdays_only: Precondition climate for departure time on weekdays only (True) or all days (False).
+            off_peak_charging_enabled: Complete charging durring off peak hours (True) or complete charging just before departure time (False).
+            off_peak_charging_weekdays_only: Complete off peak charging only on weekdays only (True) or all days (False).
+            end_off_peak_time: Time in minutes after midnight when the off peak rate ends.
+
+        """
+        data = await self._send_command(
+            "SCHEDULED_DEPARTURE",
+            path_vars={"vehicle_id": self.id},
+            enable=enable,
+            departure_time=departure_time,
+            preconditioning_enabled=preconditioning_enabled,
+            preconditioning_weekdays_only=preconditioning_weekdays_only,
+            off_peak_charging_enabled=off_peak_charging_enabled,
+            off_peak_charging_weekdays_only=off_peak_charging_weekdays_only,
+            end_off_peak_time=end_off_peak_time,
+            wake_if_asleep=True,
+        )
+
+        if data and data["response"]["result"] is True:
+            if enable:
+                mode_str = "StartAt"
+            else:
+                mode_str = "Off"
+
+            params = {
+                "scheduled_charging_mode": mode_str,
+            }
+            self._vehicle_data["charge_state"].update(params)
+
+    async def set_scheduled_charging(self, enable: bool, time: int) -> None:
+        """Send command to set charging time.
+
+        Args
+            enable: Turn on (True) or turn off (False) the scheduled charging.
+            time: Time in minutes after midnight (local time) to start charging.
+
+        """
+        data = await self._send_command(
+            "SCHEDULED_CHARGING",
+            path_vars={"vehicle_id": self.id},
+            enable=enable,
+            time=time,
+            wake_if_asleep=True,
+        )
+
+        if data and data["response"]["result"] is True:
+            if enable:
+                mode_str = "StartAt"
+            else:
+                mode_str = "Off"
+            params = {
+                "scheduled_charging_mode": mode_str,
+                "scheduled_charging_start_time_app": time,
+            }
             self._vehicle_data["charge_state"].update(params)
 
     async def set_cabin_overheat_protection(self, option: str) -> None:

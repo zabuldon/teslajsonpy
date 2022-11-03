@@ -244,6 +244,47 @@ async def test_car_properties(monkeypatch):
 
     assert _car.window_rp == VEHICLE_DATA["vehicle_state"]["rp_window"]
 
+    assert (
+        _car.scheduled_departure_time
+        == VEHICLE_DATA["charge_state"]["scheduled_departure_time"]
+    )
+
+    assert (
+        _car.scheduled_departure_time_minutes
+        == VEHICLE_DATA["charge_state"]["scheduled_departure_time_minutes"]
+    )
+
+    assert _car.is_off_peak_charging_enabled
+
+    assert (
+        _car.off_peak_charging_times
+        == VEHICLE_DATA["charge_state"]["off_peak_charging_times"]
+    )
+
+    assert (
+        _car.off_peak_hours_end_time
+        == VEHICLE_DATA["charge_state"]["off_peak_hours_end_time"]
+    )
+
+    assert _car.is_preconditioning_enabled is False
+
+    assert (
+        _car.preconditioning_times
+        == VEHICLE_DATA["charge_state"]["preconditioning_times"]
+    )
+
+    assert (
+        _car.scheduled_charging_mode
+        == VEHICLE_DATA["charge_state"]["scheduled_charging_mode"]
+    )
+
+    assert _car.is_scheduled_charging_pending is False
+
+    assert (
+        _car.scheduled_charging_start_time_app
+        == VEHICLE_DATA["charge_state"]["scheduled_charging_start_time_app"]
+    )
+
 
 @pytest.mark.asyncio
 async def test_change_charge_limit(monkeypatch):
@@ -523,3 +564,30 @@ async def test_close_windows(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert await _car.close_windows() is None
+
+
+@pytest.mark.asyncio
+async def test_set_scheduled_departure(monkeypatch):
+    """Test set scheduled departure."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert (
+        await _car.set_scheduled_departure(True, 460, True, False, False, False, 420)
+        is None
+    )
+
+
+@pytest.mark.asyncio
+async def test_set_scheduled_charging(monkeypatch):
+    """Test set scheduled departure."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.set_scheduled_charging(True, 460) is None
