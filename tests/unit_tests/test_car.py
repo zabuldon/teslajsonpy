@@ -256,10 +256,7 @@ async def test_car_properties(monkeypatch):
 
     assert _car.is_off_peak_charging_enabled
 
-    assert (
-        _car.off_peak_charging_times
-        == VEHICLE_DATA["charge_state"]["off_peak_charging_times"]
-    )
+    assert _car.off_peak_charging_weekend_only
 
     assert (
         _car.off_peak_hours_end_time
@@ -268,15 +265,9 @@ async def test_car_properties(monkeypatch):
 
     assert _car.is_preconditioning_enabled is False
 
-    assert (
-        _car.preconditioning_times
-        == VEHICLE_DATA["charge_state"]["preconditioning_times"]
-    )
+    assert _car.preconditioning_weekend_only is False
 
-    assert (
-        _car.scheduled_charging_mode
-        == VEHICLE_DATA["charge_state"]["scheduled_charging_mode"]
-    )
+    assert _car.preconditioning_weekend_only is False
 
     assert _car.is_scheduled_charging_pending is False
 

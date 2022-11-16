@@ -571,9 +571,14 @@ class TeslaCar:
         )
 
     @property
-    def off_peak_charging_times(self) -> str:
+    def off_peak_charging_weekend_only(self) -> bool:
         """Return off peak charging times."""
-        return self._vehicle_data.get("charge_state", {}).get("off_peak_charging_times")
+        if (
+            self._vehicle_data.get("charge_state", {}).get("off_peak_charging_times")
+            == "all_week"
+        ):
+            return False
+        return True
 
     @property
     def off_peak_hours_end_time(self) -> int:
@@ -586,9 +591,14 @@ class TeslaCar:
         return self._vehicle_data.get("charge_state", {}).get("preconditioning_enabled")
 
     @property
-    def preconditioning_times(self) -> str:
+    def preconditioning_weekend_only(self) -> bool:
         """Return if preconditioning is weekend only."""
-        return self._vehicle_data.get("charge_state", {}).get("preconditioning_times")
+        if (
+            self._vehicle_data.get("charge_state", {}).get("preconditioning_times")
+            == "all_week"
+        ):
+            return False
+        return True
 
     @property
     def scheduled_charging_mode(self) -> str:
