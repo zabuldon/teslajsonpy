@@ -85,8 +85,13 @@ class TeslaCar:
 
     @property
     def battery_level(self) -> float:
-        """Return car battery level."""
+        """Return car battery level (SOC). This is not affected by temperature."""
         return self._vehicle_data.get("charge_state", {}).get("battery_level")
+
+    @property
+    def usable_battery_level(self) -> float:
+        """Return car usable battery level (uSOE). This is the value used in the app and car."""
+        return self._vehicle_data.get("charge_state", {}).get("usable_battery_level")
 
     @property
     def battery_range(self) -> float:

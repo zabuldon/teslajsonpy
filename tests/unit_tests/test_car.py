@@ -38,6 +38,8 @@ async def test_car_properties(monkeypatch):
 
     assert _car.battery_level == VEHICLE_DATA["charge_state"]["battery_level"]
 
+    assert _car.usable_battery_level == VEHICLE_DATA["charge_state"]["usable_battery_level"]
+
     assert _car.battery_range == VEHICLE_DATA["charge_state"]["battery_range"]
 
     assert (
