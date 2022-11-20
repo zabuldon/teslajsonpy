@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.2.0 (2022-11-20)
+### Feature
+* Add usable_battery_level method in TeslaCar #361 ([`abf0d08`](https://github.com/zabuldon/teslajsonpy/commit/abf0d085ac1b6b26b85f081b838dc72abfe616b2))
+
 ## v3.1.0 (2022-11-02)
 ### Feature
 * Add window control and binary sensor ([#357](https://github.com/zabuldon/teslajsonpy/issues/357)) ([`29fabf7`](https://github.com/zabuldon/teslajsonpy/commit/29fabf726bc589dacf2c3fc6cd8432a776eaf6d9))
