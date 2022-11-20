@@ -342,12 +342,12 @@ class Controller:
         self._include_energysites: bool = True
         self._product_list: List[dict] = []
         self._vehicle_list: List[dict] = []
-        self._vehicle_data: Dict[str:dict] = {}
+        self._vehicle_data: Dict[str, dict] = {}
         self._energysite_list: List[dict] = []
-        self._site_config: Dict[int:dict] = {}
-        self._site_data: Dict[int:dict] = {}
-        self._battery_data: Dict[int:dict] = {}
-        self._battery_summary: Dict[int:dict] = {}
+        self._site_config: Dict[int, dict] = {}
+        self._site_data: Dict[int, dict] = {}
+        self._battery_data: Dict[int, dict] = {}
+        self._battery_summary: Dict[int, dict] = {}
         self._grid_status_unknown: Dict[int, bool] = {}
         self.cars: Dict[str, TeslaCar] = {}
         self.energysites: Dict[int, EnergySite] = {}
@@ -893,7 +893,7 @@ class Controller:
                         self.set_car_online(
                             vin=car["vin"], online_status=car["state"] == "online"
                         )
-                        self._vehicle_data[car["vin"]].update(car)
+                        self.cars[car["vin"]].update_car_info(car)
                     self._last_attempted_update_time = cur_time
 
                 # Only update online vehicles that haven't been updated recently
