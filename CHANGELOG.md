@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.2.1 (2022-11-21)
+### Fix
+* Keep existing vehicle config when asleep/offline ([#363](https://github.com/zabuldon/teslajsonpy/issues/363)) ([`92774e9`](https://github.com/zabuldon/teslajsonpy/commit/92774e975d9a5f3438d30c330f9e31481fc7b915))
+
 ## v3.2.0 (2022-11-20)
 ### Feature
 * Add usable_battery_level method in TeslaCar #361 ([`abf0d08`](https://github.com/zabuldon/teslajsonpy/commit/abf0d085ac1b6b26b85f081b838dc72abfe616b2))
