@@ -226,9 +226,9 @@ async def test_car_properties(monkeypatch):
 
     assert _car.software_update == VEHICLE_DATA["vehicle_state"]["software_update"]
 
-    assert _car.steering_wheel_heater == VEHICLE_DATA["climate_state"].get(
+    assert _car.steering_wheel_heater == (VEHICLE_DATA["climate_state"].get(
         "steering_wheel_heater"
-    )
+    ) is not None)
 
     assert _car.third_row_seats == str(
         VEHICLE_DATA["vehicle_state"].get("third_row_seats")
