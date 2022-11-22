@@ -506,8 +506,9 @@ class Controller:
 
         except TeslaException as ex:
             if ex.message == "VEHICLE_UNAVAILABLE":
-                _LOGGER.debug("Vehicle asleep - data unavailable.")
+                _LOGGER.debug("Vehicle offline - data unavailable.")
                 return {}
+            raise ex
 
         return response
 
@@ -564,9 +565,12 @@ class Controller:
             self.__driving[vin] = {}
             self._vehicle_data[vin] = {}  # Prevent KeyError for _wake_up method
 
-            self._vehicle_data[vin] = await self.get_vehicle_data(
-                vin, wake_if_asleep=wake_if_asleep
-            )
+            try:
+                self._vehicle_data[vin] = await self.get_vehicle_data(
+                    vin, wake_if_asleep=wake_if_asleep
+                )
+            except TeslaException as ex:
+                _LOGGER.warning("Unable to get vehicle data during setup, car will still be added. %s: %s", ex.code, ex.message)
             self.cars[vin] = TeslaCar(car, self, self._vehicle_data[vin])
 
         return self.cars
@@ -582,7 +586,11 @@ class Controller:
             self._grid_status_unknown = {energysite_id: True}
             # Solar only systems (no Powerwalls) are listed as "solar"
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
-                self._site_data[energysite_id] = await self.get_site_data(energysite_id)
+                try:
+                    self._site_data[energysite_id] = await self.get_site_data(energysite_id)
+                except TeslaException as ex:
+                    _LOGGER.warning("Unable to get site data during setup, site will still be added. %s: %s", ex.code, ex.message)
+                    self._site_data[energysite_id] = {}
 
                 self.energysites[energysite_id] = SolarSite(
                     self.api,
@@ -594,9 +602,13 @@ class Controller:
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
                 battery_id = energysite.get("id")
 
-                self._battery_data[energysite_id] = await self.get_battery_data(
-                    battery_id
-                )
+                try:
+                    self._battery_data[energysite_id] = await self.get_battery_data(
+                        battery_id
+                    )
+                except TeslaException as ex:
+                    _LOGGER.warning("Unable to get battery data during setup, battery will still be added. %s: %s", ex.code, ex.message)
+                    self._battery_data[energysite_id] = {}
 
                 self._battery_summary[energysite_id] = await self.get_battery_summary(
                     battery_id
@@ -783,7 +795,10 @@ class Controller:
                     response = await self.get_vehicle_data(
                         vin, wake_if_asleep=wake_if_asleep
                     )
-                except TeslaException:
+                except TeslaException as ex:
+                    # VEHICLE_UNAVAILABLE is handled in get_vehicle_data as debug and ignore
+                    # Anything else would be caught here and logged as a warning
+                    _LOGGER.warning("Unable to get vehicle data during poll. %s: %s", ex.code, ex.message)
                     response = None
 
                 if response:
