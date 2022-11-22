@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.2.2 (2022-11-22)
+### Fix
+* Handle unavailable sites/vehicles ([#365](https://github.com/zabuldon/teslajsonpy/issues/365)) ([`2daef7b`](https://github.com/zabuldon/teslajsonpy/commit/2daef7b3a7fbdbceb082749abec2386f6d97d556))
+
 ## v3.2.1 (2022-11-21)
 ### Fix
 * Keep existing vehicle config when asleep/offline ([#363](https://github.com/zabuldon/teslajsonpy/issues/363)) ([`92774e9`](https://github.com/zabuldon/teslajsonpy/commit/92774e975d9a5f3438d30c330f9e31481fc7b915))
