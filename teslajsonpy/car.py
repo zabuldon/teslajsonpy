@@ -1000,3 +1000,17 @@ class TeslaCar:
                 "rp_window": 0,
             }
             self._vehicle_data["vehicle_state"].update(params)
+
+    async def remote_start(self) -> None:
+        """Remote start."""
+        data = await self._send_command(
+            "REMOTE_START",
+            path_vars={"vehicle_id": self.id},
+            wake_if_asleep=True,
+        )
+        if data and data["response"]["result"] is True:
+            _LOGGER.debug(
+                "Remote start success. There is a two minute window to start driving."
+            )
+        else:
+            _LOGGER.debug("Remote start failed.")

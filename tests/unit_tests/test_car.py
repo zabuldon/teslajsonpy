@@ -523,3 +523,15 @@ async def test_close_windows(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert await _car.close_windows() is None
+
+
+@pytest.mark.asyncio
+async def test_remote_start(monkeypatch):
+    """Test remote start."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_start() is None
