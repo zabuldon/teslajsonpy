@@ -38,7 +38,10 @@ async def test_car_properties(monkeypatch):
 
     assert _car.battery_level == VEHICLE_DATA["charge_state"]["battery_level"]
 
-    assert _car.usable_battery_level == VEHICLE_DATA["charge_state"]["usable_battery_level"]
+    assert (
+        _car.usable_battery_level
+        == VEHICLE_DATA["charge_state"]["usable_battery_level"]
+    )
 
     assert _car.battery_range == VEHICLE_DATA["charge_state"]["battery_range"]
 
@@ -226,9 +229,9 @@ async def test_car_properties(monkeypatch):
 
     assert _car.software_update == VEHICLE_DATA["vehicle_state"]["software_update"]
 
-    assert _car.steering_wheel_heater == (VEHICLE_DATA["climate_state"].get(
-        "steering_wheel_heater"
-    ) is not None)
+    assert _car.steering_wheel_heater == (
+        VEHICLE_DATA["climate_state"].get("steering_wheel_heater") is not None
+    )
 
     assert _car.third_row_seats == str(
         VEHICLE_DATA["vehicle_state"].get("third_row_seats")
@@ -245,6 +248,8 @@ async def test_car_properties(monkeypatch):
     assert _car.window_rd == VEHICLE_DATA["vehicle_state"]["rd_window"]
 
     assert _car.window_rp == VEHICLE_DATA["vehicle_state"]["rp_window"]
+
+    assert _car.is_valet_mode == VEHICLE_DATA["vehicle_state"]["valet_mode"]
 
 
 @pytest.mark.asyncio
@@ -525,3 +530,16 @@ async def test_close_windows(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert await _car.close_windows() is None
+
+
+@pytest.mark.asyncio
+async def test_valet_mode(monkeypatch):
+    """Test close windows."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.valet_mode(True, "0000") is None
+    assert await _car.valet_mode(False, "0000") is None
