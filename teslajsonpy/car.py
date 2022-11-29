@@ -549,6 +549,11 @@ class TeslaCar:
             return False
         return True
 
+    @property
+    def is_remote_start(self) -> bool:
+        """Return if remote start active."""
+        return self._vehicle_data.get("vehicle_state", {}).get("remote_start")
+
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
     ) -> dict:
@@ -1008,9 +1013,12 @@ class TeslaCar:
             path_vars={"vehicle_id": self.id},
             wake_if_asleep=True,
         )
-        if data and data["response"]["result"] is True:
-            _LOGGER.debug(
-                "Remote start success. There is a two minute window to start driving."
-            )
-        else:
-            _LOGGER.debug("Remote start failed.")
+
+        if data and data["response"]:
+            _LOGGER.debug("Remote start response: %s", data["response"])
+            result = data["response"]["result"]
+            reason = data["response"]["reason"]
+            if result is False:
+                _LOGGER.debug("Error calling remote start: %s", reason)
+            else:
+                self._vehicle_data["vehicle_state"].update({"remote_start": True})

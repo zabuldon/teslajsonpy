@@ -244,6 +244,8 @@ async def test_car_properties(monkeypatch):
 
     assert _car.window_rp == VEHICLE_DATA["vehicle_state"]["rp_window"]
 
+    assert _car.is_remote_start == VEHICLE_DATA["vehicle_state"]["remote_start"]
+
 
 @pytest.mark.asyncio
 async def test_change_charge_limit(monkeypatch):
