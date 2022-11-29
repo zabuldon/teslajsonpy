@@ -79,14 +79,20 @@ class TeslaCar:
         """Return if data from VEHICLE_DATA endpoint is available."""
         # self._vehicle_data gets updated with some data from VEHICLE_LIST endpoint
         # Only return True if data specifically from VEHICLE_DATA endpoint is available
-        if self._vehicle_data.get("vehicle_config", {}):
+        # vehicle_state is only from the VEHICLE_DATA endpoint
+        if self._vehicle_data.get("vehicle_state", {}):
             return True
         return None
 
     @property
     def battery_level(self) -> float:
-        """Return car battery level."""
+        """Return car battery level (SOC). This is not affected by temperature."""
         return self._vehicle_data.get("charge_state", {}).get("battery_level")
+
+    @property
+    def usable_battery_level(self) -> float:
+        """Return car usable battery level (uSOE). This is the value used in the app and car."""
+        return self._vehicle_data.get("charge_state", {}).get("usable_battery_level")
 
     @property
     def battery_range(self) -> float:
@@ -440,7 +446,7 @@ class TeslaCar:
     @property
     def powered_lift_gate(self) -> bool:
         """Return True if car has power lift gate."""
-        return self._vehicle_data.get("vehicle_config", {}).get("plg")
+        return self._car.get("vehicle_config", {}).get("plg")
 
     @property
     def rear_seat_heaters(self) -> int:
@@ -450,7 +456,7 @@ class TeslaCar:
             int: 0 (no rear heated seats), int: ? (rear heated seats)
 
         """
-        return self._vehicle_data.get("vehicle_config", {}).get("rear_seat_heaters")
+        return self._car.get("vehicle_config", {}).get("rear_seat_heaters")
 
     @property
     def sentry_mode(self) -> bool:
@@ -480,7 +486,10 @@ class TeslaCar:
     @property
     def steering_wheel_heater(self) -> bool:
         """Return steering wheel heater option."""
-        return self._vehicle_data.get("climate_state", {}).get("steering_wheel_heater")
+        return (
+            self._vehicle_data.get("climate_state", {}).get("steering_wheel_heater")
+            is not None
+        )
 
     @property
     def tpms_pressure_fl(self) -> float:
@@ -510,7 +519,7 @@ class TeslaCar:
             str: None
 
         """
-        return self._vehicle_data.get("vehicle_config", {}).get("third_row_seats")
+        return self._car.get("vehicle_config", {}).get("third_row_seats")
 
     @property
     def time_to_full_charge(self) -> float:
@@ -553,6 +562,11 @@ class TeslaCar:
     def is_remote_start(self) -> bool:
         """Return if remote start active."""
         return self._vehicle_data.get("vehicle_state", {}).get("remote_start")
+    
+    @property
+    def is_valet_mode(self) -> bool:
+        """Return state of valet mode."""
+        return self._vehicle_data.get("vehicle_state", {}).get("valet_mode")
 
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
@@ -578,6 +592,20 @@ class TeslaCar:
             lat = self.latitude
 
         return lat, long
+
+    def update_car_info(self, car: dict) -> None:
+        """Update the car info dict from the vehicle_list api."""
+        if not car:
+            _LOGGER.debug("Attempted to update car id %d with empty car info", self.id)
+            return
+        if car["vin"] != self.vin:
+            _LOGGER.error(
+                "Failed updating car info: new VIN (%s) doesn't match existing vin (%s)",
+                car["vin"][-5:],
+                self.vin[-5:],
+            )
+            return
+        self._car.update(car)
 
     async def change_charge_limit(self, value: float) -> None:
         """Send command to change charge limit."""
@@ -1005,6 +1033,29 @@ class TeslaCar:
                 "rp_window": 0,
             }
             self._vehicle_data["vehicle_state"].update(params)
+
+    async def valet_mode(self, enable, pin) -> None:
+        """Set Valet Mode."""
+        data = await self._send_command(
+            "SET_VALET_MODE",
+            path_vars={"vehicle_id": self.id},
+            on=enable,
+            pin=pin,
+            wake_if_asleep=True,
+        )
+
+        if data and data["response"]:
+            _LOGGER.debug("Valet mode response: %s", data["response"])
+            result = data["response"]["result"]
+            reason = data["response"]["reason"]
+            if result is False:
+                _LOGGER.debug("Error calling valet mode: %s", reason)
+            else:
+                if enable:
+                    params = {"valet_mode": True}
+                else:
+                    params = {"valet_mode": False}
+                self._vehicle_data["vehicle_state"].update(params)
 
     async def remote_start(self) -> None:
         """Remote start."""
