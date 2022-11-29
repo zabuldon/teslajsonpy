@@ -1032,9 +1032,9 @@ class TeslaCar:
     async def valet_mode(self, enable, pin) -> None:
         """Set Valet Mode."""
         data = await self._send_command(
-            "VALET_MODE",
+            "SET_VALET_MODE",
             path_vars={"vehicle_id": self.id},
-            enable=enable,
+            on=enable,
             pin=pin,
             wake_if_asleep=True,
         )
