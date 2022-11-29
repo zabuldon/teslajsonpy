@@ -486,7 +486,10 @@ class TeslaCar:
     @property
     def steering_wheel_heater(self) -> bool:
         """Return steering wheel heater option."""
-        return self._vehicle_data.get("climate_state", {}).get("steering_wheel_heater") is not None
+        return (
+            self._vehicle_data.get("climate_state", {}).get("steering_wheel_heater")
+            is not None
+        )
 
     @property
     def tpms_pressure_fl(self) -> float:
@@ -555,6 +558,11 @@ class TeslaCar:
             return False
         return True
 
+    @property
+    def is_valet_mode(self) -> bool:
+        """Return state of valet mode."""
+        return self._vehicle_data.get("vehicle_state", {}).get("valet_mode")
+
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
     ) -> dict:
@@ -586,7 +594,11 @@ class TeslaCar:
             _LOGGER.debug("Attempted to update car id %d with empty car info", self.id)
             return
         if car["vin"] != self.vin:
-            _LOGGER.error("Failed updating car info: new VIN (%s) doesn't match existing vin (%s)", car["vin"][-5:], self.vin[-5:])
+            _LOGGER.error(
+                "Failed updating car info: new VIN (%s) doesn't match existing vin (%s)",
+                car["vin"][-5:],
+                self.vin[-5:],
+            )
             return
         self._car.update(car)
 
@@ -1016,3 +1028,26 @@ class TeslaCar:
                 "rp_window": 0,
             }
             self._vehicle_data["vehicle_state"].update(params)
+
+    async def valet_mode(self, enable, pin) -> None:
+        """Set Valet Mode."""
+        data = await self._send_command(
+            "VALET_MODE",
+            path_vars={"vehicle_id": self.id},
+            enable=enable,
+            pin=pin,
+            wake_if_asleep=True,
+        )
+
+        if data and data["response"]:
+            _LOGGER.debug("Valet mode response: %s", data["response"])
+            result = data["response"]["result"]
+            reason = data["response"]["reason"]
+            if result is False:
+                _LOGGER.debug("Error calling valet mode: %s", reason)
+            else:
+                if enable:
+                    params = {"valet_mode": True}
+                else:
+                    params = {"valet_mode": False}
+                self._vehicle_data["vehicle_state"].update(params)
