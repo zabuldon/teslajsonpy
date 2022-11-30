@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v3.3.0 (2022-11-30)
+### Feature
+* Add remote start command ([#367](https://github.com/zabuldon/teslajsonpy/issues/367)) ([`350f48b`](https://github.com/zabuldon/teslajsonpy/commit/350f48b47fbd885c452081a1ecf6ecc71b491e11))
+* Add valet mode command and property ([#368](https://github.com/zabuldon/teslajsonpy/issues/368)) ([`5e7c69f`](https://github.com/zabuldon/teslajsonpy/commit/5e7c69f848515b0d72362daaac28824081751878))
+
 ## v3.2.2 (2022-11-22)
 ### Fix
 * Handle unavailable sites/vehicles ([#365](https://github.com/zabuldon/teslajsonpy/issues/365)) ([`2daef7b`](https://github.com/zabuldon/teslajsonpy/commit/2daef7b3a7fbdbceb082749abec2386f6d97d556))
