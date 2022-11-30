@@ -249,6 +249,8 @@ async def test_car_properties(monkeypatch):
 
     assert _car.window_rp == VEHICLE_DATA["vehicle_state"]["rp_window"]
 
+    assert _car.is_remote_start == VEHICLE_DATA["vehicle_state"]["remote_start"]
+    
     assert _car.is_valet_mode == VEHICLE_DATA["vehicle_state"]["valet_mode"]
 
 
@@ -543,3 +545,14 @@ async def test_valet_mode(monkeypatch):
 
     assert await _car.valet_mode(True, "0000") is None
     assert await _car.valet_mode(False, "0000") is None
+
+@pytest.mark.asyncio
+async def test_remote_start(monkeypatch):
+    """Test remote start."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_start() is None
