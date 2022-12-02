@@ -38,6 +38,11 @@ async def test_car_properties(monkeypatch):
 
     assert _car.battery_level == VEHICLE_DATA["charge_state"]["battery_level"]
 
+    assert (
+        _car.usable_battery_level
+        == VEHICLE_DATA["charge_state"]["usable_battery_level"]
+    )
+
     assert _car.battery_range == VEHICLE_DATA["charge_state"]["battery_range"]
 
     assert (
@@ -224,8 +229,8 @@ async def test_car_properties(monkeypatch):
 
     assert _car.software_update == VEHICLE_DATA["vehicle_state"]["software_update"]
 
-    assert _car.steering_wheel_heater == VEHICLE_DATA["climate_state"].get(
-        "steering_wheel_heater"
+    assert _car.steering_wheel_heater == (
+        VEHICLE_DATA["climate_state"].get("steering_wheel_heater") is not None
     )
 
     assert _car.third_row_seats == str(
@@ -244,36 +249,18 @@ async def test_car_properties(monkeypatch):
 
     assert _car.window_rp == VEHICLE_DATA["vehicle_state"]["rp_window"]
 
+    assert _car.is_remote_start == VEHICLE_DATA["vehicle_state"]["remote_start"]
+
+    assert _car.is_valet_mode == VEHICLE_DATA["vehicle_state"]["valet_mode"]
+
     assert (
-        _car.scheduled_departure_time
-        == VEHICLE_DATA["charge_state"]["scheduled_departure_time"]
+        _car.is_auto_seat_climate_left
+        == VEHICLE_DATA["climate_state"]["auto_seat_climate_left"]
     )
 
     assert (
-        _car.scheduled_departure_time_minutes
-        == VEHICLE_DATA["charge_state"]["scheduled_departure_time_minutes"]
-    )
-
-    assert _car.is_off_peak_charging_enabled
-
-    assert _car.off_peak_charging_weekend_only
-
-    assert (
-        _car.off_peak_hours_end_time
-        == VEHICLE_DATA["charge_state"]["off_peak_hours_end_time"]
-    )
-
-    assert _car.is_preconditioning_enabled is False
-
-    assert _car.preconditioning_weekend_only is False
-
-    assert _car.preconditioning_weekend_only is False
-
-    assert _car.is_scheduled_charging_pending is False
-
-    assert (
-        _car.scheduled_charging_start_time_app
-        == VEHICLE_DATA["charge_state"]["scheduled_charging_start_time_app"]
+        _car.is_auto_seat_climate_right
+        == VEHICLE_DATA["climate_state"]["auto_seat_climate_right"]
     )
 
 
@@ -397,6 +384,30 @@ async def test_set_climate_keeper_mode(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert await _car.set_climate_keeper_mode(1) is None
+
+
+@pytest.mark.asyncio
+async def test_disable_remote_auto_seat_climate_request(monkeypatch):
+    """Test disable remote auto seat climate."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_auto_seat_climate_request(1, False) is None
+
+
+@pytest.mark.asyncio
+async def test_enable_remote_auto_seat_climate_request(monkeypatch):
+    """Test enable remote auto seat climate."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_auto_seat_climate_request(0, True) is None
 
 
 @pytest.mark.asyncio
@@ -558,27 +569,25 @@ async def test_close_windows(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_set_scheduled_departure(monkeypatch):
-    """Test set scheduled departure."""
+async def test_valet_mode(monkeypatch):
+    """Test close windows."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
     await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
-    assert (
-        await _car.set_scheduled_departure(True, 460, True, False, False, False, 420)
-        is None
-    )
+    assert await _car.valet_mode(True, "0000") is None
+    assert await _car.valet_mode(False, "0000") is None
 
 
 @pytest.mark.asyncio
-async def test_set_scheduled_charging(monkeypatch):
-    """Test set scheduled departure."""
+async def test_remote_start(monkeypatch):
+    """Test remote start."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
     await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
-    assert await _car.set_scheduled_charging(True, 460) is None
+    assert await _car.remote_start() is None
