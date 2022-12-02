@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.4.0 (2022-12-02)
+### Feature
+* Add auto seat climate command and properties ([#371](https://github.com/zabuldon/teslajsonpy/issues/371)) ([`21c5ff3`](https://github.com/zabuldon/teslajsonpy/commit/21c5ff3306d3caee48fa5062bb6194be1471f51a))
+
 ## v3.3.0 (2022-11-30)
 ### Feature
 * Add remote start command ([#367](https://github.com/zabuldon/teslajsonpy/issues/367)) ([`350f48b`](https://github.com/zabuldon/teslajsonpy/commit/350f48b47fbd885c452081a1ecf6ecc71b491e11))
