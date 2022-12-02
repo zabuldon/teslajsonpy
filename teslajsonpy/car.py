@@ -562,11 +562,23 @@ class TeslaCar:
     def is_remote_start(self) -> bool:
         """Return if remote start active."""
         return self._vehicle_data.get("vehicle_state", {}).get("remote_start")
-    
+
     @property
     def is_valet_mode(self) -> bool:
         """Return state of valet mode."""
         return self._vehicle_data.get("vehicle_state", {}).get("valet_mode")
+
+    @property
+    def is_auto_seat_climate_left(self) -> bool:
+        """Return state of valet mode."""
+        return self._vehicle_data.get("climate_state", {}).get("auto_seat_climate_left")
+
+    @property
+    def is_auto_seat_climate_right(self) -> bool:
+        """Return state of valet mode."""
+        return self._vehicle_data.get("climate_state", {}).get(
+            "auto_seat_climate_right"
+        )
 
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
@@ -778,6 +790,28 @@ class TeslaCar:
                 "climate_keeper_mode": CLIMATE_KEEPER_ID_MAP[keeper_id],
                 "is_climate_on": True,
             }
+            self._vehicle_data["climate_state"].update(params)
+
+    async def remote_auto_seat_climate_request(
+        self, seat_id: int, enable: bool
+    ) -> None:
+        """Send command to change seat climate to auto.
+
+        Args
+            seat_id: 0 (front left), 1 (front right)
+            enable: 'True' to enable, 'False' to diable
+
+        """
+
+        data = await self._send_command(
+            "REMOTE_AUTO_SEAT_CLIMATE_REQUEST",
+            path_vars={"vehicle_id": self.id},
+            auto_seat_position=seat_id,
+            auto_climate_on=enable,
+            wake_if_asleep=True,
+        )
+        if data and data["response"]["result"] is True:
+            params = {f"auto_seat_climate_{SEAT_ID_MAP[seat_id]}": enable}
             self._vehicle_data["climate_state"].update(params)
 
     async def set_heated_steering_wheel(self, value: bool) -> None:
