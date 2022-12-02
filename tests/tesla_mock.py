@@ -340,7 +340,7 @@ PRODUCT_LIST = [
             "use_range_badging": False,
             "utc_offset": -25200,
             "wheel_type": "Base19",
-        }
+        },
     },
     {
         "energy_site_id": 12345,
@@ -470,6 +470,8 @@ VEHICLE_DATA = {
     },
     "climate_state": {
         "allow_cabin_overheat_protection": True,
+        "auto_seat_climate_left": True,
+        "auto_seat_climate_right": True,
         "battery_heater": False,
         "battery_heater_no_power": False,
         "cabin_overheat_protection": "Off",
