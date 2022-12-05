@@ -575,12 +575,12 @@ class TeslaCar:
 
     @property
     def is_auto_seat_climate_left(self) -> bool:
-        """Return state of valet mode."""
+        """Return state of auto seat climate left."""
         return self._vehicle_data.get("climate_state", {}).get("auto_seat_climate_left")
 
     @property
     def is_auto_seat_climate_right(self) -> bool:
-        """Return state of valet mode."""
+        """Return state of auto seat climate right."""
         return self._vehicle_data.get("climate_state", {}).get(
             "auto_seat_climate_right"
         )
@@ -594,7 +594,7 @@ class TeslaCar:
 
     @property
     def scheduled_departure_time_minutes(self) -> int:
-        """Return the scheduled depatrue time in minutes after midnight."""
+        """Return the scheduled departure time in minutes after midnight."""
         return self._vehicle_data.get("charge_state", {}).get(
             "scheduled_departure_time_minutes"
         )
