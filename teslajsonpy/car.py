@@ -580,6 +580,49 @@ class TeslaCar:
             "auto_seat_climate_right"
         )
 
+    @property
+    def active_route_destination(self) -> str:
+        """Return active route destination."""
+        return self._vehicle_data.get("drive_state", {}).get("active_route_destination")
+
+    @property
+    def active_route_energy_at_arrival(self) -> int:
+        """Return active route latitude."""
+        return self._vehicle_data.get("drive_state", {}).get(
+            "active_route_energy_at_arrival"
+        )
+
+    @property
+    def active_route_latitude(self) -> float:
+        """Return active route latitude."""
+        return self._vehicle_data.get("drive_state", {}).get("active_route_latitude")
+
+    @property
+    def active_route_longitude(self) -> float:
+        """Return active route longitude."""
+        return self._vehicle_data.get("drive_state", {}).get("active_route_longitude")
+
+    @property
+    def active_route_miles_to_arrival(self) -> float:
+        """Return active route latitude."""
+        return self._vehicle_data.get("drive_state", {}).get(
+            "active_route_miles_to_arrival"
+        )
+
+    @property
+    def active_route_minutes_to_arrival(self) -> float:
+        """Return active route minutes to arrival."""
+        return self._vehicle_data.get("drive_state", {}).get(
+            "active_route_minutes_to_arrival"
+        )
+
+    @property
+    def active_route_traffic_minutes_delay(self) -> float:
+        """Return active route traffic minutes delay."""
+        return self._vehicle_data.get("drive_state", {}).get(
+            "active_route_traffic_minutes_delay"
+        )
+
     async def _send_command(
         self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
     ) -> dict:
@@ -602,6 +645,17 @@ class TeslaCar:
         else:
             long = self.longitude
             lat = self.latitude
+
+        return lat, long
+
+    def _get_active_route_lat_long(self) -> float:
+        """Get active route latitude and longitude."""
+        lat = None
+        long = None
+
+        if self.active_route_longitude and self.active_route_latitude:
+            lat = self.active_route_latitude
+            long = self.active_route_longitude
 
         return lat, long
 

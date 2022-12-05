@@ -263,6 +263,41 @@ async def test_car_properties(monkeypatch):
         == VEHICLE_DATA["climate_state"]["auto_seat_climate_right"]
     )
 
+    assert (
+        _car.active_route_destination
+        == VEHICLE_DATA["drive_state"]["active_route_destination"]
+    )
+
+    assert (
+        _car.active_route_energy_at_arrival
+        == VEHICLE_DATA["drive_state"]["active_route_energy_at_arrival"]
+    )
+
+    assert (
+        _car.active_route_latitude
+        == VEHICLE_DATA["drive_state"]["active_route_latitude"]
+    )
+
+    assert (
+        _car.active_route_longitude
+        == VEHICLE_DATA["drive_state"]["active_route_longitude"]
+    )
+
+    assert (
+        _car.active_route_miles_to_arrival
+        == VEHICLE_DATA["drive_state"]["active_route_miles_to_arrival"]
+    )
+
+    assert (
+        _car.active_route_minutes_to_arrival
+        == VEHICLE_DATA["drive_state"]["active_route_minutes_to_arrival"]
+    )
+
+    assert (
+        _car.active_route_traffic_minutes_delay
+        == VEHICLE_DATA["drive_state"]["active_route_traffic_minutes_delay"]
+    )
+
 
 @pytest.mark.asyncio
 async def test_change_charge_limit(monkeypatch):
