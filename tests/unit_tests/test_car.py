@@ -584,21 +584,6 @@ async def test_valet_mode(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_valet_mode(monkeypatch):
-    """Test close windows."""
-    TeslaMock(monkeypatch)
-    _controller = Controller(None)
-    await _controller.connect()
-    await _controller.generate_car_objects()
-    _car = _controller.cars[VIN]
-
-    assert await _car.valet_mode(True, "0000") is None
-    assert await _car.valet_mode(False, "0000") is None
-    assert await _car.valet_mode(True) is None
-    assert await _car.valet_mode(False) is None
-
-
-@pytest.mark.asyncio
 async def test_remote_start(monkeypatch):
     """Test remote start."""
     TeslaMock(monkeypatch)
