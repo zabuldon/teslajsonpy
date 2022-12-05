@@ -628,3 +628,17 @@ async def test_remote_start(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert await _car.remote_start() is None
+
+
+# Same logic for all active_route properties, testing one covers all.
+@pytest.mark.asyncio
+async def test_active_route_key_unavailable(monkeypatch):
+    """Test active_route_key_unavailable."""
+    del VEHICLE_DATA["drive_state"]["active_route_destination"]
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert _car.active_route_destination is None
