@@ -249,7 +249,19 @@ async def test_car_properties(monkeypatch):
 
     assert _car.window_rp == VEHICLE_DATA["vehicle_state"]["rp_window"]
 
+    assert _car.is_remote_start == VEHICLE_DATA["vehicle_state"]["remote_start"]
+
     assert _car.is_valet_mode == VEHICLE_DATA["vehicle_state"]["valet_mode"]
+
+    assert (
+        _car.is_auto_seat_climate_left
+        == VEHICLE_DATA["climate_state"]["auto_seat_climate_left"]
+    )
+
+    assert (
+        _car.is_auto_seat_climate_right
+        == VEHICLE_DATA["climate_state"]["auto_seat_climate_right"]
+    )
 
 
 @pytest.mark.asyncio
@@ -372,6 +384,30 @@ async def test_set_climate_keeper_mode(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert await _car.set_climate_keeper_mode(1) is None
+
+
+@pytest.mark.asyncio
+async def test_disable_remote_auto_seat_climate_request(monkeypatch):
+    """Test disable remote auto seat climate."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_auto_seat_climate_request(1, False) is None
+
+
+@pytest.mark.asyncio
+async def test_enable_remote_auto_seat_climate_request(monkeypatch):
+    """Test enable remote auto seat climate."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_auto_seat_climate_request(0, True) is None
 
 
 @pytest.mark.asyncio
@@ -545,3 +581,30 @@ async def test_valet_mode(monkeypatch):
     assert await _car.valet_mode(False, "0000") is None
     assert await _car.valet_mode(True) is None
     assert await _car.valet_mode(False) is None
+
+
+@pytest.mark.asyncio
+async def test_valet_mode(monkeypatch):
+    """Test close windows."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.valet_mode(True, "0000") is None
+    assert await _car.valet_mode(False, "0000") is None
+    assert await _car.valet_mode(True) is None
+    assert await _car.valet_mode(False) is None
+
+
+@pytest.mark.asyncio
+async def test_remote_start(monkeypatch):
+    """Test remote start."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_start() is None
