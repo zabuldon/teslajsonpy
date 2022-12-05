@@ -543,3 +543,5 @@ async def test_valet_mode(monkeypatch):
 
     assert await _car.valet_mode(True, "0000") is None
     assert await _car.valet_mode(False, "0000") is None
+    assert await _car.valet_mode(True) is None
+    assert await _car.valet_mode(False) is None

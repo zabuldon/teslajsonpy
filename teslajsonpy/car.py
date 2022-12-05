@@ -1029,15 +1029,29 @@ class TeslaCar:
             }
             self._vehicle_data["vehicle_state"].update(params)
 
-    async def valet_mode(self, enable, pin) -> None:
-        """Set Valet Mode."""
-        data = await self._send_command(
-            "SET_VALET_MODE",
-            path_vars={"vehicle_id": self.id},
-            on=enable,
-            pin=pin,
-            wake_if_asleep=True,
-        )
+    async def valet_mode(self, enable, pin=None) -> None:
+        """Set Valet Mode.
+
+        Args
+            enable: True to activate, False to deactivate.
+            pin: optional, not required to activate or deactivate valet mode. Even with a previous PIN set. If you clear the PIN and activate Valet Mode without the parameter, you will only be able to deactivate it from your car's screen by signing into your Tesla account.
+
+        """
+        if pin:
+            data = await self._send_command(
+                "SET_VALET_MODE",
+                path_vars={"vehicle_id": self.id},
+                on=enable,
+                pin=pin,
+                wake_if_asleep=True,
+            )
+        else:
+            data = await self._send_command(
+                "SET_VALET_MODE",
+                path_vars={"vehicle_id": self.id},
+                on=enable,
+                wake_if_asleep=True,
+            )
 
         if data and data["response"]:
             _LOGGER.debug("Valet mode response: %s", data["response"])
