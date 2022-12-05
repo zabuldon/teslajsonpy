@@ -1073,7 +1073,7 @@ class TeslaCar:
 
         Args
             enable: True to activate, False to deactivate.
-            pin: optional, not required to activate or deactivate valet mode. Even with a previous PIN set. If you clear the PIN and activate Valet Mode without the parameter, you will only be able to deactivate it from your car's screen by signing into your Tesla account.
+            pin: optional, pin not required to activate or deactivate valet mode. Even with a previous PIN set. If you clear the PIN and activate Valet Mode without the parameter, you will only be able to deactivate it from your car's screen by signing into your Tesla account.
 
         """
         if pin:
@@ -1081,7 +1081,7 @@ class TeslaCar:
                 "SET_VALET_MODE",
                 path_vars={"vehicle_id": self.id},
                 on=enable,
-                pin=pin,
+                password=pin,
                 wake_if_asleep=True,
             )
         else:
