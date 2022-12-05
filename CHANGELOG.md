@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.4.1 (2022-12-05)
+### Fix
+* Add Valet mode optional argument ([#374](https://github.com/zabuldon/teslajsonpy/issues/374)) ([`535c988`](https://github.com/zabuldon/teslajsonpy/commit/535c988d4699d009b4fa6bfb3599463241d605fb))
+
 ## v3.4.0 (2022-12-02)
 ### Feature
 * Add auto seat climate command and properties ([#371](https://github.com/zabuldon/teslajsonpy/issues/371)) ([`21c5ff3`](https://github.com/zabuldon/teslajsonpy/commit/21c5ff3306d3caee48fa5062bb6194be1471f51a))
