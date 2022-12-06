@@ -660,7 +660,7 @@ class TeslaCar:
         _LOGGER.debug("Response from command %s: %s", name, data)
         return data
 
-    def _get_lat_long(self) -> (float, float):
+    def _get_lat_long(self) -> Tuple[float, float]:
         """Get current latitude and longitude."""
         lat = None
         long = None
@@ -674,7 +674,7 @@ class TeslaCar:
 
         return lat, long
 
-    def _get_active_route_lat_long(self) -> (float, float):
+    def _get_active_route_lat_long(self) -> Tuple[float, float]:
         """Get active route latitude and longitude."""
         lat = None
         long = None
