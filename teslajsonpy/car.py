@@ -758,7 +758,7 @@ class TeslaCar:
                 return None
             raise ex
 
-    def _get_lat_long(self) -> Tuple[float, float]:
+    def _get_lat_long(self) -> Tuple[Optional[float], Optional[float]]:
         """Get current latitude and longitude."""
         lat = None
         long = None
@@ -772,7 +772,7 @@ class TeslaCar:
 
         return lat, long
 
-    def _get_active_route_lat_long(self) -> Tuple[float, float]:
+    def _get_active_route_lat_long(self) -> Tuple[Optional[float], Optional[float]]:
         """Get active route latitude and longitude."""
         lat = None
         long = None
