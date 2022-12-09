@@ -981,8 +981,7 @@ class TeslaCar:
 
     async def wake_up(self) -> None:
         """Send command to wake up."""
-        # Avoid wake wrapper loop for wake command
-        await self._send_command("WAKE_UP", wake_if_asleep=False)
+        await self._controller.wake_up(car_id=self.id)
 
     async def toggle_trunk(self) -> None:
         """Actuate rear trunk."""
