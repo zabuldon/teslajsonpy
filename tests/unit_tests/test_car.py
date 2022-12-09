@@ -301,6 +301,7 @@ async def test_car_properties(monkeypatch):
     assert (
         _car.active_route_traffic_minutes_delay
         == VEHICLE_DATA["drive_state"]["active_route_traffic_minutes_delay"]
+    )
 
     assert (
         _car.scheduled_departure_time
@@ -685,6 +686,7 @@ async def test_active_route_key_unavailable(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert _car.active_route_destination is None
+
 
 @pytest.mark.asyncio
 async def test_set_scheduled_departure(monkeypatch):

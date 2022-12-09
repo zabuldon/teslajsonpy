@@ -654,6 +654,7 @@ class TeslaCar:
             )
         return None
 
+    @property
     def scheduled_departure_time(self) -> int:
         """Return the scheduled departure time."""
         return self._vehicle_data.get("charge_state", {}).get(
@@ -716,7 +717,6 @@ class TeslaCar:
         return self._vehicle_data.get("charge_state", {}).get(
             "scheduled_charging_start_time_app"
         )
-
 
     async def _send_command(
         self,
