@@ -71,21 +71,27 @@ class HomelinkError(TeslaException):
     pass
 
 
-def should_giveup(ex: TeslaException) -> bool:
+def should_giveup(ex: Exception) -> bool:
     """Test whether the exception should result in a retry.
 
     This is consumed by backoff.
 
     Args
-        ex (TeslaException): The exception
+        ex (Exception): The exception
 
     Returns
         bool: whether backoff should give up
 
     """
-    return isinstance(ex, (IncompleteCredentials, RetryLimitError)) or ex.code in [
-        401,
-        404,
-        405,
-        423,
-    ]
+    return (
+        isinstance(ex, (IncompleteCredentials, RetryLimitError))
+        or not hasattr(ex, "code")
+        or ex.code
+        in [
+            401,
+            404,
+            405,
+            423,
+            429,
+        ]
+    )

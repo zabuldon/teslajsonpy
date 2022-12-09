@@ -8,7 +8,7 @@ https://github.com/zabuldon/teslajsonpy
 import logging
 from typing import Optional
 
-from teslajsonpy.exceptions import HomelinkError
+from teslajsonpy.exceptions import HomelinkError, TeslaException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -656,7 +656,7 @@ class TeslaCar:
         additional_path_vars: dict = None,
         wake_if_asleep: bool = True,
         **kwargs,
-    ) -> dict:
+    ) -> Optional[dict]:
         """Wrap commands sent to Tesla API.
 
         Args
@@ -671,11 +671,23 @@ class TeslaCar:
             path_vars.update(additional_path_vars)
 
         _LOGGER.debug("Sending command: %s", name)
-        data = await self._controller.api(
-            name, path_vars=path_vars, wake_if_asleep=wake_if_asleep, **kwargs
-        )
-        _LOGGER.debug("Response from command %s: %s", name, data)
-        return data
+        try:
+            data = await self._controller.api(
+                name, path_vars=path_vars, wake_if_asleep=wake_if_asleep, **kwargs
+            )
+            _LOGGER.debug("Response from command %s: %s", name, data)
+            return data
+        except TeslaException as ex:
+            if ex.code == 408 and not wake_if_asleep and not self.is_on:
+                # 408 due to being asleep and we didn't try to wake it
+                _LOGGER.debug(
+                    "Vehicle unavailable for command: %s, car state: %s, wake_if_asleep: %s",
+                    name,
+                    self.state,
+                    wake_if_asleep,
+                )
+                return None
+            raise ex
 
     def _get_lat_long(self) -> float:
         """Get current latitude and longitude."""
@@ -981,8 +993,7 @@ class TeslaCar:
 
     async def wake_up(self) -> None:
         """Send command to wake up."""
-        # Avoid wake wrapper loop for wake command
-        await self._send_command("WAKE_UP", wake_if_asleep=False)
+        await self._controller.wake_up(car_id=self.id)
 
     async def toggle_trunk(self) -> None:
         """Actuate rear trunk."""
