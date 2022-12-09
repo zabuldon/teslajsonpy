@@ -50,6 +50,9 @@ class TeslaMock:
         self._monkeypatch.setattr(
             Controller, "get_vehicle_data", self.mock_get_vehicle_data
         )
+        self._monkeypatch.setattr(
+            Controller, "get_vehicle_summary", self.mock_get_vehicle_summary
+        )
         self._energysites = copy.deepcopy(ENERGYSITES)
         self._product_list = copy.deepcopy(PRODUCT_LIST)
         self._vehicle_data = copy.deepcopy(VEHICLE_DATA)
@@ -141,6 +144,11 @@ class TeslaMock:
         """Mock controller's get_vehicle_data method."""
         return self.controller_get_vehicle_data()
 
+    def mock_get_vehicle_summary(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's get_vehicle_summary method."""
+        return self.controller_get_vehicle_summary()
+
     def mock_get_last_update_time(self, *args, **kwargs):
         # pylint: disable=unused-argument
         """Mock controller's get_last_update_time method."""
@@ -212,6 +220,10 @@ class TeslaMock:
     async def controller_get_vehicle_data(self):
         """Monkeypatch for controller.get_vehicle_data()."""
         return self._vehicle_data
+    
+    async def controller_get_vehicle_summary(self):
+        """Monkeypatch for controller.get_vehicle_summary()."""
+        return self._product_list[0]
 
     @staticmethod
     async def controller_update():
