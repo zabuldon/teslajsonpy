@@ -347,10 +347,12 @@ class Controller:
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_vehicle_summary(self, vin: str) -> dict:
         """Get vehicle summary json from TeslaAPI for a given vin."""
-        return await self.api(
-            "VEHICLE_SUMMARY",
-            path_vars={"vehicle_id": self._vin_to_id(vin)},
-            wake_if_asleep=False,
+        return (
+            await self.api(
+                "VEHICLE_SUMMARY",
+                path_vars={"vehicle_id": self._vin_to_id(vin)},
+                wake_if_asleep=False,
+            )
         )["response"]
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
