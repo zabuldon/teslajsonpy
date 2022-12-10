@@ -13,6 +13,7 @@ UPDATE_INTERVAL = 300  # Default polling interval for vehicle
 WEBSOCKET_TIMEOUT = 11  # time for websocket to timeout
 WAKE_TIMEOUT = 60  # max time to wait for vehicle to wake
 WAKE_CHECK_INTERVAL = 2  # wait period between wake checks after a wake request
+MAX_API_RETRY_TIME = 15  # how long to retry api calls
 RELEASE_NOTES_URL = "https://teslascope.com/teslapedia/software/"
 AUTH_DOMAIN = "https://auth.tesla.com"
 API_URL = "https://owner-api.teslamotors.com"
