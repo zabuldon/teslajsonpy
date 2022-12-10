@@ -2,6 +2,16 @@
 
 <!--next-version-placeholder-->
 
+## v3.5.0 (2022-12-10)
+### Feature
+* Add active route properties ([#376](https://github.com/zabuldon/teslajsonpy/issues/376)) ([`14b20d7`](https://github.com/zabuldon/teslajsonpy/commit/14b20d7a726b15f1a55d6e89213491f7d241cd6c))
+* Add scheduled charging ([#360](https://github.com/zabuldon/teslajsonpy/issues/360)) ([`f68b928`](https://github.com/zabuldon/teslajsonpy/commit/f68b928ba285a1aec48a3c3cd07128650c94a9cc))
+
+### Fix
+* Improve wake up retry logic ([#379](https://github.com/zabuldon/teslajsonpy/issues/379)) ([`31de243`](https://github.com/zabuldon/teslajsonpy/commit/31de243afe5e3b568f8bd1fe389e09ee950af84f))
+* Wake car only when necessary ([#378](https://github.com/zabuldon/teslajsonpy/issues/378)) ([`20f309e`](https://github.com/zabuldon/teslajsonpy/commit/20f309e10817924f20adbbf0fbc296975f7bf633))
+* Fix valet mode parameter ([#377](https://github.com/zabuldon/teslajsonpy/issues/377)) ([`c419a04`](https://github.com/zabuldon/teslajsonpy/commit/c419a04c9988367e080b99ee45ad092e4f6d8b0e))
+
 ## v3.4.1 (2022-12-05)
 ### Fix
 * Add Valet mode optional argument ([#374](https://github.com/zabuldon/teslajsonpy/issues/374)) ([`535c988`](https://github.com/zabuldon/teslajsonpy/commit/535c988d4699d009b4fa6bfb3599463241d605fb))
