@@ -269,6 +269,41 @@ async def test_car_properties(monkeypatch):
     )
 
     assert (
+        _car.active_route_destination
+        == VEHICLE_DATA["drive_state"]["active_route_destination"]
+    )
+
+    assert (
+        _car.active_route_energy_at_arrival
+        == VEHICLE_DATA["drive_state"]["active_route_energy_at_arrival"]
+    )
+
+    assert (
+        _car.active_route_latitude
+        == VEHICLE_DATA["drive_state"]["active_route_latitude"]
+    )
+
+    assert (
+        _car.active_route_longitude
+        == VEHICLE_DATA["drive_state"]["active_route_longitude"]
+    )
+
+    assert (
+        _car.active_route_miles_to_arrival
+        == VEHICLE_DATA["drive_state"]["active_route_miles_to_arrival"]
+    )
+
+    assert (
+        _car.active_route_minutes_to_arrival
+        == VEHICLE_DATA["drive_state"]["active_route_minutes_to_arrival"]
+    )
+
+    assert (
+        _car.active_route_traffic_minutes_delay
+        == VEHICLE_DATA["drive_state"]["active_route_traffic_minutes_delay"]
+    )
+
+    assert (
         _car.scheduled_departure_time
         == VEHICLE_DATA["charge_state"]["scheduled_departure_time"]
     )
@@ -637,6 +672,20 @@ async def test_remote_start(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert await _car.remote_start() is None
+
+
+# Same logic for all active_route properties, testing one covers all.
+@pytest.mark.asyncio
+async def test_active_route_key_unavailable(monkeypatch):
+    """Test active_route_key_unavailable."""
+    del VEHICLE_DATA["drive_state"]["active_route_destination"]
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert _car.active_route_destination is None
 
 
 @pytest.mark.asyncio

@@ -6,7 +6,7 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 
 from teslajsonpy.exceptions import HomelinkError, TeslaException
 
@@ -586,6 +586,75 @@ class TeslaCar:
         )
 
     @property
+    def active_route_destination(self) -> Optional[str]:
+        """Return active route destination."""
+        if "active_route_destination" in self._vehicle_data.get("drive_state", {}):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_destination"
+            )
+        return None
+
+    @property
+    def active_route_energy_at_arrival(self) -> Optional[int]:
+        """Return active route latitude."""
+        if "active_route_energy_at_arrival" in self._vehicle_data.get(
+            "drive_state", {}
+        ):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_energy_at_arrival"
+            )
+        return None
+
+    @property
+    def active_route_latitude(self) -> Optional[float]:
+        """Return active route latitude."""
+        if "active_route_latitude" in self._vehicle_data.get("drive_state", {}):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_latitude"
+            )
+        return None
+
+    @property
+    def active_route_longitude(self) -> Optional[float]:
+        """Return active route longitude."""
+        if "active_route_longitude" in self._vehicle_data.get("drive_state", {}):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_longitude"
+            )
+        return None
+
+    @property
+    def active_route_miles_to_arrival(self) -> Optional[float]:
+        """Return active route latitude."""
+        if "active_route_miles_to_arrival" in self._vehicle_data.get("drive_state", {}):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_miles_to_arrival"
+            )
+        return None
+
+    @property
+    def active_route_minutes_to_arrival(self) -> Optional[float]:
+        """Return active route minutes to arrival."""
+        if "active_route_minutes_to_arrival" in self._vehicle_data.get(
+            "drive_state", {}
+        ):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_minutes_to_arrival"
+            )
+        return None
+
+    @property
+    def active_route_traffic_minutes_delay(self) -> Optional[float]:
+        """Return active route traffic minutes delay."""
+        if "active_route_minutes_to_arrival" in self._vehicle_data.get(
+            "drive_state", {}
+        ):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_traffic_minutes_delay"
+            )
+        return None
+
+    @property
     def scheduled_departure_time(self) -> int:
         """Return the scheduled departure time."""
         return self._vehicle_data.get("charge_state", {}).get(
@@ -689,7 +758,7 @@ class TeslaCar:
                 return None
             raise ex
 
-    def _get_lat_long(self) -> float:
+    def _get_lat_long(self) -> Tuple[Optional[float], Optional[float]]:
         """Get current latitude and longitude."""
         lat = None
         long = None
@@ -700,6 +769,17 @@ class TeslaCar:
         else:
             long = self.longitude
             lat = self.latitude
+
+        return lat, long
+
+    def _get_active_route_lat_long(self) -> Tuple[Optional[float], Optional[float]]:
+        """Get active route latitude and longitude."""
+        lat = None
+        long = None
+
+        if self.active_route_longitude and self.active_route_latitude:
+            lat = self.active_route_latitude
+            long = self.active_route_longitude
 
         return lat, long
 
