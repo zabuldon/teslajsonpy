@@ -6,9 +6,9 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 
-from teslajsonpy.exceptions import HomelinkError
+from teslajsonpy.exceptions import HomelinkError, TeslaException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,6 +27,11 @@ SEAT_ID_MAP = {
     5: "rear_right",
     6: "third_row_left",
     7: "third_row_right",
+}
+
+DAY_SELECTION_MAP = {
+    "all_week": False,
+    "weekdays": True,
 }
 
 
@@ -570,28 +575,190 @@ class TeslaCar:
 
     @property
     def is_auto_seat_climate_left(self) -> bool:
-        """Return state of valet mode."""
+        """Return state of auto seat climate left."""
         return self._vehicle_data.get("climate_state", {}).get("auto_seat_climate_left")
 
     @property
     def is_auto_seat_climate_right(self) -> bool:
-        """Return state of valet mode."""
+        """Return state of auto seat climate right."""
         return self._vehicle_data.get("climate_state", {}).get(
             "auto_seat_climate_right"
         )
 
-    async def _send_command(
-        self, name: str, *, path_vars: dict, wake_if_asleep: bool = False, **kwargs
-    ) -> dict:
-        """Wrap commands sent to Tesla API."""
-        _LOGGER.debug("Sending command: %s", name)
-        data = await self._controller.api(
-            name, path_vars=path_vars, wake_if_asleep=wake_if_asleep, **kwargs
-        )
-        _LOGGER.debug("Response from command %s: %s", name, data)
-        return data
+    @property
+    def active_route_destination(self) -> Optional[str]:
+        """Return active route destination."""
+        if "active_route_destination" in self._vehicle_data.get("drive_state", {}):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_destination"
+            )
+        return None
 
-    def _get_lat_long(self) -> float:
+    @property
+    def active_route_energy_at_arrival(self) -> Optional[int]:
+        """Return active route latitude."""
+        if "active_route_energy_at_arrival" in self._vehicle_data.get(
+            "drive_state", {}
+        ):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_energy_at_arrival"
+            )
+        return None
+
+    @property
+    def active_route_latitude(self) -> Optional[float]:
+        """Return active route latitude."""
+        if "active_route_latitude" in self._vehicle_data.get("drive_state", {}):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_latitude"
+            )
+        return None
+
+    @property
+    def active_route_longitude(self) -> Optional[float]:
+        """Return active route longitude."""
+        if "active_route_longitude" in self._vehicle_data.get("drive_state", {}):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_longitude"
+            )
+        return None
+
+    @property
+    def active_route_miles_to_arrival(self) -> Optional[float]:
+        """Return active route latitude."""
+        if "active_route_miles_to_arrival" in self._vehicle_data.get("drive_state", {}):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_miles_to_arrival"
+            )
+        return None
+
+    @property
+    def active_route_minutes_to_arrival(self) -> Optional[float]:
+        """Return active route minutes to arrival."""
+        if "active_route_minutes_to_arrival" in self._vehicle_data.get(
+            "drive_state", {}
+        ):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_minutes_to_arrival"
+            )
+        return None
+
+    @property
+    def active_route_traffic_minutes_delay(self) -> Optional[float]:
+        """Return active route traffic minutes delay."""
+        if "active_route_minutes_to_arrival" in self._vehicle_data.get(
+            "drive_state", {}
+        ):
+            return self._vehicle_data.get("drive_state", {}).get(
+                "active_route_traffic_minutes_delay"
+            )
+        return None
+
+    @property
+    def scheduled_departure_time(self) -> int:
+        """Return the scheduled departure time."""
+        return self._vehicle_data.get("charge_state", {}).get(
+            "scheduled_departure_time"
+        )
+
+    @property
+    def scheduled_departure_time_minutes(self) -> int:
+        """Return the scheduled departure time in minutes after midnight."""
+        return self._vehicle_data.get("charge_state", {}).get(
+            "scheduled_departure_time_minutes"
+        )
+
+    @property
+    def is_off_peak_charging_enabled(self) -> bool:
+        """Return if peak charging is enabled for scheduled departure."""
+        return self._vehicle_data.get("charge_state", {}).get(
+            "off_peak_charging_enabled"
+        )
+
+    @property
+    def is_off_peak_charging_weekday_only(self) -> bool:
+        """Return if off off peak charging is weekday only for scheduled departure."""
+        return DAY_SELECTION_MAP.get(
+            self._vehicle_data.get("charge_state", {}).get("off_peak_charging_times")
+        )
+
+    @property
+    def off_peak_hours_end_time(self) -> int:
+        """Return end of off peak hours in minutes after midnight for scheduled departure."""
+        return self._vehicle_data.get("charge_state", {}).get("off_peak_hours_end_time")
+
+    @property
+    def is_preconditioning_enabled(self) -> bool:
+        """Return if preconditioning is enabled for scheduled departure."""
+        return self._vehicle_data.get("charge_state", {}).get("preconditioning_enabled")
+
+    @property
+    def is_preconditioning_weekday_only(self) -> bool:
+        """Return if preconditioning is weekday only for scheduled departure."""
+        return DAY_SELECTION_MAP.get(
+            self._vehicle_data.get("charge_state", {}).get("preconditioning_times")
+        )
+
+    @property
+    def scheduled_charging_mode(self) -> str:
+        """Return 'Off', 'DepartBy', or 'StartAt' for schedule disabled, scheduled departure, and scheduled charging respectively."""
+        return self._vehicle_data.get("charge_state", {}).get("scheduled_charging_mode")
+
+    @property
+    def is_scheduled_charging_pending(self) -> bool:
+        """Return if scheduled charging is pending."""
+        return self._vehicle_data.get("charge_state", {}).get(
+            "scheduled_charging_pending"
+        )
+
+    @property
+    def scheduled_charging_start_time_app(self) -> int:
+        """Return the scheduled charging start time."""
+        return self._vehicle_data.get("charge_state", {}).get(
+            "scheduled_charging_start_time_app"
+        )
+
+    async def _send_command(
+        self,
+        name: str,
+        *,
+        additional_path_vars: dict = None,
+        wake_if_asleep: bool = True,
+        **kwargs,
+    ) -> Optional[dict]:
+        """Wrap commands sent to Tesla API.
+
+        Args
+            name: Name of command to send, from endpoints.json
+            additional_path_vars: Additional URI variables ('vehicle_id' already included)
+            wake_if_asleep: (default True) Wake car if it's asleep before sending the command
+            **kwargs: Any additional parameters for the api call
+
+        """
+        path_vars = {"vehicle_id": self.id}
+        if additional_path_vars:
+            path_vars.update(additional_path_vars)
+
+        _LOGGER.debug("Sending command: %s", name)
+        try:
+            data = await self._controller.api(
+                name, path_vars=path_vars, wake_if_asleep=wake_if_asleep, **kwargs
+            )
+            _LOGGER.debug("Response from command %s: %s", name, data)
+            return data
+        except TeslaException as ex:
+            if ex.code == 408 and not wake_if_asleep and not self.is_on:
+                # 408 due to being asleep and we didn't try to wake it
+                _LOGGER.debug(
+                    "Vehicle unavailable for command: %s, car state: %s, wake_if_asleep: %s",
+                    name,
+                    self.state,
+                    wake_if_asleep,
+                )
+                return None
+            raise ex
+
+    def _get_lat_long(self) -> Tuple[Optional[float], Optional[float]]:
         """Get current latitude and longitude."""
         lat = None
         long = None
@@ -602,6 +769,17 @@ class TeslaCar:
         else:
             long = self.longitude
             lat = self.latitude
+
+        return lat, long
+
+    def _get_active_route_lat_long(self) -> Tuple[Optional[float], Optional[float]]:
+        """Get active route latitude and longitude."""
+        lat = None
+        long = None
+
+        if self.active_route_longitude and self.active_route_latitude:
+            lat = self.active_route_latitude
+            long = self.active_route_longitude
 
         return lat, long
 
@@ -621,11 +799,10 @@ class TeslaCar:
 
     async def change_charge_limit(self, value: float) -> None:
         """Send command to change charge limit."""
+        # Only wake car if the value is different
+        wake_if_asleep = value != self.charge_limit_soc
         data = await self._send_command(
-            "CHANGE_CHARGE_LIMIT",
-            path_vars={"vehicle_id": self.id},
-            percent=int(value),
-            wake_if_asleep=True,
+            "CHANGE_CHARGE_LIMIT", percent=int(value), wake_if_asleep=wake_if_asleep
         )
 
         if data and data["response"]["result"] is True:
@@ -634,11 +811,7 @@ class TeslaCar:
 
     async def charge_port_door_close(self) -> None:
         """Send command to close charge port door."""
-        data = await self._send_command(
-            "CHARGE_PORT_DOOR_CLOSE",
-            path_vars={"vehicle_id": self.id},
-            wake_if_asleep=True,
-        )
+        data = await self._send_command("CHARGE_PORT_DOOR_CLOSE")
 
         if data and data["response"]["result"] is True:
             params = {"charge_port_door_open": False}
@@ -646,11 +819,7 @@ class TeslaCar:
 
     async def charge_port_door_open(self) -> None:
         """Send command to open charge port door."""
-        data = await self._send_command(
-            "CHARGE_PORT_DOOR_OPEN",
-            path_vars={"vehicle_id": self.id},
-            wake_if_asleep=True,
-        )
+        data = await self._send_command("CHARGE_PORT_DOOR_OPEN")
 
         if data and data["response"]["result"] is True:
             params = {"charge_port_door_open": True}
@@ -658,29 +827,15 @@ class TeslaCar:
 
     async def flash_lights(self) -> None:
         """Send command to flash lights."""
-        await self._send_command(
-            "FLASH_LIGHTS",
-            path_vars={"vehicle_id": self.id},
-            on=True,
-            wake_if_asleep=True,
-        )
+        await self._send_command("FLASH_LIGHTS", on=True)
 
     async def honk_horn(self) -> None:
         """Send command to honk horn."""
-        await self._send_command(
-            "HONK_HORN",
-            path_vars={"vehicle_id": self.id},
-            on=True,
-            wake_if_asleep=True,
-        )
+        await self._send_command("HONK_HORN", on=True)
 
     async def lock(self) -> None:
         """Send lock command."""
-        data = await self._send_command(
-            "LOCK",
-            path_vars={"vehicle_id": self.id},
-            wake_if_asleep=True,
-        )
+        data = await self._send_command("LOCK")
         if data and data["response"]["result"] is True:
             params = {"locked": True}
             self._vehicle_data["vehicle_state"].update(params)
@@ -694,13 +849,13 @@ class TeslaCar:
             5 (rear right), 6 (third row left), 7 (third row right)
 
         """
-
+        # If car is asleep the heater is already off
+        wake_if_asleep = level > 0
         data = await self._send_command(
             "REMOTE_SEAT_HEATER_REQUEST",
-            path_vars={"vehicle_id": self.id},
             heater=seat_id,
             level=level,
-            wake_if_asleep=True,
+            wake_if_asleep=wake_if_asleep,
         )
         if data and data["response"]["result"] is True:
             params = {f"seat_heater_{SEAT_ID_MAP[seat_id]}": level}
@@ -715,28 +870,21 @@ class TeslaCar:
 
     async def schedule_software_update(self, offset_sec: Optional[int] = 0) -> None:
         """Send command to install software update."""
-        await self._send_command(
-            "SCHEDULE_SOFTWARE_UPDATE",
-            path_vars={"vehicle_id": self.id},
-            offset_sec=offset_sec,
-            wake_if_asleep=True,
-        )
+        await self._send_command("SCHEDULE_SOFTWARE_UPDATE", offset_sec=offset_sec)
 
     async def set_charging_amps(self, value: float) -> None:
         """Send command to set charging amps."""
+        # Only wake car if the value is different
+        wake_if_asleep = value != self._vehicle_data.get("charge_state", {}).get(
+            "charge_amps"
+        )
         data = await self._send_command(
-            "CHARGING_AMPS",
-            path_vars={"vehicle_id": self.id},
-            charging_amps=int(value),
-            wake_if_asleep=True,
+            "CHARGING_AMPS", charging_amps=int(value), wake_if_asleep=wake_if_asleep
         )
         # A second API call allows setting below 5 Amps
         if value < 5:
             data = await self._send_command(
-                "CHARGING_AMPS",
-                path_vars={"vehicle_id": self.id},
-                charging_amps=int(value),
-                wake_if_asleep=True,
+                "CHARGING_AMPS", charging_amps=int(value), wake_if_asleep=wake_if_asleep
             )
 
         if data and data["response"]["result"] is True:
@@ -762,11 +910,7 @@ class TeslaCar:
             fan_only = False
 
         data = await self._send_command(
-            "SET_CABIN_OVERHEAT_PROTECTION",
-            path_vars={"vehicle_id": self.id},
-            on=body_on,
-            fan_only=fan_only,
-            wake_if_asleep=True,
+            "SET_CABIN_OVERHEAT_PROTECTION", on=body_on, fan_only=fan_only
         )
         if data and data["response"]["result"] is True:
             params = {"cabin_overheat_protection": option}
@@ -779,11 +923,12 @@ class TeslaCar:
             keeper_id: 1 (keep on), 2 (dog mode), 3 (camp mode)
 
         """
+        # If car is asleep, climate is already off
+        wake_if_asleep = keeper_id > 0
         data = await self._send_command(
             "SET_CLIMATE_KEEPER_MODE",
-            path_vars={"vehicle_id": self.id},
             climate_keeper_mode=keeper_id,
-            wake_if_asleep=True,
+            wake_if_asleep=wake_if_asleep,
         )
         if data and data["response"]["result"] is True:
             params = {
@@ -799,16 +944,14 @@ class TeslaCar:
 
         Args
             seat_id: 0 (front left), 1 (front right)
-            enable: 'True' to enable, 'False' to diable
+            enable: 'True' to enable, 'False' to disable
 
         """
 
         data = await self._send_command(
             "REMOTE_AUTO_SEAT_CLIMATE_REQUEST",
-            path_vars={"vehicle_id": self.id},
             auto_seat_position=seat_id,
             auto_climate_on=enable,
-            wake_if_asleep=True,
         )
         if data and data["response"]["result"] is True:
             params = {f"auto_seat_climate_{SEAT_ID_MAP[seat_id]}": enable}
@@ -817,10 +960,7 @@ class TeslaCar:
     async def set_heated_steering_wheel(self, value: bool) -> None:
         """Send command to set heated steering wheel."""
         data = await self._send_command(
-            "REMOTE_STEERING_WHEEL_HEATER_REQUEST",
-            path_vars={"vehicle_id": self.id},
-            on=value,
-            wake_if_asleep=True,
+            "REMOTE_STEERING_WHEEL_HEATER_REQUEST", on=value
         )
 
         if data and data["response"]["result"] is True:
@@ -835,11 +975,8 @@ class TeslaCar:
 
         """
         if value == "off":
-            data = await self._send_command(
-                "CLIMATE_OFF",
-                path_vars={"vehicle_id": self.id},
-                wake_if_asleep=True,
-            )
+            # If car is asleep, climate is already off
+            data = await self._send_command("CLIMATE_OFF", wake_if_asleep=False)
             if data and data["response"]["result"] is True:
                 # Set additional values if turning HVAC off after defrost max
                 params = {
@@ -853,11 +990,7 @@ class TeslaCar:
                 self._vehicle_data["climate_state"].update(params)
 
         elif value == "on":
-            data = await self._send_command(
-                "CLIMATE_ON",
-                path_vars={"vehicle_id": self.id},
-                wake_if_asleep=True,
-            )
+            data = await self._send_command("CLIMATE_ON")
             if data and data["response"]["result"] is True:
                 params = {"is_climate_on": True}
                 self._vehicle_data["climate_state"].update(params)
@@ -869,11 +1002,10 @@ class TeslaCar:
             state: 2 = on, 0 = off
 
         """
+        # If car is asleep, climate is already off
+        wake_if_asleep = state > 0
         data = await self._send_command(
-            "MAX_DEFROST",
-            path_vars={"vehicle_id": self.id},
-            on=state,
-            wake_if_asleep=True,
+            "MAX_DEFROST", on=state, wake_if_asleep=wake_if_asleep
         )
         if data and data["response"]["result"] is True:
             self._previous_driver_temp = self.driver_temp_setting
@@ -904,11 +1036,9 @@ class TeslaCar:
 
     async def set_sentry_mode(self, value: bool) -> None:
         """Send command to set sentry mode."""
+        # If car is asleep, sentry is already off
         data = await self._send_command(
-            "SET_SENTRY_MODE",
-            path_vars={"vehicle_id": self.id},
-            on=value,
-            wake_if_asleep=True,
+            "SET_SENTRY_MODE", on=value, wake_if_asleep=value
         )
 
         if data and data["response"]["result"] is True:
@@ -918,11 +1048,7 @@ class TeslaCar:
     async def set_temperature(self, temp: float) -> None:
         """Send command to set temperature."""
         data = await self._send_command(
-            "CHANGE_CLIMATE_TEMPERATURE_SETTING",
-            path_vars={"vehicle_id": self.id},
-            driver_temp=temp,
-            passenger_temp=temp,
-            wake_if_asleep=True,
+            "CHANGE_CLIMATE_TEMPERATURE_SETTING", driver_temp=temp, passenger_temp=temp
         )
         if data and data["response"]["result"] is True:
             params = {"driver_temp_setting": temp}
@@ -930,23 +1056,16 @@ class TeslaCar:
 
     async def start_charge(self) -> None:
         """Send command to start charge."""
-        data = await self._send_command(
-            "START_CHARGE",
-            path_vars={"vehicle_id": self.id},
-            wake_if_asleep=True,
-        )
+        data = await self._send_command("START_CHARGE")
 
         if data and data["response"]["result"] is True:
             params = {"charging_state": "Charging"}
             self._vehicle_data["charge_state"].update(params)
 
     async def stop_charge(self) -> None:
-        """Send command to start charge."""
-        data = await self._send_command(
-            "STOP_CHARGE",
-            path_vars={"vehicle_id": self.id},
-            wake_if_asleep=True,
-        )
+        """Send command to stop charge."""
+        # If car is asleep, it's not charging
+        data = await self._send_command("STOP_CHARGE", wake_if_asleep=False)
 
         if data and data["response"]["result"] is True:
             params = {"charging_state": "Stopped"}
@@ -954,21 +1073,12 @@ class TeslaCar:
 
     async def wake_up(self) -> None:
         """Send command to wake up."""
-        await self._send_command(
-            "WAKE_UP",
-            path_vars={"vehicle_id": self.id},
-            wake_if_asleep=True,
-        )
+        await self._controller.wake_up(car_id=self.id)
 
     async def toggle_trunk(self) -> None:
         """Actuate rear trunk."""
         prev_is_trunk_closed = self.is_trunk_closed
-        data = await self._send_command(
-            "ACTUATE_TRUNK",
-            path_vars={"vehicle_id": self.id},
-            which_trunk="rear",
-            wake_if_asleep=True,
-        )
+        data = await self._send_command("ACTUATE_TRUNK", which_trunk="rear")
         if data and data["response"]["result"] is True:
             if not prev_is_trunk_closed:
                 params = {"rt": 0}
@@ -980,12 +1090,7 @@ class TeslaCar:
     async def toggle_frunk(self) -> None:
         """Actuate front trunk."""
         prev_is_frunk_closed = self.is_frunk_closed
-        data = await self._send_command(
-            "ACTUATE_TRUNK",
-            path_vars={"vehicle_id": self.id},
-            which_trunk="front",
-            wake_if_asleep=True,
-        )
+        data = await self._send_command("ACTUATE_TRUNK", which_trunk="front")
         if data and data["response"]["result"] is True:
             if not prev_is_frunk_closed:
                 params = {"ft": 0}
@@ -1004,13 +1109,7 @@ class TeslaCar:
 
         lat, long = self._get_lat_long()
 
-        data = await self._send_command(
-            "TRIGGER_HOMELINK",
-            path_vars={"vehicle_id": self.id},
-            lat=lat,
-            lon=long,
-            wake_if_asleep=True,
-        )
+        data = await self._send_command("TRIGGER_HOMELINK", lat=lat, lon=long)
 
         if data and data["response"]:
             _LOGGER.debug("Homelink response: %s", data["response"])
@@ -1021,25 +1120,14 @@ class TeslaCar:
 
     async def unlock(self) -> None:
         """Send unlock command."""
-        data = await self._send_command(
-            "UNLOCK",
-            path_vars={"vehicle_id": self.id},
-            wake_if_asleep=True,
-        )
+        data = await self._send_command("UNLOCK")
         if data and data["response"]["result"] is True:
             params = {"locked": False}
             self._vehicle_data["vehicle_state"].update(params)
 
     async def vent_windows(self) -> None:
         """Vent Windows."""
-        data = await self._send_command(
-            "WINDOW_CONTROL",
-            path_vars={"vehicle_id": self.id},
-            command="vent",
-            lat=0,
-            long=0,
-            wake_if_asleep=True,
-        )
+        data = await self._send_command("WINDOW_CONTROL", command="vent", lat=0, long=0)
         if data and data["response"]["result"] is True:
             params = {
                 "fd_window": 1,
@@ -1052,12 +1140,7 @@ class TeslaCar:
     async def close_windows(self) -> None:
         """Close Windows."""
         data = await self._send_command(
-            "WINDOW_CONTROL",
-            path_vars={"vehicle_id": self.id},
-            command="close",
-            lat=self.latitude,
-            long=self.longitude,
-            wake_if_asleep=True,
+            "WINDOW_CONTROL", command="close", lat=self.latitude, long=self.longitude
         )
         if data and data["response"]["result"] is True:
             params = {
@@ -1073,24 +1156,16 @@ class TeslaCar:
 
         Args
             enable: True to activate, False to deactivate.
-            pin: optional, not required to activate or deactivate valet mode. Even with a previous PIN set. If you clear the PIN and activate Valet Mode without the parameter, you will only be able to deactivate it from your car's screen by signing into your Tesla account.
+            pin: optional, pin not required to activate or deactivate valet mode.
+                Even with a previous PIN set. If you clear the PIN and activate Valet Mode
+                without the parameter, you will only be able to deactivate it from your
+                car's screen by signing into your Tesla account.
 
         """
         if pin:
-            data = await self._send_command(
-                "SET_VALET_MODE",
-                path_vars={"vehicle_id": self.id},
-                on=enable,
-                pin=pin,
-                wake_if_asleep=True,
-            )
+            data = await self._send_command("SET_VALET_MODE", on=enable, password=pin)
         else:
-            data = await self._send_command(
-                "SET_VALET_MODE",
-                path_vars={"vehicle_id": self.id},
-                on=enable,
-                wake_if_asleep=True,
-            )
+            data = await self._send_command("SET_VALET_MODE", on=enable)
 
         if data and data["response"]:
             _LOGGER.debug("Valet mode response: %s", data["response"])
@@ -1107,11 +1182,7 @@ class TeslaCar:
 
     async def remote_start(self) -> None:
         """Remote start."""
-        data = await self._send_command(
-            "REMOTE_START",
-            path_vars={"vehicle_id": self.id},
-            wake_if_asleep=True,
-        )
+        data = await self._send_command("REMOTE_START")
 
         if data and data["response"]:
             _LOGGER.debug("Remote start response: %s", data["response"])
@@ -1121,3 +1192,80 @@ class TeslaCar:
                 _LOGGER.debug("Error calling remote start: %s", reason)
             else:
                 self._vehicle_data["vehicle_state"].update({"remote_start": True})
+
+    async def set_scheduled_departure(
+        self,
+        enable: bool,
+        departure_time: int,
+        preconditioning_enabled: bool,
+        preconditioning_weekdays_only: bool,
+        off_peak_charging_enabled: bool,
+        off_peak_charging_weekdays_only: bool,
+        end_off_peak_time: int,
+    ) -> None:
+        """Send command to set departure time.
+
+        Args
+            enable: Turn on (True) or turn off (False) the scheduled departure.
+            departure_time: Time in minutes after midnight (local time) for the departure.
+            preconditioning_enabled: Enable (True) or disable (False) the climate preconditioning.
+            preconditioning_weekdays_only: Precondition climate for departure time on weekdays only (True) or all days (False).
+            off_peak_charging_enabled: Complete charging during off peak hours (True) or complete charging just before departure time (False).
+            off_peak_charging_weekdays_only: Complete off peak charging only on weekdays only (True) or all days (False).
+            end_off_peak_time: Time in minutes after midnight when the off peak rate ends.
+
+        """
+        data = await self._send_command(
+            "SCHEDULED_DEPARTURE",
+            enable=enable,
+            departure_time=departure_time,
+            preconditioning_enabled=preconditioning_enabled,
+            preconditioning_weekdays_only=preconditioning_weekdays_only,
+            off_peak_charging_enabled=off_peak_charging_enabled,
+            off_peak_charging_weekdays_only=off_peak_charging_weekdays_only,
+            end_off_peak_time=end_off_peak_time,
+        )
+
+        if data and data["response"]["result"] is True:
+            if enable:
+                mode_str = "DepartBy"
+            else:
+                mode_str = "Off"
+
+            params = {
+                "scheduled_charging_mode": mode_str,
+                "scheduled_departure_time_minutes": departure_time,
+                "preconditioning_enabled": preconditioning_enabled,
+                "preconditioning_weekdays_only": list(DAY_SELECTION_MAP.values()).index(
+                    preconditioning_weekdays_only
+                ),
+                "off_peak_charging_enabled": off_peak_charging_enabled,
+                "off_peak_charging_weekdays_only": list(
+                    DAY_SELECTION_MAP.values()
+                ).index(off_peak_charging_weekdays_only),
+                "end_off_peak_time": end_off_peak_time,
+            }
+            self._vehicle_data["charge_state"].update(params)
+
+    async def set_scheduled_charging(self, enable: bool, time: int) -> None:
+        """Send command to set scheduled charging time.
+
+        Args
+            enable: Turn on (True) or turn off (False) the scheduled charging.
+            time: Time in minutes after midnight (local time) to start charging.
+
+        """
+        data = await self._send_command("SCHEDULED_CHARGING", enable=enable, time=time)
+
+        if data and data["response"]["result"] is True:
+            if enable:
+                mode_str = "StartAt"
+            else:
+                mode_str = "Off"
+                time = None
+            params = {
+                "scheduled_charging_mode": mode_str,
+                "scheduled_charging_start_time": time,
+                "scheduled_charging_pending": enable,
+            }
+            self._vehicle_data["charge_state"].update(params)

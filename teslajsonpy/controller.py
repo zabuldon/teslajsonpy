@@ -10,10 +10,9 @@ import json
 import logging
 import pkgutil
 import time
-from typing import Callable, Dict, List, Optional, Text
+from typing import Dict, List, Optional, Text
 import backoff
 import httpx
-import wrapt
 from yarl import URL
 
 from teslajsonpy.car import TeslaCar
@@ -25,13 +24,14 @@ from teslajsonpy.const import (
     ONLINE_INTERVAL,
     UPDATE_INTERVAL,
     SLEEP_INTERVAL,
-    PRODUCT_TYPE_ENERGY_SITES,
     RESOURCE_TYPE,
     RESOURCE_TYPE_SOLAR,
     RESOURCE_TYPE_BATTERY,
+    WAKE_TIMEOUT,
+    WAKE_CHECK_INTERVAL,
 )
 from teslajsonpy.energy import EnergySite, SolarSite, PowerwallSite, SolarPowerwallSite
-from teslajsonpy.exceptions import RetryLimitError, TeslaException
+from teslajsonpy.exceptions import should_giveup, TeslaException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,211 +59,48 @@ def min_expo(base=2, factor=1, max_value=None, min_value=0):
             yield max_value
 
 
-@wrapt.decorator
-async def wake_up(wrapped, instance, args, kwargs) -> Callable:
-    # pylint: disable=protected-access,too-many-statements
-    """Wrap a API func so it will attempt to wake the vehicle if asleep.
+def valid_result(result):
+    """Check if TeslaAPI result successful.
 
-    The command wrapped is run once if the car_id was last reported
-    online. If wrapped detects the car_id is offline, five attempts
-    will be made to wake the vehicle to retry the command.
-
-    Raises
-        RetryLimitError: The wake_up has exceeded the 5 attempts.
-        TeslaException: Tesla connection errors
+    Parameters
+    ----------
+    result : tesla API result
+        This is the result of a Tesla Rest API call.
 
     Returns
-        Callable: Wrapped function that will wake_up
+    -------
+    bool
+        Tesla API failure can be checked in a dict with a bool in
+        ['response']['result'], a bool, or None or
+        ['response']['reason'] == 'could_not_wake_buses'
+        Returns true when a failure state not detected.
 
     """
-
-    def valid_result(result):
-        """Check if TeslaAPI result succesful.
-
-        Parameters
-        ----------
-        result : tesla API result
-            This is the result of a Tesla Rest API call.
-
-        Returns
-        -------
-        bool
-            Tesla API failure can be checked in a dict with a bool in
-            ['response']['result'], a bool, or None or
-            ['response']['reason'] == 'could_not_wake_buses'
-            Returns true when a failure state not detected.
-
-        """
-        try:
-            return (
-                result is not None
-                and result is not False
-                and (
-                    result is True
-                    or (
-                        isinstance(result, dict)
-                        and (
-                            (
-                                isinstance(result["response"], dict)
-                                and (
-                                    result["response"].get("result") is True
-                                    or result["response"].get("reason")
-                                    != "could_not_wake_buses"
-                                )
-                                or (
-                                    isinstance(result, dict)
-                                    and isinstance(result["response"], list)
-                                )
+    try:
+        return (
+            result is not None
+            and result is not False
+            and (
+                result is True
+                or (
+                    isinstance(result, dict)
+                    and (
+                        (
+                            isinstance(result["response"], dict)
+                            and (
+                                result["response"].get("result") is True
+                                or result["response"].get("reason")
+                                != "could_not_wake_buses"
                             )
                         )
+                        or isinstance(result.get("response"), list)
                     )
                 )
             )
-        except TypeError as exception:
-            _LOGGER.error("Result: %s, %s", result, exception)
-            return False
-
-    retries = 0
-    sleep_delay = 2
-    car_id = ""
-    is_wake_command = False
-    is_wake_api = False
-    is_energysite_command = False
-
-    if wrapped.__name__ == "api":
-        car_id = kwargs.get("path_vars", {}).get("vehicle_id", "")
-        is_wake_api = kwargs.get("name", "").lower() == "wake_up"
-    else:
-        car_id = args[0] if not kwargs.get("vehicle_id") else kwargs.get("vehicle_id")
-        is_wake_command = len(args) >= 2 and args[1].lower() == "wake_up"
-        is_energysite_command = kwargs.get("product_type") == PRODUCT_TYPE_ENERGY_SITES
-
-    result = None
-
-    if (
-        instance._id_to_vin(car_id) is None
-        or (car_id and instance.is_car_online(car_id=car_id))
-        or is_wake_command
-        or is_energysite_command
-    ):
-        try:
-            result = await wrapped(*args, **kwargs)
-        except TeslaException as ex:
-            _LOGGER.debug(
-                "Exception: %s\n%s(%s %s)", str(ex), wrapped.__name__, args, kwargs
-            )
-            if ex.code == 408 and car_id and instance._id_to_vin(car_id):
-                instance.set_car_online(car_id=car_id, online_status=False)
-                # instance.car_online[instance._id_to_vin(car_id)] = False
-            raise
-
-    if (
-        valid_result(result)
-        or is_wake_command
-        or is_energysite_command
-        or instance._id_to_vin(car_id) is None
-    ):
-        return result
-
-    _LOGGER.debug(
-        "%s: "
-        "wake_up needed for %s -> %s "
-        "Info: args:%s, kwargs:%s, "
-        "ID:%s, car_online:%s "
-        "is_wake_command:%s, is_wake_api:%s wake_if_asleep:%s",
-        instance._id_to_vin(car_id)[-5:],
-        wrapped.__name__,
-        result,
-        args,
-        kwargs,
-        car_id if car_id else None,
-        instance.car_online if instance.car_online else None,
-        is_wake_command,
-        is_wake_api,
-        kwargs.get("wake_if_asleep"),
-    )
-    # instance.car_online[instance._id_to_vin(car_id)] = False
-    instance.set_car_online(car_id=car_id, online_status=False)
-    while (
-        kwargs.get("wake_if_asleep")
-        and
-        # Check online state
-        (
-            car_id is None
-            or (
-                not instance._id_to_vin(car_id)
-                or not instance.is_car_online(car_id=car_id)
-            )
         )
-    ):
-        _LOGGER.debug("Attempting to wake up")
-        result = await instance._wake_up(car_id)
-        _LOGGER.debug(
-            "%s: %s: Wake Attempt(%s): %s. Next attempt in %s",
-            instance._id_to_vin(car_id)[-5:],
-            wrapped.__name__,
-            retries,
-            result,
-            15 + sleep_delay ** (retries + 2),
-        )
-        if not result:
-            if retries < 5:
-                await asyncio.sleep(15 + sleep_delay ** (retries + 2))
-                retries += 1
-                continue
-            instance.set_car_online(car_id=car_id, online_status=False)
-            # instance.car_online[instance._id_to_vin(car_id)] = False
-            raise RetryLimitError("Reached retry limit; aborting wake up")
-        break
-    # instance.car_online[instance._id_to_vin(car_id)] = True
-    # retry function
-    if is_wake_api and instance.is_car_online(car_id=car_id):
-        _LOGGER.debug(
-            "%s: Api-command was WAKE_UP and car is awake: %s",
-            instance._id_to_vin(car_id)[-5:],
-            instance.is_car_online(car_id=car_id),
-        )
-        return result
-
-    _LOGGER.debug(
-        "%s: Retrying %s(%s %s)",
-        instance._id_to_vin(car_id)[-5:],
-        wrapped.__name__,
-        args,
-        kwargs,
-    )
-    try:
-        result = await wrapped(*args, **kwargs)
-        _LOGGER.debug(
-            "%s: Retry after wake up succeeded: %s",
-            instance._id_to_vin(car_id)[-5:],
-            "True" if valid_result(result) else result,
-        )
-    except TeslaException as ex:
-        _LOGGER.debug(
-            "Exception: %s\n%s(%s %s)", str(ex), wrapped.__name__, args, kwargs
-        )
-        raise
-
-    if valid_result(result):
-        _LOGGER.debug("Result: %s", result)
-        if (
-            "state" in result.get("response")
-            and (is_wake_command or is_wake_api)
-            and result.get("response").get("state") != "online"
-        ):
-            _LOGGER.debug(
-                "%s: Was wake_up command. State: %s",
-                instance._id_to_vin(car_id)[-5:],
-                result.get("response").get("state"),
-            )
-            instance.set_car_online(
-                car_id=car_id,
-                online_status=result.get("response").get("state") == "online",
-            )
-        return result
-
-    raise TeslaException("could_not_wake_buses")
+    except TypeError as exception:
+        _LOGGER.error("Result: %s, %s", result, exception)
+        return False
 
 
 class Controller:
@@ -320,12 +157,11 @@ class Controller:
         self.__update = {}
         self.__driving = {}  # for websocket timestamp only
         self._last_update_time = {}  # succesful update attempts by car
-        self._last_wake_up_attempt = {}  # attempts to wake_up car
         self._last_wake_up_time = {}  # succesful wake_ups by car
         self._last_attempted_update_time = 0  # all attempts by controller
         self.__lock = {}
         self.__update_lock = None  # controls access to update function
-        self.__wakeup_conds = {}
+        self.__wakeup_lock = {}
         self.car_online = {}
         self.__id_vin_map = {}
         self.__vin_id_map = {}
@@ -472,18 +308,14 @@ class Controller:
         return len(self.__websocket_listeners) - 1
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
-    async def get_product_list(self, wake_if_asleep: bool = False) -> list:
+    async def get_product_list(self) -> list:
         """Get product list from Tesla."""
-        return (await self.api("PRODUCT_LIST", wake_if_asleep=wake_if_asleep))[
-            "response"
-        ]
+        return (await self.api("PRODUCT_LIST"))["response"]
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
-    async def get_vehicles(self, wake_if_asleep: bool = False) -> list:
+    async def get_vehicles(self) -> list:
         """Get vehicles json from TeslaAPI."""
-        return (await self.api("VEHICLE_LIST", wake_if_asleep=wake_if_asleep))[
-            "response"
-        ]
+        return (await self.api("VEHICLE_LIST"))["response"]
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_site_config(self, energysite_id: int) -> dict:
@@ -499,7 +331,7 @@ class Controller:
             response = (
                 await self.api(
                     "VEHICLE_DATA",
-                    path_vars={"vehicle_id": self.__vin_id_map[vin]},
+                    path_vars={"vehicle_id": self._vin_to_id(vin)},
                     wake_if_asleep=wake_if_asleep,
                 )
             )["response"]
@@ -511,6 +343,17 @@ class Controller:
             raise ex
 
         return response
+
+    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
+    async def get_vehicle_summary(self, vin: str) -> dict:
+        """Get vehicle summary json from TeslaAPI for a given vin."""
+        return (
+            await self.api(
+                "VEHICLE_SUMMARY",
+                path_vars={"vehicle_id": self._vin_to_id(vin)},
+                wake_if_asleep=False,
+            )
+        )["response"]
 
     @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_site_data(self, energysite_id: int) -> dict:
@@ -554,23 +397,26 @@ class Controller:
             self.set_id_vin(car_id=car["id"], vin=vin)
             self.set_vehicle_id_vin(vehicle_id=car["vehicle_id"], vin=vin)
             self.__lock[vin] = asyncio.Lock()
-            self.__wakeup_conds[vin] = asyncio.Lock()
+            self.__wakeup_lock[vin] = asyncio.Lock()
             self._last_update_time[vin] = 0
-            self._last_wake_up_attempt[vin] = 0
             self._last_wake_up_time[vin] = 0
             self.__update[vin] = True
             self.__update_state[vin] = "normal"
             self.set_car_online(vin=vin, online_status=car["state"] == "online")
             self.set_last_park_time(vin=vin, timestamp=self._last_attempted_update_time)
             self.__driving[vin] = {}
-            self._vehicle_data[vin] = {}  # Prevent KeyError for _wake_up method
+            self._vehicle_data[vin] = {}
 
             try:
                 self._vehicle_data[vin] = await self.get_vehicle_data(
                     vin, wake_if_asleep=wake_if_asleep
                 )
             except TeslaException as ex:
-                _LOGGER.warning("Unable to get vehicle data during setup, car will still be added. %s: %s", ex.code, ex.message)
+                _LOGGER.warning(
+                    "Unable to get vehicle data during setup, car will still be added. %s: %s",
+                    ex.code,
+                    ex.message,
+                )
             self.cars[vin] = TeslaCar(car, self, self._vehicle_data[vin])
 
         return self.cars
@@ -587,9 +433,15 @@ class Controller:
             # Solar only systems (no Powerwalls) are listed as "solar"
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
                 try:
-                    self._site_data[energysite_id] = await self.get_site_data(energysite_id)
+                    self._site_data[energysite_id] = await self.get_site_data(
+                        energysite_id
+                    )
                 except TeslaException as ex:
-                    _LOGGER.warning("Unable to get site data during setup, site will still be added. %s: %s", ex.code, ex.message)
+                    _LOGGER.warning(
+                        "Unable to get site data during setup, site will still be added. %s: %s",
+                        ex.code,
+                        ex.message,
+                    )
                     self._site_data[energysite_id] = {}
 
                 self.energysites[energysite_id] = SolarSite(
@@ -607,7 +459,11 @@ class Controller:
                         battery_id
                     )
                 except TeslaException as ex:
-                    _LOGGER.warning("Unable to get battery data during setup, battery will still be added. %s: %s", ex.code, ex.message)
+                    _LOGGER.warning(
+                        "Unable to get battery data during setup, battery will still be added. %s: %s",
+                        ex.code,
+                        ex.message,
+                    )
                     self._battery_data[energysite_id] = {}
 
                 self._battery_summary[energysite_id] = await self.get_battery_summary(
@@ -633,35 +489,54 @@ class Controller:
 
         return self.energysites
 
-    async def _wake_up(self, car_id):
+    @backoff.on_exception(
+        min_expo,
+        TeslaException,
+        max_tries=3,
+        logger=__name__,
+        giveup=should_giveup,
+    )
+    async def wake_up(self, car_id) -> bool:
+        """Attempt to wake the car, returns True if successfully awakened."""
         car_vin = self._id_to_vin(car_id)
         car_id = self._update_id(car_id)
-        async with self.__wakeup_conds[car_vin]:
-            cur_time = round(time.time())
-
-            if not self.is_car_online(vin=car_vin) or (
-                self._last_wake_up_attempt[car_vin] < self._last_attempted_update_time
-            ):
-                result = await self.api(
-                    "WAKE_UP", path_vars={"vehicle_id": car_id}, wake_if_asleep=False
-                )  # avoid wrapper loop
+        async with self.__wakeup_lock[car_vin]:
+            wake_start_time = time.time()
+            wake_deadline = wake_start_time + WAKE_TIMEOUT
+            _LOGGER.debug(
+                "%s: Sending wake request with deadline of: %d",
+                car_vin[-5:],
+                wake_deadline,
+            )
+            result = await self.api(
+                "WAKE_UP", path_vars={"vehicle_id": car_id}, wake_if_asleep=False
+            )
+            state = result.get("response", {}).get("state")
+            self.set_car_online(
+                car_id=car_id,
+                online_status=state == "online",
+            )
+            while not self.is_car_online(vin=car_vin) and time.time() < wake_deadline:
+                await asyncio.sleep(WAKE_CHECK_INTERVAL)
+                response = await self.get_vehicle_summary(vin=car_vin)
+                state = response.get("state")
                 self.set_car_online(
-                    car_id=car_id, online_status=result["response"]["state"] == "online"
-                )
-                self._vehicle_data[car_vin].update(result["response"])
-                self._last_wake_up_attempt[car_vin] = cur_time
-                _LOGGER.debug(
-                    "%s: Wakeup: %s",
-                    car_vin[-5:],
-                    self._vehicle_data[car_vin].get("state"),
+                    car_id=car_id,
+                    online_status=state == "online",
                 )
 
+            _LOGGER.debug(
+                "%s: Wakeup took %d seconds, state: %s",
+                car_vin[-5:],
+                time.time() - wake_start_time,
+                state,
+            )
             return self.is_car_online(vin=car_vin)
 
     def _calculate_next_interval(self, vin: Text) -> int:
         cur_time = round(time.time())
         _LOGGER.debug(
-            "%s: %s. Polling policy: %s. Update state: %s. Since last park: %s. Since last wake_up: %s. Idle interval: %s. shift_state: %s sentry: %s climate: %s, charging: %s ",
+            "%s: %s. Polling policy: %s. Update state: %s. Since last park: %s. Since last wake up: %s. Idle interval: %s. shift_state: %s sentry: %s climate: %s, charging: %s ",
             vin[-5:],
             self.cars[vin].state,
             self.polling_policy,
@@ -776,14 +651,11 @@ class Controller:
 
         Args
             car_id (Text, optional): The vehicle to update. If None, all cars are updated. Defaults to None.
-            wake_if_asleep (bool, optional): force a vehicle awake. This is processed by the wake_up decorator. Defaults to False.
+            wake_if_asleep (bool, optional): force a vehicle awake. Defaults to False.
             force (bool, optional): force a vehicle update regardless of the update_interval. Defaults to False.
 
         Returns
             Whether update was successful.
-
-        Raises
-            RetryLimitError
 
         """
         tasks = []
@@ -798,7 +670,11 @@ class Controller:
                 except TeslaException as ex:
                     # VEHICLE_UNAVAILABLE is handled in get_vehicle_data as debug and ignore
                     # Anything else would be caught here and logged as a warning
-                    _LOGGER.warning("Unable to get vehicle data during poll. %s: %s", ex.code, ex.message)
+                    _LOGGER.warning(
+                        "Unable to get vehicle data during poll. %s: %s",
+                        ex.code,
+                        ex.message,
+                    )
                     response = None
 
                 if response:
@@ -954,7 +830,7 @@ class Controller:
                                 (
                                     "%s: Skipping update with state %s. Polling: %s. "
                                     "Last update: %s ago. Last parked: %s ago. "
-                                    "Last wake_up %s ago. "
+                                    "Last wake up %s ago. "
                                 ),
                                 vin[-5:],
                                 self.cars[vin].state,
@@ -1383,12 +1259,11 @@ class Controller:
         vin = self.__vehicle_id_vin_map[vehicle_id]
         _LOGGER.debug("Disconnected %s from websocket", vin[-5:])
 
-    @wake_up
     async def api(
         self,
         name: str,
         path_vars=None,
-        wake_if_asleep: bool = False,  # pylint: disable=W0613
+        wake_if_asleep: bool = False,
         **kwargs,
     ):
         """Perform api request for given endpoint name, with keyword arguments as parameters.
@@ -1402,8 +1277,7 @@ class Controller:
         path_vars : dict
             Path variables to be replaced. Defaults to None. For vehicle_id reference see https://tesla-api.timdorr.com/api-basics/vehicles#vehicle_id-vs-id
         wake_if_asleep : bool
-            Function for underlying api call for whether a failed response
-            should wake up the vehicle or retry.
+            If a sleeping vehicle should be woken before making the api call.
         **kwargs :
             Arguments to pass to underlying Tesla command. See https://tesla-api.timdorr.com/vehicle/commands
 
@@ -1444,9 +1318,39 @@ class Controller:
             uri = endpoint["URI"].format(**path_vars)
         except KeyError as ex:
             raise ValueError(f"{name} requires path variable {ex}") from ex
+        method = endpoint["TYPE"].lower()
+
+        # Old @wake_up decorator condensed here
+        if wake_if_asleep:
+            car_id = path_vars.get("vehicle_id")
+            if not car_id:
+                raise ValueError(
+                    "wake_if_asleep only supported on endpoints with 'vehicle_id' path variable"
+                )
+            # If we already know the car is asleep, go ahead and wake it
+            if not self.is_car_online(car_id=car_id):
+                await self.wake_up(car_id=car_id)
+                return await self.__connection.post(
+                    "", method=method, data=kwargs, url=uri
+                )
+
+            # We think the car is awake, lets try the api call:
+            try:
+                response = await self.__connection.post(
+                    "", method=method, data=kwargs, url=uri
+                )
+            except TeslaException as ex:
+                if ex.code != 408:
+                    raise ex
+                response = None
+            # It may fail if the car slept since the last api update
+            if not valid_result(response):
+                # Assumed it failed because it was asleep and we didn't know it
+                await self.wake_up
+                response = await self.__connection.post(
+                    "", method=method, data=kwargs, url=uri
+                )
+            return response
+
         # Perform request using given keyword arguments as parameters
-        if endpoint["TYPE"] == "GET":
-            return await self.__connection.post("", method="get", data=kwargs, url=uri)
-        return await self.__connection.post(
-            "", method=endpoint["TYPE"].lower(), data=kwargs, url=uri
-        )
+        return await self.__connection.post("", method=method, data=kwargs, url=uri)

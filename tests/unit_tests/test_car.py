@@ -10,6 +10,11 @@ from tests.tesla_mock import (
     VIN,
 )
 
+DAY_SELECTION_MAP = {
+    "all_week": False,
+    "weekdays": True,
+}
+
 
 @pytest.mark.asyncio
 async def test_car_properties(monkeypatch):
@@ -261,6 +266,80 @@ async def test_car_properties(monkeypatch):
     assert (
         _car.is_auto_seat_climate_right
         == VEHICLE_DATA["climate_state"]["auto_seat_climate_right"]
+    )
+
+    assert (
+        _car.active_route_destination
+        == VEHICLE_DATA["drive_state"]["active_route_destination"]
+    )
+
+    assert (
+        _car.active_route_energy_at_arrival
+        == VEHICLE_DATA["drive_state"]["active_route_energy_at_arrival"]
+    )
+
+    assert (
+        _car.active_route_latitude
+        == VEHICLE_DATA["drive_state"]["active_route_latitude"]
+    )
+
+    assert (
+        _car.active_route_longitude
+        == VEHICLE_DATA["drive_state"]["active_route_longitude"]
+    )
+
+    assert (
+        _car.active_route_miles_to_arrival
+        == VEHICLE_DATA["drive_state"]["active_route_miles_to_arrival"]
+    )
+
+    assert (
+        _car.active_route_minutes_to_arrival
+        == VEHICLE_DATA["drive_state"]["active_route_minutes_to_arrival"]
+    )
+
+    assert (
+        _car.active_route_traffic_minutes_delay
+        == VEHICLE_DATA["drive_state"]["active_route_traffic_minutes_delay"]
+    )
+
+    assert (
+        _car.scheduled_departure_time
+        == VEHICLE_DATA["charge_state"]["scheduled_departure_time"]
+    )
+
+    assert (
+        _car.scheduled_departure_time_minutes
+        == VEHICLE_DATA["charge_state"]["scheduled_departure_time_minutes"]
+    )
+
+    assert _car.is_off_peak_charging_enabled
+
+    assert _car.is_off_peak_charging_weekday_only == DAY_SELECTION_MAP.get(
+        VEHICLE_DATA["charge_state"]["off_peak_charging_times"]
+    )
+
+    assert (
+        _car.off_peak_hours_end_time
+        == VEHICLE_DATA["charge_state"]["off_peak_hours_end_time"]
+    )
+
+    assert _car.is_preconditioning_enabled is False
+
+    assert _car.is_preconditioning_weekday_only == DAY_SELECTION_MAP.get(
+        VEHICLE_DATA["charge_state"]["preconditioning_times"]
+    )
+
+    assert (
+        _car.scheduled_charging_mode
+        == VEHICLE_DATA["charge_state"]["scheduled_charging_mode"]
+    )
+
+    assert _car.is_scheduled_charging_pending is False
+
+    assert (
+        _car.scheduled_charging_start_time_app
+        == VEHICLE_DATA["charge_state"]["scheduled_charging_start_time_app"]
     )
 
 
@@ -593,3 +672,51 @@ async def test_remote_start(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert await _car.remote_start() is None
+
+
+# Same logic for all active_route properties, testing one covers all.
+@pytest.mark.asyncio
+async def test_active_route_key_unavailable(monkeypatch):
+    """Test active_route_key_unavailable."""
+    del VEHICLE_DATA["drive_state"]["active_route_destination"]
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert _car.active_route_destination is None
+
+
+@pytest.mark.asyncio
+async def test_set_scheduled_departure(monkeypatch):
+    """Test set scheduled departure."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert (
+        await _car.set_scheduled_departure(True, 420, True, False, False, False, 480)
+        is None
+    )
+
+    assert (
+        await _car.set_scheduled_departure(False, 460, False, True, True, True, 500)
+        is None
+    )
+
+
+@pytest.mark.asyncio
+async def test_set_scheduled_charging(monkeypatch):
+    """Test set scheduled charging."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.set_scheduled_charging(True, 420) is None
+
+    assert await _car.set_scheduled_charging(False, 420) is None
