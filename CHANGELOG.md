@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.5.1 (2022-12-11)
+### Fix
+* Fix typo in wake_up call ([#383](https://github.com/zabuldon/teslajsonpy/issues/383)) ([`5209e0a`](https://github.com/zabuldon/teslajsonpy/commit/5209e0a6ad6a3dc8eec1ea71536ad4fd41fe518f))
+
 ## v3.5.0 (2022-12-10)
 ### Feature
 * Add active route properties ([#376](https://github.com/zabuldon/teslajsonpy/issues/376)) ([`14b20d7`](https://github.com/zabuldon/teslajsonpy/commit/14b20d7a726b15f1a55d6e89213491f7d241cd6c))
