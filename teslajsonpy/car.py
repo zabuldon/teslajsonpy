@@ -378,8 +378,13 @@ class TeslaCar:
 
     @property
     def is_on(self) -> bool:
-        """Return car is on."""
+        """Return car is online (available, even if asleep)."""
         return self._controller.is_car_online(vin=self.vin)
+
+    @property
+    def is_asleep(self) -> bool:
+        """Return car is asleep."""
+        return self._controller.is_car_asleep(vin=self.vin)
 
     @property
     def longitude(self) -> float:
@@ -745,9 +750,10 @@ class TeslaCar:
                 name, path_vars=path_vars, wake_if_asleep=wake_if_asleep, **kwargs
             )
             _LOGGER.debug("Response from command %s: %s", name, data)
+            self._controller.reset_tesla_exceptions(vin=self.vin)
             return data
         except TeslaException as ex:
-            if ex.code == 408 and not wake_if_asleep and not self.is_on:
+            if ex.code == 408 and not wake_if_asleep and self.is_asleep:
                 # 408 due to being asleep and we didn't try to wake it
                 _LOGGER.debug(
                     "Vehicle unavailable for command: %s, car state: %s, wake_if_asleep: %s",
@@ -756,6 +762,7 @@ class TeslaCar:
                     wake_if_asleep,
                 )
                 return None
+            self._controller.count_tesla_exceptions(vin=self.vin)
             raise ex
 
     def _get_lat_long(self) -> Tuple[Optional[float], Optional[float]]:

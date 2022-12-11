@@ -30,3 +30,9 @@ PRODUCT_TYPE_POWERWALLS = "powerwalls"
 RESOURCE_TYPE = "resource_type"
 RESOURCE_TYPE_SOLAR = "solar"
 RESOURCE_TYPE_BATTERY = "battery"
+
+STATUS_ONLINE = "online"  # reported by Tesla, vehicle available and awake
+STATUS_ASLEEP = "asleep"  # reported by Tesla, vehicle available but asleep
+STATUS_OFFLINE = "offline"  # reported by Tesla, vehicle offline, wake/sleep unknown
+STATUS_UNAVAILABLE = "unavailable"  # set by Controller after successive api failures, overrides the above
+STATUS_UNKNOWN = "unknown"  # set by Controller during initialization, default value

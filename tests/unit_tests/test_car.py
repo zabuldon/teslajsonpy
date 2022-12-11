@@ -2,6 +2,13 @@
 
 import pytest
 
+from teslajsonpy.const import (
+    STATUS_ASLEEP,
+    STATUS_OFFLINE,
+    STATUS_ONLINE,
+    STATUS_UNAVAILABLE,
+    STATUS_UNKNOWN,
+)
 from teslajsonpy.controller import Controller
 
 from tests.tesla_mock import (
@@ -177,7 +184,9 @@ async def test_car_properties(monkeypatch):
 
     assert _car.is_trunk_closed
 
-    assert _car.is_on
+    assert _car.is_on is True
+
+    assert _car.is_asleep is False
 
     assert _car.is_window_closed
 
@@ -341,6 +350,52 @@ async def test_car_properties(monkeypatch):
         _car.scheduled_charging_start_time_app
         == VEHICLE_DATA["charge_state"]["scheduled_charging_start_time_app"]
     )
+
+
+@pytest.mark.asyncio
+async def test_car_states(monkeypatch):
+    """Test TeslaCar class properties."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+
+    _car = _controller.cars[VIN]
+
+    test_set = [
+        # state, online, asleep
+        (STATUS_ONLINE, True, False),
+        (STATUS_OFFLINE, False, False),
+        (STATUS_UNKNOWN, False, False),
+        (STATUS_UNAVAILABLE, False, False),
+        (STATUS_ASLEEP, True, True),
+        # asleep keeps last known state when offline/unknown
+        (STATUS_OFFLINE, False, True),
+        (STATUS_UNKNOWN, False, True),
+        (STATUS_UNAVAILABLE, False, True),
+        # asleep flips back to False with online
+        (STATUS_ONLINE, True, False),
+    ]
+    for state, online, asleep in test_set:
+        _controller._set_car_state(state, vin=VIN)
+        assert _car.state == state
+        assert _car.is_on == online
+        assert _car.is_asleep == asleep
+
+    test_set = [
+        # state, expected, error_count
+        (STATUS_ONLINE, STATUS_ONLINE, 0),
+        (STATUS_ONLINE, STATUS_ONLINE, 4),
+        (STATUS_ONLINE, STATUS_UNAVAILABLE, 5),
+        (STATUS_ONLINE, STATUS_UNAVAILABLE, 6),
+        (STATUS_ASLEEP, STATUS_ASLEEP, 5),
+    ]
+    for state, expected, error_count in test_set:
+        _controller.reset_tesla_exceptions(VIN)
+        for _ in range(error_count):
+            _controller.count_tesla_exceptions(VIN)
+        _controller._set_car_state(state, vin=VIN)
+        assert _car.state == expected
 
 
 @pytest.mark.asyncio

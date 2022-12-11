@@ -1,7 +1,7 @@
 """Test online sensor."""
 
+from teslajsonpy.const import STATUS_ONLINE, UPDATE_INTERVAL
 from teslajsonpy.controller import Controller
-from teslajsonpy.const import UPDATE_INTERVAL
 from tests.tesla_mock import TeslaMock, VIN, CAR_ID
 
 VIN_INTERVAL = 5
@@ -16,7 +16,7 @@ def test_update_interval(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
 
-    monkeypatch.setitem(_controller.car_online, VIN, True)
+    _controller._set_car_state(STATUS_ONLINE, vin=VIN)
 
     _controller.set_id_vin(CAR_ID, VIN)
 
@@ -35,7 +35,7 @@ def test_set_update_interval_vin(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
 
-    monkeypatch.setitem(_controller.car_online, VIN, True)
+    _controller._set_car_state(STATUS_ONLINE, vin=VIN)
 
     _controller.set_id_vin(CAR_ID, VIN)
     _controller.set_id_vin(CAR_ID2, VIN2)
@@ -65,7 +65,7 @@ def test_get_update_interval_vin(monkeypatch):
     TeslaMock(monkeypatch)
     _controller = Controller(None)
 
-    monkeypatch.setitem(_controller.car_online, VIN, True)
+    _controller._set_car_state(STATUS_ONLINE, vin=VIN)
 
     _controller.set_id_vin(CAR_ID, VIN)
     _controller.update_interval = UPDATE_INTERVAL

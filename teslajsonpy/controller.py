@@ -27,6 +27,10 @@ from teslajsonpy.const import (
     RESOURCE_TYPE,
     RESOURCE_TYPE_SOLAR,
     RESOURCE_TYPE_BATTERY,
+    STATUS_ONLINE,
+    STATUS_ASLEEP,
+    STATUS_UNKNOWN,
+    STATUS_UNAVAILABLE,
     WAKE_TIMEOUT,
     WAKE_CHECK_INTERVAL,
 )
@@ -162,7 +166,8 @@ class Controller:
         self.__lock = {}
         self.__update_lock = None  # controls access to update function
         self.__wakeup_lock = {}
-        self.car_online = {}
+        self.__car_state: Dict[str, str] = {}
+        self.__car_sleeping: Dict[str, bool] = {}
         self.__id_vin_map = {}
         self.__vin_id_map = {}
         self.__vin_vehicle_id_map = {}
@@ -178,6 +183,7 @@ class Controller:
         self._include_energysites: bool = True
         self._product_list: List[dict] = []
         self._vehicle_list: List[dict] = []
+        self._consecutive_exceptions: Dict[str, int] = {}
         self._vehicle_data: Dict[str, dict] = {}
         self._energysite_list: List[dict] = []
         self._site_config: Dict[int, dict] = {}
@@ -335,12 +341,14 @@ class Controller:
                     wake_if_asleep=wake_if_asleep,
                 )
             )["response"]
+            self.reset_tesla_exceptions(vin=vin)
 
         except TeslaException as ex:
-            if ex.message == "VEHICLE_UNAVAILABLE":
-                _LOGGER.debug("Vehicle offline - data unavailable.")
-                return {}
-            raise ex
+            self.count_tesla_exceptions(vin=vin)
+            if should_giveup(ex):
+                raise ex
+            _LOGGER.debug("Unable to get vehicle data: %s: %s", ex.code, ex.message)
+            return {}
 
         return response
 
@@ -402,21 +410,23 @@ class Controller:
             self._last_wake_up_time[vin] = 0
             self.__update[vin] = True
             self.__update_state[vin] = "normal"
-            self.set_car_online(vin=vin, online_status=car["state"] == "online")
+            self._consecutive_exceptions[vin] = 0
+            self._set_car_state(car.get("state", STATUS_UNKNOWN), vin=vin)
             self.set_last_park_time(vin=vin, timestamp=self._last_attempted_update_time)
             self.__driving[vin] = {}
             self._vehicle_data[vin] = {}
 
-            try:
-                self._vehicle_data[vin] = await self.get_vehicle_data(
-                    vin, wake_if_asleep=wake_if_asleep
-                )
-            except TeslaException as ex:
-                _LOGGER.warning(
-                    "Unable to get vehicle data during setup, car will still be added. %s: %s",
-                    ex.code,
-                    ex.message,
-                )
+            if not self.is_car_asleep(vin=vin) or wake_if_asleep:
+                try:
+                    self._vehicle_data[vin] = await self.get_vehicle_data(
+                        vin, wake_if_asleep=wake_if_asleep
+                    )
+                except TeslaException as ex:
+                    _LOGGER.warning(
+                        "Unable to get vehicle data during setup, car will still be added. %s: %s",
+                        ex.code,
+                        ex.message,
+                    )
             self.cars[vin] = TeslaCar(car, self, self._vehicle_data[vin])
 
         return self.cars
@@ -511,27 +521,35 @@ class Controller:
             result = await self.api(
                 "WAKE_UP", path_vars={"vehicle_id": car_id}, wake_if_asleep=False
             )
-            state = result.get("response", {}).get("state")
-            self.set_car_online(
-                car_id=car_id,
-                online_status=state == "online",
-            )
-            while not self.is_car_online(vin=car_vin) and time.time() < wake_deadline:
+            self._set_car_state(result.get("response", {}).get("state"), car_id=car_id)
+            while self.is_car_asleep(vin=car_vin) and time.time() < wake_deadline:
                 await asyncio.sleep(WAKE_CHECK_INTERVAL)
                 response = await self.get_vehicle_summary(vin=car_vin)
-                state = response.get("state")
-                self.set_car_online(
-                    car_id=car_id,
-                    online_status=state == "online",
-                )
+                self._set_car_state(response.get("state"), car_id=car_id)
 
             _LOGGER.debug(
                 "%s: Wakeup took %d seconds, state: %s",
                 car_vin[-5:],
                 time.time() - wake_start_time,
-                state,
+                self.get_car_state(vin=car_vin),
             )
-            return self.is_car_online(vin=car_vin)
+            return not self.is_car_asleep(vin=car_vin)
+
+    def count_tesla_exceptions(self, vin: str) -> None:
+        """Keep track of consecutive exceptions."""
+        if vin not in self._consecutive_exceptions:
+            self._consecutive_exceptions[vin] = 0
+        self._consecutive_exceptions[vin] += 1
+        _LOGGER.debug(
+            "%s: exception counter increased to %d",
+            vin[-5:],
+            self._consecutive_exceptions[vin],
+        )
+
+    def reset_tesla_exceptions(self, vin: str) -> None:
+        """Reset consecutive exception counter."""
+        self._consecutive_exceptions[vin] = 0
+        _LOGGER.debug("%s: exception counter reset", vin[-5:])
 
     def _calculate_next_interval(self, vin: Text) -> int:
         cur_time = round(time.time())
@@ -552,7 +570,7 @@ class Controller:
         if vin not in self.__update_state:
             self.__update_state[vin] = "normal"
 
-        if self.cars[vin].state == "asleep" or self.cars[vin].shift_state:
+        if self.is_car_asleep(vin=vin) or self.cars[vin].shift_state:
             self.set_last_park_time(
                 vin=vin, timestamp=cur_time, shift_state=self.cars[vin].shift_state
             )
@@ -781,10 +799,8 @@ class Controller:
                         self.set_vehicle_id_vin(
                             vehicle_id=car["vehicle_id"], vin=car["vin"]
                         )
-                        self.set_car_online(
-                            vin=car["vin"], online_status=car["state"] == "online"
-                        )
                         self.cars[car["vin"]].update_car_info(car)
+                        self._set_car_state(car["state"], vin=car["vin"])
                     self._last_attempted_update_time = cur_time
 
                 # Only update online vehicles that haven't been updated recently
@@ -794,26 +810,20 @@ class Controller:
                 car_id = self._update_id(car_id)
                 car_vin = self._id_to_vin(car_id)
 
-                for vin, online in self.get_car_online().items():
+                for vin, car in self.cars.items():
                     # If specific car_id provided, only update match
                     if (
                         (car_vin and car_vin != vin)
                         or vin not in self.__lock
-                        or (vin and self.cars[vin].in_service)
+                        or (vin and car.in_service)
                     ):
                         continue
 
                     async with self.__lock[vin]:
                         if (
-                            (
-                                online
-                                or (
-                                    wake_if_asleep
-                                    and self.cars[vin].state in ["asleep", "offline"]
-                                )
-                            )
-                            and (  # pylint: disable=too-many-boolean-expressions
-                                self.__update.get(vin)
+                            (not self.is_car_asleep(vin=vin) or wake_if_asleep)
+                            and self.__update.get(
+                                vin
                             )  # Only update cars with update flag on
                             and (
                                 force
@@ -833,7 +843,7 @@ class Controller:
                                     "Last wake up %s ago. "
                                 ),
                                 vin[-5:],
-                                self.cars[vin].state,
+                                car.state,
                                 self.__update.get(vin),
                                 cur_time - self._last_update_time[vin],
                                 cur_time - self.get_last_park_time(vin=vin),
@@ -1036,41 +1046,54 @@ class Controller:
             _LOGGER.debug("%s: Resetting last_wake_up_time to: %s", vin[-5:], timestamp)
             self._last_wake_up_time[vin] = timestamp
 
-    def set_car_online(
-        self, car_id: Text = None, vin: Text = None, online_status: bool = True
+    def _set_car_state(
+        self, new_state: str, car_id: Text = None, vin: Text = None
     ) -> None:
-        """Set online status for car_id.
+        """Set vehicle state for car_id or vin.
 
-        Will also update "last_wake_up_time" if the car changes from offline
+        Will also update "last_wake_up_time" if the car changes from asleep
         to online
 
         Parameters
         ----------
+        new_state: string
+            The state string from a vehicle api response
         car_id : string
             Identifier for the car on the owner-api endpoint.
         vin : string
             VIN number
 
-        online_status : boolean
-            True if the car is online (awake)
-            False if the car is offline (out of reach or sleeping)
-
-
         """
+        if not (car_id or vin):
+            raise ValueError("Either car_id or vin must be provided to set car state")
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
-        if vin and self.get_car_online(vin=vin) != online_status:
-            _LOGGER.debug(
-                "%s: Changing car_online from %s to %s",
-                vin[-5:],
-                self.get_car_online(vin=vin),
-                online_status,
-            )
-            self.car_online[vin] = online_status
-            if online_status:
-                self.set_last_wake_up_time(vin=vin, timestamp=round(time.time()))
 
-    def get_car_online(self, car_id: Text = None, vin: Text = None):
+        if self._consecutive_exceptions.get(vin, 0) >= 5 and new_state == STATUS_ONLINE:
+            # Tesla is clearly lying that it's online, set it as unavailable instead
+            new_state = STATUS_UNAVAILABLE
+
+        if self.get_car_state(vin=vin) != new_state:
+            _LOGGER.debug(
+                "%s: Changing car state from %s to %s",
+                vin[-5:],
+                self.get_car_state(vin=vin),
+                new_state,
+            )
+        self.__car_state[vin] = new_state
+        # Update the car object's state as well if it exists
+        if vin in self.cars:
+            self.cars[vin].update_car_info({"state": new_state, "vin": vin})
+
+        if self.is_car_asleep(vin=vin) and new_state == STATUS_ONLINE:
+            self.set_last_wake_up_time(vin=vin, timestamp=round(time.time()))
+        # Don't update __car_sleeping when state is offline or unavailable
+        if new_state == STATUS_ASLEEP:
+            self.__car_sleeping[vin] = True
+        if new_state == STATUS_ONLINE:
+            self.__car_sleeping[vin] = False
+
+    def get_car_state(self, car_id: Text = None, vin: Text = None):
         """Get online status for car_id or all cars.
 
         Parameters
@@ -1094,13 +1117,34 @@ class Controller:
         """
         if car_id and not vin:
             vin = self._id_to_vin(car_id)
-        if vin and vin in self.car_online:
-            return self.car_online[vin]
-        return self.car_online
+        if vin:
+            return self.__car_state.get(vin, STATUS_UNKNOWN)
+        return self.__car_state
 
     def is_car_online(self, car_id: Text = None, vin: Text = None) -> bool:
-        """Alias for get_car_online for better readability."""
-        return self.get_car_online(car_id=car_id, vin=vin)
+        """Get online status for car_id or vin.
+
+        Returns True if it is reachable, this includes asleep.
+        """
+        if not (car_id or vin):
+            raise ValueError("Either car_id or vin must be provided")
+
+        return self.get_car_state(car_id=car_id, vin=vin) in [
+            STATUS_ONLINE,
+            STATUS_ASLEEP,
+        ]
+
+    def is_car_asleep(self, car_id: Text = None, vin: Text = None) -> bool:
+        """Get asleep status for car_id or vin.
+
+        Returns True if it is asleep, or was last seen as asleep.
+        """
+        if not (car_id or vin):
+            raise ValueError("Either car_id or vin must be provided")
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+
+        return self.__car_sleeping.get(vin)
 
     def set_id_vin(self, car_id: Text, vin: Text) -> None:
         """Update mappings of car_id <--> vin."""
@@ -1328,7 +1372,7 @@ class Controller:
                     "wake_if_asleep only supported on endpoints with 'vehicle_id' path variable"
                 )
             # If we already know the car is asleep, go ahead and wake it
-            if not self.is_car_online(car_id=car_id):
+            if self.is_car_asleep(car_id=car_id):
                 await self.wake_up(car_id=car_id)
                 return await self.__connection.post(
                     "", method=method, data=kwargs, url=uri
