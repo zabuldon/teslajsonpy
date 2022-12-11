@@ -1346,7 +1346,7 @@ class Controller:
             # It may fail if the car slept since the last api update
             if not valid_result(response):
                 # Assumed it failed because it was asleep and we didn't know it
-                await self.wake_up
+                await self.wake_up(car_id=car_id)
                 response = await self.__connection.post(
                     "", method=method, data=kwargs, url=uri
                 )
