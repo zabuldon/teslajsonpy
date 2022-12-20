@@ -497,6 +497,13 @@ class TeslaCar:
         )
 
     @property
+    def pedestrian_speaker(self) -> bool:
+        """Return pedestrian warning speaker option."""
+        if "P3WS" in self._vehicle_data.get("option_codes", {}):
+            return True
+        return False
+
+    @property
     def tpms_pressure_fl(self) -> float:
         """Return tire pressure sensor for front left tire."""
         return self._vehicle_data.get("vehicle_state", {}).get("tpms_pressure_fl")
