@@ -1276,3 +1276,15 @@ class TeslaCar:
                 "scheduled_charging_pending": enable,
             }
             self._vehicle_data["charge_state"].update(params)
+
+    async def remote_boombox(self) -> None:
+        """Remote boombox."""
+        data = await self._send_command("REMOTE_BOOMBOX")
+
+        if data and data["response"]:
+            result = data["response"]["result"]
+            reason = data["response"]["reason"]
+            if result is False:
+                _LOGGER.debug("Error calling remote boombox: %s", reason)
+            else:
+                _LOGGER.debug("Remote boombox called successfully.")
