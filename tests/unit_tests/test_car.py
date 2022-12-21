@@ -238,6 +238,8 @@ async def test_car_properties(monkeypatch):
         VEHICLE_DATA["climate_state"].get("steering_wheel_heater") is not None
     )
 
+    assert _car.pedestrian_speaker == ("P3WS" in VEHICLE_DATA["option_codes"])
+
     assert _car.third_row_seats == str(
         VEHICLE_DATA["vehicle_state"].get("third_row_seats")
     )
@@ -720,3 +722,15 @@ async def test_set_scheduled_charging(monkeypatch):
     assert await _car.set_scheduled_charging(True, 420) is None
 
     assert await _car.set_scheduled_charging(False, 420) is None
+
+
+@pytest.mark.asyncio
+async def test_remote_boombox(monkeypatch):
+    """Test remote boombox."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_boombox() is None
