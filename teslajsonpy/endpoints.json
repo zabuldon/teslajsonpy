@@ -1189,6 +1189,11 @@
     "TYPE": "POST",
     "URI": "api/1/vehicles/{vehicle_id}/command/remote_auto_seat_climate_request"
   },
+  "REMOTE_BOOMBOX": {
+    "AUTH": true,
+    "TYPE": "POST",
+    "URI": "api/1/vehicles/{vehicle_id}/command/remote_boombox"
+  },
   "REMOTE_SEAT_COOLING_REQUEST": {
     "AUTH": true,
     "TYPE": "POST",
