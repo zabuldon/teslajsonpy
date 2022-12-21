@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.6.0 (2022-12-21)
+### Feature
+* Add pedestrian speaker and remote_boombox ([#385](https://github.com/zabuldon/teslajsonpy/issues/385)) ([`81cbb13`](https://github.com/zabuldon/teslajsonpy/commit/81cbb136d2d928f0a09400ebe6e0f5db65c2f619))
+
 ## v3.5.1 (2022-12-11)
 ### Fix
 * Fix typo in wake_up call ([#383](https://github.com/zabuldon/teslajsonpy/issues/383)) ([`5209e0a`](https://github.com/zabuldon/teslajsonpy/commit/5209e0a6ad6a3dc8eec1ea71536ad4fd41fe518f))
