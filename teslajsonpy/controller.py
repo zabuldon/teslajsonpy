@@ -11,8 +11,8 @@ import logging
 import pkgutil
 import time
 from typing import Dict, List, Optional, Text
-import backoff
 import httpx
+from tenacity import retry, stop_after_delay
 from yarl import URL
 
 from teslajsonpy.car import TeslaCar
@@ -29,34 +29,12 @@ from teslajsonpy.const import (
     RESOURCE_TYPE_BATTERY,
     WAKE_TIMEOUT,
     WAKE_CHECK_INTERVAL,
+    MAX_API_RETRY_TIME,
 )
 from teslajsonpy.energy import EnergySite, SolarSite, PowerwallSite, SolarPowerwallSite
-from teslajsonpy.exceptions import should_giveup, TeslaException
+from teslajsonpy.exceptions import custom_retry, custom_wait, TeslaException
 
 _LOGGER = logging.getLogger(__name__)
-
-
-def min_expo(base=2, factor=1, max_value=None, min_value=0):
-    # pylint: disable=invalid-name
-    """Generate value for exponential decay.
-
-    Args:
-        base: The mathematical base of the exponentiation operation
-        factor: Factor to multiply the exponentation by.
-        max_value: The maximum value to yield. Once the value in the
-             true exponential sequence exceeds this, the value
-             of max_value will forever after be yielded.
-        min_value: The minimum value to yield. This is a constant minimum.
-
-    """
-    n = 0
-    while True:
-        a = min_value + factor * base**n
-        if max_value is None or a < max_value:
-            yield a
-            n += 1
-        else:
-            yield max_value
 
 
 def valid_result(result):
@@ -307,24 +285,20 @@ class Controller:
         self.__websocket_listeners.append(callback)
         return len(self.__websocket_listeners) - 1
 
-    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_product_list(self) -> list:
         """Get product list from Tesla."""
         return (await self.api("PRODUCT_LIST"))["response"]
 
-    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_vehicles(self) -> list:
         """Get vehicles json from TeslaAPI."""
         return (await self.api("VEHICLE_LIST"))["response"]
 
-    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_site_config(self, energysite_id: int) -> dict:
         """Get site config json from TeslaAPI for a given energysite_id."""
         return (await self.api("SITE_CONFIG", path_vars={"site_id": energysite_id}))[
             "response"
         ]
 
-    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_vehicle_data(self, vin: str, wake_if_asleep: bool = False) -> dict:
         """Get vehicle data json from TeslaAPI for a given vin."""
         try:
@@ -344,7 +318,6 @@ class Controller:
 
         return response
 
-    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_vehicle_summary(self, vin: str) -> dict:
         """Get vehicle summary json from TeslaAPI for a given vin."""
         return (
@@ -355,21 +328,18 @@ class Controller:
             )
         )["response"]
 
-    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_site_data(self, energysite_id: int) -> dict:
         """Get site data json from TeslaAPI for a given energysite_id."""
         return (await self.api("SITE_DATA", path_vars={"site_id": energysite_id}))[
             "response"
         ]
 
-    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_battery_data(self, battery_id: str) -> dict:
         """Get battery data json from TeslaAPI for a given battery_id."""
         return (await self.api("BATTERY_DATA", path_vars={"battery_id": battery_id}))[
             "response"
         ]
 
-    @backoff.on_exception(min_expo, httpx.RequestError, max_time=10, logger=__name__)
     async def get_battery_summary(self, battery_id: str) -> dict:
         """Get site config json from TeslaAPI for a given battery_id."""
         return (
@@ -489,13 +459,6 @@ class Controller:
 
         return self.energysites
 
-    @backoff.on_exception(
-        min_expo,
-        TeslaException,
-        max_tries=3,
-        logger=__name__,
-        giveup=should_giveup,
-    )
     async def wake_up(self, car_id) -> bool:
         """Attempt to wake the car, returns True if successfully awakened."""
         car_vin = self._id_to_vin(car_id)
@@ -1330,27 +1293,38 @@ class Controller:
             # If we already know the car is asleep, go ahead and wake it
             if not self.is_car_online(car_id=car_id):
                 await self.wake_up(car_id=car_id)
-                return await self.__connection.post(
+                return await self.__post_with_retries(
                     "", method=method, data=kwargs, url=uri
                 )
 
             # We think the car is awake, lets try the api call:
             try:
-                response = await self.__connection.post(
+                response = await self.__post_with_retries(
                     "", method=method, data=kwargs, url=uri
                 )
             except TeslaException as ex:
-                if ex.code != 408:
+                # Don't bother to wake and retry if it's not retryable
+                if not ex.retryable:
                     raise ex
                 response = None
             # It may fail if the car slept since the last api update
             if not valid_result(response):
                 # Assumed it failed because it was asleep and we didn't know it
                 await self.wake_up(car_id=car_id)
-                response = await self.__connection.post(
+                response = await self.__post_with_retries(
                     "", method=method, data=kwargs, url=uri
                 )
             return response
 
         # Perform request using given keyword arguments as parameters
-        return await self.__connection.post("", method=method, data=kwargs, url=uri)
+        return await self.__post_with_retries("", method=method, data=kwargs, url=uri)
+
+    @retry(
+        wait=custom_wait,
+        retry=custom_retry,
+        stop=stop_after_delay(MAX_API_RETRY_TIME),
+        reraise=True,
+    )
+    async def __post_with_retries(self, command, method="post", data=None, url=""):
+        """Call connection.post with retries for common exceptions."""
+        return await self.__connection.post(command, method=method, data=data, url=url)
