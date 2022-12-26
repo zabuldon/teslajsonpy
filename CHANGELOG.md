@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.7.0 (2022-12-26)
+### Feature
+* Include TeslaExceptions for api retries ([#382](https://github.com/zabuldon/teslajsonpy/issues/382)) ([`63700b9`](https://github.com/zabuldon/teslajsonpy/commit/63700b92dc57f05d99f38c51514146085519a636))
+
 ## v3.6.0 (2022-12-21)
 ### Feature
 * Add pedestrian speaker and remote_boombox ([#385](https://github.com/zabuldon/teslajsonpy/issues/385)) ([`81cbb13`](https://github.com/zabuldon/teslajsonpy/commit/81cbb136d2d928f0a09400ebe6e0f5db65c2f619))
