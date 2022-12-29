@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.7.1 (2022-12-29)
+### Fix
+* Handle unavailable option codes ([#390](https://github.com/zabuldon/teslajsonpy/issues/390)) ([`4e8a3a0`](https://github.com/zabuldon/teslajsonpy/commit/4e8a3a08966f21b4740cbfcf940998cdc1f8bc97))
+
 ## v3.7.0 (2022-12-26)
 ### Feature
 * Include TeslaExceptions for api retries ([#382](https://github.com/zabuldon/teslajsonpy/issues/382)) ([`63700b9`](https://github.com/zabuldon/teslajsonpy/commit/63700b92dc57f05d99f38c51514146085519a636))
