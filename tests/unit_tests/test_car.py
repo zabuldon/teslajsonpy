@@ -240,9 +240,6 @@ async def test_car_properties(monkeypatch):
 
     assert _car.pedestrian_speaker == ("P3WS" in VEHICLE_DATA["option_codes"])
 
-    VEHICLE_DATA["option_codes"] = None
-    assert _car.pedestrian_speaker is None
-
     assert _car.third_row_seats == str(
         VEHICLE_DATA["vehicle_state"].get("third_row_seats")
     )
@@ -346,6 +343,20 @@ async def test_car_properties(monkeypatch):
         _car.scheduled_charging_start_time_app
         == VEHICLE_DATA["charge_state"]["scheduled_charging_start_time_app"]
     )
+
+
+@pytest.mark.asyncio
+async def test_null_option_codes(monkeypatch):
+    """Test TeslaCar class properties."""
+    VEHICLE_DATA["option_codes"] = None
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+
+    _car = _controller.cars[VIN]
+
+    assert _car.pedestrian_speaker is None
 
 
 @pytest.mark.asyncio
