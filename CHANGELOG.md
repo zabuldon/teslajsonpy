@@ -2,6 +2,61 @@
 
 <!--next-version-placeholder-->
 
+## v3.7.0 (2022-12-26)
+### Feature
+* Include TeslaExceptions for api retries ([#382](https://github.com/zabuldon/teslajsonpy/issues/382)) ([`63700b9`](https://github.com/zabuldon/teslajsonpy/commit/63700b92dc57f05d99f38c51514146085519a636))
+
+## v3.6.0 (2022-12-21)
+### Feature
+* Add pedestrian speaker and remote_boombox ([#385](https://github.com/zabuldon/teslajsonpy/issues/385)) ([`81cbb13`](https://github.com/zabuldon/teslajsonpy/commit/81cbb136d2d928f0a09400ebe6e0f5db65c2f619))
+
+## v3.5.1 (2022-12-11)
+### Fix
+* Fix typo in wake_up call ([#383](https://github.com/zabuldon/teslajsonpy/issues/383)) ([`5209e0a`](https://github.com/zabuldon/teslajsonpy/commit/5209e0a6ad6a3dc8eec1ea71536ad4fd41fe518f))
+
+## v3.5.0 (2022-12-10)
+### Feature
+* Add active route properties ([#376](https://github.com/zabuldon/teslajsonpy/issues/376)) ([`14b20d7`](https://github.com/zabuldon/teslajsonpy/commit/14b20d7a726b15f1a55d6e89213491f7d241cd6c))
+* Add scheduled charging ([#360](https://github.com/zabuldon/teslajsonpy/issues/360)) ([`f68b928`](https://github.com/zabuldon/teslajsonpy/commit/f68b928ba285a1aec48a3c3cd07128650c94a9cc))
+
+### Fix
+* Improve wake up retry logic ([#379](https://github.com/zabuldon/teslajsonpy/issues/379)) ([`31de243`](https://github.com/zabuldon/teslajsonpy/commit/31de243afe5e3b568f8bd1fe389e09ee950af84f))
+* Wake car only when necessary ([#378](https://github.com/zabuldon/teslajsonpy/issues/378)) ([`20f309e`](https://github.com/zabuldon/teslajsonpy/commit/20f309e10817924f20adbbf0fbc296975f7bf633))
+* Fix valet mode parameter ([#377](https://github.com/zabuldon/teslajsonpy/issues/377)) ([`c419a04`](https://github.com/zabuldon/teslajsonpy/commit/c419a04c9988367e080b99ee45ad092e4f6d8b0e))
+
+## v3.4.1 (2022-12-05)
+### Fix
+* Add Valet mode optional argument ([#374](https://github.com/zabuldon/teslajsonpy/issues/374)) ([`535c988`](https://github.com/zabuldon/teslajsonpy/commit/535c988d4699d009b4fa6bfb3599463241d605fb))
+
+## v3.4.0 (2022-12-02)
+### Feature
+* Add auto seat climate command and properties ([#371](https://github.com/zabuldon/teslajsonpy/issues/371)) ([`21c5ff3`](https://github.com/zabuldon/teslajsonpy/commit/21c5ff3306d3caee48fa5062bb6194be1471f51a))
+
+## v3.3.0 (2022-11-30)
+### Feature
+* Add remote start command ([#367](https://github.com/zabuldon/teslajsonpy/issues/367)) ([`350f48b`](https://github.com/zabuldon/teslajsonpy/commit/350f48b47fbd885c452081a1ecf6ecc71b491e11))
+* Add valet mode command and property ([#368](https://github.com/zabuldon/teslajsonpy/issues/368)) ([`5e7c69f`](https://github.com/zabuldon/teslajsonpy/commit/5e7c69f848515b0d72362daaac28824081751878))
+
+## v3.2.2 (2022-11-22)
+### Fix
+* Handle unavailable sites/vehicles ([#365](https://github.com/zabuldon/teslajsonpy/issues/365)) ([`2daef7b`](https://github.com/zabuldon/teslajsonpy/commit/2daef7b3a7fbdbceb082749abec2386f6d97d556))
+
+## v3.2.1 (2022-11-21)
+### Fix
+* Keep existing vehicle config when asleep/offline ([#363](https://github.com/zabuldon/teslajsonpy/issues/363)) ([`92774e9`](https://github.com/zabuldon/teslajsonpy/commit/92774e975d9a5f3438d30c330f9e31481fc7b915))
+
+## v3.2.0 (2022-11-20)
+### Feature
+* Add usable_battery_level method in TeslaCar #361 ([`abf0d08`](https://github.com/zabuldon/teslajsonpy/commit/abf0d085ac1b6b26b85f081b838dc72abfe616b2))
+
+## v3.1.0 (2022-11-02)
+### Feature
+* Add window control and binary sensor ([#357](https://github.com/zabuldon/teslajsonpy/issues/357)) ([`29fabf7`](https://github.com/zabuldon/teslajsonpy/commit/29fabf726bc589dacf2c3fc6cd8432a776eaf6d9))
+* Add tpms, door and window properties ([`e66ff45`](https://github.com/zabuldon/teslajsonpy/commit/e66ff45d817a1b2db705b3e00a5515e6ea46f733))
+
+### Fix
+* Check energysite_id in _grid_status_unknown ([`d828ab4`](https://github.com/zabuldon/teslajsonpy/commit/d828ab4978e645094af9b595b99af4e20ce01ce1))
+
 ## v3.0.0 (2022-10-12)
 ### Feature
 * Add support for solar systems and powerwall ([#341](https://github.com/zabuldon/teslajsonpy/issues/341)) ([`5827dc9`](https://github.com/zabuldon/teslajsonpy/commit/5827dc9bda57e47dc0dafa674aeca2551582f43c))

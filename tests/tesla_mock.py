@@ -50,6 +50,9 @@ class TeslaMock:
         self._monkeypatch.setattr(
             Controller, "get_vehicle_data", self.mock_get_vehicle_data
         )
+        self._monkeypatch.setattr(
+            Controller, "get_vehicle_summary", self.mock_get_vehicle_summary
+        )
         self._energysites = copy.deepcopy(ENERGYSITES)
         self._product_list = copy.deepcopy(PRODUCT_LIST)
         self._vehicle_data = copy.deepcopy(VEHICLE_DATA)
@@ -141,6 +144,11 @@ class TeslaMock:
         """Mock controller's get_vehicle_data method."""
         return self.controller_get_vehicle_data()
 
+    def mock_get_vehicle_summary(self, *args, **kwargs):
+        # pylint: disable=unused-argument
+        """Mock controller's get_vehicle_summary method."""
+        return self.controller_get_vehicle_summary()
+
     def mock_get_last_update_time(self, *args, **kwargs):
         # pylint: disable=unused-argument
         """Mock controller's get_last_update_time method."""
@@ -212,6 +220,10 @@ class TeslaMock:
     async def controller_get_vehicle_data(self):
         """Monkeypatch for controller.get_vehicle_data()."""
         return self._vehicle_data
+
+    async def controller_get_vehicle_summary(self):
+        """Monkeypatch for controller.get_vehicle_summary()."""
+        return self._product_list[0]
 
     @staticmethod
     async def controller_update():
@@ -293,7 +305,7 @@ PRODUCT_LIST = [
         "vehicle_id": 1234567890,
         "vin": "5YJSA11111111111",
         "display_name": "My Model S",
-        "option_codes": "AD15,MDL3,PBSB,RENA,BT37,ID3W,RF3G,S3PB,DRLH,DV2W,W39B,APF0,COUS,BC3B,CH07,PC30,FC3P,FG31,GLFR,HL31,HM31,IL31,LTPB,MR31,FM3B,RS3H,SA3P,STCP,SC04,SU3C,T3CA,TW00,TM00,UT3P,WR00,AU3P,APH3,AF00,ZCST,MI00,CDM0",
+        "option_codes": "AD15,MDL3,PBSB,RENA,BT37,ID3W,RF3G,S3PB,DRLH,DV2W,W39B,APF0,COUS,BC3B,CH07,PC30,FC3P,FG31,GLFR,HL31,HM31,IL31,LTPB,MR31,FM3B,RS3H,SA3P,STCP,SC04,SU3C,T3CA,TW00,TM00,UT3P,WR00,AU3P,APH3,AF00,ZCST,MI00,CDM0,P3WS",
         "color": None,
         "access_type": "OWNER",
         "tokens": ["abcdef1234567890", "1234567890abcdef"],
@@ -304,6 +316,43 @@ PRODUCT_LIST = [
         "api_version": 36,
         "backseat_token": None,
         "backseat_token_updated_at": None,
+        "vehicle_config": {
+            "can_accept_navigation_requests": True,
+            "can_actuate_trunks": True,
+            "car_special_type": "base",
+            "car_type": "models",
+            "charge_port_type": "US",
+            "dashcam_clip_save_supported": False,
+            "default_charge_to_max": False,
+            "driver_assist": "MonoCam",
+            "ece_restrictions": False,
+            "efficiency_package": "Default",
+            "eu_vehicle": False,
+            "exterior_color": "White",
+            "front_drive_unit": "NoneOrSmall",
+            "has_air_suspension": False,
+            "has_ludicrous_mode": False,
+            "has_seat_cooling": False,
+            "headlamp_type": "Hid",
+            "interior_trim_type": "AllBlack",
+            "motorized_charge_port": True,
+            "plg": True,
+            "pws": False,
+            "rear_drive_unit": "Small",
+            "rear_seat_heaters": 0,
+            "rear_seat_type": 1,
+            "rhd": False,
+            "roof_color": "Colored",
+            "seat_type": 1,
+            "spoiler_type": "None",
+            "sun_roof_installed": 0,
+            "third_row_seats": "None",
+            "timestamp": 1661641175269,
+            "trim_badging": "85d",
+            "use_range_badging": False,
+            "utc_offset": -25200,
+            "wheel_type": "Base19",
+        },
     },
     {
         "energy_site_id": 12345,
@@ -363,7 +412,7 @@ VEHICLE_DATA = {
     "vehicle_id": 1234567890,
     "vin": "5YJSA11111111111",
     "display_name": "My Model S",
-    "option_codes": "AD15,MDL3,PBSB,RENA,BT37,ID3W,RF3G,S3PB,DRLH,DV2W,W39B,APF0,COUS,BC3B,CH07,PC30,FC3P,FG31,GLFR,HL31,HM31,IL31,LTPB,MR31,FM3B,RS3H,SA3P,STCP,SC04,SU3C,T3CA,TW00,TM00,UT3P,WR00,AU3P,APH3,AF00,ZCST,MI00,CDM0",
+    "option_codes": "AD15,MDL3,PBSB,RENA,BT37,ID3W,RF3G,S3PB,DRLH,DV2W,W39B,APF0,COUS,BC3B,CH07,PC30,FC3P,FG31,GLFR,HL31,HM31,IL31,LTPB,MR31,FM3B,RS3H,SA3P,STCP,SC04,SU3C,T3CA,TW00,TM00,UT3P,WR00,AU3P,APH3,AF00,ZCST,MI00,CDM0,P3WS",
     "color": None,
     "access_type": "OWNER",
     "tokens": ["redacted", "redacted"],
@@ -428,11 +477,13 @@ VEHICLE_DATA = {
         "time_to_full_charge": 0.25,
         "timestamp": 1661641175268,
         "trip_charging": False,
-        "usable_battery_level": 78,
+        "usable_battery_level": 77,
         "user_charge_enable_request": None,
     },
     "climate_state": {
         "allow_cabin_overheat_protection": True,
+        "auto_seat_climate_left": True,
+        "auto_seat_climate_right": True,
         "battery_heater": False,
         "battery_heater_no_power": False,
         "cabin_overheat_protection": "Off",
@@ -462,6 +513,13 @@ VEHICLE_DATA = {
         "wiper_blade_heater": False,
     },
     "drive_state": {
+        "active_route_destination": "Saved destination name",
+        "active_route_energy_at_arrival": 40,
+        "active_route_latitude": 34.111111,
+        "active_route_longitude": -88.11111,
+        "active_route_miles_to_arrival": 19.80,
+        "active_route_minutes_to_arrival": 34.13,
+        "active_route_traffic_minutes_delay": 0.0,
         "gps_as_of": 1661641173,
         "heading": 182,
         "latitude": 33.111111,
@@ -588,7 +646,7 @@ VEHICLE_DATA_BY_VIN = {
         "vehicle_id": 1234567890,
         "vin": "5YJSA11111111111",
         "display_name": "My Model S",
-        "option_codes": "AD15,MDL3,PBSB,RENA,BT37,ID3W,RF3G,S3PB,DRLH,DV2W,W39B,APF0,COUS,BC3B,CH07,PC30,FC3P,FG31,GLFR,HL31,HM31,IL31,LTPB,MR31,FM3B,RS3H,SA3P,STCP,SC04,SU3C,T3CA,TW00,TM00,UT3P,WR00,AU3P,APH3,AF00,ZCST,MI00,CDM0",
+        "option_codes": "AD15,MDL3,PBSB,RENA,BT37,ID3W,RF3G,S3PB,DRLH,DV2W,W39B,APF0,COUS,BC3B,CH07,PC30,FC3P,FG31,GLFR,HL31,HM31,IL31,LTPB,MR31,FM3B,RS3H,SA3P,STCP,SC04,SU3C,T3CA,TW00,TM00,UT3P,WR00,AU3P,APH3,AF00,ZCST,MI00,CDM0,P3WS",
         "color": None,
         "access_type": "OWNER",
         "tokens": ["redacted", "redacted"],
@@ -653,7 +711,7 @@ VEHICLE_DATA_BY_VIN = {
             "time_to_full_charge": 0.25,
             "timestamp": 1661641175268,
             "trip_charging": False,
-            "usable_battery_level": 78,
+            "usable_battery_level": 77,
             "user_charge_enable_request": None,
         },
         "climate_state": {

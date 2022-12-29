@@ -6,7 +6,13 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import logging
+import random
 from typing import Any, Dict, Text
+
+from httpx import RequestError
+from tenacity import RetryCallState
+
+from teslajsonpy.const import MAX_API_RETRY_TIME
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,6 +49,11 @@ class TeslaException(Exception):
         elif self.code > 299:
             self.message = f"UNKNOWN_ERROR_{self.code}"
 
+    @property
+    def retryable(self):
+        """Determine if this exception can/should be retried."""
+        return self.code not in [401, 404, 405, 423, 429]
+
 
 class RetryLimitError(TeslaException):
     """Class of exceptions for hitting retry limits."""
@@ -71,21 +82,42 @@ class HomelinkError(TeslaException):
     pass
 
 
-def should_giveup(ex: TeslaException) -> bool:
-    """Test whether the exception should result in a retry.
-
-    This is consumed by backoff.
+def custom_retry(retry_state: RetryCallState) -> bool:
+    """Determine whether Tenacity should retry.
 
     Args
-        ex (TeslaException): The exception
+        retry_state (RetryCallState): Provided by Tenacity
 
     Returns
-        bool: whether backoff should give up
+        bool: whether or not to retry
 
     """
-    return isinstance(ex, (IncompleteCredentials, RetryLimitError)) or ex.code in [
-        401,
-        404,
-        405,
-        423,
-    ]
+    if not retry_state.outcome.failed:
+        return False
+
+    ex = retry_state.outcome.exception()
+    return (
+        isinstance(ex, RequestError) or isinstance(ex, TeslaException) and ex.retryable
+    )
+
+
+def custom_wait(retry_state: RetryCallState) -> float:
+    """Determine how long to wait before retrying.
+
+    Args
+        retry_state (RetryCallState): Provided by Tenacity
+
+    Returns
+        float: time to wait in seconds
+
+    """
+    initial = 1
+    base = 2
+    jitter = random.uniform(0, 1)
+    max_wait = MAX_API_RETRY_TIME - retry_state.seconds_since_start
+    try:
+        exp = base ** (retry_state.attempt_number - 1)
+        result = initial * exp + jitter
+    except OverflowError:
+        result = max_wait
+    return max(0, min(result, max_wait))

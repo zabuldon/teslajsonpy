@@ -18,3 +18,4 @@
 -   danielp370 [Github](https://github.com/danielp370)
 -   carleeno [Github](https://github.com/carleeno)
 -   shred [Github](https://github.com/shred86)
+-   InTheDaylight14 [Github](https://github.com/InTheDaylight14)

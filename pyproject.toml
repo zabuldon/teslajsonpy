@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "teslajsonpy"
-version = "3.0.0"
+version = "3.7.0"
 description = "A library to work with Tesla API."
 authors = ["Sergey Isachenko <sergey.isachenkol@bool.by>"]
 license = "Apache-2.0"
@@ -28,7 +28,7 @@ include = [
 [tool.poetry.dependencies]
 python = "^3.7"
 aiohttp = ">=3.7.4"
-backoff = ">=1.10.0"
+tenacity = ">=8.1.0"
 beautifulsoup4 = ">=4.9.3"
 wrapt = ">=1.12.1"
 authcaptureproxy = ">=1.1.3"
