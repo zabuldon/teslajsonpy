@@ -497,8 +497,10 @@ class TeslaCar:
         )
 
     @property
-    def pedestrian_speaker(self) -> bool:
+    def pedestrian_speaker(self) -> Optional[bool]:
         """Return pedestrian warning speaker option."""
+        if self._vehicle_data.get("option_codes", {}) is None:
+            return None
         if "P3WS" in self._vehicle_data.get("option_codes", {}):
             return True
         return False

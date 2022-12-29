@@ -346,6 +346,20 @@ async def test_car_properties(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_null_option_codes(monkeypatch):
+    """Test TeslaCar class properties."""
+    VEHICLE_DATA["option_codes"] = None
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+
+    _car = _controller.cars[VIN]
+
+    assert _car.pedestrian_speaker is None
+
+
+@pytest.mark.asyncio
 async def test_change_charge_limit(monkeypatch):
     """Test change charge limit."""
     TeslaMock(monkeypatch)
