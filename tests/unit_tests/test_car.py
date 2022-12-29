@@ -240,6 +240,9 @@ async def test_car_properties(monkeypatch):
 
     assert _car.pedestrian_speaker == ("P3WS" in VEHICLE_DATA["option_codes"])
 
+    VEHICLE_DATA["option_codes"] = None
+    assert _car.pedestrian_speaker is None
+
     assert _car.third_row_seats == str(
         VEHICLE_DATA["vehicle_state"].get("third_row_seats")
     )
