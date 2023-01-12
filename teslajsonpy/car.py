@@ -897,7 +897,10 @@ class TeslaCar:
             )
 
         if data and data["response"]["result"] is True:
-            params = {"charge_current_request": int(value)}
+            params = {
+                "charge_amps": int(value),
+                "charge_current_request": int(value),
+            }
             self._vehicle_data["charge_state"].update(params)
 
     async def set_cabin_overheat_protection(self, option: str) -> None:
