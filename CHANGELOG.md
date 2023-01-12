@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.7.2 (2023-01-12)
+### Fix
+* Replace charge_amps with charge_current_request in set_charging_amps ([#392](https://github.com/zabuldon/teslajsonpy/issues/392)) ([`316b9e6`](https://github.com/zabuldon/teslajsonpy/commit/316b9e6ec63004520c171b9f6e58e0d9f091adb6))
+
 ## v3.7.1 (2022-12-29)
 ### Fix
 * Handle unavailable option codes ([#390](https://github.com/zabuldon/teslajsonpy/issues/390)) ([`4e8a3a0`](https://github.com/zabuldon/teslajsonpy/commit/4e8a3a08966f21b4740cbfcf940998cdc1f8bc97))
