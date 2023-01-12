@@ -19,3 +19,4 @@
 -   carleeno [Github](https://github.com/carleeno)
 -   shred [Github](https://github.com/shred86)
 -   InTheDaylight14 [Github](https://github.com/InTheDaylight14)
+-   Bre77 [Github](https://github.com/Bre77)

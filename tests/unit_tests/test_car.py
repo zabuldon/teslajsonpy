@@ -454,7 +454,8 @@ async def test_set_charging_amps(monkeypatch):
     await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
-    assert await _car.set_charging_amps(32.0) is None
+    assert await _car.set_charging_amps(16.0) is None
+    assert _car.charge_current_request == 16.0
 
 
 @pytest.mark.asyncio
