@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.7.4 (2023-03-05)
+### Fix
+* Fix processing or httpx response for orjson ([`e34126f`](https://github.com/zabuldon/teslajsonpy/commit/e34126fa8c9b6f3264a77d6c6ed592d0c56a90f8))
+
 ## v3.7.3 (2023-03-05)
 ### Fix
 * Convert to orjson ([`0f94eca`](https://github.com/zabuldon/teslajsonpy/commit/0f94ecab9c78f7151621a0194f7f7cbe57c331f5))
