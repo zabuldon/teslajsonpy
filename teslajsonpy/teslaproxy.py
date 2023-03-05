@@ -14,11 +14,12 @@ import random
 from typing import Any, Dict, Optional
 
 from aiohttp import web
-import httpx
 from authcaptureproxy import AuthCaptureProxy, return_timer_countdown_refresh_html
 from authcaptureproxy.examples.modifiers import find_regex_urls
 from authcaptureproxy.helper import get_content_type, prepend_url
+import httpx
 import multidict
+import orjson
 from yarl import URL
 
 _LOGGER = logging.getLogger(__name__)
@@ -110,7 +111,7 @@ class TeslaProxy(AuthCaptureProxy):
                 )
             self.waf_retry = 0
         if get_content_type(resp) == "application/json":
-            text = resp.json()
+            text = orjson.loads(resp)  # pylint: disable=no-member
             _LOGGER.debug("Json response: %s", text)
 
     @staticmethod
