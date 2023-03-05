@@ -497,8 +497,10 @@ class TeslaCar:
         )
 
     @property
-    def pedestrian_speaker(self) -> bool:
+    def pedestrian_speaker(self) -> Optional[bool]:
         """Return pedestrian warning speaker option."""
+        if self._vehicle_data.get("option_codes", {}) is None:
+            return None
         if "P3WS" in self._vehicle_data.get("option_codes", {}):
             return True
         return False
@@ -883,7 +885,7 @@ class TeslaCar:
         """Send command to set charging amps."""
         # Only wake car if the value is different
         wake_if_asleep = value != self._vehicle_data.get("charge_state", {}).get(
-            "charge_amps"
+            "charge_current_request"
         )
         data = await self._send_command(
             "CHARGING_AMPS", charging_amps=int(value), wake_if_asleep=wake_if_asleep
@@ -895,7 +897,10 @@ class TeslaCar:
             )
 
         if data and data["response"]["result"] is True:
-            params = {"charge_amps": int(value)}
+            params = {
+                "charge_amps": int(value),
+                "charge_current_request": int(value),
+            }
             self._vehicle_data["charge_state"].update(params)
 
     async def set_cabin_overheat_protection(self, option: str) -> None:

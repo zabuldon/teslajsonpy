@@ -346,6 +346,20 @@ async def test_car_properties(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_null_option_codes(monkeypatch):
+    """Test TeslaCar class properties."""
+    VEHICLE_DATA["option_codes"] = None
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+
+    _car = _controller.cars[VIN]
+
+    assert _car.pedestrian_speaker is None
+
+
+@pytest.mark.asyncio
 async def test_change_charge_limit(monkeypatch):
     """Test change charge limit."""
     TeslaMock(monkeypatch)
@@ -440,12 +454,13 @@ async def test_set_charging_amps(monkeypatch):
     await _controller.generate_car_objects()
     _car = _controller.cars[VIN]
 
-    assert await _car.set_charging_amps(32.0) is None
+    assert await _car.set_charging_amps(16.0) is None
+    assert _car.charge_current_request == 16.0
 
 
 @pytest.mark.asyncio
 async def test_set_cabin_overheat_protection(monkeypatch):
-    """Test setting heated steering wheel."""
+    """Test setting cabin overheat protection."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
@@ -651,7 +666,7 @@ async def test_close_windows(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_valet_mode(monkeypatch):
-    """Test close windows."""
+    """Test valet mode."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
