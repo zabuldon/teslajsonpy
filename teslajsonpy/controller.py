@@ -6,7 +6,7 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import asyncio
-import json
+import orjson
 import logging
 import pkgutil
 import time
@@ -1264,7 +1264,7 @@ class Controller:
         if not self.endpoints:
             try:
                 data = pkgutil.get_data(__name__, "endpoints.json")
-                self.endpoints = json.loads(data.decode())
+                self.endpoints = orjson.loads(data.decode())
                 _LOGGER.debug("%d endpoints loaded", len(self.endpoints))
             except (IOError, ValueError):
                 _LOGGER.error("No endpoints loaded")

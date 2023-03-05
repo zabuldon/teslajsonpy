@@ -7,17 +7,18 @@ https://github.com/zabuldon/teslajsonpy
 """
 import asyncio
 import base64
-import time
 import calendar
 import datetime
 import hashlib
-import json
 import logging
 import secrets
+import time
 from typing import Dict, Text
-from bs4 import BeautifulSoup
+
 import aiohttp
+from bs4 import BeautifulSoup
 import httpx
+import orjson
 import yarl
 from yarl import URL
 
@@ -207,7 +208,7 @@ class Connection:
                 elif resp.status_code == 408:
                     raise TeslaException(resp.status_code, "vehicle_unavailable")
                 raise TeslaException(resp.status_code)
-            data = resp.json()
+            data = orjson.loads(resp)
             if data.get("error"):
                 # known errors:
                 #     'vehicle unavailable: {:error=>"vehicle unavailable:"}',
@@ -243,7 +244,7 @@ class Connection:
             async for msg in self.websocket:
                 _LOGGER.debug("msg: %s", msg)
                 if msg.type == aiohttp.WSMsgType.BINARY:
-                    msg_json = json.loads(msg.data)
+                    msg_json = orjson.loads(msg.data)
                     if msg_json["msg_type"] == "control:hello":
                         _LOGGER.debug(
                             "%s:Succesfully connected to websocket %s",
@@ -321,7 +322,7 @@ class Connection:
     #         async for msg in self.websocket[vin]["websocket"]:
     #             _LOGGER.debug("%s:msg: %s", vin[-5:], msg)
     #             if msg.type == aiohttp.WSMsgType.BINARY:
-    #                 msg_json = json.loads(msg.data)
+    #                 msg_json = orjson.loads(msg.data)
     #                 if msg_json["msg_type"] == "control:hello":
     #                     _LOGGER.debug(
     #                         "%s:Succesfully connected to websocket %s on %s",
@@ -450,7 +451,7 @@ class Connection:
                     #         }
                     #     ]
                     # }
-                    mfa_json = mfa_resp.json()
+                    mfa_json = orjson.loads(mfa_resp)
                     if len(mfa_json.get("data", [])) >= 1:
                         factor_id = mfa_json["data"][mfa_device]["id"]
                     if not mfa_code:
@@ -472,7 +473,7 @@ class Connection:
                         },
                     )
                     _process_resp(mfa_resp)
-                    mfa_json = mfa_resp.json()
+                    mfa_json = orjson.loads(mfa_resp)
                     if not (
                         mfa_json["data"].get("approved")
                         and mfa_json["data"].get("valid")
@@ -534,7 +535,7 @@ class Connection:
             str(self.auth_domain.with_path("/oauth2/v3/token")),
             data=oauth,
         )
-        return auth.json()
+        return orjson.loads(auth)
 
     async def refresh_access_token(self, refresh_token):
         """Refresh access token from sso."""
@@ -553,7 +554,7 @@ class Connection:
             str(self.auth_domain.with_path("/oauth2/v3/token")),
             data=oauth,
         )
-        return auth.json()
+        return orjson.loads(auth)
 
     async def get_bearer_token(self, access_token):
         """Get bearer token. This is used by the owners API."""
@@ -573,7 +574,7 @@ class Connection:
         auth = await self.websession.post(
             "https://owner-api.teslamotors.com/oauth/token", headers=head, data=oauth
         )
-        return auth.json()
+        return orjson.loads(auth)
 
 
 def get_inputs(soup: BeautifulSoup, searchfield=None) -> Dict[str, str]:
