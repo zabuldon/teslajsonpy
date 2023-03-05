@@ -111,7 +111,7 @@ class TeslaProxy(AuthCaptureProxy):
                 )
             self.waf_retry = 0
         if get_content_type(resp) == "application/json":
-            text = orjson.loads(resp)  # pylint: disable=no-member
+            text = orjson.loads(resp.text)  # pylint: disable=no-member
             _LOGGER.debug("Json response: %s", text)
 
     @staticmethod
