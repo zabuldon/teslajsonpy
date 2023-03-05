@@ -1265,7 +1265,9 @@ class Controller:
         if not self.endpoints:
             try:
                 data = pkgutil.get_data(__name__, "endpoints.json")
-                self.endpoints = orjson.loads(data.decode())
+                self.endpoints = orjson.loads(  # pylint: disable=no-member
+                    data.decode()
+                )
                 _LOGGER.debug("%d endpoints loaded", len(self.endpoints))
             except (IOError, ValueError):
                 _LOGGER.error("No endpoints loaded")
