@@ -8,10 +8,7 @@ https://github.com/zabuldon/teslajsonpy
 import logging
 from typing import Callable
 
-from teslajsonpy.const import (
-    RESOURCE_TYPE,
-    DEFAULT_ENERGYSITE_NAME,
-)
+from teslajsonpy.const import DEFAULT_ENERGYSITE_NAME, RESOURCE_TYPE
 
 _LOGGER = logging.getLogger(__name__)
 
