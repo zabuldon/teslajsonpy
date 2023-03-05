@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v3.7.3 (2023-03-05)
+### Fix
+* Convert to orjson ([`0f94eca`](https://github.com/zabuldon/teslajsonpy/commit/0f94ecab9c78f7151621a0194f7f7cbe57c331f5))
+
+### Documentation
+* Update docs ([`c917165`](https://github.com/zabuldon/teslajsonpy/commit/c91716577a0d88e4107f1d63330b67b7321901ef))
+
 ## v3.7.2 (2023-01-12)
 ### Fix
 * Replace charge_amps with charge_current_request in set_charging_amps ([#392](https://github.com/zabuldon/teslajsonpy/issues/392)) ([`316b9e6`](https://github.com/zabuldon/teslajsonpy/commit/316b9e6ec63004520c171b9f6e58e0d9f091adb6))
