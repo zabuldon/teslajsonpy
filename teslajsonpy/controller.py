@@ -6,12 +6,13 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import asyncio
-import json
 import logging
 import pkgutil
 import time
 from typing import Dict, List, Optional, Text
+
 import httpx
+import orjson
 from tenacity import retry, stop_after_delay
 from yarl import URL
 
@@ -21,18 +22,18 @@ from teslajsonpy.const import (
     AUTH_DOMAIN,
     DRIVING_INTERVAL,
     IDLE_INTERVAL,
-    ONLINE_INTERVAL,
-    UPDATE_INTERVAL,
-    SLEEP_INTERVAL,
-    RESOURCE_TYPE,
-    RESOURCE_TYPE_SOLAR,
-    RESOURCE_TYPE_BATTERY,
-    WAKE_TIMEOUT,
-    WAKE_CHECK_INTERVAL,
     MAX_API_RETRY_TIME,
+    ONLINE_INTERVAL,
+    RESOURCE_TYPE,
+    RESOURCE_TYPE_BATTERY,
+    RESOURCE_TYPE_SOLAR,
+    SLEEP_INTERVAL,
+    UPDATE_INTERVAL,
+    WAKE_CHECK_INTERVAL,
+    WAKE_TIMEOUT,
 )
-from teslajsonpy.energy import EnergySite, SolarSite, PowerwallSite, SolarPowerwallSite
-from teslajsonpy.exceptions import custom_retry, custom_wait, TeslaException
+from teslajsonpy.energy import EnergySite, PowerwallSite, SolarPowerwallSite, SolarSite
+from teslajsonpy.exceptions import TeslaException, custom_retry, custom_wait
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -1264,7 +1265,9 @@ class Controller:
         if not self.endpoints:
             try:
                 data = pkgutil.get_data(__name__, "endpoints.json")
-                self.endpoints = json.loads(data.decode())
+                self.endpoints = orjson.loads(  # pylint: disable=no-member
+                    data.decode()
+                )
                 _LOGGER.debug("%d endpoints loaded", len(self.endpoints))
             except (IOError, ValueError):
                 _LOGGER.error("No endpoints loaded")

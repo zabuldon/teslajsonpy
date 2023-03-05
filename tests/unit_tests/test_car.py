@@ -460,7 +460,7 @@ async def test_set_charging_amps(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_set_cabin_overheat_protection(monkeypatch):
-    """Test setting heated steering wheel."""
+    """Test setting cabin overheat protection."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
@@ -532,7 +532,7 @@ async def test_set_hvac_mode(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_set_max_defrost(monkeypatch):
-    """Test wake up."""
+    """Test max defrost."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
@@ -544,7 +544,7 @@ async def test_set_max_defrost(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_set_sentry_mode(monkeypatch):
-    """Test wake up."""
+    """Test sentry mode."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
@@ -556,7 +556,7 @@ async def test_set_sentry_mode(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_set_temperature(monkeypatch):
-    """Test wake up."""
+    """Test set temperature."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
@@ -568,7 +568,7 @@ async def test_set_temperature(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_start_stop_charge(monkeypatch):
-    """Test wake up."""
+    """Test start charge."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
@@ -666,7 +666,7 @@ async def test_close_windows(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_valet_mode(monkeypatch):
-    """Test close windows."""
+    """Test valet mode."""
     TeslaMock(monkeypatch)
     _controller = Controller(None)
     await _controller.connect()
