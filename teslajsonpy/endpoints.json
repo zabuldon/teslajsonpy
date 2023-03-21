@@ -1325,10 +1325,10 @@
     "TYPE": "POST",
     "URI": "api/1/users/keys"
   },
-  "SEND_GPS_TO_VEHICLE": {
+  "SHARE": {
     "AUTH": true,
     "TYPE": "POST",
-    "URI": "api/1/vehicles/{vehicle_id}/command/navigation_gps_request"
+    "URI": "api/1/vehicles/{vehicle_id}/command/share"
   },
   "SEND_NOTIFICATION_CONFIRMATION": {
     "AUTH": true,
