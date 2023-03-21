@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.7.5 (2023-03-21)
+### Fix
+* Update endpoints.json for sharing ([#399](https://github.com/zabuldon/teslajsonpy/issues/399)) ([`e46d0d9`](https://github.com/zabuldon/teslajsonpy/commit/e46d0d968024107f7897dbb27387bf34a1fa0b87))
+
 ## v3.7.4 (2023-03-05)
 ### Fix
 * Fix processing or httpx response for orjson ([`e34126f`](https://github.com/zabuldon/teslajsonpy/commit/e34126fa8c9b6f3264a77d6c6ed592d0c56a90f8))
