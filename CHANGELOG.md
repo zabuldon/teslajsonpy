@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.8.0 (2023-03-26)
+### Feature
+* Add energy_site_ids and vins to update to limit updating to specific devices ([#402](https://github.com/zabuldon/teslajsonpy/issues/402)) ([`e97ccaf`](https://github.com/zabuldon/teslajsonpy/commit/e97ccaf41dcc3df0dc526882a5b85c14480ac672))
+
 ## v3.7.5 (2023-03-21)
 ### Fix
 * Update endpoints.json for sharing ([#399](https://github.com/zabuldon/teslajsonpy/issues/399)) ([`e46d0d9`](https://github.com/zabuldon/teslajsonpy/commit/e46d0d968024107f7897dbb27387bf34a1fa0b87))
