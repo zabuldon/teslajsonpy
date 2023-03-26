@@ -9,7 +9,7 @@ import asyncio
 import logging
 import pkgutil
 import time
-from typing import Dict, List, Optional, Text
+from typing import Dict, List, Optional, Set, Text
 
 import httpx
 import orjson
@@ -602,6 +602,9 @@ class Controller:
         car_id: Optional[Text] = None,
         wake_if_asleep: bool = False,
         force: bool = False,
+        update_vehicles: bool = True,
+        vins: Optional[Set[str]] = None,
+        energy_site_ids: Optional[Set[str]] = None,
     ) -> bool:
         #  pylint: disable=too-many-locals,too-many-statements
         """Update all vehicle and energy site attributes in the cache.
@@ -617,6 +620,8 @@ class Controller:
             car_id (Text, optional): The vehicle to update. If None, all cars are updated. Defaults to None.
             wake_if_asleep (bool, optional): force a vehicle awake. Defaults to False.
             force (bool, optional): force a vehicle update regardless of the update_interval. Defaults to False.
+            vins: (Set[str], optional): The cars to update. If None, all cars are updated. Defaults to None.
+            energy_site_ids: (Set[str], optional): The energy sites to update. If None, all sites are updated. Defaults to None.
 
         Returns
             Whether update was successful.
@@ -738,7 +743,7 @@ class Controller:
                     cur_time - last_update,
                     ONLINE_INTERVAL,
                 )
-                if force or cur_time - last_update >= ONLINE_INTERVAL:
+                if force or cur_time - last_update >= ONLINE_INTERVAL and update_vehicles:
                     cars = await self.get_vehicles()
                     for car in cars:
                         self.set_id_vin(car_id=car["id"], vin=car["vin"])
@@ -765,6 +770,9 @@ class Controller:
                         or vin not in self.__lock
                         or (vin and self.cars[vin].in_service)
                     ):
+                        continue
+
+                    if isinstance(vins, set) and vin not in vins:
                         continue
 
                     async with self.__lock[vin]:
@@ -807,6 +815,11 @@ class Controller:
                 # do not update energy sites if car_id was a parameter.
                 for energysite in self._energysite_list:
                     energysite_id = energysite["energy_site_id"]
+                    if (
+                        isinstance(energy_site_ids, set)
+                        and energysite_id not in energy_site_ids
+                    ):
+                        continue
 
                     if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
                         tasks.append(_get_and_process_site_data(energysite_id))
