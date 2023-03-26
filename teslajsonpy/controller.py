@@ -9,7 +9,7 @@ import asyncio
 import logging
 import pkgutil
 import time
-from typing import Dict, List, Optional, Text
+from typing import Dict, List, Optional, Set, Text
 
 import httpx
 import orjson
@@ -602,6 +602,7 @@ class Controller:
         car_id: Optional[Text] = None,
         wake_if_asleep: bool = False,
         force: bool = False,
+        energy_site_ids: Optional[Set[str]] = None,
     ) -> bool:
         #  pylint: disable=too-many-locals,too-many-statements
         """Update all vehicle and energy site attributes in the cache.
@@ -807,6 +808,8 @@ class Controller:
                 # do not update energy sites if car_id was a parameter.
                 for energysite in self._energysite_list:
                     energysite_id = energysite["energy_site_id"]
+                    if energy_site_ids and energysite_id not in energy_site_ids:
+                        continue
 
                     if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
                         tasks.append(_get_and_process_site_data(energysite_id))
