@@ -602,6 +602,7 @@ class Controller:
         car_id: Optional[Text] = None,
         wake_if_asleep: bool = False,
         force: bool = False,
+        update_vehicles: bool = True,
         vins: Optional[Set[str]] = None,
         energy_site_ids: Optional[Set[str]] = None,
     ) -> bool:
@@ -742,7 +743,7 @@ class Controller:
                     cur_time - last_update,
                     ONLINE_INTERVAL,
                 )
-                if force or cur_time - last_update >= ONLINE_INTERVAL:
+                if force or cur_time - last_update >= ONLINE_INTERVAL and update_vehicles:
                     cars = await self.get_vehicles()
                     for car in cars:
                         self.set_id_vin(car_id=car["id"], vin=car["vin"])
