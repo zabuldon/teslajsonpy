@@ -761,3 +761,11 @@ async def test_get_seat_heater_status(monkeypatch):
 
     assert _car.get_seat_heater_status(1) is 0
     assert _car.get_seat_heater_status(7) is None
+
+    orig_climate_state = _car._vehicle_data["climate_state"]
+    del _car._vehicle_data["climate_state"]
+
+    assert _car.get_seat_heater_status(1) is None
+
+    # Restoring state incase its used later
+    _car._vehicle_data["climate_state"] = orig_climate_state
