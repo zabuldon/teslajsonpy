@@ -749,3 +749,15 @@ async def test_remote_boombox(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert await _car.remote_boombox() is None
+
+@pytest.mark.asyncio
+async def test_get_seat_heater_status(monkeypatch):
+    """Test get seat heater status."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert _car.get_seat_heater_status(1) is 0
+    assert _car.get_seat_heater_status(7) is None
