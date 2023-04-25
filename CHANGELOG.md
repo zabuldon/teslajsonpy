@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v3.8.1 (2023-04-25)
+### Fix
+* Handle missing climate_state ([#404](https://github.com/zabuldon/teslajsonpy/issues/404)) ([`342a2ef`](https://github.com/zabuldon/teslajsonpy/commit/342a2ef03c2ccd8b4281fb815107d423f3c1bddc))
+
 ## v3.8.0 (2023-03-26)
 ### Feature
 * Add energy_site_ids and vins to update to limit updating to specific devices ([#402](https://github.com/zabuldon/teslajsonpy/issues/402)) ([`e97ccaf`](https://github.com/zabuldon/teslajsonpy/commit/e97ccaf41dcc3df0dc526882a5b85c14480ac672))
