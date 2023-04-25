@@ -874,7 +874,7 @@ class TeslaCar:
         """Return status of seat heater for a given seat."""
         seat_id = f"seat_heater_{SEAT_ID_MAP[seat_id]}"
         if self.data_available:
-            return self._vehicle_data.get("climate_state").get(seat_id)
+            return self._vehicle_data.get("climate_state", {}).get(seat_id)
         return None
 
     async def schedule_software_update(self, offset_sec: Optional[int] = 0) -> None:
