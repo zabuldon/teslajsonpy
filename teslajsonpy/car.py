@@ -34,6 +34,16 @@ DAY_SELECTION_MAP = {
     "weekdays": True,
 }
 
+def safeget(dct, *keys, default=None):
+    """Get a recursuive object from a dict."""
+    for key in keys:
+        try:
+            dct = dct[key]
+        except KeyError:
+            return default
+        except TypeError:
+            return default
+    return dct
 
 class TeslaCar:
     #  pylint: disable=too-many-public-methods
@@ -1334,3 +1344,95 @@ class TeslaCar:
                 _LOGGER.debug("Error calling remote boombox: %s", reason)
             else:
                 _LOGGER.debug("Remote boombox called successfully.")
+        
+    @property
+    def audio_volume(self) -> float:
+        """Return the current audio volume of the media player."""
+        return safeget(self._vehicle_data, "vehicle_state", "media_info", "audio_volume")
+
+    @property
+    def audio_volume_increment(self) -> float:
+        """Return the increment at which the audio volume can be adjusted."""
+        return safeget(self._vehicle_data, "vehicle_state", "media_info", "audio_volume_increment")
+
+    @property
+    def audio_volume_max(self) -> float:
+        """Return the maximum audio volume of the media player."""
+        return safeget(self._vehicle_data, "vehicle_state", "media_info", "audio_volume_max")
+
+    @property
+    def media_playback_status(self) -> str:
+        """Return the current media playback status."""
+        return safeget(self._vehicle_data, "vehicle_state", "media_info", "media_playback_status")
+
+    @property
+    def now_playing_album(self) -> str:
+        """Return the name of the album currently being played."""
+        return safeget(self._vehicle_data, "vehicle_state", "media_info", "now_playing_album")
+
+    @property
+    def now_playing_artist(self) -> str:
+        """Return the name of the artist currently being played."""
+        return safeget(self._vehicle_data, "vehicle_state", "media_info", "now_playing_artist")
+
+    @property
+    def now_playing_duration(self) -> float:
+        """Return the total duration of the currently playing media."""
+        return safeget(self._vehicle_data, "vehicle_state", "media_info", "now_playing_duration")
+
+    @property
+    def now_playing_elapsed(self) -> float:
+        """Return the elapsed time of the currently playing media."""
+        return safeget(self._vehicle_data, "vehicle_state", "media_info", "now_playing_elapsed")
+
+    @property
+    def now_playing_source(self) -> str:
+        """Return the current media source."""
+        return safeget(self._vehicle_data, "vehicle_state", "media_info", "now_playing_source")
+
+    @property
+    def now_playing_station(self) -> str:
+        """Return the name of the radio station currently being played."""
+        return safeget(self._vehicle_data, "vehicle_state", "media_info", "now_playing_station")
+
+    @property
+    def now_playing_title(self) -> str:
+        """Return the title of the currently playing media."""
+        return safeget(self._vehicle_data, "vehicle_state", "media_info", "now_playing_title")
+    
+    async def toggle_playback(self) -> None:
+        """Send command to toggle media playback."""
+        await self._send_command("MEDIA_TOGGLE_PLAYBACK")
+
+    async def next_track(self) -> None:
+        """Send command to skip to the next track."""
+        await self._send_command("MEDIA_NEXT_TRACK")
+
+    async def previous_track(self) -> None:
+        """Send command to skip to the previous track."""
+        await self._send_command("MEDIA_PREVIOUS_TRACK")
+
+    async def next_favorite(self) -> None:
+        """Send command to skip to the next favorite."""
+        await self._send_command("MEDIA_NEXT_FAVORITE")
+
+    async def previous_favorite(self) -> None:
+        """Send command to skip to the previous favorite."""
+        await self._send_command("MEDIA_PREVIOUS_FAVORITE")
+
+    async def volume_up(self) -> None:
+        """Send command to increase the media volume."""
+        await self._send_command("MEDIA_VOLUME_UP")
+
+    async def volume_down(self) -> None:
+        """Send command to decrease the media volume."""
+        await self._send_command("MEDIA_VOLUME_DOWN")
+    
+    async def adjust_volume(self, value: int) -> None:
+        """Send command to adjust the media volume."""
+        data = await self._send_command(
+            "ADJUST_VOLUME", volume=int(value)
+        )
+
+        if data and data["response"]["result"] is True:
+            self._vehicle_data["vehicle_state"]["media_info"]["audio_volume"] = float(value)
