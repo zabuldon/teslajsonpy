@@ -4,6 +4,11 @@
     "TYPE": "POST",
     "URI": "api/1/vehicles/{vehicle_id}/command/actuate_trunk"
   },
+  "ADJUST_VOLUME": {
+    "TYPE": "POST",
+    "URI": "api/1/vehicles/{vehicle_id}/command/adjust_volume",
+    "AUTH": true
+  },
   "APP_FEEDBACK_ENTITLEMENTS": {
     "AUTH": true,
     "TYPE": "GET",
