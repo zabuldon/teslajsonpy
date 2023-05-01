@@ -349,6 +349,22 @@ async def test_car_properties(monkeypatch):
         == VEHICLE_DATA["charge_state"]["scheduled_charging_start_time_app"]
     )
 
+    assert (
+        _car.audio_volume
+        == VEHICLE_DATA["vehicle_state"]["media_info"]["audio_volume"]
+    )
+    assert _car.audio_volume == VEHICLE_DATA["vehicle_state"]["media_info"]["audio_volume"]
+    assert _car.audio_volume_increment == VEHICLE_DATA["vehicle_state"]["media_info"]["audio_volume_increment"]
+    assert _car.audio_volume_max == VEHICLE_DATA["vehicle_state"]["media_info"]["audio_volume_max"]
+    assert _car.media_playback_status == VEHICLE_DATA["vehicle_state"]["media_info"]["media_playback_status"]
+    assert _car.now_playing_album == VEHICLE_DATA["vehicle_state"]["media_info"]["now_playing_album"]
+    assert _car.now_playing_artist == VEHICLE_DATA["vehicle_state"]["media_info"]["now_playing_artist"]
+    assert _car.now_playing_duration == VEHICLE_DATA["vehicle_state"]["media_info"]["now_playing_duration"]
+    assert _car.now_playing_elapsed == VEHICLE_DATA["vehicle_state"]["media_info"]["now_playing_elapsed"]
+    assert _car.now_playing_source == VEHICLE_DATA["vehicle_state"]["media_info"]["now_playing_source"]
+    assert _car.now_playing_station == VEHICLE_DATA["vehicle_state"]["media_info"]["now_playing_station"]
+    assert _car.now_playing_title == VEHICLE_DATA["vehicle_state"]["media_info"]["now_playing_title"]
+
 
 @pytest.mark.asyncio
 async def test_null_option_codes(monkeypatch):
@@ -785,6 +801,100 @@ async def test_get_seat_heater_status(monkeypatch):
 
     # Restoring state incase its used later
     _car._vehicle_data["climate_state"] = orig_climate_state
+
+@pytest.mark.asyncio
+async def test_toggle_playback(monkeypatch):
+    """Test toggle playback method."""
+    TeslaMock(monkeypatch)
+    controller = Controller(None)
+    await controller.connect()
+    await controller.generate_car_objects()
+    car = controller.cars[VIN]
+
+    assert await car.toggle_playback() is None
+
+@pytest.mark.asyncio
+async def test_next_track(monkeypatch):
+    """Test sending command to skip to the next track."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.next_track() is None
+
+
+@pytest.mark.asyncio
+async def test_previous_track(monkeypatch):
+    """Test sending command to skip to the previous track."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.previous_track() is None
+
+
+@pytest.mark.asyncio
+async def test_next_favorite(monkeypatch):
+    """Test sending command to skip to the next favorite."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.next_favorite() is None
+
+
+@pytest.mark.asyncio
+async def test_previous_favorite(monkeypatch):
+    """Test sending command to skip to the previous favorite."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.previous_favorite() is None
+
+
+@pytest.mark.asyncio
+async def test_volume_up(monkeypatch):
+    """Test sending command to increase the media volume."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.volume_up() is None
+
+
+@pytest.mark.asyncio
+async def test_volume_down(monkeypatch):
+    """Test sending command to decrease the media volume."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.volume_down() is None
+
+
+@pytest.mark.asyncio
+async def test_adjust_volume(monkeypatch):
+    """Test sending command to adjust the media volume."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.adjust_volume(10) is None
 
 @pytest.mark.asyncio
 async def test_get_heated_steering_wheel_level(monkeypatch):

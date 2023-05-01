@@ -34,6 +34,7 @@ DAY_SELECTION_MAP = {
     "weekdays": True,
 }
 
+
 def safeget(dct, *keys, default=None):
     """Get a recursuive object from a dict."""
     for key in keys:
@@ -44,6 +45,7 @@ def safeget(dct, *keys, default=None):
         except TypeError:
             return default
     return dct
+
 
 class TeslaCar:
     #  pylint: disable=too-many-public-methods
@@ -1344,7 +1346,7 @@ class TeslaCar:
                 _LOGGER.debug("Error calling remote boombox: %s", reason)
             else:
                 _LOGGER.debug("Remote boombox called successfully.")
-        
+
     @property
     def audio_volume(self) -> float:
         """Return the current audio volume of the media player."""
@@ -1399,7 +1401,7 @@ class TeslaCar:
     def now_playing_title(self) -> str:
         """Return the title of the currently playing media."""
         return safeget(self._vehicle_data, "vehicle_state", "media_info", "now_playing_title")
-    
+
     async def toggle_playback(self) -> None:
         """Send command to toggle media playback."""
         await self._send_command("MEDIA_TOGGLE_PLAYBACK")
@@ -1427,7 +1429,7 @@ class TeslaCar:
     async def volume_down(self) -> None:
         """Send command to decrease the media volume."""
         await self._send_command("MEDIA_VOLUME_DOWN")
-    
+
     async def adjust_volume(self, value: int) -> None:
         """Send command to adjust the media volume."""
         data = await self._send_command(
