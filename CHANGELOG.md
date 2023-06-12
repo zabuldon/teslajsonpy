@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v3.9.0 (2023-06-12)
+
+### Feature
+
+* Add new heated steering wheel controls ([#408](https://github.com/zabuldon/teslajsonpy/issues/408)) ([`a8ec439`](https://github.com/zabuldon/teslajsonpy/commit/a8ec439eac3215b28712ec1d3bd45e16aae9ef7a))
+
 ## v3.8.1 (2023-04-25)
 ### Fix
 * Handle missing climate_state ([#404](https://github.com/zabuldon/teslajsonpy/issues/404)) ([`342a2ef`](https://github.com/zabuldon/teslajsonpy/commit/342a2ef03c2ccd8b4281fb815107d423f3c1bddc))
