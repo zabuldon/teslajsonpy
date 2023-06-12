@@ -36,7 +36,7 @@ DAY_SELECTION_MAP = {
 
 
 def safeget(dct, *keys, default=None):
-    """Get a recursuive object from a dict."""
+    """Get a recursive object from a dict."""
     for key in keys:
         try:
             dct = dct[key]
