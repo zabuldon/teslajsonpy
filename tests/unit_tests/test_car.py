@@ -271,6 +271,11 @@ async def test_car_properties(monkeypatch):
     )
 
     assert (
+        _car.is_auto_steering_wheel_heat
+        == VEHICLE_DATA["climate_state"]["auto_steering_wheel_heat"]
+    )
+
+    assert (
         _car.active_route_destination
         == VEHICLE_DATA["drive_state"]["active_route_destination"]
     )
@@ -516,6 +521,17 @@ async def test_set_heated_steering_wheel(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert await _car.set_heated_steering_wheel(True) is None
+
+@pytest.mark.asyncio
+async def test_set_heated_steering_wheel_level(monkeypatch):
+    """Test the 'set_heated_steering_wheel_level' method."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.set_heated_steering_wheel_level(0) is None
 
 
 @pytest.mark.asyncio
@@ -769,3 +785,45 @@ async def test_get_seat_heater_status(monkeypatch):
 
     # Restoring state incase its used later
     _car._vehicle_data["climate_state"] = orig_climate_state
+
+@pytest.mark.asyncio
+async def test_get_heated_steering_wheel_level(monkeypatch):
+    """Test the 'get_heated_steering_wheel_level' method."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert _car.get_heated_steering_wheel_level() is 1
+
+    orig_climate_state = _car._vehicle_data["climate_state"]
+    del _car._vehicle_data["climate_state"]
+
+    assert _car.get_heated_steering_wheel_level() is None
+
+    # Restoring state incase its used later
+    _car._vehicle_data["climate_state"] = orig_climate_state
+
+@pytest.mark.asyncio
+async def test_disable_remote_auto_steering_wheel_heat_climate_request(monkeypatch):
+    """Test the 'remote_auto_steering_wheel_heat_climate_request' method to disable remote auto steering wheel heat."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_auto_steering_wheel_heat_climate_request(False) is None
+
+
+@pytest.mark.asyncio
+async def test_enable_remote_auto_steering_wheel_heat_climate_request(monkeypatch):
+    """Test the 'remote_auto_steering_wheel_heat_climate_request' method to enable remote auto steering wheel heat."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_auto_steering_wheel_heat_climate_request(True) is None

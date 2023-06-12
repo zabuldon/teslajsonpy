@@ -1214,6 +1214,16 @@
     "TYPE": "POST",
     "URI": "api/1/vehicles/{vehicle_id}/command/remote_steering_wheel_heater_request"
   },
+  "REMOTE_AUTO_STEERING_WHEEL_HEAT_CLIMATE_REQUEST": {
+    "TYPE": "POST",
+    "URI": "api/1/vehicles/{vehicle_id}/command/remote_auto_steering_wheel_heat_climate_request",
+    "AUTH": true
+  },
+  "REMOTE_STEERING_WHEEL_HEAT_LEVEL_REQUEST": {
+    "TYPE": "POST",
+    "URI": "api/1/vehicles/{vehicle_id}/command/remote_steering_wheel_heat_level_request",
+    "AUTH": true
+  },
   "REMOVE_VEHICLE_SHARE_DRIVER": {
     "AUTH": true,
     "TYPE": "DELETE",

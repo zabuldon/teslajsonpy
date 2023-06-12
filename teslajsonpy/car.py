@@ -595,6 +595,13 @@ class TeslaCar:
         )
 
     @property
+    def is_auto_steering_wheel_heat(self) -> bool:
+        """Return the state of auto steering wheel heat."""
+        return self._vehicle_data.get("climate_state", {}).get(
+            "auto_steering_wheel_heat"
+        )
+
+    @property
     def active_route_destination(self) -> Optional[str]:
         """Return active route destination."""
         if "active_route_destination" in self._vehicle_data.get("drive_state", {}):
@@ -969,6 +976,24 @@ class TeslaCar:
             params = {f"auto_seat_climate_{SEAT_ID_MAP[seat_id]}": enable}
             self._vehicle_data["climate_state"].update(params)
 
+    async def remote_auto_steering_wheel_heat_climate_request(
+        self, enable: bool
+    ) -> None:
+        """Send command to enable or disable auto steering wheel heat.
+
+        Args
+            enable: True to enable auto steering wheel heat, False to disable.
+
+        """
+
+        data = await self._send_command(
+            "REMOTE_AUTO_STEERING_WHEEL_HEAT_CLIMATE_REQUEST",
+            on=enable
+        )
+        if data and data["response"]["result"] is True:
+            params = {"auto_steering_wheel_heat": enable}
+            self._vehicle_data["climate_state"].update(params)
+
     async def set_heated_steering_wheel(self, value: bool) -> None:
         """Send command to set heated steering wheel."""
         data = await self._send_command(
@@ -978,6 +1003,22 @@ class TeslaCar:
         if data and data["response"]["result"] is True:
             params = {"steering_wheel_heater": value}
             self._vehicle_data["climate_state"].update(params)
+
+    async def set_heated_steering_wheel_level(self, level: int) -> None:
+        """Send command to set the heated steering wheel level."""
+        data = await self._send_command(
+            "REMOTE_STEERING_WHEEL_HEAT_LEVEL_REQUEST", level=level
+        )
+
+        if data and data["response"]["result"] is True:
+            params = {"steering_wheel_heat_level": level}
+            self._vehicle_data["climate_state"].update(params)
+
+    def get_heated_steering_wheel_level(self) -> int:
+        """Return the status of the heated steering wheel."""
+        if self.data_available:
+            return self._vehicle_data.get("climate_state", {}).get("steering_wheel_heat_level")
+        return None
 
     async def set_hvac_mode(self, value: str) -> None:
         """Send command to set HVAC mode.
