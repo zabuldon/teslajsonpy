@@ -188,19 +188,21 @@ class Connection:
         if not baseurl:
             baseurl = self.baseurl
         url: URL = URL(baseurl).join(URL(url))
-
-        _LOGGER.debug("%s: %s %s", method, url, data)
+        debug = _LOGGER.isEnabledFor(logging.DEBUG)
+        if debug:
+            _LOGGER.debug("%s: %s %s", method, url, data)
 
         try:
             if data:
-                resp = await getattr(self.websession, method)(
+                resp: httpx.Response = await getattr(self.websession, method)(
                     str(url), json=data, headers=headers, cookies=cookies
                 )
             else:
-                resp = await getattr(self.websession, method)(
+                resp: httpx.Response = await getattr(self.websession, method)(
                     str(url), headers=headers, cookies=cookies
                 )
-            _LOGGER.debug("%s: %s", resp.status_code, resp.text)
+            if debug:
+                _LOGGER.debug("%s: %s", resp.status_code, resp.text)
             if resp.status_code > 299:
                 if resp.status_code == 401:
                     if data and data.get("error") == "invalid_token":
@@ -208,15 +210,16 @@ class Connection:
                 elif resp.status_code == 408:
                     raise TeslaException(resp.status_code, "vehicle_unavailable")
                 raise TeslaException(resp.status_code)
-            data = orjson.loads(resp.text)  # pylint: disable=no-member
+            data = orjson.loads(resp.content)  # pylint: disable=no-member
             if data.get("error"):
                 # known errors:
                 #     'vehicle unavailable: {:error=>"vehicle unavailable:"}',
                 #     "upstream_timeout", "vehicle is curently in service"
-                _LOGGER.debug(
-                    "Raising exception for : %s",
-                    f'{data.get("error")}:{data.get("error_description")}',
-                )
+                if debug:
+                    _LOGGER.debug(
+                        "Raising exception for : %s",
+                        f'{data.get("error")}:{data.get("error_description")}',
+                    )
                 raise TeslaException(
                     f'{data.get("error")}:{data.get("error_description")}'
                 )
