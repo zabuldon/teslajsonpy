@@ -987,8 +987,7 @@ class TeslaCar:
         """
 
         data = await self._send_command(
-            "REMOTE_AUTO_STEERING_WHEEL_HEAT_CLIMATE_REQUEST",
-            on=enable
+            "REMOTE_AUTO_STEERING_WHEEL_HEAT_CLIMATE_REQUEST", on=enable
         )
         if data and data["response"]["result"] is True:
             params = {"auto_steering_wheel_heat": enable}
@@ -1017,7 +1016,9 @@ class TeslaCar:
     def get_heated_steering_wheel_level(self) -> int:
         """Return the status of the heated steering wheel."""
         if self.data_available:
-            return self._vehicle_data.get("climate_state", {}).get("steering_wheel_heat_level")
+            return self._vehicle_data.get("climate_state", {}).get(
+                "steering_wheel_heat_level"
+            )
         return None
 
     async def set_hvac_mode(self, value: str) -> None:

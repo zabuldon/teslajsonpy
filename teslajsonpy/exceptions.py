@@ -82,6 +82,25 @@ class HomelinkError(TeslaException):
     pass
 
 
+def custom_retry_except_unavailable(retry_state: RetryCallState) -> bool:
+    """Determine whether Tenacity should retry.
+
+    Args
+        retry_state (RetryCallState): Provided by Tenacity
+
+    Returns
+        bool: whether or not to retry
+
+    """
+    if not custom_retry(retry_state):
+        return False
+    ex = retry_state.outcome.exception()
+    if isinstance(ex, TeslaException):
+        if ex.code == 408:  # "VEHICLE_UNAVAILABLE"
+            return False
+    return True
+
+
 def custom_retry(retry_state: RetryCallState) -> bool:
     """Determine whether Tenacity should retry.
 
