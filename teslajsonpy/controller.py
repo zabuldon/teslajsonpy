@@ -33,7 +33,12 @@ from teslajsonpy.const import (
     WAKE_TIMEOUT,
 )
 from teslajsonpy.energy import EnergySite, PowerwallSite, SolarPowerwallSite, SolarSite
-from teslajsonpy.exceptions import TeslaException, custom_retry, custom_wait
+from teslajsonpy.exceptions import (
+    TeslaException,
+    custom_retry,
+    custom_retry_except_unavailable,
+    custom_wait,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -743,7 +748,11 @@ class Controller:
                     cur_time - last_update,
                     ONLINE_INTERVAL,
                 )
-                if force or cur_time - last_update >= ONLINE_INTERVAL and update_vehicles:
+                if (
+                    force
+                    or cur_time - last_update >= ONLINE_INTERVAL
+                    and update_vehicles
+                ):
                     cars = await self.get_vehicles()
                     for car in cars:
                         self.set_id_vin(car_id=car["id"], vin=car["vin"])
@@ -1333,7 +1342,11 @@ class Controller:
             return response
 
         # Perform request using given keyword arguments as parameters
-        return await self.__post_with_retries("", method=method, data=kwargs, url=uri)
+        # wake_if_asleep is False so we do not retry if the car is asleep
+        # or if the car is unavailable
+        return await self.__post_with_retries_except_unavailable(
+            "", method=method, data=kwargs, url=uri
+        )
 
     @retry(
         wait=custom_wait,
@@ -1342,5 +1355,25 @@ class Controller:
         reraise=True,
     )
     async def __post_with_retries(self, command, method="post", data=None, url=""):
-        """Call connection.post with retries for common exceptions."""
+        """Call connection.post with retries for common exceptions.
+
+        Retries if the car is unavailable.
+        """
+        return await self.__connection.post(command, method=method, data=data, url=url)
+
+    @retry(
+        wait=custom_wait,
+        retry=custom_retry_except_unavailable,
+        stop=stop_after_delay(MAX_API_RETRY_TIME),
+        reraise=True,
+    )
+    async def __post_with_retries_except_unavailable(
+        self, command, method="post", data=None, url=""
+    ):
+        """Call connection.post with retries for common exceptions.
+
+        Does not retry if the car is unavailable. This should be
+        used when wake_if_asleep is False since its unlikely the
+        car will suddenly become available if its offline/sleep.
+        """
         return await self.__connection.post(command, method=method, data=data, url=url)
