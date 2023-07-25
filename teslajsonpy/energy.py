@@ -30,17 +30,17 @@ class EnergySite:
     @property
     def has_load_meter(self) -> bool:
         """Return True if energy site has a load meter."""
-        return self._energysite.get("components").get("load_meter")
+        return self._energysite.get("components", {}).get("load_meter")
 
     @property
     def has_battery(self) -> bool:
         """Return True if energy site has battery."""
-        return self._energysite.get("components").get("battery")
+        return self._energysite.get("components", {}).get("battery")
 
     @property
     def has_solar(self) -> bool:
         """Return True if energy site has solar."""
-        return self._energysite.get("components").get("solar")
+        return self._energysite.get("components", {}).get("solar")
 
     @property
     def id(self) -> str:
@@ -108,7 +108,7 @@ class SolarSite(EnergySite):
     @property
     def solar_type(self) -> str:
         """Return type of solar (e.g. pv_panels or roof)."""
-        return self._energysite.get("components").get("solar_type")
+        return self._energysite.get("components", {}).get("solar_type")
 
 
 class PowerwallSite(EnergySite):
@@ -134,7 +134,7 @@ class PowerwallSite(EnergySite):
     @property
     def backup_reserve_percent(self) -> int:
         """Return backup reserve percentage."""
-        return self._battery_data.get("backup").get("backup_reserve_percent")
+        return self._battery_data.get("backup", {}).get("backup_reserve_percent")
 
     @property
     def battery_power(self) -> float:
@@ -238,7 +238,7 @@ class SolarPowerwallSite(PowerwallSite):
     @property
     def export_rule(self) -> str:
         """Return energy export rule setting."""
-        return self._battery_data.get("components").get(
+        return self._battery_data.get("components", {}).get(
             "customer_preferred_export_rule"
         )
 
@@ -246,14 +246,14 @@ class SolarPowerwallSite(PowerwallSite):
     def grid_charging(self) -> bool:
         """Return grid charging."""
         # Key is missing from battery_data when False
-        return not self._battery_data.get("components").get(
+        return not self._battery_data.get("components", {}).get(
             "disallow_charge_from_grid_with_solar_installed", False
         )
 
     @property
     def solar_type(self) -> str:
         """Return type of solar (e.g. pv_panels or roof)."""
-        return self._battery_data.get("components").get("solar_type")
+        return self._battery_data.get("components", {}).get("solar_type")
 
     async def set_grid_charging(self, value: bool) -> None:
         """Set grid charging setting of Powerwall."""
