@@ -49,7 +49,7 @@ jobs:
       - name: Install library
         run: poetry install --no-interaction
       - name: Python Semantic Release
-        uses: relekang/python-semantic-release@master
+        uses: python-semantic-release/python-semantic-release@v7.34.6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           repository_username: __token__
