@@ -14,16 +14,12 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
-	"Intended Audience :: Developers",
+    "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Environment :: Console",
-    "Topic :: Software Development :: Libraries :: Python Modules"
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-include = [
-    "README.md",
-    "LICENSE",
-    "CHANGELOG.md"
-]
+include = ["README.md", "LICENSE", "CHANGELOG.md"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -59,4 +55,3 @@ build-backend = "poetry.core.masonry.api"
 
 [metadata]
 description-file = "README.md"
-
