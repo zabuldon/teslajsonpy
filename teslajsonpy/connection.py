@@ -15,6 +15,7 @@ import secrets
 import time
 from typing import Dict, Text
 
+from json import JSONDecodeError
 import aiohttp
 from bs4 import BeautifulSoup
 import httpx
@@ -225,7 +226,7 @@ class Connection:
                 )
         except httpx.HTTPStatusError as exception_:
             raise TeslaException(exception_.request.status_code) from exception_
-        except orjson.JSONDecodeError as exception_:
+        except JSONDecodeError as exception_:
             raise TeslaException("Error decoding response into json") from exception_
         return data
 
@@ -275,7 +276,7 @@ class Connection:
                             disconnected = True
                         if kwargs.get("on_message"):
                             kwargs.get("on_message")(msg_json)
-                    except orjson.JSONDecodeError:
+                    except JSONDecodeError:
                         _LOGGER.debug("Received bad websocket message: %s", msg.data)
                         break
                 elif msg.type == aiohttp.WSMsgType.ERROR:
@@ -546,7 +547,7 @@ class Connection:
         )
         try:
             return orjson.loads(auth.text)  # pylint: disable=no-member
-        except orjson.JSONDecodeError:
+        except JSONDecodeError:
             _LOGGER.debug("Received bad auth response: %s", auth.text)
             return None
 
@@ -569,7 +570,7 @@ class Connection:
         )
         try:
             return orjson.loads(auth.text)  # pylint: disable=no-member
-        except orjson.JSONDecodeError:
+        except JSONDecodeError:
             _LOGGER.debug("Received bad auth response: %s", auth.text)
             return None
 
@@ -593,7 +594,7 @@ class Connection:
         )
         try:
             return orjson.loads(auth.text)  # pylint: disable=no-member
-        except orjson.JSONDecodeError:
+        except JSONDecodeError:
             _LOGGER.debug("Received bad auth response: %s", auth.text)
             return None
 
