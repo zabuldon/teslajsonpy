@@ -9,6 +9,7 @@ import asyncio
 import logging
 import pkgutil
 import time
+from json import JSONDecodeError
 from typing import Dict, List, Optional, Set, Text
 
 import httpx
@@ -1291,7 +1292,7 @@ class Controller:
                     data.decode()
                 )
                 _LOGGER.debug("%d endpoints loaded", len(self.endpoints))
-            except (IOError, ValueError):
+            except (IOError, ValueError, JSONDecodeError):
                 _LOGGER.error("No endpoints loaded")
         # Lookup endpoint name
         try:
