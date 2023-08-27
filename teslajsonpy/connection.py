@@ -225,6 +225,8 @@ class Connection:
                 )
         except httpx.HTTPStatusError as exception_:
             raise TeslaException(exception_.request.status_code) from exception_
+        except orjson.JSONDecodeError as exception_:
+            raise TeslaException("Error decoding response into json") from exception_
         return data
 
     async def websocket_connect(self, vin: int, vehicle_id: int, **kwargs):
@@ -247,31 +249,35 @@ class Connection:
             async for msg in self.websocket:
                 _LOGGER.debug("msg: %s", msg)
                 if msg.type == aiohttp.WSMsgType.BINARY:
-                    msg_json = orjson.loads(msg.data)  # pylint: disable=no-member
-                    if msg_json["msg_type"] == "control:hello":
-                        _LOGGER.debug(
-                            "%s:Succesfully connected to websocket %s",
-                            vin[-5:],
-                            self.websocket_url,
-                        )
-                    if msg_json["msg_type"] == "data:update":
-                        last_message_time = time.time()
-                    if (
-                        msg_json["msg_type"] == "data:error"
-                        and msg_json["value"] == "Can't validate token. "
-                    ):
-                        raise TeslaException(
-                            "Can't validate token for websocket connection."
-                        )
-                    if (
-                        msg_json["msg_type"] == "data:error"
-                        and msg_json["value"] == "disconnected"
-                    ):
-                        if kwargs.get("on_disconnect"):
-                            kwargs.get("on_disconnect")(msg_json)
-                        disconnected = True
-                    if kwargs.get("on_message"):
-                        kwargs.get("on_message")(msg_json)
+                    try:
+                        msg_json = orjson.loads(msg.data)  # pylint: disable=no-member
+                        if msg_json["msg_type"] == "control:hello":
+                            _LOGGER.debug(
+                                "%s:Succesfully connected to websocket %s",
+                                vin[-5:],
+                                self.websocket_url,
+                            )
+                        if msg_json["msg_type"] == "data:update":
+                            last_message_time = time.time()
+                        if (
+                            msg_json["msg_type"] == "data:error"
+                            and msg_json["value"] == "Can't validate token. "
+                        ):
+                            raise TeslaException(
+                                "Can't validate token for websocket connection."
+                            )
+                        if (
+                            msg_json["msg_type"] == "data:error"
+                            and msg_json["value"] == "disconnected"
+                        ):
+                            if kwargs.get("on_disconnect"):
+                                kwargs.get("on_disconnect")(msg_json)
+                            disconnected = True
+                        if kwargs.get("on_message"):
+                            kwargs.get("on_message")(msg_json)
+                    except orjson.JSONDecodeError:
+                        _LOGGER.debug("Received bad websocket message: %s", msg.data)
+                        break
                 elif msg.type == aiohttp.WSMsgType.ERROR:
                     _LOGGER.debug("WSMsgType error")
                     break
@@ -538,7 +544,11 @@ class Connection:
             str(self.auth_domain.with_path("/oauth2/v3/token")),
             data=oauth,
         )
-        return orjson.loads(auth.text)  # pylint: disable=no-member
+        try:
+            return orjson.loads(auth.text)  # pylint: disable=no-member
+        except orjson.JSONDecodeError:
+            _LOGGER.debug("Received bad auth response: %s", auth.text)
+            return None
 
     async def refresh_access_token(self, refresh_token):
         """Refresh access token from sso."""
@@ -557,7 +567,11 @@ class Connection:
             str(self.auth_domain.with_path("/oauth2/v3/token")),
             data=oauth,
         )
-        return orjson.loads(auth.text)  # pylint: disable=no-member
+        try:
+            return orjson.loads(auth.text)  # pylint: disable=no-member
+        except orjson.JSONDecodeError:
+            _LOGGER.debug("Received bad auth response: %s", auth.text)
+            return None
 
     async def get_bearer_token(self, access_token):
         """Get bearer token. This is used by the owners API."""
@@ -577,7 +591,11 @@ class Connection:
         auth = await self.websession.post(
             "https://owner-api.teslamotors.com/oauth/token", headers=head, data=oauth
         )
-        return orjson.loads(auth.text)  # pylint: disable=no-member
+        try:
+            return orjson.loads(auth.text)  # pylint: disable=no-member
+        except orjson.JSONDecodeError:
+            _LOGGER.debug("Received bad auth response: %s", auth.text)
+            return None
 
 
 def get_inputs(soup: BeautifulSoup, searchfield=None) -> Dict[str, str]:

@@ -1291,7 +1291,7 @@ class Controller:
                     data.decode()
                 )
                 _LOGGER.debug("%d endpoints loaded", len(self.endpoints))
-            except (IOError, ValueError):
+            except (IOError, ValueError, orjson.JSONDecodeError):
                 _LOGGER.error("No endpoints loaded")
         # Lookup endpoint name
         try:
