@@ -17,6 +17,8 @@ MAX_API_RETRY_TIME = 15  # how long to retry api calls
 RELEASE_NOTES_URL = "https://teslascope.com/teslapedia/software/"
 AUTH_DOMAIN = "https://auth.tesla.com"
 API_URL = "https://owner-api.teslamotors.com"
+API_URL_CN = "https://owner-api.vn.cloud.tesla.cn"
+DOMAIN_KEY = {".com": API_URL, ".cn": API_URL_CN}
 WS_URL = "wss://streaming.vn.teslamotors.com/streaming"
 
 TESLA_PRODUCT_TYPE_VEHICLES = "vehicles"

@@ -27,6 +27,7 @@ from teslajsonpy.const import (
     API_URL,
     AUTH_DOMAIN,
     DRIVING_INTERVAL,
+    DOMAIN_KEY,
     WEBSOCKET_TIMEOUT,
     WS_URL,
 )
@@ -57,7 +58,9 @@ class Connection:
         self.client_secret: Text = (
             "c7257eb71a564034f9419ee651c7d0e5f7" "aa6bfbd18bafb5c5c033b093bb2fa3"
         )
-        self.baseurl: Text = API_URL
+        self.baseurl: Text = DOMAIN_KEY.get(
+            auth_domain[auth_domain.rfind(".") :], API_URL
+        )
         self.websocket_url: Text = WS_URL
         self.api: Text = "/api/1/"
         self.expiration: int = expiration
@@ -590,7 +593,7 @@ class Connection:
             "Authorization": f"Bearer {access_token}",
         }
         auth = await self.websession.post(
-            "https://owner-api.teslamotors.com/oauth/token", headers=head, data=oauth
+            f"{self.baseurl}/oauth/token", headers=head, data=oauth
         )
         try:
             return orjson.loads(auth.text)  # pylint: disable=no-member
