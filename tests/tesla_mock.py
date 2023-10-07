@@ -40,9 +40,9 @@ class TeslaMock:
             Controller, "get_site_config", self.mock_get_site_config
         )
         self._monkeypatch.setattr(Controller, "get_site_data", self.mock_get_site_data)
-        self._monkeypatch.setattr(
-            Controller, "get_battery_data", self.mock_get_battery_data
-        )
+        # self._monkeypatch.setattr(
+        #     Controller, "get_battery_data", self.mock_get_battery_data
+        # )
         self._monkeypatch.setattr(
             Controller, "get_battery_summary", self.mock_get_battery_summary
         )
@@ -129,10 +129,10 @@ class TeslaMock:
         """Mock controller's get_site_data method."""
         return self.controller_get_site_data()
 
-    def mock_get_battery_data(self, *args, **kwargs):
-        # pylint: disable=unused-argument
-        """Mock controller's get_battery_data method."""
-        return self.controller_get_battery_data()
+    # def mock_get_battery_data(self, *args, **kwargs):
+    #     # pylint: disable=unused-argument
+    #     """Mock controller's get_battery_data method."""
+    #     return self.controller_get_battery_data()
 
     def mock_get_battery_summary(self, *args, **kwargs):
         # pylint: disable=unused-argument
