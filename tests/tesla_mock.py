@@ -41,10 +41,7 @@ class TeslaMock:
         )
         self._monkeypatch.setattr(Controller, "get_site_data", self.mock_get_site_data)
         self._monkeypatch.setattr(
-            Controller, "get_battery_data", self.mock_get_battery_data
-        )
-        self._monkeypatch.setattr(
-            Controller, "get_battery_summary", self.mock_get_battery_summary
+            Controller, "get_site_summary", self.mock_get_site_summary
         )
         self._monkeypatch.setattr(Controller, "update", self.mock_update)
         self._monkeypatch.setattr(
@@ -129,15 +126,10 @@ class TeslaMock:
         """Mock controller's get_site_data method."""
         return self.controller_get_site_data()
 
-    def mock_get_battery_data(self, *args, **kwargs):
+    def mock_get_site_summary(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """Mock controller's get_battery_data method."""
-        return self.controller_get_battery_data()
-
-    def mock_get_battery_summary(self, *args, **kwargs):
-        # pylint: disable=unused-argument
-        """Mock controller's get_battery_summary method."""
-        return self.controller_get_battery_summary()
+        """Mock controller's get_site_summary method."""
+        return self.controller_get_site_summary()
 
     def mock_get_vehicle_data(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -209,13 +201,9 @@ class TeslaMock:
         """Monkeypatch for controller.get_site_data()."""
         return self._site_data
 
-    async def controller_get_battery_data(self):
-        """Monkeypatch for controller.get_battery_data()."""
-        return self._battery_data
-
-    async def controller_get_battery_summary(self):
-        """Monkeypatch for controller.get_battery_summary()."""
-        return self._battery_summary
+    async def controller_get_site_summary(self):
+        """Monkeypatch for controller.get_site_summary()."""
+        return self._site_summary
 
     async def controller_get_vehicle_data(self):
         """Monkeypatch for controller.get_vehicle_data()."""
