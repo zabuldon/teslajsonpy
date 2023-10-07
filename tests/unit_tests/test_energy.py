@@ -6,8 +6,7 @@ from teslajsonpy.controller import Controller
 from teslajsonpy.energy import SolarSite
 
 from tests.tesla_mock import (
-    BATTERY_DATA,
-    BATTERY_SUMMARY,
+    SITE_SUMMARY,
     ENERGYSITES,
     SITE_CONFIG,
     SITE_DATA,
@@ -83,23 +82,23 @@ async def test_powerwall_site(monkeypatch):
     assert _solar_powerwall_site.site_name == ENERGYSITES[1]["site_name"]
     assert (
         _solar_powerwall_site.percentage_charged
-        == BATTERY_SUMMARY["percentage_charged"]
+        == SITE_SUMMARY["percentage_charged"]
     )
     assert (
         _solar_powerwall_site.battery_power
-        == BATTERY_DATA["power_reading"][0]["battery_power"]
+        == SITE_SUMMARY["battery_power"]
     )
     assert (
         _solar_powerwall_site.grid_power
-        == BATTERY_DATA["power_reading"][0]["grid_power"]
+        == SITE_DATA["grid_power"]
     )
     assert (
         _solar_powerwall_site.load_power
-        == BATTERY_DATA["power_reading"][0]["load_power"]
+        == SITE_DATA["load_power"]
     )
     assert (
         _solar_powerwall_site.solar_power
-        == BATTERY_DATA["power_reading"][0]["solar_power"]
+        == SITE_DATA["solar_power"]
     )
     assert (
         _solar_powerwall_site.solar_type == ENERGYSITES[1]["components"]["solar_type"]
