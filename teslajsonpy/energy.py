@@ -122,79 +122,72 @@ class PowerwallSite(EnergySite):
         self,
         api: Callable,
         energysite: dict,
-        site_config: dict,
-        battery_data: dict,
-        battery_summary: dict,
+        site_config: dict,        
+        site_data: dict,
+        site_summary: dict,
     ) -> None:
         """Initialize PowerwallSite."""
         super().__init__(api, energysite, site_config)
-        self._battery_data: dict = battery_data
-        self._battery_summary: dict = battery_summary
+        self._site_data: dict = site_data
+        self._site_summary: dict = site_summary
 
     @property
     def backup_reserve_percent(self) -> int:
         """Return backup reserve percentage."""
-        return self._battery_data.get("backup", {}).get("backup_reserve_percent")
+        return self._site_config.get("backup_reserve_percent")
 
     @property
     def battery_power(self) -> float:
         """Return battery power in Watts."""
-        if self._battery_data.get("power_reading"):
-            return self._battery_data["power_reading"][0]["battery_power"]
-        return None
+        return self._site_summary.get("battery_power")
 
     @property
     def data_available(self) -> bool:
         """Return if data is available."""
-        return self._battery_data != {}
+        return self._site_summary != {}
 
     @property
     def energy_left(self) -> float:
         """Return battery energy left in Watt hours."""
-        return self._battery_summary.get("energy_left")
+        return self._site_summary.get("energy_left")
 
     @property
     def grid_power(self) -> float:
-        """Return grid power in Watts."""
-        if self._battery_data.get("power_reading"):
-            return self._battery_data["power_reading"][0]["grid_power"]
-        return None
+        """Return grid power in Watts."""    
+        return self._site_data.get("grid_power")
+        
 
     @property
     def grid_status(self) -> str:
         """Return grid status."""
-        return self._battery_data.get("grid_status")
+        return self._site_summary.get("grid_status")
 
     @property
     def load_power(self) -> float:
         """Return load power in Watts."""
-        if self._battery_data.get("power_reading"):
-            return self._battery_data["power_reading"][0]["load_power"]
-        return None
+        return self._site_data.get("load_power")
 
     @property
     def operation_mode(self) -> str:
         """Return operation mode."""
-        return self._battery_data.get("operation")
+        return self._site_config.get("default_real_mode")
 
     @property
     def percentage_charged(self) -> float:
         """Return battery percentage charged."""
         # percentage_charged sometimes incorrectly reports 0
-        return self._battery_summary.get("percentage_charged")
+        return self._site_summary.get("percentage_charged")
 
     @property
     def site_name(self) -> str:
         """Return energy site name."""
         # "site_name" not a valid key if name never set in Tesla app
-        return self._battery_data.get("site_name", DEFAULT_ENERGYSITE_NAME)
+        return self._site_summary.get("site_name", DEFAULT_ENERGYSITE_NAME)
 
     @property
     def solar_power(self) -> float:
         """Return solar power in Watts."""
-        if self._battery_data.get("power_reading"):
-            return self._battery_data["power_reading"][0]["solar_power"]
-        return None
+        return self._site_data.get("solar_power")
 
     @property
     def version(self) -> float:
@@ -208,11 +201,11 @@ class PowerwallSite(EnergySite):
         """
         data = await self._send_command(
             "BATTERY_OPERATION_MODE",
-            path_vars={"battery_id": self.id},
+            path_vars={"site_id": self.energysite_id},
             default_real_mode=real_mode,
         )
         if data and data["response"]["code"] == 201:
-            self._battery_data.update({"operation": real_mode})
+            self._site_config.update({"operation": real_mode})
 
     async def set_reserve_percent(self, value: int) -> None:
         """Set reserve percentage of Powerwall.
@@ -225,7 +218,7 @@ class PowerwallSite(EnergySite):
             backup_reserve_percent=int(value),
         )
         if data and data["response"]["code"] == 201:
-            self._battery_data["backup"].update({"backup_reserve_percent": value})
+            self._site_config.update({"backup_reserve_percent": value})
 
 
 class SolarPowerwallSite(PowerwallSite):
@@ -238,22 +231,22 @@ class SolarPowerwallSite(PowerwallSite):
     @property
     def export_rule(self) -> str:
         """Return energy export rule setting."""
-        return self._battery_data.get("components", {}).get(
+        return self._site_config.get("components", {}).get(
             "customer_preferred_export_rule"
         )
 
     @property
     def grid_charging(self) -> bool:
         """Return grid charging."""
-        # Key is missing from battery_data when False
-        return not self._battery_data.get("components", {}).get(
+        # Key is missing from site config when False
+        return not self._site_config.get("components", {}).get(
             "disallow_charge_from_grid_with_solar_installed", False
         )
 
     @property
     def solar_type(self) -> str:
         """Return type of solar (e.g. pv_panels or roof)."""
-        return self._battery_data.get("components", {}).get("solar_type")
+        return self._site_config.get("components", {}).get("solar_type")
 
     async def set_grid_charging(self, value: bool) -> None:
         """Set grid charging setting of Powerwall."""
@@ -264,7 +257,7 @@ class SolarPowerwallSite(PowerwallSite):
             disallow_charge_from_grid_with_solar_installed=value,
         )
         # This endpoint returns an empty response instead of a result code
-        self._battery_data["components"].update(
+        self._site_config["components"].update(
             {"disallow_charge_from_grid_with_solar_installed": value}
         )
 
@@ -281,6 +274,6 @@ class SolarPowerwallSite(PowerwallSite):
             customer_preferred_export_rule=setting,
         )
         # This endpoint returns an empty response instead of a result code
-        self._battery_data["components"].update(
+        self._site_config["components"].update(
             {"customer_preferred_export_rule": setting}
         )

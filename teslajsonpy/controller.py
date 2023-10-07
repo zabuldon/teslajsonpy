@@ -167,8 +167,7 @@ class Controller:
         self._energysite_list: List[dict] = []
         self._site_config: Dict[int, dict] = {}
         self._site_data: Dict[int, dict] = {}
-        self._battery_data: Dict[int, dict] = {}
-        self._battery_summary: Dict[int, dict] = {}
+        self._site_summary: Dict[int, dict] = {}
         self._grid_status_unknown: Dict[int, bool] = {}
         self.cars: Dict[str, TeslaCar] = {}
         self.energysites: Dict[int, EnergySite] = {}
@@ -340,18 +339,12 @@ class Controller:
         return (await self.api("SITE_DATA", path_vars={"site_id": energysite_id}))[
             "response"
         ]
-
-    async def get_battery_data(self, battery_id: str) -> dict:
-        """Get battery data json from TeslaAPI for a given battery_id."""
-        return (await self.api("BATTERY_DATA", path_vars={"battery_id": battery_id}))[
+        
+    async def get_site_summary(self, energysite_id: int) -> dict:
+        """Get site data json from TeslaAPI for a given energysite_id."""
+        return (await self.api("SITE_SUMMARY", path_vars={"site_id": energysite_id}))[
             "response"
-        ]
-
-    async def get_battery_summary(self, battery_id: str) -> dict:
-        """Get site config json from TeslaAPI for a given battery_id."""
-        return (
-            await self.api("BATTERY_SUMMARY", path_vars={"battery_id": battery_id})
-        )["response"]
+        ]    
 
     async def generate_car_objects(
         self,
@@ -428,41 +421,39 @@ class Controller:
                     self._site_data[energysite_id],
                 )
             # Powerwall systems listed as "battery"
-            if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
-                battery_id = energysite.get("id")
-
+            if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:                
                 try:
-                    self._battery_data[energysite_id] = await self.get_battery_data(
-                        battery_id
+                    self._site_data[energysite_id] = await self.get_site_data(
+                        energysite_id
                     )
                 except TeslaException as ex:
                     _LOGGER.warning(
-                        "Unable to get battery data during setup, battery will still be added. %s: %s",
+                        "Unable to get site data during setup, site will still be added. %s: %s",
                         ex.code,
                         ex.message,
                     )
-                    self._battery_data[energysite_id] = {}
-
-                self._battery_summary[energysite_id] = await self.get_battery_summary(
-                    battery_id
-                )
+                    self._site_data[energysite_id] = {}
+                                    
+                self._site_summary[energysite_id] = await self.get_site_summary(
+                        energysite_id
+                    )                    
 
                 if energysite["components"]["solar"]:
                     self.energysites[energysite_id] = SolarPowerwallSite(
                         self.api,
                         energysite,
                         self._site_config[energysite_id],
-                        self._battery_data[energysite_id],
-                        self._battery_summary[energysite_id],
+                        self._site_data[energysite_id],
+                        self._site_summary[energysite_id],
                     )
                 else:
                     self.energysites[energysite_id] = PowerwallSite(
                         self.api,
                         energysite,
                         self._site_config[energysite_id],
-                        self._battery_data[energysite_id],
-                        self._battery_summary[energysite_id],
-                    )
+                        self._site_data[energysite_id],
+                        self._site_summary[energysite_id],
+                    )            
 
         return self.energysites
 
@@ -713,30 +704,26 @@ class Controller:
                     del response["solar_power"]
 
                 self._site_data[energysite_id].update(response)
-
-        async def _get_and_process_battery_data(
-            energysite_id: int, battery_id: str
-        ) -> None:
-            _LOGGER.debug("Updating BATTERY_DATA for energysite: %s", energysite_id)
+                
+        async def _get_and_process_site_summary(energysite_id: int) -> None:
+            _LOGGER.debug("Updating SITE_SUMMARY for energysite: %s", energysite_id)
             try:
-                response = await self.get_battery_data(battery_id)
+                response = await self.get_site_summary(energysite_id)
+            except TeslaException:
+                response = None
+ 
+            if response:
+                self._site_summary[energysite_id].update(response)
+                
+        async def _get_and_process_site_config(energysite_id: int) -> None:
+            _LOGGER.debug("Updating SITE_CONFIG for energysite: %s", energysite_id)
+            try:
+                response = await self.get_site_config(energysite_id)
             except TeslaException:
                 response = None
 
             if response:
-                self._battery_data[energysite_id].update(response)
-
-        async def _get_and_process_battery_summary(
-            energysite_id: int, battery_id: str
-        ) -> None:
-            _LOGGER.debug("Updating BATTERY_SUMMARY for energysite: %s", energysite_id)
-            try:
-                response = await self.get_battery_summary(battery_id)
-            except TeslaException:
-                response = None
-
-            if response:
-                self._battery_summary[energysite_id].update(response)
+                self._site_config[energysite_id].update(response)                
 
         async with self.__update_lock:
             if self._vehicle_list:
@@ -835,13 +822,8 @@ class Controller:
                         tasks.append(_get_and_process_site_data(energysite_id))
 
                     if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
-                        battery_id = energysite["id"]
-                        tasks.append(
-                            _get_and_process_battery_data(energysite_id, battery_id)
-                        )
-                        tasks.append(
-                            _get_and_process_battery_summary(energysite_id, battery_id)
-                        )
+                        tasks.append(_get_and_process_site_config(energysite_id))
+                        tasks.append(_get_and_process_site_summary(energysite_id))
 
             return any(await asyncio.gather(*tasks))
 
