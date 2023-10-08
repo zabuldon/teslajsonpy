@@ -919,7 +919,7 @@ SITE_DATA = {
     "island_status": "island_status_unknown",
     "storm_mode_active": False,
     "timestamp": "2022-07-28T17:11:27Z",
-    "wall_connectors": null
+    "wall_connectors": Null
 }
 
 SITE_DATA_UNKNOWN_GRID = {
@@ -940,9 +940,9 @@ SITE_SUMMARY = {
     "battery_type": "ac_powerwall",
     "backup_capable": true,
     "battery_power": 10,
-    "storm_mode_enabled": true,
-    "powerwall_onboarding_settings_set": true,
-    "powerwall_tesla_electric_interested_in": null,
-    "sync_grid_alert_enabled": true,
-    "breaker_alert_enabled": true,
+    "storm_mode_enabled": True,
+    "powerwall_onboarding_settings_set": True,
+    "powerwall_tesla_electric_interested_in": Null,
+    "sync_grid_alert_enabled": True,
+    "breaker_alert_enabled": True,
 }
