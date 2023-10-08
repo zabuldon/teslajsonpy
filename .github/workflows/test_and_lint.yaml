@@ -4,8 +4,11 @@
 name: Lint and test
 
 on:
+  workflow_dispatch:
+    branches: [ main, dev]
   pull_request:
     branches: [ master, dev ]
+
 
 jobs:
   build:
