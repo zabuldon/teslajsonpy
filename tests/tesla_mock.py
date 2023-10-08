@@ -41,10 +41,7 @@ class TeslaMock:
         )
         self._monkeypatch.setattr(Controller, "get_site_data", self.mock_get_site_data)
         self._monkeypatch.setattr(
-            Controller, "get_battery_data", self.mock_get_battery_data
-        )
-        self._monkeypatch.setattr(
-            Controller, "get_battery_summary", self.mock_get_battery_summary
+            Controller, "get_site_summary", self.mock_get_site_summary
         )
         self._monkeypatch.setattr(Controller, "update", self.mock_update)
         self._monkeypatch.setattr(
@@ -58,8 +55,7 @@ class TeslaMock:
         self._vehicle_data = copy.deepcopy(VEHICLE_DATA)
         self._vehicle_data_by_vin = copy.deepcopy(VEHICLE_DATA_BY_VIN)
         self._site_data = copy.deepcopy(SITE_DATA)
-        self._battery_data = copy.deepcopy(BATTERY_DATA)
-        self._battery_summary = copy.deepcopy(BATTERY_SUMMARY)
+        self._site_summary = copy.deepcopy(SITE_SUMMARY)
         self._drive_state = copy.deepcopy(VEHICLE_DATA["drive_state"])
         self._climate_state = copy.deepcopy(VEHICLE_DATA["climate_state"])
         self._charge_state = copy.deepcopy(VEHICLE_DATA["charge_state"])
@@ -129,15 +125,10 @@ class TeslaMock:
         """Mock controller's get_site_data method."""
         return self.controller_get_site_data()
 
-    def mock_get_battery_data(self, *args, **kwargs):
+    def mock_get_site_summary(self, *args, **kwargs):
         # pylint: disable=unused-argument
-        """Mock controller's get_battery_data method."""
-        return self.controller_get_battery_data()
-
-    def mock_get_battery_summary(self, *args, **kwargs):
-        # pylint: disable=unused-argument
-        """Mock controller's get_battery_summary method."""
-        return self.controller_get_battery_summary()
+        """Mock controller's get_site_summary method."""
+        return self.controller_get_site_summary()
 
     def mock_get_vehicle_data(self, *args, **kwargs):
         # pylint: disable=unused-argument
@@ -209,13 +200,9 @@ class TeslaMock:
         """Monkeypatch for controller.get_site_data()."""
         return self._site_data
 
-    async def controller_get_battery_data(self):
-        """Monkeypatch for controller.get_battery_data()."""
-        return self._battery_data
-
-    async def controller_get_battery_summary(self):
-        """Monkeypatch for controller.get_battery_summary()."""
-        return self._battery_summary
+    async def controller_get_site_summary(self):
+        """Monkeypatch for controller.get_site_summary()."""
+        return self._site_summary
 
     async def controller_get_vehicle_data(self):
         """Monkeypatch for controller.get_vehicle_data()."""
@@ -271,13 +258,9 @@ class TeslaMock:
         """Simulate the result of site state with unknown grid data request."""
         return self._site_data_unknown_grid
 
-    def data_request_battery_data(self):
-        """Get battery_data."""
-        return self._battery_data
-
-    def data_request_battery_summary(self):
-        """Get battery_summary."""
-        return self._battery_summary
+    def data_request_site_summary(self):
+        """Get site_summary."""
+        return self._site_summary
 
     @staticmethod
     def command_ok():
@@ -936,7 +919,7 @@ SITE_DATA = {
     "island_status": "island_status_unknown",
     "storm_mode_active": False,
     "timestamp": "2022-07-28T17:11:27Z",
-    "wall_connectors": None,
+    "wall_connectors": None
 }
 
 SITE_DATA_UNKNOWN_GRID = {
@@ -946,121 +929,20 @@ SITE_DATA_UNKNOWN_GRID = {
     "grid_status": "Unknown",
     "grid_services_active": False,
 }
-# Example of battery_data response for future tests
-BATTERY_DATA = {
-    "energy_site_id": 67890,
+
+SITE_SUMMARY = {
     "resource_type": "battery",
     "site_name": "My Battery Home",
-    "id": "XXX",
-    "gateway_id": "XXX",
-    "asset_site_id": "XXX",
-    "energy_left": 12650.052631578948,
-    "total_pack_energy": 14069,
-    "percentage_charged": 20.360603000037408,
+    "gateway_id": "A-123456-987645321S",
+    "energy_left": 21604,
+    "total_pack_energy": 21604,
+    "percentage_charged": 100,
     "battery_type": "ac_powerwall",
     "backup_capable": True,
-    "battery_power": 3080,
+    "battery_power": 10,
     "storm_mode_enabled": True,
     "powerwall_onboarding_settings_set": True,
+    "powerwall_tesla_electric_interested_in": None,
     "sync_grid_alert_enabled": True,
     "breaker_alert_enabled": True,
-    "components": {
-        "solar": True,
-        "solar_type": "pv_panel",
-        "battery": True,
-        "grid": True,
-        "backup": True,
-        "gateway": "teg",
-        "load_meter": True,
-        "tou_capable": True,
-        "storm_mode_capable": True,
-        "flex_energy_request_capable": False,
-        "car_charging_data_supported": False,
-        "off_grid_vehicle_charging_reserve_supported": False,
-        "vehicle_charging_performance_view_enabled": False,
-        "vehicle_charging_solar_offset_view_enabled": False,
-        "battery_solar_offset_view_enabled": True,
-        "solar_value_enabled": True,
-        "energy_value_header": "Energy Value",
-        "energy_value_subheader": "Estimated Value",
-        "show_grid_import_battery_source_cards": True,
-        "backup_time_remaining_enabled": True,
-        "rate_plan_manager_supported": True,
-        "battery_type": "ac_powerwall",
-        "configurable": False,
-        "grid_services_enabled": False,
-        "customer_preferred_export_rule": "battery_ok",
-        "net_meter_mode": "battery_ok",
-    },
-    "grid_status": "Active",
-    "backup": {
-        "backup_reserve_percent": 100,
-        "events": [
-            {"timestamp": "2022-07-12T06:56:55+10:00", "duration": 38773},
-            {"timestamp": "2022-07-11T20:46:25+10:00", "duration": 66479},
-            {"timestamp": "2022-06-29T11:35:43+10:00", "duration": 842030},
-            {"timestamp": "2022-06-18T15:28:35+10:00", "duration": 1013486},
-            {"timestamp": "2022-06-15T15:43:20+10:00", "duration": 210737},
-            {"timestamp": "2022-06-10T08:26:12+10:00", "duration": 47649},
-            {"timestamp": "2022-06-03T13:58:52+10:00", "duration": 443079},
-            {"timestamp": "2022-05-15T10:46:58+10:00", "duration": 31389950},
-            {"timestamp": "2022-05-14T15:33:38+10:00", "duration": 1279604},
-            {"timestamp": "2022-05-07T19:39:07+10:00", "duration": 901817},
-            {"timestamp": "2022-04-23T08:26:14+10:00", "duration": 437693},
-            {"timestamp": "2022-04-22T19:14:33+10:00", "duration": 757615},
-            {"timestamp": "2022-04-14T11:54:35+10:00", "duration": 581358},
-            {"timestamp": "2022-04-06T22:26:41+10:00", "duration": 65188},
-            {"timestamp": "2022-04-03T22:12:07+10:00", "duration": 654161},
-            {"timestamp": "2022-04-03T21:57:36+10:00", "duration": 798912},
-            {"timestamp": "2022-04-03T18:51:05+10:00", "duration": 67764},
-            {"timestamp": "2022-04-03T17:22:58+10:00", "duration": 641782},
-            {"timestamp": "2022-04-03T17:21:19+10:00", "duration": 69942},
-            {"timestamp": "2022-04-03T06:34:17+10:00", "duration": 232350},
-            {"timestamp": "2022-04-02T19:05:41+10:00", "duration": 47104},
-            {"timestamp": "2022-04-02T09:35:18+10:00", "duration": 258895},
-            {"timestamp": "2022-04-02T05:21:14+10:00", "duration": 63814},
-            {"timestamp": "2022-04-01T11:59:57+10:00", "duration": 586849},
-            {"timestamp": "2022-04-01T11:50:56+10:00", "duration": 457199},
-            {"timestamp": "2022-04-01T11:48:21+10:00", "duration": 51065},
-            {"timestamp": "2022-04-01T11:47:23+10:00", "duration": 41783},
-            {"timestamp": "2022-04-01T11:01:46+10:00", "duration": 73278},
-            {"timestamp": "2022-03-31T17:12:00+10:00", "duration": 45838},
-            {"timestamp": "2022-03-24T16:28:07+10:00", "duration": 122233},
-            {"timestamp": "2022-03-24T06:15:44+10:00", "duration": 5932791},
-            {"timestamp": "2022-03-23T17:01:37+10:00", "duration": 210322},
-            {"timestamp": "2022-03-23T16:11:27+10:00", "duration": 2608373},
-            {"timestamp": "2022-03-21T21:04:54+10:00", "duration": 296080},
-        ],
-        "events_count": 0,
-        "total_events": 0,
-    },
-    "user_settings": {
-        "storm_mode_enabled": True,
-        "powerwall_onboarding_settings_set": True,
-        "sync_grid_alert_enabled": False,
-        "breaker_alert_enabled": False,
-    },
-    "default_real_mode": "backup",
-    "operation": "backup",
-    "installation_date": "2022-03-21T17:15:23+10:00",
-    "power_reading": [
-        {
-            "timestamp": "2022-08-16T15:23:24+10:00",
-            "load_power": 329,
-            "solar_power": 709,
-            "grid_power": 2930,
-            "battery_power": -3310,
-            "generator_power": 0,
-        }
-    ],
-    "battery_count": 1,
-}
-
-BATTERY_SUMMARY = {
-    "site_name": "My Battery Home",
-    "id": "XXX",
-    "energy_left": 13610.736842105263,
-    "total_pack_energy": 14056,
-    "percentage_charged": 96.8322199922116,
-    "battery_power": 400,
 }
