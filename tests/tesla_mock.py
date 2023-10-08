@@ -937,7 +937,7 @@ SITE_SUMMARY = {
     "total_pack_energy": 21604,
     "percentage_charged": 100,
     "battery_type": "ac_powerwall",
-    "backup_capable": true,
+    "backup_capable": True,
     "battery_power": 10,
     "storm_mode_enabled": True,
     "powerwall_onboarding_settings_set": True,
