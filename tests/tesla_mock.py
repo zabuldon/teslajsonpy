@@ -912,12 +912,12 @@ SITE_DATA = {
     "battery_power": 0,
     "load_power": 4517.14990234375,
     "grid_status": "Unknown",
-    "grid_services_active": false,
+    "grid_services_active": False,
     "grid_power": -3202.85009765625,
     "grid_services_power": 0,
     "generator_power": 0,
     "island_status": "island_status_unknown",
-    "storm_mode_active": false,
+    "storm_mode_active": False,
     "timestamp": "2022-07-28T17:11:27Z",
     "wall_connectors": null
 }
