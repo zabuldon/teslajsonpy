@@ -918,7 +918,8 @@ SITE_DATA = {
     "generator_power": 0,
     "island_status": "island_status_unknown",
     "storm_mode_active": False,
-    "timestamp": "2022-07-28T17:11:27Z",    
+    "timestamp": "2022-07-28T17:11:27Z",
+    "wall_connectors": None
 }
 
 SITE_DATA_UNKNOWN_GRID = {
@@ -941,6 +942,7 @@ SITE_SUMMARY = {
     "battery_power": 10,
     "storm_mode_enabled": True,
     "powerwall_onboarding_settings_set": True,
+    "powerwall_tesla_electric_interested_in": None,
     "sync_grid_alert_enabled": True,
     "breaker_alert_enabled": True,
 }
