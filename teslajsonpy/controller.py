@@ -401,18 +401,19 @@ class Controller:
             # Default to True and check during updates
             self._grid_status_unknown = {energysite_id: True}
             # Solar only systems (no Powerwalls) are listed as "solar"
+            try:
+                self._site_data[energysite_id] = await self.get_site_data(
+                    energysite_id
+                )
+            except TeslaException as ex:
+                _LOGGER.warning(
+                    "Unable to get site data during setup, site will still be added. %s: %s",
+                    ex.code,
+                    ex.message,
+                )
+                self._site_data[energysite_id] = {}
+            
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
-                try:
-                    self._site_data[energysite_id] = await self.get_site_data(
-                        energysite_id
-                    )
-                except TeslaException as ex:
-                    _LOGGER.warning(
-                        "Unable to get site data during setup, site will still be added. %s: %s",
-                        ex.code,
-                        ex.message,
-                    )
-                    self._site_data[energysite_id] = {}
 
                 self.energysites[energysite_id] = SolarSite(
                     self.api,
@@ -422,17 +423,6 @@ class Controller:
                 )
             # Powerwall systems listed as "battery"
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:                
-                try:
-                    self._site_data[energysite_id] = await self.get_site_data(
-                        energysite_id
-                    )
-                except TeslaException as ex:
-                    _LOGGER.warning(
-                        "Unable to get site data during setup, site will still be added. %s: %s",
-                        ex.code,
-                        ex.message,
-                    )
-                    self._site_data[energysite_id] = {}
                                     
                 self._site_summary[energysite_id] = await self.get_site_summary(
                         energysite_id
@@ -817,12 +807,11 @@ class Controller:
                         and energysite_id not in energy_site_ids
                     ):
                         continue
-                        
-                    if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
-                        tasks.append(_get_and_process_site_data(energysite_id))
-
+                       
+                    tasks.append(_get_and_process_site_data(energysite_id))
+                    tasks.append(_get_and_process_site_config(energysite_id))
+                    
                     if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
-                        tasks.append(_get_and_process_site_config(energysite_id))
                         tasks.append(_get_and_process_site_summary(energysite_id))
 
             return any(await asyncio.gather(*tasks))
