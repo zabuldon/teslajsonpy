@@ -817,10 +817,13 @@ class Controller:
                         and energysite_id not in energy_site_ids
                     ):
                         continue
+                        
+                    if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
+                        tasks.append(_get_and_process_site_data(energysite_id))
 
-                    tasks.append(_get_and_process_site_data(energysite_id))
-                    tasks.append(_get_and_process_site_config(energysite_id))
-                    tasks.append(_get_and_process_site_summary(energysite_id))
+                    if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
+                        tasks.append(_get_and_process_site_config(energysite_id))
+                        tasks.append(_get_and_process_site_summary(energysite_id))
 
             return any(await asyncio.gather(*tasks))
 
