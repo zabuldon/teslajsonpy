@@ -195,11 +195,9 @@ class Connection:
         debug = _LOGGER.isEnabledFor(logging.DEBUG)
         if debug:
             _LOGGER.debug("%s: %s %s", method, url, data)
-            _LOGGER.debug("CUSTOM: %s: %s %s", str(data), headers, url)
 
         try:
             if data:
-                _LOGGER.debug("CUSTOM: %s: %s %s", str(data), headers, url)
                 resp: httpx.Response = await getattr(self.websession, method)(
                     str(url), json=data, headers=headers, cookies=cookies
                 )
