@@ -175,6 +175,7 @@ class Connection:
         self.head = {
             "Authorization": f"Bearer {access_token}",
             "User-Agent": self.user_agent,
+            "x-tesla-user-agent": self.user_agent
         }
 
     async def __open(
