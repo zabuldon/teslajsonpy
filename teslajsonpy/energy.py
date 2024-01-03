@@ -122,7 +122,7 @@ class PowerwallSite(EnergySite):
         self,
         api: Callable,
         energysite: dict,
-        site_config: dict,        
+        site_config: dict,
         site_data: dict,
         site_summary: dict,
     ) -> None:
@@ -153,9 +153,8 @@ class PowerwallSite(EnergySite):
 
     @property
     def grid_power(self) -> float:
-        """Return grid power in Watts."""    
+        """Return grid power in Watts."""
         return self._site_data.get("grid_power")
-        
 
     @property
     def grid_status(self) -> str:

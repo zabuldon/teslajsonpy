@@ -339,12 +339,12 @@ class Controller:
         return (await self.api("SITE_DATA", path_vars={"site_id": energysite_id}))[
             "response"
         ]
-        
+
     async def get_site_summary(self, energysite_id: int) -> dict:
         """Get site data json from TeslaAPI for a given energysite_id."""
         return (await self.api("SITE_SUMMARY", path_vars={"site_id": energysite_id}))[
             "response"
-        ]    
+        ]
 
     async def generate_car_objects(
         self,
@@ -412,7 +412,7 @@ class Controller:
                     ex.message,
                 )
                 self._site_data[energysite_id] = {}
-            
+
             if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_SOLAR:
 
                 self.energysites[energysite_id] = SolarSite(
@@ -422,11 +422,11 @@ class Controller:
                     self._site_data[energysite_id],
                 )
             # Powerwall systems listed as "battery"
-            if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:                
-                                    
+            if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
+
                 self._site_summary[energysite_id] = await self.get_site_summary(
-                        energysite_id
-                    )                    
+                    energysite_id
+                )
 
                 if energysite["components"]["solar"]:
                     self.energysites[energysite_id] = SolarPowerwallSite(
@@ -443,7 +443,7 @@ class Controller:
                         self._site_config[energysite_id],
                         self._site_data[energysite_id],
                         self._site_summary[energysite_id],
-                    )            
+                    )
 
         return self.energysites
 
@@ -694,17 +694,17 @@ class Controller:
                     del response["solar_power"]
 
                 self._site_data[energysite_id].update(response)
-                
+
         async def _get_and_process_site_summary(energysite_id: int) -> None:
             _LOGGER.debug("Updating SITE_SUMMARY for energysite: %s", energysite_id)
             try:
                 response = await self.get_site_summary(energysite_id)
             except TeslaException:
                 response = None
- 
+
             if response:
                 self._site_summary[energysite_id].update(response)
-                
+
         async def _get_and_process_site_config(energysite_id: int) -> None:
             _LOGGER.debug("Updating SITE_CONFIG for energysite: %s", energysite_id)
             try:
@@ -713,7 +713,7 @@ class Controller:
                 response = None
 
             if response:
-                self._site_config[energysite_id].update(response)                
+                self._site_config[energysite_id].update(response)
 
         async with self.__update_lock:
             if self._vehicle_list:
@@ -807,10 +807,10 @@ class Controller:
                         and energysite_id not in energy_site_ids
                     ):
                         continue
-                       
+
                     tasks.append(_get_and_process_site_data(energysite_id))
                     tasks.append(_get_and_process_site_config(energysite_id))
-                    
+
                     if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
                         tasks.append(_get_and_process_site_summary(energysite_id))
 
