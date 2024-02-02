@@ -14,11 +14,6 @@
     "URI": "api/1/products",
     "AUTH": true
   },
-  "VEHICLE_LIST": {
-    "TYPE": "GET",
-    "URI": "api/1/vehicles",
-    "AUTH": true
-  },
   "VEHICLE_ORDER_LIST": {
     "TYPE": "GET",
     "URI": "api/1/users/orders",

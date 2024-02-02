@@ -295,10 +295,6 @@ class Controller:
         """Get product list from Tesla."""
         return (await self.api("PRODUCT_LIST"))["response"]
 
-    async def get_vehicles(self) -> list:
-        """Get vehicles json from TeslaAPI."""
-        return (await self.api("VEHICLE_LIST"))["response"]
-
     async def get_site_config(self, energysite_id: int) -> dict:
         """Get site config json from TeslaAPI for a given energysite_id."""
         return (await self.api("SITE_CONFIG", path_vars={"site_id": energysite_id}))[
@@ -718,7 +714,7 @@ class Controller:
         async with self.__update_lock:
             if self._vehicle_list:
                 cur_time = round(time.time())
-                #  Update the online cars using get_vehicles()
+                #  Update the online cars using get_product_list()
                 last_update = self._last_attempted_update_time
                 _LOGGER.debug(
                     "Get vehicles. Force: %s Time: %s Interval %s",
@@ -731,8 +727,11 @@ class Controller:
                     or cur_time - last_update >= ONLINE_INTERVAL
                     and update_vehicles
                 ):
-                    cars = await self.get_vehicles()
-                    for car in cars:
+                    self._product_list = await self.get_product_list()
+                    self._vehicle_list = [
+                        cars for cars in self._product_list if "vehicle_id" in cars
+                    ]
+                    for car in self._vehicle_list:
                         self.set_id_vin(car_id=car["id"], vin=car["vin"])
                         self.set_vehicle_id_vin(
                             vehicle_id=car["vehicle_id"], vin=car["vin"]
