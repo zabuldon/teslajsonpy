@@ -751,7 +751,7 @@ class TeslaCar:
             **kwargs: Any additional parameters for the api call
 
         """
-        path_vars = {"vehicle_id": self.id}
+        path_vars = {"vehicle_id": self.vin}
         if additional_path_vars:
             path_vars.update(additional_path_vars)
 
@@ -1127,7 +1127,7 @@ class TeslaCar:
 
     async def wake_up(self) -> None:
         """Send command to wake up."""
-        await self._controller.wake_up(car_id=self.id)
+        await self._controller.wake_up(car_vin=self.vin)
 
     async def toggle_trunk(self) -> None:
         """Actuate rear trunk."""

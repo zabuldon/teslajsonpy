@@ -9,6 +9,7 @@ import asyncio
 import logging
 import pkgutil
 import time
+import ssl
 from json import JSONDecodeError
 from typing import Dict, List, Optional, Set, Text
 
@@ -32,6 +33,7 @@ from teslajsonpy.const import (
     UPDATE_INTERVAL,
     WAKE_CHECK_INTERVAL,
     WAKE_TIMEOUT,
+    CLIENT_ID,
 )
 from teslajsonpy.energy import EnergySite, PowerwallSite, SolarPowerwallSite, SolarSite
 from teslajsonpy.exceptions import (
@@ -104,6 +106,9 @@ class Controller:
         enable_websocket: bool = False,
         polling_policy: Text = None,
         auth_domain: str = AUTH_DOMAIN,
+        api_proxy_url: str = None,
+        api_proxy_cert: str = None,
+        client_id: str = CLIENT_ID
     ) -> None:
         """Initialize controller.
 
@@ -124,18 +129,30 @@ class Controller:
             session is complete.
             'always' - Keep polling the car at all times.  Will possibly never allow the car to sleep.
             auth_domain (str, optional): The authentication domain. Defaults to const.AUTH_DOMAIN
+            api_proxy_url (str, optional): HTTPS Proxy for Fleet API commands
+            api_proxy_cert (str, optional): Custom SSL certificate to use with proxy
+            client_id (str, optional): Required for modern vehicles using Fleet API
 
         """
+        ssl_context = ssl.create_default_context()
+        if api_proxy_cert:
+            try:
+                ssl_context.load_verify_locations(api_proxy_cert)
+            except (FileNotFoundError, ssl.SSLError):
+                _LOGGER.warning("Unable to load custom SSL certificate from %s", api_proxy_cert)
+
         self.__connection = Connection(
             websession=websession
             if websession and isinstance(websession, httpx.AsyncClient)
-            else httpx.AsyncClient(timeout=60),
+            else httpx.AsyncClient(timeout=60, verify=ssl_context),
             email=email,
             password=password,
             access_token=access_token,
             refresh_token=refresh_token,
             expiration=expiration,
             auth_domain=auth_domain,
+            client_id=client_id,
+            api_proxy_url=api_proxy_url,
         )
         self._update_interval: int = update_interval
         self._update_interval_vin = {}
@@ -307,7 +324,7 @@ class Controller:
             response = (
                 await self.api(
                     "VEHICLE_DATA",
-                    path_vars={"vehicle_id": self._vin_to_id(vin)},
+                    path_vars={"vehicle_id": vin},
                     wake_if_asleep=wake_if_asleep,
                 )
             )["response"]
@@ -325,7 +342,7 @@ class Controller:
         return (
             await self.api(
                 "VEHICLE_SUMMARY",
-                path_vars={"vehicle_id": self._vin_to_id(vin)},
+                path_vars={"vehicle_id": vin},
                 wake_if_asleep=False,
             )
         )["response"]
@@ -443,10 +460,8 @@ class Controller:
 
         return self.energysites
 
-    async def wake_up(self, car_id) -> bool:
+    async def wake_up(self, car_vin) -> bool:
         """Attempt to wake the car, returns True if successfully awakened."""
-        car_vin = self._id_to_vin(car_id)
-        car_id = self._update_id(car_id)
         async with self.__wakeup_lock[car_vin]:
             wake_start_time = time.time()
             wake_deadline = wake_start_time + WAKE_TIMEOUT
@@ -456,11 +471,11 @@ class Controller:
                 wake_deadline,
             )
             result = await self.api(
-                "WAKE_UP", path_vars={"vehicle_id": car_id}, wake_if_asleep=False
+                "WAKE_UP", path_vars={"vehicle_id": car_vin}, wake_if_asleep=False
             )
             state = result.get("response", {}).get("state")
             self.set_car_online(
-                car_id=car_id,
+                vin=car_vin,
                 online_status=state == "online",
             )
             while not self.is_car_online(vin=car_vin) and time.time() < wake_deadline:
@@ -468,7 +483,7 @@ class Controller:
                 response = await self.get_vehicle_summary(vin=car_vin)
                 state = response.get("state")
                 self.set_car_online(
-                    car_id=car_id,
+                    vin=car_vin,
                     online_status=state == "online",
                 )
 
@@ -1120,17 +1135,13 @@ class Controller:
         """Return vin for a car_id."""
         return self.__id_vin_map.get(str(car_id))
 
-    def _vin_to_id(self, vin: Text) -> Optional[Text]:
-        """Return car_id for a vin."""
-        return self.__vin_id_map.get(vin)
-
     def _vehicle_id_to_vin(self, vehicle_id: Text) -> Optional[Text]:
         """Return vin for a vehicle_id."""
         return self.__vehicle_id_vin_map.get(vehicle_id)
 
     def _vehicle_id_to_id(self, vehicle_id: Text) -> Optional[Text]:
         """Return car_id for a vehicle_id."""
-        return self._vin_to_id(self._vehicle_id_to_vin(vehicle_id))
+        return self._vehicle_id_to_vin(vehicle_id)
 
     def vin_to_vehicle_id(self, vin: Text) -> Optional[Text]:
         """Return vehicle_id for a vin."""
@@ -1288,7 +1299,7 @@ class Controller:
                 )
             # If we already know the car is asleep, go ahead and wake it
             if not self.is_car_online(car_id=car_id):
-                await self.wake_up(car_id=car_id)
+                await self.wake_up(car_vin=car_id)
                 return await self.__post_with_retries(
                     "", method=method, data=kwargs, url=uri
                 )
@@ -1306,7 +1317,7 @@ class Controller:
             # It may fail if the car slept since the last api update
             if not valid_result(response):
                 # Assumed it failed because it was asleep and we didn't know it
-                await self.wake_up(car_id=car_id)
+                await self.wake_up(car_vin=car_id)
                 response = await self.__post_with_retries(
                     "", method=method, data=kwargs, url=uri
                 )
