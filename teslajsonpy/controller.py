@@ -818,7 +818,7 @@ class Controller:
                 # Update in sequence since establishing a new connection
                 # is more expensive because of TLS than the actual update
                 # so we want to maximize the chance of reusing the connection
-                result |= await task
+                result |= bool(await task)
 
             return result
 
