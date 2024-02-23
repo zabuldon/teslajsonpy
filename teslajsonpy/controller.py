@@ -813,7 +813,14 @@ class Controller:
                     if energysite[RESOURCE_TYPE] == RESOURCE_TYPE_BATTERY:
                         tasks.append(_get_and_process_site_summary(energysite_id))
 
-            return any(await asyncio.gather(*tasks))
+            result = False
+            for task in tasks:
+                # Update in sequence since establishing a new connection
+                # is more expensive because of TLS than the actual update
+                # so we want to maximize the chance of reusing the connection
+                result |= bool(await task)
+
+            return result
 
     def get_updates(self, car_id: Text = None, vin: Text = None):
         """Get updates dictionary.
