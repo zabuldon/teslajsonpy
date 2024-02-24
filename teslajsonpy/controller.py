@@ -324,7 +324,7 @@ class Controller:
             response = (
                 await self.api(
                     "VEHICLE_DATA",
-                    path_vars={"vehicle_id": vin},
+                    path_vars={"vehicle_id": self._vin_to_id(vin)},
                     wake_if_asleep=wake_if_asleep,
                 )
             )["response"]
@@ -342,7 +342,7 @@ class Controller:
         return (
             await self.api(
                 "VEHICLE_SUMMARY",
-                path_vars={"vehicle_id": vin},
+                path_vars={"vehicle_id": self._vin_to_id(vin)},
                 wake_if_asleep=False,
             )
         )["response"]
@@ -460,8 +460,10 @@ class Controller:
 
         return self.energysites
 
-    async def wake_up(self, car_vin) -> bool:
+    async def wake_up(self, car_id) -> bool:
         """Attempt to wake the car, returns True if successfully awakened."""
+        car_vin = self._id_to_vin(car_id)
+        car_id = self._update_id(car_id)
         async with self.__wakeup_lock[car_vin]:
             wake_start_time = time.time()
             wake_deadline = wake_start_time + WAKE_TIMEOUT
@@ -471,11 +473,12 @@ class Controller:
                 wake_deadline,
             )
             result = await self.api(
-                "WAKE_UP", path_vars={"vehicle_id": car_vin}, wake_if_asleep=False
+                "WAKE_UP", path_vars={"vehicle_id": car_id}, wake_if_asleep=False
             )
             state = result.get("response", {}).get("state")
             self.set_car_online(
                 vin=car_vin,
+                car_id=car_id,
                 online_status=state == "online",
             )
             while not self.is_car_online(vin=car_vin) and time.time() < wake_deadline:
@@ -484,6 +487,7 @@ class Controller:
                 state = response.get("state")
                 self.set_car_online(
                     vin=car_vin,
+                    car_id=car_id,
                     online_status=state == "online",
                 )
 
@@ -493,7 +497,10 @@ class Controller:
                 time.time() - wake_start_time,
                 state,
             )
-            return self.is_car_online(vin=car_vin)
+            return self.is_car_online(
+                vin=car_vin,
+                car_id=car_id,
+            )
 
     def _calculate_next_interval(self, vin: Text) -> int:
         cur_time = round(time.time())
@@ -1135,13 +1142,17 @@ class Controller:
         """Return vin for a car_id."""
         return self.__id_vin_map.get(str(car_id))
 
+    def _vin_to_id(self, vin: Text) -> Optional[Text]:
+        """Return car_id for a vin."""
+        return self.__vin_id_map.get(vin)
+
     def _vehicle_id_to_vin(self, vehicle_id: Text) -> Optional[Text]:
         """Return vin for a vehicle_id."""
         return self.__vehicle_id_vin_map.get(vehicle_id)
 
     def _vehicle_id_to_id(self, vehicle_id: Text) -> Optional[Text]:
         """Return car_id for a vehicle_id."""
-        return self._vehicle_id_to_vin(vehicle_id)
+        return self._vin_to_id(self._vehicle_id_to_vin(vehicle_id))
 
     def vin_to_vehicle_id(self, vin: Text) -> Optional[Text]:
         """Return vehicle_id for a vin."""
@@ -1227,6 +1238,26 @@ class Controller:
         vin = self.__vehicle_id_vin_map[vehicle_id]
         _LOGGER.debug("Disconnected %s from websocket", vin[-5:])
 
+    def _get_vehicle_ids_for_api(self, path_vars):
+        vehicle_id = path_vars.get("vehicle_id")
+        if not vehicle_id:
+            return None, None
+
+        vehicle_id = str(vehicle_id)
+        if vehicle_id in self.__id_vin_map:
+            car_id = vehicle_id
+            car_vin = self.__id_vin_map.get(vehicle_id)
+            return car_id, car_vin
+
+        if vehicle_id in self.__vin_id_map:
+            car_id = self.__vin_id_map.get(vehicle_id)
+            car_vin = vehicle_id
+            return car_id, car_vin
+
+        _LOGGER.error("Could not determine correct vehicle ID for API communication: '%s'", vehicle_id)
+        return None, None
+
+
     async def api(
         self,
         name: str,
@@ -1265,6 +1296,14 @@ class Controller:
 
         """
         path_vars = path_vars or {}
+        # use of car_id was deprecated on the new API but VIN can be used on both new and old so always use vin
+        car_id, car_vin = self._get_vehicle_ids_for_api(path_vars)
+        if path_vars.get("vehicle_id"):
+            if car_vin:
+                path_vars["vehicle_id"] = car_vin
+            else:
+                _LOGGER.warning("WARNING: could not set vehicle_id to car_vin, will attempt to send without overriding but this might cause issues!")
+
         # Load API endpoints once
         if not self.endpoints:
             try:
@@ -1292,14 +1331,14 @@ class Controller:
 
         # Old @wake_up decorator condensed here
         if wake_if_asleep:
-            car_id = path_vars.get("vehicle_id")
-            if not car_id:
+            if not path_vars.get("vehicle_id"):
                 raise ValueError(
                     "wake_if_asleep only supported on endpoints with 'vehicle_id' path variable"
                 )
+
             # If we already know the car is asleep, go ahead and wake it
-            if not self.is_car_online(car_id=car_id):
-                await self.wake_up(car_vin=car_id)
+            if not self.is_car_online(car_id=car_id, vin=car_vin):
+                await self.wake_up(car_id=car_id)
                 return await self.__post_with_retries(
                     "", method=method, data=kwargs, url=uri
                 )
@@ -1317,7 +1356,7 @@ class Controller:
             # It may fail if the car slept since the last api update
             if not valid_result(response):
                 # Assumed it failed because it was asleep and we didn't know it
-                await self.wake_up(car_vin=car_id)
+                await self.wake_up(car_id=car_id)
                 response = await self.__post_with_retries(
                     "", method=method, data=kwargs, url=uri
                 )

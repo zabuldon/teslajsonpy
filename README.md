@@ -11,9 +11,6 @@
 
 Async python module for Tesla API primarily for enabling Home-Assistant.
 
-**NOTE:** Tesla has no official API; therefore, this library may stop
-working at any time without warning.
-
 # Credits
 
 Originally inspired by [this code.](https://github.com/gglockner/teslajson)
