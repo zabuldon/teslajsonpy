@@ -9,6 +9,7 @@ import asyncio
 import logging
 import pkgutil
 import time
+import ssl
 from json import JSONDecodeError
 from typing import Dict, List, Optional, Set, Text
 
@@ -32,6 +33,7 @@ from teslajsonpy.const import (
     UPDATE_INTERVAL,
     WAKE_CHECK_INTERVAL,
     WAKE_TIMEOUT,
+    CLIENT_ID,
 )
 from teslajsonpy.energy import EnergySite, PowerwallSite, SolarPowerwallSite, SolarSite
 from teslajsonpy.exceptions import (
@@ -104,6 +106,9 @@ class Controller:
         enable_websocket: bool = False,
         polling_policy: Text = None,
         auth_domain: str = AUTH_DOMAIN,
+        api_proxy_url: str = None,
+        api_proxy_cert: str = None,
+        client_id: str = CLIENT_ID
     ) -> None:
         """Initialize controller.
 
@@ -124,18 +129,30 @@ class Controller:
             session is complete.
             'always' - Keep polling the car at all times.  Will possibly never allow the car to sleep.
             auth_domain (str, optional): The authentication domain. Defaults to const.AUTH_DOMAIN
+            api_proxy_url (str, optional): HTTPS Proxy for Fleet API commands
+            api_proxy_cert (str, optional): Custom SSL certificate to use with proxy
+            client_id (str, optional): Required for modern vehicles using Fleet API
 
         """
+        ssl_context = ssl.create_default_context()
+        if api_proxy_cert:
+            try:
+                ssl_context.load_verify_locations(api_proxy_cert)
+            except (FileNotFoundError, ssl.SSLError):
+                _LOGGER.warning("Unable to load custom SSL certificate from %s", api_proxy_cert)
+
         self.__connection = Connection(
             websession=websession
             if websession and isinstance(websession, httpx.AsyncClient)
-            else httpx.AsyncClient(timeout=60),
+            else httpx.AsyncClient(timeout=60, verify=ssl_context),
             email=email,
             password=password,
             access_token=access_token,
             refresh_token=refresh_token,
             expiration=expiration,
             auth_domain=auth_domain,
+            client_id=client_id,
+            api_proxy_url=api_proxy_url,
         )
         self._update_interval: int = update_interval
         self._update_interval_vin = {}
@@ -460,6 +477,7 @@ class Controller:
             )
             state = result.get("response", {}).get("state")
             self.set_car_online(
+                vin=car_vin,
                 car_id=car_id,
                 online_status=state == "online",
             )
@@ -468,6 +486,7 @@ class Controller:
                 response = await self.get_vehicle_summary(vin=car_vin)
                 state = response.get("state")
                 self.set_car_online(
+                    vin=car_vin,
                     car_id=car_id,
                     online_status=state == "online",
                 )
@@ -478,7 +497,10 @@ class Controller:
                 time.time() - wake_start_time,
                 state,
             )
-            return self.is_car_online(vin=car_vin)
+            return self.is_car_online(
+                vin=car_vin,
+                car_id=car_id,
+            )
 
     def _calculate_next_interval(self, vin: Text) -> int:
         cur_time = round(time.time())
@@ -1223,6 +1245,26 @@ class Controller:
         vin = self.__vehicle_id_vin_map[vehicle_id]
         _LOGGER.debug("Disconnected %s from websocket", vin[-5:])
 
+    def _get_vehicle_ids_for_api(self, path_vars):
+        vehicle_id = path_vars.get("vehicle_id")
+        if not vehicle_id:
+            return None, None
+
+        vehicle_id = str(vehicle_id)
+        if vehicle_id in self.__id_vin_map:
+            car_id = vehicle_id
+            car_vin = self.__id_vin_map.get(vehicle_id)
+            return car_id, car_vin
+
+        if vehicle_id in self.__vin_id_map:
+            car_id = self.__vin_id_map.get(vehicle_id)
+            car_vin = vehicle_id
+            return car_id, car_vin
+
+        _LOGGER.error("Could not determine correct vehicle ID for API communication: '%s'", vehicle_id)
+        return None, None
+
+
     async def api(
         self,
         name: str,
@@ -1261,6 +1303,14 @@ class Controller:
 
         """
         path_vars = path_vars or {}
+        # use of car_id was deprecated on the new API but VIN can be used on both new and old so always use vin
+        car_id, car_vin = self._get_vehicle_ids_for_api(path_vars)
+        if path_vars.get("vehicle_id"):
+            if car_vin:
+                path_vars["vehicle_id"] = car_vin
+            else:
+                _LOGGER.warning("WARNING: could not set vehicle_id to car_vin, will attempt to send without overriding but this might cause issues!")
+
         # Load API endpoints once
         if not self.endpoints:
             try:
@@ -1288,13 +1338,13 @@ class Controller:
 
         # Old @wake_up decorator condensed here
         if wake_if_asleep:
-            car_id = path_vars.get("vehicle_id")
-            if not car_id:
+            if not path_vars.get("vehicle_id"):
                 raise ValueError(
                     "wake_if_asleep only supported on endpoints with 'vehicle_id' path variable"
                 )
+
             # If we already know the car is asleep, go ahead and wake it
-            if not self.is_car_online(car_id=car_id):
+            if not self.is_car_online(car_id=car_id, vin=car_vin):
                 await self.wake_up(car_id=car_id)
                 return await self.__post_with_retries(
                     "", method=method, data=kwargs, url=uri

@@ -25,6 +25,7 @@ from yarl import URL
 
 from teslajsonpy.const import (
     API_URL,
+    CLIENT_ID,
     AUTH_DOMAIN,
     DRIVING_INTERVAL,
     DOMAIN_KEY,
@@ -49,18 +50,26 @@ class Connection:
         authorization_token: Text = None,
         expiration: int = 0,
         auth_domain: str = AUTH_DOMAIN,
+        client_id: str = CLIENT_ID,
+        api_proxy_url: str = None,
     ) -> None:
         """Initialize connection object."""
         self.user_agent: Text = "TeslaApp/4.10.0"
-        self.client_id: Text = (
-            "81527cff06843c8634fdc09e8ac0abef" "b46ac849f38fe1e431c2ef2106796384"
-        )
-        self.client_secret: Text = (
-            "c7257eb71a564034f9419ee651c7d0e5f7" "aa6bfbd18bafb5c5c033b093bb2fa3"
-        )
-        self.baseurl: Text = DOMAIN_KEY.get(
-            auth_domain[auth_domain.rfind(".") :], API_URL
-        )
+        if client_id == "ownerapi":
+            self.client_id: Text = (
+                "81527cff06843c8634fdc09e8ac0abef" "b46ac849f38fe1e431c2ef2106796384"
+            )
+            self.client_secret: Text = (
+                "c7257eb71a564034f9419ee651c7d0e5f7" "aa6bfbd18bafb5c5c033b093bb2fa3"
+            )
+        else:
+            self.client_id = client_id
+        if api_proxy_url is None:
+            self.baseurl: Text = DOMAIN_KEY.get(
+                auth_domain[auth_domain.rfind(".") :], API_URL
+            )
+        else:
+            self.baseurl: Text = api_proxy_url
         self.websocket_url: Text = WS_URL
         self.api: Text = "/api/1/"
         self.expiration: int = expiration
@@ -563,7 +572,7 @@ class Connection:
             return
         _LOGGER.debug("Refreshing access token with refresh_token")
         oauth = {
-            "client_id": "ownerapi",
+            "client_id": self.client_id,
             "grant_type": "refresh_token",
             "refresh_token": refresh_token,
             "scope": "openid email offline_access",
