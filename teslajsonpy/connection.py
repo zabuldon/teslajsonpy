@@ -55,15 +55,7 @@ class Connection:
     ) -> None:
         """Initialize connection object."""
         self.user_agent: Text = "TeslaApp/4.10.0"
-        if client_id == "ownerapi":
-            self.client_id: Text = (
-                "81527cff06843c8634fdc09e8ac0abef" "b46ac849f38fe1e431c2ef2106796384"
-            )
-            self.client_secret: Text = (
-                "c7257eb71a564034f9419ee651c7d0e5f7" "aa6bfbd18bafb5c5c033b093bb2fa3"
-            )
-        else:
-            self.client_id = client_id
+        self.client_id = client_id
         if api_proxy_url is None:
             self.baseurl: Text = DOMAIN_KEY.get(
                 auth_domain[auth_domain.rfind(".") :], API_URL
