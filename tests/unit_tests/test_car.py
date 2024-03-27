@@ -204,6 +204,8 @@ async def test_car_properties(monkeypatch):
 
     assert _car.outside_temp == VEHICLE_DATA["climate_state"]["outside_temp"]
 
+    assert _car.powered_lift_gate == VEHICLE_DATA["vehicle_config"]["plg"]
+
     assert _car.rear_seat_heaters == VEHICLE_DATA["vehicle_config"]["rear_seat_heaters"]
 
     assert _car.sentry_mode == VEHICLE_DATA["vehicle_state"].get("sentry_mode")
@@ -241,7 +243,7 @@ async def test_car_properties(monkeypatch):
     assert _car.pedestrian_speaker == ("P3WS" in VEHICLE_DATA["option_codes"])
 
     assert _car.third_row_seats == str(
-        VEHICLE_DATA["vehicle_state"].get("third_row_seats")
+        VEHICLE_DATA["vehicle_config"].get("third_row_seats")
     )
 
     assert (
