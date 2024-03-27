@@ -451,7 +451,7 @@ class TeslaCar:
     @property
     def powered_lift_gate(self) -> bool:
         """Return True if car has power lift gate."""
-        return self._car.get("vehicle_config", {}).get("plg")
+        return self._vehicle_data.get("vehicle_config", {}).get("plg")
 
     @property
     def rear_seat_heaters(self) -> int:
@@ -461,7 +461,7 @@ class TeslaCar:
             int: 0 (no rear heated seats), int: ? (rear heated seats)
 
         """
-        return self._car.get("vehicle_config", {}).get("rear_seat_heaters")
+        return self._vehicle_data.get("vehicle_config", {}).get("rear_seat_heaters")
 
     @property
     def sentry_mode(self) -> bool:
@@ -533,7 +533,7 @@ class TeslaCar:
             str: None
 
         """
-        return self._car.get("vehicle_config", {}).get("third_row_seats")
+        return self._vehicle_data.get("vehicle_config", {}).get("third_row_seats")
 
     @property
     def time_to_full_charge(self) -> float:
