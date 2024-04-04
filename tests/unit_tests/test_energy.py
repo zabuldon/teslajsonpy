@@ -93,6 +93,10 @@ async def test_powerwall_site(monkeypatch):
         == SITE_DATA["grid_power"]
     )
     assert (
+        _solar_powerwall_site.grid_status
+        == SITE_DATA["grid_status"]
+    )
+    assert (
         _solar_powerwall_site.load_power
         == SITE_DATA["load_power"]
     )
