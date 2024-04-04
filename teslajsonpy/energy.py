@@ -159,7 +159,7 @@ class PowerwallSite(EnergySite):
     @property
     def grid_status(self) -> str:
         """Return grid status."""
-        return self._site_summary.get("grid_status")
+        return self._site_data.get("grid_status")
 
     @property
     def load_power(self) -> float:
