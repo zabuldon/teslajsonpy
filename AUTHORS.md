@@ -23,3 +23,4 @@
 -   craigrouse [Github](https://github.com/craigrouse)
 -   thierryVT [Github](https://github.com/thierryvt)
 -   llamafilm [Github](https://github.com/llamafilm)
+-   ericdegroot [Github](https://github.com/ericdegroot)
