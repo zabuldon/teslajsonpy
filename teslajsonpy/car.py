@@ -216,6 +216,11 @@ class TeslaCar:
         return self._vehicle_data.get("charge_state", {}).get("charger_voltage")
 
     @property
+    def bioweapon_mode(self) -> bool:
+        """Return bioweapon defense mode."""
+        return self._vehicle_data.get("climate_state", {}).get("bioweapon_mode")
+    
+    @property
     def climate_keeper_mode(self) -> str:
         """Return climate keeper mode mode.
 
