@@ -964,6 +964,8 @@ class TeslaCar:
     async def set_bioweapon_mode(self, enable: bool) -> None:
         """Send command to set bioweapon mode.
 
+        Args
+            enable: 'True' to enable, 'False' to disable
         """
         # If car is asleep, bioweapon is already off
         data = await self._send_command(
