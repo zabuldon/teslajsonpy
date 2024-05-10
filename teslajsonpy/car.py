@@ -971,7 +971,7 @@ class TeslaCar:
         data = await self._send_command(
             "HVAC_BIOWEAPON_MODE",
             on=enable,
-            wake_if_asleep=enable,
+            manual_override=True,
         )
         if data and data["response"]["result"] is True:
             params = {
