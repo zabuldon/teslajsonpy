@@ -971,7 +971,7 @@ class TeslaCar:
         data = await self._send_command(
             "SET_BIOWEAPON_MODE",
             on=enable,
-            wake_if_asleep=enable
+            wake_if_asleep=enable,
         )
         if data and data["response"]["result"] is True:
             params = {
