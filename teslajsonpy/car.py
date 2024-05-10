@@ -961,6 +961,23 @@ class TeslaCar:
             }
             self._vehicle_data["climate_state"].update(params)
 
+    async def set_bioweapon_mode(self, enable: bool) -> None:
+        """Send command to set bioweapon mode.
+
+        """
+        # If car is asleep, bioweapon is already off
+        data = await self._send_command(
+            "SET_BIOWEAPON_MODE",
+            on=enable,
+            wake_if_asleep=enable
+        )
+        if data and data["response"]["result"] is True:
+            params = {
+                "bioweapon_mode": enable,
+                "is_climate_on": True,
+            }
+            self._vehicle_data["climate_state"].update(params)
+    
     async def remote_auto_seat_climate_request(
         self, seat_id: int, enable: bool
     ) -> None:
