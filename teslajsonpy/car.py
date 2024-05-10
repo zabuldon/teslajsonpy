@@ -969,7 +969,7 @@ class TeslaCar:
         """
         # If car is asleep, bioweapon is already off
         data = await self._send_command(
-            "SET_BIOWEAPON_MODE",
+            "HVAC_BIOWEAPON_MODE",
             on=enable,
             wake_if_asleep=enable,
         )
