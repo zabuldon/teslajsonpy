@@ -470,6 +470,7 @@ VEHICLE_DATA = {
         "auto_steering_wheel_heat": True,
         "battery_heater": False,
         "battery_heater_no_power": False,
+        "bioweapon_mode": False,
         "cabin_overheat_protection": "Off",
         "climate_keeper_mode": "off",
         "defrost_mode": 0,
