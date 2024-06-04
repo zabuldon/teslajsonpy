@@ -904,7 +904,6 @@ class TeslaCar:
         """
         # If car is asleep the cooler is already off
         wake_if_asleep = level > 1
-        seat_id = seat_id
         data = await self._send_command(
             "REMOTE_SEAT_COOLING_REQUEST",
             seat_position=seat_id,
