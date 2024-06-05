@@ -443,6 +443,18 @@ async def test_remote_seat_heater_request(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_remote_seat_cooler_request(monkeypatch):
+    """Test remote seat cooler request."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_seat_cooler_request(1, 2) is None
+    
+
+@pytest.mark.asyncio
 async def test_schedule_software_update(monkeypatch):
     """Test scheduling software update."""
     TeslaMock(monkeypatch)
