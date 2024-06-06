@@ -879,7 +879,7 @@ class TeslaCar:
         wake_if_asleep = level > 0
         data = await self._send_command(
             "REMOTE_SEAT_HEATER_REQUEST",
-            seat_position=seat_id,
+            heater=seat_id,
             level=level,
             wake_if_asleep=wake_if_asleep,
         )
