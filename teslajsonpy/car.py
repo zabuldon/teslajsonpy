@@ -469,6 +469,11 @@ class TeslaCar:
         return self._vehicle_data.get("vehicle_config", {}).get("rear_seat_heaters")
 
     @property
+    def has_seat_cooling(self) -> bool:
+        """Return if car has cooled seats."""
+        return self._vehicle_data.get("vehicle_config", {}).get("has_seat_cooling")
+
+    @property
     def sentry_mode(self) -> bool:
         """Return sentry mode."""
         return self._vehicle_data.get("vehicle_state", {}).get("sentry_mode")
@@ -888,6 +893,33 @@ class TeslaCar:
         if self.data_available:
             return self._vehicle_data.get("climate_state", {}).get(seat_id)
         return None
+    
+    async def remote_seat_cooler_request(self, level: int, seat_id: int) -> None:
+        """Send command to change seat cooler.
+
+        Args
+            level: 1 (off), 2 (low), 3 (medium), 4 (high)
+            seat_id: 1 (front left), 2 (front right)
+
+        """
+        # If car is asleep the cooler is already off
+        wake_if_asleep = level > 1
+        data = await self._send_command(
+            "REMOTE_SEAT_COOLING_REQUEST",
+            seat_position=seat_id,
+            seat_cooler_level=level,
+            wake_if_asleep=wake_if_asleep,
+        )
+        if data and data["response"]["result"] is True:
+            params = {f"seat_fan_front_{SEAT_ID_MAP[seat_id]}": level}
+            self._vehicle_data["climate_state"].update(params)
+    
+    def get_seat_cooler_status(self, seat_id: int) -> int:
+        """Return status of seat heater for a given seat."""
+        seat_id = f"seat_fan_front_{SEAT_ID_MAP[seat_id]}"
+        if self.data_available:
+            return self._vehicle_data.get("climate_state", {}).get(seat_id)
+        return None
 
     async def schedule_software_update(self, offset_sec: Optional[int] = 0) -> None:
         """Send command to install software update."""
@@ -995,6 +1027,7 @@ class TeslaCar:
         data = await self._send_command(
             "REMOTE_AUTO_SEAT_CLIMATE_REQUEST",
             auto_seat_position=seat_id,
+            seat_position=seat_id,
             auto_climate_on=enable,
         )
         if data and data["response"]["result"] is True:
