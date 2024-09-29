@@ -134,17 +134,23 @@ class Controller:
             client_id (str, optional): Required for modern vehicles using Fleet API
 
         """
-        ssl_context = ssl.create_default_context()
+        if not websession or not isinstance(websession, httpx.AsyncClient):
+            # create_default_context() does blocking I/O. It is recommended
+            # to always pass an httpx.AsyncClient instance to the Controller
+            ssl_context = ssl.create_default_context()
+            websession = httpx.AsyncClient(timeout=60, verify=ssl_context)
+
         if api_proxy_cert:
+            # Loading custom SSL certificate for proxy does blocking I/O.
+            # It is recommended to instead pass an httpx.AsyncClient that
+            # already has an SSL context with the custom certificate loaded.
             try:
                 ssl_context.load_verify_locations(api_proxy_cert)
             except (FileNotFoundError, ssl.SSLError):
                 _LOGGER.warning("Unable to load custom SSL certificate from %s", api_proxy_cert)
 
         self.__connection = Connection(
-            websession=websession
-            if websession and isinstance(websession, httpx.AsyncClient)
-            else httpx.AsyncClient(timeout=60, verify=ssl_context),
+            websession=websession,
             email=email,
             password=password,
             access_token=access_token,
