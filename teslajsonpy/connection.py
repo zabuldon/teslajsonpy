@@ -200,9 +200,14 @@ class Connection:
 
         try:
             if data:
-                resp: httpx.Response = await getattr(self.websession, method)(
-                    str(url), json=data, headers=headers, cookies=cookies
-                )
+                if method == "get":
+                    resp: httpx.Response = await getattr(self.websession, method)(
+                        str(url), params=data, headers=headers, cookies=cookies
+                    )
+                else:
+                    resp: httpx.Response = await getattr(self.websession, method)(
+                        str(url), json=data, headers=headers, cookies=cookies
+                    )
             else:
                 resp: httpx.Response = await getattr(self.websession, method)(
                     str(url), headers=headers, cookies=cookies
