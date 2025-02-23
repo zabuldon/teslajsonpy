@@ -16,3 +16,6 @@ reports=no
 
 [FORMAT]
 expected-line-ending-format=LF
+
+[DESIGN]
+max-locals = 16

@@ -103,6 +103,7 @@ class Controller:
         refresh_token: Text = None,
         expiration: int = 0,
         update_interval: int = UPDATE_INTERVAL,
+        driving_interval: int = DRIVING_INTERVAL,
         enable_websocket: bool = False,
         polling_policy: Text = None,
         auth_domain: str = AUTH_DOMAIN,
@@ -121,6 +122,7 @@ class Controller:
             expiration (int, optional): Timestamp when access_token expires. Defaults to 0
             update_interval (int, optional): Seconds between allowed updates to the API.  This is to prevent
             being blocked by Tesla. Defaults to UPDATE_INTERVAL.
+            driving_interval (int, optional): Seconds between allowed updates to the API while driving.
             enable_websocket (bool, optional): Whether to connect with websockets. Defaults to False.
             polling_policy (Text, optional): How aggressively will we poll the car. Possible values:
             Not set - Only keep the car awake while it is actively charging or driving, and while sentry
@@ -161,7 +163,9 @@ class Controller:
             api_proxy_url=api_proxy_url,
         )
         self._update_interval: int = update_interval
+        self._driving_interval: int = driving_interval
         self._update_interval_vin = {}
+        self._driving_interval_vin = {}
         self.__update = {}
         self.__driving = {}  # for websocket timestamp only
         self._last_update_time = {}  # succesful update attempts by car
@@ -533,9 +537,7 @@ class Controller:
             )
 
         if self.cars[vin].is_in_gear:
-            driving_interval = min(
-                DRIVING_INTERVAL, self.get_update_interval_vin(vin=vin)
-            )
+            driving_interval = self.get_driving_interval_vin(vin=vin)
             if self.__update_state[vin] != "driving":
                 self.__update_state[vin] = "driving"
                 _LOGGER.debug(
@@ -1150,6 +1152,51 @@ class Controller:
             return self.update_interval
 
         return self._update_interval_vin.get(vin, self.update_interval)
+
+    @property
+    def driving_interval(self) -> int:
+        """Return driving_interval.
+
+        Returns
+            int: The number of seconds between updates while driving.
+
+        """
+        return self._driving_interval
+
+    @driving_interval.setter
+    def driving_interval(self, value: int) -> None:
+        """Set driving_interval."""
+        # Sometimes receive a value of None
+        if value and value < 0:
+            value = DRIVING_INTERVAL
+        if value and value:
+            _LOGGER.debug("Driving interval set to %s.", value)
+            self._driving_interval = int(value)
+
+    def set_driving_interval_vin(
+            self, car_id: Text = None, vin: Text = None, value: int = None
+    ) -> None:
+        """Set driving interval for specific vin."""
+
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin is None:
+            return
+        if value is None or value < 0:
+            _LOGGER.debug("%s: Driving interval reset to default.", vin[-5:])
+            self._driving_interval_vin.pop(vin, None)
+        else:
+            _LOGGER.debug("%s: Driving interval set to %s.", vin[-5:], value)
+            self._driving_interval_vin.update({vin: value})
+
+    def get_driving_interval_vin(self, car_id: Text = None, vin: Text = None) -> int:
+        """Get driving interval for specific vin or default if no vin specific."""
+        if car_id and not vin:
+            vin = self._id_to_vin(car_id)
+        if vin is None or vin == "":
+            return self.driving_interval
+
+        return self._driving_interval_vin.get(vin, self.driving_interval)
 
     def _id_to_vin(self, car_id: Text) -> Optional[Text]:
         """Return vin for a car_id."""

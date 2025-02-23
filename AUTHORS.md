@@ -24,3 +24,4 @@
 -   thierryVT [Github](https://github.com/thierryvt)
 -   llamafilm [Github](https://github.com/llamafilm)
 -   ericdegroot [Github](https://github.com/ericdegroot)
+-   flaviorighi [Github](https://github.com/flaviorighi)
