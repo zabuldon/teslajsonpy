@@ -203,7 +203,9 @@ class PowerwallSite(EnergySite):
             path_vars={"site_id": self.energysite_id},
             default_real_mode=real_mode,
         )
-        if data and data["response"]["code"] == 201:
+        if data and (
+    data["response"].get("code") == 201 or data["response"].get("Code") == 201
+):
             self._site_config.update({"operation": real_mode})
 
     async def set_reserve_percent(self, value: int) -> None:
@@ -216,7 +218,9 @@ class PowerwallSite(EnergySite):
             path_vars={"site_id": self.energysite_id},
             backup_reserve_percent=int(value),
         )
-        if data and data["response"]["code"] == 201:
+        if data and (
+    data["response"].get("code") == 201 or data["response"].get("Code") == 201
+):
             self._site_config.update({"backup_reserve_percent": value})
 
 
