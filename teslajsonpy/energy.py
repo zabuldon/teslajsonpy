@@ -149,7 +149,7 @@ class PowerwallSite(EnergySite):
     @property
     def energy_left(self) -> float:
         """Return battery energy left in Watt hours."""
-        return round (self._site_config.get("nameplate_energy") * self.percentage_charged / 100 )
+        return round(self._site_config.get("nameplate_energy") * self.percentage_charged / 100)
 
     @property
     def grid_power(self) -> float:
@@ -203,8 +203,12 @@ class PowerwallSite(EnergySite):
             path_vars={"site_id": self.energysite_id},
             default_real_mode=real_mode,
         )
-        if data and data["response"]["code"] == 201:
-            self._site_config.update({"operation": real_mode})
+        if data:
+            response = data.get("response", {})
+            # Find 'code' key case-insensitively
+            code = next((v for k, v in response.items() if k.lower() == "code"), None)
+            if code == 201:
+                self._site_config.update({"operation": real_mode})
 
     async def set_reserve_percent(self, value: int) -> None:
         """Set reserve percentage of Powerwall.
@@ -216,8 +220,12 @@ class PowerwallSite(EnergySite):
             path_vars={"site_id": self.energysite_id},
             backup_reserve_percent=int(value),
         )
-        if data and data["response"]["code"] == 201:
-            self._site_config.update({"backup_reserve_percent": value})
+        if data:
+            response = data.get("response", {})
+            # Find 'code' key case-insensitively
+            code = next((v for k, v in response.items() if k.lower() == "code"), None)
+            if code == 201:
+                self._site_config.update({"backup_reserve_percent": value})
 
 
 class SolarPowerwallSite(PowerwallSite):
