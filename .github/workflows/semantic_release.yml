@@ -4,7 +4,7 @@ name: Continuous Delivery
 on:
   push:
     branches:
-      - main
+      - master
 # default: least privileged permissions across all jobs
 permissions:
   contents: read
