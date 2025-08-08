@@ -175,7 +175,7 @@ class PowerwallSite(EnergySite):
     def percentage_charged(self) -> float:
         """Return battery percentage charged."""
         # percentage_charged sometimes incorrectly reports 0
-        return self._site_summary.get("percentage_charged")
+        return self._site_summary.get("percentage_charged", 0)
 
     @property
     def site_name(self) -> str:
