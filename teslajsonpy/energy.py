@@ -149,7 +149,7 @@ class PowerwallSite(EnergySite):
     @property
     def energy_left(self) -> float:
         """Return battery energy left in Watt hours."""
-        return round(self._site_config.get("nameplate_energy") * self.percentage_charged / 100)
+        return round(self._site_config.get("nameplate_energy", 0) * self.percentage_charged / 100)
 
     @property
     def grid_power(self) -> float:
@@ -175,7 +175,7 @@ class PowerwallSite(EnergySite):
     def percentage_charged(self) -> float:
         """Return battery percentage charged."""
         # percentage_charged sometimes incorrectly reports 0
-        return self._site_summary.get("percentage_charged")
+        return self._site_summary.get("percentage_charged", 0)
 
     @property
     def site_name(self) -> str:
