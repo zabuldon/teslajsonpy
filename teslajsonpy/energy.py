@@ -6,7 +6,7 @@ For more details about this api, please refer to the documentation at
 https://github.com/zabuldon/teslajsonpy
 """
 import logging
-from typing import Callable
+from typing import Callable, Optional
 
 from teslajsonpy.const import DEFAULT_ENERGYSITE_NAME, RESOURCE_TYPE
 
@@ -147,9 +147,12 @@ class PowerwallSite(EnergySite):
         return self._site_summary != {}
 
     @property
-    def energy_left(self) -> float:
+    def energy_left(self) -> Optional[float]:
         """Return battery energy left in Watt hours."""
-        return round(self._site_config.get("nameplate_energy", 0) * self.percentage_charged / 100)
+        value = self._site_config.get("nameplate_energy")
+        if value is None:
+            return None
+        return round(value * self.percentage_charged / 100)
 
     @property
     def grid_power(self) -> float:
