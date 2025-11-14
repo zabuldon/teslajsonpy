@@ -8,7 +8,7 @@ https://github.com/zabuldon/teslajsonpy
 IDLE_INTERVAL = 600  # interval after parking to check at regular update_interval
 ONLINE_INTERVAL = 60  # interval for checking online state; does not hit individual cars
 SLEEP_INTERVAL = 660  # interval required to let vehicle sleep; based on testing
-DRIVING_INTERVAL = 60  # interval when driving detected
+DRIVING_INTERVAL = 60  # Default interval when driving detected
 UPDATE_INTERVAL = 300  # Default polling interval for vehicle
 WEBSOCKET_TIMEOUT = 11  # time for websocket to timeout
 WAKE_TIMEOUT = 60  # max time to wait for vehicle to wake

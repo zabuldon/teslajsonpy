@@ -27,7 +27,6 @@ from teslajsonpy.const import (
     API_URL,
     CLIENT_ID,
     AUTH_DOMAIN,
-    DRIVING_INTERVAL,
     DOMAIN_KEY,
     WEBSOCKET_TIMEOUT,
     WS_URL,
@@ -200,9 +199,14 @@ class Connection:
 
         try:
             if data:
-                resp: httpx.Response = await getattr(self.websession, method)(
-                    str(url), json=data, headers=headers, cookies=cookies
-                )
+                if method == "get":
+                    resp: httpx.Response = await getattr(self.websession, method)(
+                        str(url), params=data, headers=headers, cookies=cookies
+                    )
+                else:
+                    resp: httpx.Response = await getattr(self.websession, method)(
+                        str(url), json=data, headers=headers, cookies=cookies
+                    )
             else:
                 resp: httpx.Response = await getattr(self.websession, method)(
                     str(url), headers=headers, cookies=cookies
@@ -290,7 +294,6 @@ class Connection:
 
         disconnected = False
         last_message_time = time.time()
-        timeout = last_message_time + DRIVING_INTERVAL
         if not self.websocket or self.websocket.closed:
             _LOGGER.debug("%s:Connecting to websocket %s", vin[-5:], self.websocket_url)
             self.websocket = await self.websession.ws_connect(self.websocket_url)
@@ -298,8 +301,7 @@ class Connection:
             loop.create_task(_process_messages())
         while not (
             disconnected
-            or time.time() - last_message_time > WEBSOCKET_TIMEOUT
-            or time.time() > timeout
+            or time.time() > last_message_time + WEBSOCKET_TIMEOUT
         ):
             _LOGGER.debug("%s:Trying to subscribe to websocket", vin[-5:])
             await self.websocket.send_json(

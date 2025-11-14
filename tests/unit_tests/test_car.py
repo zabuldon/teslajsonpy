@@ -50,6 +50,8 @@ async def test_car_properties(monkeypatch):
 
     assert _car.battery_range == VEHICLE_DATA["charge_state"]["battery_range"]
 
+    assert _car.bioweapon_mode == VEHICLE_DATA["climate_state"]["bioweapon_mode"]
+
     assert (
         _car.cabin_overheat_protection
         == VEHICLE_DATA["climate_state"]["cabin_overheat_protection"]
@@ -441,6 +443,18 @@ async def test_remote_seat_heater_request(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_remote_seat_cooler_request(monkeypatch):
+    """Test remote seat cooler request."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.remote_seat_cooler_request(1, 2) is None
+    
+
+@pytest.mark.asyncio
 async def test_schedule_software_update(monkeypatch):
     """Test scheduling software update."""
     TeslaMock(monkeypatch)
@@ -450,6 +464,18 @@ async def test_schedule_software_update(monkeypatch):
     _car = _controller.cars[VIN]
 
     assert await _car.schedule_software_update() is None
+
+
+@pytest.mark.asyncio
+async def test_set_bioweapon_mode(monkeypatch):
+    """Test setting bioweapon mode."""
+    TeslaMock(monkeypatch)
+    _controller = Controller(None)
+    await _controller.connect()
+    await _controller.generate_car_objects()
+    _car = _controller.cars[VIN]
+
+    assert await _car.set_bioweapon_mode(True) is None
 
 
 @pytest.mark.asyncio
