@@ -359,9 +359,20 @@ class Controller:
 
     async def get_site_data(self, energysite_id: int) -> dict:
         """Get site data json from TeslaAPI for a given energysite_id."""
-        return (await self.api("SITE_DATA", path_vars={"site_id": energysite_id}))[
+        response = (await self.api("SITE_DATA", path_vars={"site_id": energysite_id}))[
             "response"
         ]
+        if not isinstance(response, dict):
+            # Some energy sites answer HTTP 200 with a bare string instead of an
+            # object. That is not a TeslaException, so it would otherwise be stored
+            # as-is and later crash on .get()/.update().
+            _LOGGER.warning(
+                "Unexpected SITE_DATA response for energysite %s, ignoring: %r",
+                energysite_id,
+                response,
+            )
+            return {}
+        return response
 
     async def get_site_summary(self, energysite_id: int) -> dict:
         """Get site data json from TeslaAPI for a given energysite_id."""
