@@ -171,3 +171,31 @@ async def test_set_export_rule(monkeypatch):
 
 
 # Test reponse with "grid_status" of "Unknown"
+
+
+@pytest.mark.asyncio
+async def test_get_site_data_with_non_dict_response(monkeypatch):
+    """Test SITE_DATA returning a bare string instead of an object."""
+
+    async def mock_api(self, name, *args, **kwargs):
+        # pylint: disable=unused-argument
+        return {"response": "site_unavailable"}
+
+    monkeypatch.setattr(Controller, "api", mock_api)
+    _controller = Controller(None)
+
+    assert await _controller.get_site_data(12345) == {}
+
+
+@pytest.mark.asyncio
+async def test_solar_site_with_empty_site_data(monkeypatch):
+    """Test SolarSite reports no data rather than raising when site data is empty."""
+    _mock = TeslaMock(monkeypatch)
+    _api = _mock.controller_api
+    _energysite = ENERGYSITES[0]
+    _site_config = SITE_CONFIG
+
+    _solar_site = SolarSite(_api, _energysite, _site_config, {})
+
+    assert _solar_site.data_available is False
+    assert _solar_site.solar_power is None
