@@ -230,6 +230,52 @@ class PowerwallSite(EnergySite):
             if code == 201:
                 self._site_config.update({"backup_reserve_percent": value})
 
+    @property
+    def storm_mode_capable(self) -> Optional[bool]:
+        """Return Powerwall storm mode capability."""
+        if (val := self._site_data.get("storm_mode_capable")) is not None:
+            return val
+        if (
+            val := self._site_config.get("components", {}).get("storm_mode_capable")
+        ) is not None:
+            return val
+        return (
+            self._site_config.get("user_settings", {}).get("storm_mode_enabled")
+            is not None
+        )
+
+    @property
+    def storm_mode_enabled(self) -> Optional[bool]:
+        """Return Powerwall storm mode enabled setting."""
+        return self._site_config.get("user_settings", {}).get("storm_mode_enabled")
+
+    @property
+    def storm_mode_active(self) -> Optional[bool]:
+        """Return Powerwall storm mode active state."""
+        return self._site_data.get("storm_mode_active")
+
+    @property
+    def storm_mode_states(self) -> list:
+        """Return Powerwall storm mode states list."""
+        return self._site_data.get("storm_mode_states", [])
+
+    async def set_storm_mode(self, enabled: bool) -> bool:
+        """Set the storm mode of the Powerwall."""
+        data = await self._send_command(
+            "STORM_MODE_SETTINGS",
+            path_vars={"site_id": self.energysite_id},
+            enabled=bool(enabled),
+        )
+        if data:
+            response = data.get("response", {})
+            code = next((v for k, v in response.items() if k.lower() == "code"), None)
+            if code in (200, 201) or response.get("result") is True:
+                self._site_config.setdefault("user_settings", {})[
+                    "storm_mode_enabled"
+                ] = bool(enabled)
+                return True
+        return False
+
 
 class SolarPowerwallSite(PowerwallSite):
     """Represents a Tesla Energy Solar site with Powerwall(s).
