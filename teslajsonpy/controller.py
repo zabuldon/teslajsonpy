@@ -753,7 +753,9 @@ class Controller:
                 self._site_config[energysite_id].update(response)
 
         async with self.__update_lock:
-            if self._vehicle_list:
+            # Check self.cars, not self._vehicle_list, so a bad product list
+            # response can never stop vehicle polling.
+            if self.cars:
                 cur_time = round(time.time())
                 #  Update the online cars using get_product_list()
                 last_update = self._last_attempted_update_time
@@ -768,11 +770,19 @@ class Controller:
                     or cur_time - last_update >= ONLINE_INTERVAL
                     and update_vehicles
                 ):
-                    self._product_list = await self.get_product_list()
-                    self._vehicle_list = [
-                        cars for cars in self._product_list if "vehicle_id" in cars
+                    product_list = await self.get_product_list()
+                    vehicle_list = [
+                        cars for cars in product_list if "vehicle_id" in cars
                     ]
-                    for car in self._vehicle_list:
+                    if vehicle_list:
+                        self._product_list = product_list
+                        self._vehicle_list = vehicle_list
+                    else:
+                        _LOGGER.warning(
+                            "Product list returned no vehicles; "
+                            "keeping the last known vehicle list"
+                        )
+                    for car in vehicle_list:
                         self.set_id_vin(car_id=car["id"], vin=car["vin"])
                         self.set_vehicle_id_vin(
                             vehicle_id=car["vehicle_id"], vin=car["vin"]
