@@ -90,6 +90,7 @@ jobs:
     if: ${{ needs.release.outputs.released == 'true' }}
     permissions:
       contents: read
+      id-token: write # PyPI trusted publishing (OIDC)
     steps:
       - name: Setup | Download Build Artifacts
         uses: actions/download-artifact@v4
@@ -101,7 +102,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1
         with:
           packages-dir: dist
-          password: ${{ secrets.TESLA_PYPY_TOKEN }}
           print-hash: true
           verbose: true
   # Manual recovery: publish the assets of an already-created GitHub release.
@@ -110,6 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write # PyPI trusted publishing (OIDC)
     steps:
       - name: Download release assets
         env:
@@ -119,6 +120,5 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1
         with:
           packages-dir: dist
-          password: ${{ secrets.TESLA_PYPY_TOKEN }}
           print-hash: true
           verbose: true
