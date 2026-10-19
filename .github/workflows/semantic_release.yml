@@ -5,12 +5,21 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to publish to PyPI (e.g. v3.14.0)
+        required: true
+        type: string
 # default: least privileged permissions across all jobs
 permissions:
   contents: read
 jobs:
   release:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.release.outputs.released }}
     concurrency:
       group: ${{ github.workflow }}-release-${{ github.ref_name }}
       cancel-in-progress: false
@@ -88,11 +97,28 @@ jobs:
         with:
           name: distribution-artifacts
           path: dist
-      # see https://docs.pypi.org/trusted-publishers/
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@v1
         with:
           packages-dir: dist
-          password: ${{ secrets.PYPI_TOKEN }}
+          password: ${{ secrets.TESLA_PYPY_TOKEN }}
+          print-hash: true
+          verbose: true
+  # Manual recovery: publish the assets of an already-created GitHub release.
+  publish_existing:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release download "${{ inputs.tag }}" --repo "$GITHUB_REPOSITORY" --dir dist
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@v1
+        with:
+          packages-dir: dist
+          password: ${{ secrets.TESLA_PYPY_TOKEN }}
           print-hash: true
           verbose: true
