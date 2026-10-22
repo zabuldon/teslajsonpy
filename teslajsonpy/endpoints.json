@@ -588,6 +588,11 @@
     "URI": "api/1/vehicles/{vehicle_id}/command/share",
     "AUTH": true
   },
+  "NAVIGATION_REQUEST": {
+    "TYPE": "POST",
+    "URI": "api/1/vehicles/{vehicle_id}/command/navigation_request",
+    "AUTH": true
+  },
   "SEND_SC_TO_VEHICLE": {
     "TYPE": "POST",
     "URI": "api/1/vehicles/{vehicle_id}/command/navigation_sc_request",
