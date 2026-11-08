@@ -36,7 +36,7 @@ lazy-object-proxy==1.7.1; python_full_version >= "3.6.2" and python_version >= "
 m2r2==0.3.3
 markupsafe==2.1.1; python_version >= "3.7"
 mccabe==0.6.1; python_full_version >= "3.6.2"
-mistune==3.3.0
+mistune==3.3.3
 multidict==6.0.2; python_version >= "3.7" and python_version < "4.0"
 mypy-extensions==0.4.3; python_version >= "3.7"
 mypy==0.982; python_version >= "3.7"
