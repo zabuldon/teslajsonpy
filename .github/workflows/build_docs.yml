@@ -3,15 +3,18 @@ name: build_docs
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v7
         with:
           ref: master
-      - uses: ammaraskar/sphinx-action@master
+      - uses: ammaraskar/sphinx-action@8.2.3
         with:
           docs-folder: "docs/"
       - name: Setup Git and commit docs
@@ -21,13 +24,13 @@ jobs:
           git add .
           git commit -am "docs: update documentation"
       - name: Push changes to master
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@v1.3.0
         with:
          github_token: ${{ secrets.GITHUB_TOKEN }}
          branch: master
         if: always()
       - name: Push changes to dev
-        uses: ad-m/github-push-action@master
+        uses: ad-m/github-push-action@v1.3.0
         with:
          github_token: ${{ secrets.GITHUB_TOKEN }}
          branch: dev

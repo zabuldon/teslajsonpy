@@ -60,8 +60,4 @@ version_toml = [
 version_variable = [
   "teslajsonpy/__version__.py:__version__"
 ]
-upload_to_pypi = true
-check_build_status = false
-remove_dist = false
-hvcs = "github"
 build_command = "pip install poetry && poetry build"
